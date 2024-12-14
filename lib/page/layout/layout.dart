@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import './chat_page/chat_page.dart';
 import './chat_history.dart';
 import 'package:ChatMcp/provider/provider_manager.dart';
-import 'package:ChatMcp/llm/openai_client.dart';
 
 class LayoutPage extends StatefulWidget {
   const LayoutPage({super.key});
@@ -53,7 +52,7 @@ class _LayoutPageState extends State<LayoutPage> {
                           alignedDropdown: true,
                           child: DropdownButton<String>(
                             value: ProviderManager.chatProvider.currentModel,
-                            items: models
+                            items: ProviderManager.chatProvider.availableModels
                                 .map((model) => DropdownMenuItem(
                                       value: model.name,
                                       child: Text(model.label),
@@ -62,7 +61,7 @@ class _LayoutPageState extends State<LayoutPage> {
                             onChanged: (String? value) {
                               if (value != null) {
                                 setState(() {
-                                  ProviderManager.chatProvider.setModel(value);
+                                  ProviderManager.chatProvider.currentModel = value;
                                 });
                               }
                             },
