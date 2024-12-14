@@ -106,3 +106,20 @@ install(DIRECTORY "${PROJECT_BUILD_DIR}/${FLUTTER_ASSET_DIR_NAME}"
 install(FILES "${AOT_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
   CONFIGURATIONS Profile;Release
   COMPONENT Runtime)
+
+# Install SQLite3 DLL
+find_file(SQLITE3_DLL 
+  NAMES "sqlite3.dll"
+  PATHS
+  "${CMAKE_CURRENT_SOURCE_DIR}"
+  DOC "Path to SQLite3 DLL"
+)
+
+if(SQLITE3_DLL)
+  install(FILES "${SQLITE3_DLL}"
+    DESTINATION "${CMAKE_INSTALL_PREFIX}"
+    COMPONENT Runtime)
+  message(STATUS "Found SQLite3 DLL at: ${SQLITE3_DLL}")
+else()
+  message(WARNING "sqlite3.dll not found. The application may not work correctly.")
+endif()
