@@ -91,5 +91,7 @@ Future<Process> startProcess(
     args,
     environment: env,
     includeParentEnvironment: true,
+    // Windows need it to run properly, no idea why. Keep other platforms as default value (false).
+    runInShell: Platform.isWindows,
   );
 }
