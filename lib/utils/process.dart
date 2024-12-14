@@ -66,13 +66,25 @@ Future<bool> isCommandAvailable(String command) async {
   }
 }
 
+Future<Map<String, String>> getDefaultEnv() async {
+  final Map<String, String> env = Map.of(Platform.environment);
+  env['PATH'] = await getDefaultPath();
+  
+  if (Platform.isWindows) {
+    env['PYTHONIOENCODING'] = 'utf-8';
+    env['PYTHONLEGACYWINDOWSSTDIO'] = 'utf-8';
+  }
+  
+  return env;
+}
+
 Future<Process> startProcess(
   String command,
   List<String> args,
   Map<String, String> environment,
 ) async {
-  final Map<String, String> env = Map.of(environment);
-  env['PATH'] = await getDefaultPath();
+  final Map<String, String> env = await getDefaultEnv();
+  env.addAll(environment); // Add user provided environment variables
 
   return Process.start(
     command,
