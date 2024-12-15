@@ -24,7 +24,7 @@ brew install node
 
 ## Install
 
-[Download](https://github.com/daodao97/chatmcp/releases)  MacOS | ~Windows~
+[Download](https://github.com/daodao97/chatmcp/releases)  MacOS | Windows | Linux
 
 
 ## Debug 
