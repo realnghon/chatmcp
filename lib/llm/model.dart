@@ -140,6 +140,9 @@ class Model {
     required this.name,
     required this.label,
   });
+
+  @override
+  String toString() => 'Model(name: $name, label: $label)';
 }
 
 class CompletionRequest {

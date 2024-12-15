@@ -41,13 +41,12 @@ class OpenAIClient extends BaseLLMClient {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer $apiKey',
               },
-              responseType: ResponseType.stream,
             ));
 
   @override
   Future<LLMResponse> chatCompletion(CompletionRequest request) async {
     final body = {
-      'model': 'gpt-4o-mini',
+      'model': request.model,
       'messages': request.messages.map((m) => m.toJson()).toList(),
     };
 
@@ -64,17 +63,17 @@ class OpenAIClient extends BaseLLMClient {
         data: bodyStr,
       );
 
-      // 处理流数据
-      final buffer = StringBuffer();
-
-      await for (final chunk in response.data.stream) {
-        buffer.write(utf8.decode(chunk));
+      // 处理 ResponseBody 类型的响应
+      var jsonData;
+      if (response.data is ResponseBody) {
+        final responseBody = response.data as ResponseBody;
+        final responseStr = await utf8.decodeStream(responseBody.stream);
+        jsonData = jsonDecode(responseStr);
+      } else {
+        jsonData = response.data;
       }
 
-      final responseBody = buffer.toString();
-      final json = jsonDecode(responseBody);
-
-      final message = json['choices'][0]['message'];
+      final message = jsonData['choices'][0]['message'];
 
       // 解析工具调用
       final toolCalls = message['tool_calls']
@@ -95,7 +94,6 @@ class OpenAIClient extends BaseLLMClient {
     } catch (e) {
       final tips =
           "call openai chatCompletion failed: endpoint: $baseUrl/chat/completions body: $body $e";
-      Logger.root.severe(tips);
       throw Exception(tips);
     }
   }
@@ -109,6 +107,7 @@ class OpenAIClient extends BaseLLMClient {
     };
 
     try {
+      _dio.options.responseType = ResponseType.stream;
       final response = await _dio.post(
         "$baseUrl/chat/completions",
         data: jsonEncode(body),
@@ -194,5 +193,25 @@ $conversationText""",
       messages: [prompt],
     ));
     return response.content?.trim() ?? "New Chat";
+  }
+
+  @override
+  Future<List<String>> models() async {
+    try {
+      final response = await _dio.get("$baseUrl/models");
+
+      final data = response.data;
+
+      final models = (data['data'] as List)
+          .map((m) => m['id'].toString())
+          .where((id) => id.contains('gpt') || id.contains('o1'))
+          .toList();
+
+      return models;
+    } catch (e, trace) {
+      Logger.root.severe('获取模型列表失败: $e, trace: $trace');
+      // 返回预定义的模型列表作为后备
+      return [];
+    }
   }
 }

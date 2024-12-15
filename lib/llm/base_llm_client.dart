@@ -15,7 +15,7 @@ abstract class BaseLLMClient {
 
     final response = await chatCompletion(
       CompletionRequest(
-        model: ProviderManager.chatProvider.currentModel,
+        model: ProviderManager.chatModelProvider.currentModel,
         messages: [ChatMessage(role: MessageRole.user, content: content)],
         tools: openaiTools,
       ),
@@ -43,4 +43,6 @@ abstract class BaseLLMClient {
   }
 
   Future<String> genTitle(List<ChatMessage> messages);
+
+  Future<List<String>> models();
 }

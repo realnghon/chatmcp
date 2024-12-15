@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:ChatMcp/llm/model.dart';
-import 'package:ChatMcp/llm/prompt.dart';
 import 'package:ChatMcp/llm/llm_factory.dart';
 import 'package:ChatMcp/llm/base_llm_client.dart';
 import 'package:logging/logging.dart';
@@ -32,34 +31,23 @@ class _ChatPageState extends State<ChatPage> {
     super.initState();
     _initializeLLMClient();
 
-    // Add settings change listener
+    // Add settings change listener, when settings changed, we need to reinitialize LLM client
     ProviderManager.settingsProvider.addListener(_onSettingsChanged);
-    // Add chat change listener
+    // Add chat model change listener, when model changed, we need to reinitialize LLM client
+    ProviderManager.chatModelProvider.addListener(_initializeLLMClient);
+    // Add chat change listener, when chat changed, we need to reinitialize history messages
     ProviderManager.chatProvider.addListener(_onChatProviderChanged);
     _initializeHistoryMessages();
   }
 
   void _onChatProviderChanged() {
-    _initializeLLMClient();
     _initializeHistoryMessages();
   }
 
   void _initializeLLMClient() {
-    final currentModel = ProviderManager.chatProvider.currentModel;
-    final provider = currentModel.startsWith('gpt') ? 'openai' : 'claude';
-    
-    final apiKey = ProviderManager.settingsProvider.apiSettings[provider]?.apiKey ?? '';
-    final baseUrl = ProviderManager.settingsProvider.apiSettings[provider]?.apiEndpoint ?? '';
-    
-    Logger.root.fine('Using API Key: [HIDDEN] for provider: $provider');
-    _llmClient = LLMFactory.create(
-      provider == 'openai' ? LLMProvider.openAI : LLMProvider.claude,
-      apiKey: apiKey,
-      baseUrl: baseUrl
-    );
-
+    _llmClient = LLMFactoryHelper.createFromModel(
+        ProviderManager.chatModelProvider.currentModel);
     setState(() {}); // Refresh UI after client change
-    Logger.root.fine('llmClient initialized for $provider with model $currentModel');
   }
 
   void _onSettingsChanged() {
@@ -252,7 +240,7 @@ class _ChatPageState extends State<ChatPage> {
       ];
 
       final stream = _llmClient!.chatStreamCompletion(CompletionRequest(
-        model: ProviderManager.chatProvider.currentModel,
+        model: ProviderManager.chatModelProvider.currentModel,
         messages: messageList,
       ));
 

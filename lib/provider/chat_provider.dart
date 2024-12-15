@@ -3,16 +3,13 @@ import 'package:ChatMcp/dao/chat.dart';
 import 'package:ChatMcp/dao/chat_message.dart';
 import 'package:logging/logging.dart';
 import 'package:ChatMcp/llm/model.dart' as llmModel;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ChatMcp/llm/openai_client.dart' as openai;
 import 'package:ChatMcp/llm/claude_client.dart' as claude;
 
 class ChatProvider extends ChangeNotifier {
   static final ChatProvider _instance = ChatProvider._internal();
   factory ChatProvider() => _instance;
-  ChatProvider._internal() {
-    _loadSavedModel();
-  }
+  ChatProvider._internal() {}
 
   Chat? _activeChat;
   List<Chat> _chats = [];
@@ -20,32 +17,10 @@ class ChatProvider extends ChangeNotifier {
   Chat? get activeChat => _activeChat;
   List<Chat> get chats => _chats;
 
-  static const String _modelKey = 'current_model';
-  String _currentModel = "gpt-4o-mini";
-
-  String get currentModel => _currentModel;
-
   List<llmModel.Model> get availableModels => [
-    ...openai.models,
-    ...claude.models,
-  ];
-
-  set currentModel(String model) {
-    _currentModel = model;
-    _saveSavedModel();
-    notifyListeners();
-  }
-
-  Future<void> _loadSavedModel() async {
-    final prefs = await SharedPreferences.getInstance();
-    _currentModel = prefs.getString(_modelKey) ?? "gpt-4o-mini";
-    notifyListeners();
-  }
-
-  Future<void> _saveSavedModel() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_modelKey, _currentModel);
-  }
+        ...openai.models,
+        ...claude.models,
+      ];
 
   Future<void> loadChats() async {
     final chatDao = ChatDao();

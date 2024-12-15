@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'settings_provider.dart';
 import 'mcp_server_provider.dart';
 import 'chat_provider.dart';
+import 'chat_model_provider.dart';
 
 class ProviderManager {
   static List<ChangeNotifierProvider> providers = [
@@ -14,6 +15,9 @@ class ProviderManager {
     ),
     ChangeNotifierProvider<ChatProvider>(
       create: (_) => ChatProvider(),
+    ),
+    ChangeNotifierProvider<ChatModelProvider>(
+      create: (_) => ChatModelProvider(),
     ),
     // 在这里添加其他 Provider
   ];
@@ -37,6 +41,13 @@ class ProviderManager {
   static ChatProvider get chatProvider {
     _chatProvider ??= ChatProvider();
     return _chatProvider!;
+  }
+
+  static ChatModelProvider? _chatModelProvider;
+
+  static ChatModelProvider get chatModelProvider {
+    _chatModelProvider ??= ChatModelProvider();
+    return _chatModelProvider!;
   }
 
   static Future<void> init() async {
