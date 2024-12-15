@@ -32,24 +32,34 @@ class _ChatPageState extends State<ChatPage> {
     super.initState();
     _initializeLLMClient();
 
-    // 添加设置变更监听器
+    // Add settings change listener
     ProviderManager.settingsProvider.addListener(_onSettingsChanged);
-    // 添加监听器
-    ProviderManager.chatProvider.addListener(_onActiveChatChanged);
+    // Add chat change listener
+    ProviderManager.chatProvider.addListener(_onChatProviderChanged);
+    _initializeHistoryMessages();
+  }
+
+  void _onChatProviderChanged() {
+    _initializeLLMClient();
     _initializeHistoryMessages();
   }
 
   void _initializeLLMClient() {
-    final apiKey =
-        ProviderManager.settingsProvider.apiSettings['openai']?.apiKey ?? '';
-    final baseUrl =
-        ProviderManager.settingsProvider.apiSettings['openai']?.apiEndpoint ??
-            '';
-    Logger.root.fine('Using API Key: [HIDDEN]');
-    _llmClient =
-        LLMFactory.create(LLMProvider.openAI, apiKey: apiKey, baseUrl: baseUrl);
+    final currentModel = ProviderManager.chatProvider.currentModel;
+    final provider = currentModel.startsWith('gpt') ? 'openai' : 'claude';
+    
+    final apiKey = ProviderManager.settingsProvider.apiSettings[provider]?.apiKey ?? '';
+    final baseUrl = ProviderManager.settingsProvider.apiSettings[provider]?.apiEndpoint ?? '';
+    
+    Logger.root.fine('Using API Key: [HIDDEN] for provider: $provider');
+    _llmClient = LLMFactory.create(
+      provider == 'openai' ? LLMProvider.openAI : LLMProvider.claude,
+      apiKey: apiKey,
+      baseUrl: baseUrl
+    );
 
-    Logger.root.fine('llmClient init success');
+    setState(() {}); // Refresh UI after client change
+    Logger.root.fine('llmClient initialized for $provider with model $currentModel');
   }
 
   void _onSettingsChanged() {
@@ -58,9 +68,8 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   void dispose() {
-    // 移除所有监听器
     ProviderManager.settingsProvider.removeListener(_onSettingsChanged);
-    ProviderManager.chatProvider.removeListener(_onActiveChatChanged);
+    ProviderManager.chatProvider.removeListener(_onChatProviderChanged);
     super.dispose();
   }
 
@@ -244,7 +253,7 @@ class _ChatPageState extends State<ChatPage> {
 
       final stream = _llmClient!.chatStreamCompletion(CompletionRequest(
         model: ProviderManager.chatProvider.currentModel,
-        messages: messages,
+        messages: messageList,
       ));
 
       setState(() {

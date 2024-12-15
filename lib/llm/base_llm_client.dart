@@ -1,5 +1,6 @@
 import 'model.dart';
 import 'utils.dart';
+import 'package:ChatMcp/provider/provider_manager.dart';
 
 abstract class BaseLLMClient {
   Future<LLMResponse> chatCompletion(CompletionRequest request);
@@ -14,7 +15,7 @@ abstract class BaseLLMClient {
 
     final response = await chatCompletion(
       CompletionRequest(
-        model: "gpt-4o-mini",
+        model: ProviderManager.chatProvider.currentModel,
         messages: [ChatMessage(role: MessageRole.user, content: content)],
         tools: openaiTools,
       ),

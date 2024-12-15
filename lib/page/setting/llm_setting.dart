@@ -12,8 +12,10 @@ class LlmSettings extends StatefulWidget {
 
 class _LlmSettingsState extends State<LlmSettings> {
   final _formKey = GlobalKey<FormState>();
-  final _apiKeyController = TextEditingController();
-  final _apiEndpointController = TextEditingController();
+  final _openaiApiKeyController = TextEditingController();
+  final _openaiApiEndpointController = TextEditingController();
+  final _claudeApiKeyController = TextEditingController();
+  final _claudeApiEndpointController = TextEditingController();
 
   @override
   void initState() {
@@ -23,8 +25,10 @@ class _LlmSettingsState extends State<LlmSettings> {
 
   @override
   void dispose() {
-    _apiKeyController.dispose();
-    _apiEndpointController.dispose();
+    _openaiApiKeyController.dispose();
+    _openaiApiEndpointController.dispose();
+    _claudeApiKeyController.dispose();
+    _claudeApiEndpointController.dispose();
     super.dispose();
   }
 
@@ -34,8 +38,14 @@ class _LlmSettingsState extends State<LlmSettings> {
 
     final openaiSettings = settings.apiSettings['openai'];
     if (openaiSettings != null) {
-      _apiKeyController.text = openaiSettings.apiKey;
-      _apiEndpointController.text = openaiSettings.apiEndpoint;
+      _openaiApiKeyController.text = openaiSettings.apiKey;
+      _openaiApiEndpointController.text = openaiSettings.apiEndpoint;
+    }
+
+    final claudeSettings = settings.apiSettings['claude'];
+    if (claudeSettings != null) {
+      _claudeApiKeyController.text = claudeSettings.apiKey;
+      _claudeApiEndpointController.text = claudeSettings.apiEndpoint;
     }
   }
 
@@ -45,8 +55,7 @@ class _LlmSettingsState extends State<LlmSettings> {
       padding: const EdgeInsets.all(16.0),
       child: Form(
         key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: ListView(
           children: [
             const Text(
               'OpenAI API',
@@ -57,7 +66,7 @@ class _LlmSettingsState extends State<LlmSettings> {
             ),
             const SizedBox(height: 16),
             TextFormField(
-              controller: _apiKeyController,
+              controller: _openaiApiKeyController,
               decoration: const InputDecoration(
                 labelText: 'API Key',
                 hintText: 'Please enter your OpenAI API Key',
@@ -72,21 +81,44 @@ class _LlmSettingsState extends State<LlmSettings> {
             ),
             const SizedBox(height: 16),
             TextFormField(
-              controller: _apiEndpointController,
+              controller: _openaiApiEndpointController,
               decoration: const InputDecoration(
                 labelText: 'API Endpoint',
                 hintText: 'https://api.openai.com/v1',
                 border: OutlineInputBorder(),
               ),
+            ),
+            const SizedBox(height: 32),
+            const Text(
+              'Claude API',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _claudeApiKeyController,
+              decoration: const InputDecoration(
+                labelText: 'API Key',
+                hintText: 'Please enter your Claude API Key',
+                border: OutlineInputBorder(),
+              ),
               validator: (value) {
-                // if (value == null || value.isEmpty) {
-                //   return '请输入 API 地址';
-                // }
-                // if (!Uri.tryParse(value)!.isAbsolute) {
-                //   return '请输入有效的 URL';
-                // }
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your Claude API Key';
+                }
                 return null;
               },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _claudeApiEndpointController,
+              decoration: const InputDecoration(
+                labelText: 'API Endpoint',
+                hintText: 'https://api.anthropic.com/v1',
+                border: OutlineInputBorder(),
+              ),
             ),
             const SizedBox(height: 24),
             SizedBox(
@@ -109,13 +141,21 @@ class _LlmSettingsState extends State<LlmSettings> {
     if (_formKey.currentState!.validate()) {
       final settings = ProviderManager.settingsProvider;
 
-      final apiSetting = ApiSetting(
-        apiKey: _apiKeyController.text,
-        apiEndpoint: _apiEndpointController.text,
+      final openaiSetting = ApiSetting(
+        apiKey: _openaiApiKeyController.text,
+        apiEndpoint: _openaiApiEndpointController.text,
+      );
+
+      final claudeSetting = ApiSetting(
+        apiKey: _claudeApiKeyController.text,
+        apiEndpoint: _claudeApiEndpointController.text,
       );
 
       await settings.updateSettings(
-        apiSettings: {'openai': apiSetting},
+        apiSettings: {
+          'openai': openaiSetting,
+          'claude': claudeSetting,
+        },
       );
 
       if (mounted) {
