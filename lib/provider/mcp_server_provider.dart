@@ -133,7 +133,7 @@ class McpServerProvider extends ChangeNotifier {
   }
 
   String mcpServerMarket =
-      "https://gh-proxy.com/raw.githubusercontent.com/daodao97/chatmcp/refs/heads/main/assets/mcp_server_market.json";
+      "https://raw.githubusercontent.com/daodao97/chatmcp/refs/heads/main/assets/mcp_server_market.json";
 
   Future<Map<String, dynamic>> loadMarketServers() async {
     try {
