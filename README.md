@@ -91,4 +91,4 @@ You can install MCP Server from MCP Server Market, MCP Server Market is a collec
 
 ## License
 
-This project is licensed under the [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html) (GPL-3.0).
+This project is licensed under the [Apache License 2.0](./LICENSE).
