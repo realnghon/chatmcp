@@ -84,6 +84,15 @@ All features are welcome to submit, you can submit your ideas or bugs in [Issues
 
 You can install MCP Server from MCP Server Market, MCP Server Market is a collection of MCP Server, you can use it to chat with different data.
 
+## Community & Feedback
+
+We value your feedback! If you're using chatmcp, please consider sharing your experience with the community:
+- 🌟 [Leave a Review](https://glama.ai/mcp/clients/chatmcp)
+- 🐛 [Report Issues](https://github.com/daodao97/chatmcp/issues)
+- 💡 [Feature Requests](https://github.com/daodao97/chatmcp/issues)
+
+Your feedback helps us improve chatmcp and helps other users make informed decisions.
+
 ## Thanks
 
 - [MCP](https://modelcontextprotocol.io/introduction)
