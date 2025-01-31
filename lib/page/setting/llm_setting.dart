@@ -73,8 +73,8 @@ class _LlmSettingsState extends State<LlmSettings> {
                 border: OutlineInputBorder(),
               ),
               validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your OpenAI API Key';
+                if (value != null && value.isNotEmpty && value.length < 10) {
+                  return 'API Key must be at least 10 characters';
                 }
                 return null;
               },
@@ -105,8 +105,8 @@ class _LlmSettingsState extends State<LlmSettings> {
                 border: OutlineInputBorder(),
               ),
               validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your Claude API Key';
+                if (value != null && value.isNotEmpty && value.length < 10) {
+                  return 'API Key must be at least 10 characters';
                 }
                 return null;
               },
