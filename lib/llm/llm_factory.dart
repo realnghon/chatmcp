@@ -1,10 +1,11 @@
 import 'openai_client.dart';
 import 'claude_client.dart';
+//import 'deepseek_client.dart';
 import 'base_llm_client.dart';
 import 'package:ChatMcp/provider/provider_manager.dart';
 import 'package:logging/logging.dart';
 
-enum LLMProvider { openAI, claude, llama }
+enum LLMProvider { openAI, claude, llama, deepSeek }
 
 class LLMFactory {
   static BaseLLMClient create(LLMProvider provider,
@@ -14,6 +15,8 @@ class LLMFactory {
         return OpenAIClient(apiKey: apiKey, baseUrl: baseUrl);
       case LLMProvider.claude:
         return ClaudeClient(apiKey: apiKey, baseUrl: baseUrl);
+      //case LLMProvider.deepSeek:
+      //  return DeepSeekClient(apiKey: apiKey, baseUrl: baseUrl);
       default:
         throw Exception('Unsupported LLM provider');
     }
@@ -43,18 +46,22 @@ class LLMFactoryHelper {
   }
 
   static Future<List<String>> getAvailableModels() async {
-    List<String> providers = ["openai", "claude"];
+    Map<String, LLMProvider> providerMap = {
+      "openai": LLMProvider.openAI,
+      "claude": LLMProvider.claude,
+      "deepseek": LLMProvider.deepSeek,
+    };
+
     List<String> models = [];
-    for (var provider in providers) {
+    for (var provider in providerMap.entries) {
       final apiKey =
-          ProviderManager.settingsProvider.apiSettings[provider]?.apiKey ?? '';
-      final baseUrl =
-          ProviderManager.settingsProvider.apiSettings[provider]?.apiEndpoint ??
+          ProviderManager.settingsProvider.apiSettings[provider.key]?.apiKey ??
               '';
-      final client = LLMFactory.create(
-          provider == "openai" ? LLMProvider.openAI : LLMProvider.claude,
-          apiKey: apiKey,
-          baseUrl: baseUrl);
+      final baseUrl = ProviderManager
+              .settingsProvider.apiSettings[provider.key]?.apiEndpoint ??
+          '';
+      final client =
+          LLMFactory.create(provider.value, apiKey: apiKey, baseUrl: baseUrl);
       models.addAll(await client.models());
     }
 
