@@ -33,7 +33,7 @@ class LLMFactoryHelper {
             '';
 
     Logger.root.fine(
-        'Using API Key: $apiKey for provider: $provider model: $currentModel');
+        'Using API Key: ****** for provider: $provider model: $currentModel');
 
     // 创建 LLM 客户端
     return LLMFactory.create(
