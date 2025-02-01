@@ -60,7 +60,7 @@ class _LayoutPageState extends State<LayoutPage> {
                           ),
                         // model select
                         Container(
-                          constraints: const BoxConstraints(maxWidth: 150),
+                          constraints: const BoxConstraints(maxWidth: 250),
                           decoration: BoxDecoration(
                             // color: Colors.grey[50],
                             borderRadius: BorderRadius.circular(4),
