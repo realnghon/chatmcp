@@ -67,6 +67,7 @@ class _LlmSettingsState extends State<LlmSettings> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _openaiApiKeyController,
+              obscureText: true,
               decoration: const InputDecoration(
                 labelText: 'API Key',
                 hintText: 'Please enter your OpenAI API Key',
@@ -99,6 +100,7 @@ class _LlmSettingsState extends State<LlmSettings> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _claudeApiKeyController,
+              obscureText: true,
               decoration: const InputDecoration(
                 labelText: 'API Key',
                 hintText: 'Please enter your Claude API Key',
