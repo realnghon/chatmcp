@@ -48,10 +48,10 @@ class LLMFactoryHelper {
 
     // 获取配置信息
     final apiKey =
-        ProviderManager.settingsProvider.apiSettings[provider.key]?.apiKey ??
+        ProviderManager.settingsProvider.apiSettings[provider.value]?.apiKey ??
             '';
     final baseUrl = ProviderManager
-            .settingsProvider.apiSettings[provider.key]?.apiEndpoint ??
+            .settingsProvider.apiSettings[provider.value]?.apiEndpoint ??
         '';
 
     Logger.root.fine(
