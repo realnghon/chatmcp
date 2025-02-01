@@ -67,14 +67,15 @@ class _LlmSettingsState extends State<LlmSettings> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _openaiApiKeyController,
+              obscureText: true,
               decoration: const InputDecoration(
                 labelText: 'API Key',
                 hintText: 'Please enter your OpenAI API Key',
                 border: OutlineInputBorder(),
               ),
               validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your OpenAI API Key';
+                if (value != null && value.isNotEmpty && value.length < 10) {
+                  return 'API Key must be at least 10 characters';
                 }
                 return null;
               },
@@ -99,14 +100,15 @@ class _LlmSettingsState extends State<LlmSettings> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _claudeApiKeyController,
+              obscureText: true,
               decoration: const InputDecoration(
                 labelText: 'API Key',
                 hintText: 'Please enter your Claude API Key',
                 border: OutlineInputBorder(),
               ),
               validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your Claude API Key';
+                if (value != null && value.isNotEmpty && value.length < 10) {
+                  return 'API Key must be at least 10 characters';
                 }
                 return null;
               },

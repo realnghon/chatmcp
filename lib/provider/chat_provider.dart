@@ -9,7 +9,7 @@ import 'package:ChatMcp/llm/claude_client.dart' as claude;
 class ChatProvider extends ChangeNotifier {
   static final ChatProvider _instance = ChatProvider._internal();
   factory ChatProvider() => _instance;
-  ChatProvider._internal() {}
+  ChatProvider._internal();
 
   Chat? _activeChat;
   List<Chat> _chats = [];

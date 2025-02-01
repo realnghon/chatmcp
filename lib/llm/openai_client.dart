@@ -197,6 +197,11 @@ $conversationText""",
 
   @override
   Future<List<String>> models() async {
+    if (apiKey.isEmpty) {
+      Logger.root.info('OpenAI API 密钥未设置，跳过模型列表获取');
+      return [];
+    }
+
     try {
       final response = await _dio.get("$baseUrl/models");
 
