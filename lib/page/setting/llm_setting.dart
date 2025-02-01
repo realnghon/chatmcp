@@ -143,6 +143,7 @@ class _LlmSettingsState extends State<LlmSettings> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _deepseekApiKeyController,
+              obscureText: true,
               decoration: const InputDecoration(
                 labelText: 'API Key',
                 hintText: 'Please enter your DeepSeek API Key',

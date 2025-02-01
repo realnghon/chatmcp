@@ -150,11 +150,13 @@ class CompletionRequest {
   final List<ChatMessage> messages;
   final List<Map<String, dynamic>>? tools;
   final bool stream;
+  final int? maxTokens;
 
   CompletionRequest({
     required this.model,
     required this.messages,
     this.tools,
     this.stream = false,
+    this.maxTokens,
   });
 }
