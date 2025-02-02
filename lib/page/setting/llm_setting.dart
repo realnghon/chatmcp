@@ -16,6 +16,8 @@ class _LlmSettingsState extends State<LlmSettings> {
   final _openaiApiEndpointController = TextEditingController();
   final _claudeApiKeyController = TextEditingController();
   final _claudeApiEndpointController = TextEditingController();
+  final _deepseekApiKeyController = TextEditingController();
+  final _deepseekApiEndpointController = TextEditingController();
 
   @override
   void initState() {
@@ -29,6 +31,8 @@ class _LlmSettingsState extends State<LlmSettings> {
     _openaiApiEndpointController.dispose();
     _claudeApiKeyController.dispose();
     _claudeApiEndpointController.dispose();
+    _deepseekApiKeyController.dispose();
+    _deepseekApiEndpointController.dispose();
     super.dispose();
   }
 
@@ -46,6 +50,12 @@ class _LlmSettingsState extends State<LlmSettings> {
     if (claudeSettings != null) {
       _claudeApiKeyController.text = claudeSettings.apiKey;
       _claudeApiEndpointController.text = claudeSettings.apiEndpoint;
+    }
+
+    final deepseekSettings = settings.apiSettings['deepseek'];
+    if (deepseekSettings != null) {
+      _deepseekApiKeyController.text = deepseekSettings.apiKey;
+      _deepseekApiEndpointController.text = deepseekSettings.apiEndpoint;
     }
   }
 
@@ -122,7 +132,39 @@ class _LlmSettingsState extends State<LlmSettings> {
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
+            const Text(
+              'DeepSeek API',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _deepseekApiKeyController,
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: 'API Key',
+                hintText: 'Please enter your DeepSeek API Key',
+                border: OutlineInputBorder(),
+              ),
+              validator: (value) {
+                if (value != null && value.isNotEmpty && value.length < 10) {
+                  return 'API Key must be at least 10 characters';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _deepseekApiEndpointController,
+              decoration: const InputDecoration(
+                labelText: 'API Endpoint',
+                hintText: 'https://api.deepseek.com/v1',
+                border: OutlineInputBorder(),
+              ),
+            ),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -153,12 +195,16 @@ class _LlmSettingsState extends State<LlmSettings> {
         apiEndpoint: _claudeApiEndpointController.text,
       );
 
-      await settings.updateSettings(
-        apiSettings: {
-          'openai': openaiSetting,
-          'claude': claudeSetting,
-        },
+      final deepseekSetting = ApiSetting(
+        apiKey: _deepseekApiKeyController.text,
+        apiEndpoint: _deepseekApiEndpointController.text,
       );
+
+      await settings.updateSettings(apiSettings: {
+        'openai': openaiSetting,
+        'claude': claudeSetting,
+        'deepseek': deepseekSetting
+      });
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

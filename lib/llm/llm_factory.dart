@@ -1,10 +1,11 @@
 import 'openai_client.dart';
 import 'claude_client.dart';
+import 'deepseek_client.dart';
 import 'base_llm_client.dart';
 import 'package:ChatMcp/provider/provider_manager.dart';
 import 'package:logging/logging.dart';
 
-enum LLMProvider { openAI, claude, llama }
+enum LLMProvider { openAI, claude, llama, deepSeek }
 
 class LLMFactory {
   static BaseLLMClient create(LLMProvider provider,
@@ -14,6 +15,8 @@ class LLMFactory {
         return OpenAIClient(apiKey: apiKey, baseUrl: baseUrl);
       case LLMProvider.claude:
         return ClaudeClient(apiKey: apiKey, baseUrl: baseUrl);
+      case LLMProvider.deepSeek:
+        return DeepSeekClient(apiKey: apiKey, baseUrl: baseUrl);
       default:
         throw Exception('Unsupported LLM provider');
     }
@@ -21,40 +24,58 @@ class LLMFactory {
 }
 
 class LLMFactoryHelper {
+  static final modelMapping = {
+    'gpt': 'openai',
+    'o1': 'openai',
+    'o3': 'openai',
+    'sonnet': 'claude',
+    'haiku': 'claude',
+    'deepseek': 'deepseek',
+  };
+
+  static final Map<String, LLMProvider> providerMap = {
+    "openai": LLMProvider.openAI,
+    "claude": LLMProvider.claude,
+    "deepseek": LLMProvider.deepSeek,
+  };
+
   static BaseLLMClient createFromModel(String currentModel) {
     // 根据模型名称判断 provider
-    final provider = currentModel.startsWith('gpt') ? 'openai' : 'claude';
+    final provider = LLMFactoryHelper.modelMapping.entries.firstWhere(
+      (entry) => currentModel.startsWith(entry.key),
+      orElse: () => throw ArgumentError("Unknown model type: $currentModel"),
+    );
 
     // 获取配置信息
     final apiKey =
-        ProviderManager.settingsProvider.apiSettings[provider]?.apiKey ?? '';
-    final baseUrl =
-        ProviderManager.settingsProvider.apiSettings[provider]?.apiEndpoint ??
+        ProviderManager.settingsProvider.apiSettings[provider.value]?.apiKey ??
             '';
+    final baseUrl = ProviderManager
+            .settingsProvider.apiSettings[provider.value]?.apiEndpoint ??
+        '';
 
     Logger.root.fine(
-        'Using API Key: ****** for provider: $provider model: $currentModel');
+        'Using API Key: ****** for provider: ${provider.toString()} model: $currentModel');
 
     // 创建 LLM 客户端
     return LLMFactory.create(
-        provider == 'openai' ? LLMProvider.openAI : LLMProvider.claude,
+        LLMFactoryHelper.providerMap[provider.value] ??
+            (throw ArgumentError("Unknown provider: $provider")),
         apiKey: apiKey,
         baseUrl: baseUrl);
   }
 
   static Future<List<String>> getAvailableModels() async {
-    List<String> providers = ["openai", "claude"];
     List<String> models = [];
-    for (var provider in providers) {
+    for (var provider in LLMFactoryHelper.providerMap.entries) {
       final apiKey =
-          ProviderManager.settingsProvider.apiSettings[provider]?.apiKey ?? '';
-      final baseUrl =
-          ProviderManager.settingsProvider.apiSettings[provider]?.apiEndpoint ??
+          ProviderManager.settingsProvider.apiSettings[provider.key]?.apiKey ??
               '';
-      final client = LLMFactory.create(
-          provider == "openai" ? LLMProvider.openAI : LLMProvider.claude,
-          apiKey: apiKey,
-          baseUrl: baseUrl);
+      final baseUrl = ProviderManager
+              .settingsProvider.apiSettings[provider.key]?.apiEndpoint ??
+          '';
+      final client =
+          LLMFactory.create(provider.value, apiKey: apiKey, baseUrl: baseUrl);
       models.addAll(await client.models());
     }
 
