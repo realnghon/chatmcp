@@ -1,13 +1,34 @@
 <div align="center">
 <img src="./macos/Runner/Assets.xcassets/AppIcon.appiconset/icon_128@1x.png" alt="logo">
 <h1>chatmcp</h1>
-</div>
 
 AI Chat with [MCP](https://modelcontextprotocol.io/introduction) Server use Any LLM Model
+</div>
 
-![](./assets/preview/preview.png)
+<div align="center">
+  <div class="carousel" style="max-width: 800px; margin: auto; overflow: hidden;">
+    <div class="slides" style="display: flex; animation: slide 10s infinite;">
+      <img src="./assets/preview/preview1.png" style="min-width: 100%; object-fit: contain;">
+      <img src="./assets/preview/preview2.png" style="min-width: 100%; object-fit: contain;">
+      <img src="./assets/preview/preview3.png" style="min-width: 100%; object-fit: contain;">
+      <img src="./assets/preview/preview4.png" style="min-width: 100%; object-fit: contain;">
+    </div>
+  </div>
+</div>
 
-![](./assets/preview/preview-setting.png)
+<style>
+@keyframes slide {
+    0%, 30% {
+        transform: translateX(0);
+    }
+    35%, 65% {
+        transform: translateX(-100%);
+    }
+    70%, 100% {
+        transform: translateX(-200%);
+    }
+}
+</style>
 
 ## Usage
 

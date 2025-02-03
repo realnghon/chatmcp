@@ -230,13 +230,13 @@ class _ApiSectionState extends State<ApiSection> {
   Widget build(BuildContext context) {
     return Card(
       elevation: 2,
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(8),
           border: Border.all(color: Colors.grey.withAlpha(51)),
         ),
         child: Column(
@@ -244,19 +244,19 @@ class _ApiSectionState extends State<ApiSection> {
           children: [
             Row(
               children: [
-                Icon(Icons.api, color: widget.accentColor),
-                const SizedBox(width: 8),
+                Icon(Icons.api, color: widget.accentColor, size: 18),
+                const SizedBox(width: 6),
                 Text(
                   widget.title,
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: widget.accentColor,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             TextFormField(
               controller: widget.keyController,
               obscureText: !_isKeyVisible,
