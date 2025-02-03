@@ -61,10 +61,6 @@ class _ChatPageState extends State<ChatPage> {
     super.dispose();
   }
 
-  void _onActiveChatChanged() {
-    _initializeHistoryMessages();
-  }
-
   Future<void> _initializeHistoryMessages() async {
     final activeChat = ProviderManager.chatProvider.activeChat;
     if (activeChat == null) {
@@ -114,13 +110,6 @@ class _ChatPageState extends State<ChatPage> {
     }
 
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(0),
-        child: AppBar(
-          elevation: 0,
-          backgroundColor: Colors.transparent,
-        ),
-      ),
       body: Column(
         children: [
           Expanded(
@@ -375,7 +364,7 @@ class MessageList extends StatelessWidget {
         final showAvatar = group.first.role != MessageRole.user;
 
         return ChatUIMessage(
-          messages: group.reversed.toList(),
+          messages: group,
           showAvatar: showAvatar,
         );
       },
