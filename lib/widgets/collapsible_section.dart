@@ -21,31 +21,35 @@ class _CollapsibleSectionState extends State<CollapsibleSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        InkWell(
-          onTap: () => setState(() => _isExpanded = !_isExpanded),
-          child: Row(
-            children: [
-              Icon(
-                _isExpanded
-                    ? Icons.keyboard_arrow_down
-                    : Icons.keyboard_arrow_right,
-                size: 16,
-                color: Colors.grey[600],
-              ),
-              Expanded(child: widget.title),
-            ],
+    return Container(
+      width: double.infinity,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InkWell(
+            onTap: () => setState(() => _isExpanded = !_isExpanded),
+            child: Row(
+              children: [
+                Icon(
+                  _isExpanded
+                      ? Icons.keyboard_arrow_down
+                      : Icons.keyboard_arrow_right,
+                  size: 16,
+                  color: Colors.grey[600],
+                ),
+                Expanded(child: widget.title),
+              ],
+            ),
           ),
-        ),
-        if (_isExpanded)
-          Padding(
-            padding:
-                widget.padding ?? const EdgeInsets.only(top: 4.0, left: 8.0),
-            child: widget.content,
-          ),
-      ],
+          if (_isExpanded)
+            Padding(
+              padding:
+                  widget.padding ?? const EdgeInsets.only(top: 4.0, left: 8.0),
+              child: widget.content,
+            ),
+        ],
+      ),
     );
   }
 }

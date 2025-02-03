@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ChatMcp/llm/model.dart';
 import 'dart:convert';
 import 'package:ChatMcp/widgets/collapsible_section.dart';
-import 'package:ChatMcp/widgets/markit.dart';
+import 'package:ChatMcp/widgets/markdown/markit.dart';
 
 class ChatUIMessage extends StatelessWidget {
   final List<ChatMessage> messages;
@@ -74,7 +74,7 @@ class ChatUIMessage extends StatelessWidget {
             child: msg.role == MessageRole.user
                 ? TextSelectionTheme(
                     data: TextSelectionThemeData(
-                      selectionColor: Colors.white.withOpacity(0.3),
+                      selectionColor: Colors.white.withAlpha(77),
                     ),
                     child: SelectableText(
                       msg.content ?? '',
@@ -82,44 +82,50 @@ class ChatUIMessage extends StatelessWidget {
                     ),
                   )
                 : msg.content != null
-                    ? Markit(data: msg.content!)
+                    ? Markit(data: (msg.content!).trim())
                     : const Text(''),
           ),
         if (msg.toolCalls != null && msg.toolCalls!.isNotEmpty)
-          CollapsibleSection(
-            title: Text(
-              '${msg.mcpServerName} call_${msg.toolCalls![0]['function']['name']}',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-                fontStyle: FontStyle.italic,
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 8.0),
+            child: CollapsibleSection(
+              title: Text(
+                '${msg.mcpServerName} call_${msg.toolCalls![0]['function']['name']}',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                  fontStyle: FontStyle.italic,
+                ),
               ),
-            ),
-            content: Markit(
-              data: (msg.toolCalls?.isNotEmpty ?? false)
-                  ? [
-                      '```json',
-                      const JsonEncoder.withIndent('  ').convert({
-                        "name": msg.toolCalls![0]['function']['name'],
-                        "arguments": json
-                            .decode(msg.toolCalls![0]['function']['arguments']),
-                      }),
-                      '```',
-                    ].join('\n')
-                  : '',
+              content: Markit(
+                data: (msg.toolCalls?.isNotEmpty ?? false)
+                    ? [
+                        '```json',
+                        const JsonEncoder.withIndent('  ').convert({
+                          "name": msg.toolCalls![0]['function']['name'],
+                          "arguments": json.decode(
+                              msg.toolCalls![0]['function']['arguments']),
+                        }),
+                        '```',
+                      ].join('\n')
+                    : '',
+              ),
             ),
           ),
         if (msg.role == MessageRole.tool && msg.toolCallId != null)
-          CollapsibleSection(
-            title: Text(
-              '${msg.mcpServerName} ${msg.toolCallId!} result',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-                fontStyle: FontStyle.italic,
+          Container(
+            margin: const EdgeInsets.symmetric(vertical: 8.0),
+            child: CollapsibleSection(
+              title: Text(
+                '${msg.mcpServerName} ${msg.toolCallId!} result',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                  fontStyle: FontStyle.italic,
+                ),
               ),
+              content: Markit(data: (msg.content ?? '').trim()),
             ),
-            content: Markit(data: msg.content ?? ''),
           ),
       ],
     );
