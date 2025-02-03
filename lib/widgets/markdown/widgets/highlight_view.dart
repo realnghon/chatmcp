@@ -1,7 +1,45 @@
 import 'package:flutter/material.dart';
-import 'package:highlighter/highlighter.dart' show highlight, Node;
+import 'package:highlighter/highlighter.dart' show highlight, Node, Mode;
+
+// 添加 Mermaid 语法规则
+final mermaidMode = Mode(
+  refs: {},
+  contains: [
+    Mode(
+      className: 'keyword',
+      begin:
+          r'\b(sequenceDiagram|participant|actor|note|over|right of|left of|loop|alt|else|opt|par|and|rect|end|flowchart|subgraph|class|classDiagram|stateDiagram|state|gantt|pie|erDiagram|journey)\b',
+    ),
+    Mode(
+      className: 'operator',
+      begin: r'(-->|->|-->>|==|--)',
+    ),
+    Mode(
+      className: 'string',
+      begin: '"',
+      end: '"',
+    ),
+    Mode(
+      className: 'title',
+      begin: r'title\s+',
+      end: r'\n',
+    ),
+    Mode(
+      className: 'comment',
+      begin: r'%% ',
+      end: r'\n',
+    ),
+  ],
+);
+
+// 注册 Mermaid 语法模式
+void _registerMermaidMode() {
+  highlight.registerLanguage('mermaid', mermaidMode);
+}
 
 class HighlightView extends StatelessWidget {
+  static bool _mermaidModeRegistered = false;
+
   final String source;
   final String? language;
   final Map<String, TextStyle> theme;
@@ -21,7 +59,12 @@ class HighlightView extends StatelessWidget {
     this.padding,
     this.textStyle,
     int tabSize = 8,
-  }) : source = input.replaceAll('\t', ' ' * tabSize);
+  }) : source = input.replaceAll('\t', ' ' * tabSize) {
+    if (!_mermaidModeRegistered) {
+      _registerMermaidMode();
+      _mermaidModeRegistered = true;
+    }
+  }
 
   List<TextSpan> _convert(List<Node> nodes) {
     List<TextSpan> spans = [];

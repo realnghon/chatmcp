@@ -33,7 +33,7 @@ class ChatUIMessage extends StatelessWidget {
           if (!isUser)
             SizedBox(
               width: 40,
-              child: showAvatar ? _buildAvatar(false) : null,
+              child: showAvatar ? ChatAvatar(isUser: false) : null,
             ),
           const SizedBox(width: 8),
           Flexible(
@@ -41,97 +41,160 @@ class ChatUIMessage extends StatelessWidget {
               crossAxisAlignment:
                   isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
               children: messages
-                  .map((msg) => _buildMessageContent(context, msg))
+                  .map((msg) => ChatMessageContent(message: msg))
                   .toList(),
             ),
           ),
           const SizedBox(width: 8),
-          if (isUser) _buildAvatar(true),
+          if (isUser) ChatAvatar(isUser: true),
         ],
       ),
     );
   }
+}
 
-  Widget _buildMessageContent(BuildContext context, ChatMessage msg) {
+class ChatMessageContent extends StatelessWidget {
+  final ChatMessage message;
+
+  const ChatMessageContent({
+    super.key,
+    required this.message,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: msg.role == MessageRole.user
+      crossAxisAlignment: message.role == MessageRole.user
           ? CrossAxisAlignment.end
           : CrossAxisAlignment.start,
       children: [
-        if (msg.role == MessageRole.loading) const CircularProgressIndicator(),
-        if ((msg.role == MessageRole.user ||
-                msg.role == MessageRole.assistant) &&
-            msg.content != null)
-          Container(
-            margin: const EdgeInsets.only(bottom: 4),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: msg.role == MessageRole.user
-                  ? Theme.of(context).primaryColor
-                  : Colors.grey[300],
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: msg.role == MessageRole.user
-                ? TextSelectionTheme(
-                    data: TextSelectionThemeData(
-                      selectionColor: Colors.white.withAlpha(77),
-                    ),
-                    child: SelectableText(
-                      msg.content ?? '',
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  )
-                : msg.content != null
-                    ? Markit(data: (msg.content!).trim())
-                    : const Text(''),
-          ),
-        if (msg.toolCalls != null && msg.toolCalls!.isNotEmpty)
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 8.0),
-            child: CollapsibleSection(
-              title: Text(
-                '${msg.mcpServerName} call_${msg.toolCalls![0]['function']['name']}',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-              content: Markit(
-                data: (msg.toolCalls?.isNotEmpty ?? false)
-                    ? [
-                        '```json',
-                        const JsonEncoder.withIndent('  ').convert({
-                          "name": msg.toolCalls![0]['function']['name'],
-                          "arguments": json.decode(
-                              msg.toolCalls![0]['function']['arguments']),
-                        }),
-                        '```',
-                      ].join('\n')
-                    : '',
-              ),
-            ),
-          ),
-        if (msg.role == MessageRole.tool && msg.toolCallId != null)
-          Container(
-            margin: const EdgeInsets.symmetric(vertical: 8.0),
-            child: CollapsibleSection(
-              title: Text(
-                '${msg.mcpServerName} ${msg.toolCallId!} result',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-              content: Markit(data: (msg.content ?? '').trim()),
-            ),
-          ),
+        if (message.role == MessageRole.loading)
+          const CircularProgressIndicator(),
+        if ((message.role == MessageRole.user ||
+                message.role == MessageRole.assistant) &&
+            message.content != null)
+          MessageBubble(message: message),
+        if (message.toolCalls != null && message.toolCalls!.isNotEmpty)
+          ToolCallWidget(message: message),
+        if (message.role == MessageRole.tool && message.toolCallId != null)
+          ToolResultWidget(message: message),
       ],
     );
   }
+}
 
-  Widget _buildAvatar(bool isUser) {
+class MessageBubble extends StatelessWidget {
+  final ChatMessage message;
+
+  const MessageBubble({
+    super.key,
+    required this.message,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 4),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: message.role == MessageRole.user
+            ? Theme.of(context).primaryColor
+            : Colors.grey[300],
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: message.role == MessageRole.user
+          ? TextSelectionTheme(
+              data: TextSelectionThemeData(
+                selectionColor: Colors.white.withAlpha(77),
+              ),
+              child: SelectableText(
+                message.content ?? '',
+                style: const TextStyle(color: Colors.white),
+              ),
+            )
+          : message.content != null
+              ? Markit(data: (message.content!).trim())
+              : const Text(''),
+    );
+  }
+}
+
+class ToolCallWidget extends StatelessWidget {
+  final ChatMessage message;
+
+  const ToolCallWidget({
+    super.key,
+    required this.message,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      child: CollapsibleSection(
+        title: Text(
+          '${message.mcpServerName} call_${message.toolCalls![0]['function']['name']}',
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey[600],
+            fontStyle: FontStyle.italic,
+          ),
+        ),
+        content: Markit(
+          data: (message.toolCalls?.isNotEmpty ?? false)
+              ? [
+                  '```json',
+                  const JsonEncoder.withIndent('  ').convert({
+                    "name": message.toolCalls![0]['function']['name'],
+                    "arguments": json
+                        .decode(message.toolCalls![0]['function']['arguments']),
+                  }),
+                  '```',
+                ].join('\n')
+              : '',
+        ),
+      ),
+    );
+  }
+}
+
+class ToolResultWidget extends StatelessWidget {
+  final ChatMessage message;
+
+  const ToolResultWidget({
+    super.key,
+    required this.message,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      child: CollapsibleSection(
+        title: Text(
+          '${message.mcpServerName} ${message.toolCallId!} result',
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey[600],
+            fontStyle: FontStyle.italic,
+          ),
+        ),
+        content: Markit(data: (message.content ?? '').trim()),
+      ),
+    );
+  }
+}
+
+class ChatAvatar extends StatelessWidget {
+  final bool isUser;
+
+  const ChatAvatar({
+    super.key,
+    required this.isUser,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     if (isUser) {
       return Container();
     }

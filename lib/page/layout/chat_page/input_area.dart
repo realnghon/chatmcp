@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:io' show Platform;
 
 class InputArea extends StatelessWidget {
   final TextEditingController textController;
@@ -30,9 +31,11 @@ class InputArea extends StatelessWidget {
                 child: Focus(
                   onKeyEvent: (node, event) {
                     if (event is KeyDownEvent &&
-                        event.logicalKey == LogicalKeyboardKey.enter &&
-                        HardwareKeyboard.instance.isShiftPressed &&
-                        isComposing) {
+                            event.logicalKey == LogicalKeyboardKey.enter &&
+                            Platform.isMacOS
+                        ? HardwareKeyboard.instance.isMetaPressed
+                        : HardwareKeyboard.instance.isControlPressed &&
+                            isComposing) {
                       onSubmitted(textController.text);
                       textController.clear();
                       return KeyEventResult.handled;

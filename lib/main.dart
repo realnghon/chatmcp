@@ -6,19 +6,12 @@ import './page/layout/layout.dart';
 import './provider/provider_manager.dart';
 import 'package:logging/logging.dart';
 import 'package:window_manager_plus/window_manager_plus.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'dart:io';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // 初始化窗口管理器
   await WindowManagerPlus.ensureInitialized(0);
-
-  // 初始化 InAppWebView
-  if (Platform.isAndroid) {
-    await InAppWebViewController.setWebContentsDebuggingEnabled(true);
-  }
 
   // 设置窗口选项
   WindowOptions windowOptions = const WindowOptions(

@@ -16,7 +16,8 @@ class McpServer extends StatefulWidget {
 
 class _McpServerState extends State<McpServer> {
   final TextEditingController _searchController = TextEditingController();
-  String _selectedTab = 'All'; // 'All' 或 'Installed'
+  String _selectedTab = 'All';
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -26,199 +27,393 @@ class _McpServerState extends State<McpServer> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          // 搜索框
-          TextField(
-            controller: _searchController,
-            decoration: InputDecoration(
-              hintText: 'Search server...',
-              prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            ),
-            onChanged: (value) => setState(() {}),
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Theme.of(context).colorScheme.background,
+              Theme.of(context).colorScheme.background.withAlpha(204),
+            ],
           ),
-          const SizedBox(height: 16),
-
-          // 标签选择
-          Row(
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
             children: [
-              _buildFilterChip('All'),
-              const SizedBox(width: 8),
-              _buildFilterChip('Installed'),
-              const Spacer(),
-              IconButton(
-                icon: const Icon(Icons.add),
-                onPressed: () {
-                  final provider =
-                      Provider.of<McpServerProvider>(context, listen: false);
-                  _showEditDialog(context, '', provider, null);
-                },
+              // 搜索框
+              Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search server...',
+                    prefixIcon: Icon(
+                      Icons.search,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                    filled: true,
+                    fillColor: Theme.of(context).cardColor,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                  ),
+                  onChanged: (value) => setState(() {}),
+                ),
               ),
-              IconButton(
-                icon: const Icon(Icons.refresh),
-                onPressed: () => setState(() {}),
+              const SizedBox(height: 16),
+
+              // 标签选择和操作按钮
+              Row(
+                children: [
+                  _buildFilterChip('All'),
+                  const SizedBox(width: 12),
+                  _buildFilterChip('Installed'),
+                  const Spacer(),
+                  _buildActionButton(
+                    icon: Icons.add,
+                    tooltip: 'Add Server',
+                    onPressed: () {
+                      final provider = Provider.of<McpServerProvider>(context,
+                          listen: false);
+                      _showEditDialog(context, '', provider, null);
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  _buildActionButton(
+                    icon: Icons.refresh,
+                    tooltip: 'Refresh',
+                    onPressed: () => setState(() {}),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // 服务器列表
+              Expanded(
+                child: Consumer<McpServerProvider>(
+                  builder: (context, provider, child) {
+                    return FutureBuilder<Map<String, dynamic>>(
+                      future: _selectedTab == 'All'
+                          ? provider.loadMarketServers()
+                          : provider.loadServers(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+
+                        if (snapshot.hasError) {
+                          return Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.error_outline,
+                                  size: 48,
+                                  color: Colors.red,
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'Failed to load: ${snapshot.error}',
+                                  style: const TextStyle(color: Colors.red),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+
+                        if (snapshot.hasData) {
+                          final servers = snapshot.data?['mcpServers']
+                                  as Map<String, dynamic>? ??
+                              {};
+
+                          if (servers.isEmpty) {
+                            return Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.dns_outlined,
+                                    size: 64,
+                                    color: Theme.of(context).disabledColor,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'No server configurations found',
+                                    style: TextStyle(
+                                      color: Theme.of(context).disabledColor,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+
+                          return ListView.builder(
+                            itemCount: servers.length,
+                            itemBuilder: (context, index) {
+                              final serverName = servers.keys.elementAt(index);
+                              final serverConfig = servers[serverName];
+
+                              return _buildServerCard(
+                                context,
+                                serverName,
+                                serverConfig,
+                                provider,
+                              );
+                            },
+                          );
+                        }
+                        return const Center(child: CircularProgressIndicator());
+                      },
+                    );
+                  },
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+        ),
+      ),
+    );
+  }
 
-          // 服务器列表
-          Expanded(
-            child: Consumer<McpServerProvider>(
-              builder: (context, provider, child) {
-                return FutureBuilder<Map<String, dynamic>>(
-                  future: _selectedTab == 'All'
-                      ? provider.loadMarketServers()
-                      : provider.loadServers(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-
-                    if (snapshot.hasError) {
-                      return Center(
-                          child: Text('Failed to load: ${snapshot.error}'));
-                    }
-
-                    if (snapshot.hasData) {
-                      // 获取 mcpServers 对象
-                      final servers = snapshot.data?['mcpServers']
-                              as Map<String, dynamic>? ??
-                          {};
-
-                      if (servers.isEmpty) {
-                        return const Center(
-                            child: Text('No server configurations found'));
-                      }
-
-                      return ListView.builder(
-                        itemCount: servers.length,
-                        itemBuilder: (context, index) {
-                          final serverName = servers.keys.elementAt(index);
-                          final serverConfig = servers[serverName];
-
-                          return Card(
-                            margin: const EdgeInsets.symmetric(vertical: 4.0),
-                            child: ListTile(
-                              title: Text(serverName),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                      'Command: ${serverConfig['command'] ?? ''}'),
-                                  Text(
-                                      'Arguments: ${(serverConfig['args'] as List?)?.join(' ') ?? ''}'),
-                                  if (serverConfig['env'] != null)
-                                    Text(
-                                        'Environment Variables: ${(serverConfig['env'] as Map?)?.entries.map((e) => '${e.key}=${e.value}').join('\n') ?? ''}'),
-                                ],
-                              ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (_selectedTab == 'All')
-                                    FutureBuilder<Map<String, dynamic>>(
-                                      future: provider.loadServers(),
-                                      builder: (context, snapshot) {
-                                        if (snapshot.hasData) {
-                                          final installedServers = snapshot
-                                                      .data?['mcpServers']
-                                                  as Map<String, dynamic>? ??
-                                              {};
-                                          final isInstalled = installedServers
-                                              .containsKey(serverName);
-
-                                          return Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              if (isInstalled) ...[
-                                                IconButton(
-                                                  icon: const Icon(Icons.edit),
-                                                  onPressed: () {
-                                                    _showEditDialog(
-                                                        context,
-                                                        serverName,
-                                                        provider,
-                                                        null);
-                                                  },
-                                                ),
-                                                IconButton(
-                                                  icon:
-                                                      const Icon(Icons.delete),
-                                                  onPressed: () {
-                                                    _showDeleteConfirmDialog(
-                                                        context,
-                                                        serverName,
-                                                        provider);
-                                                  },
-                                                ),
-                                              ] else
-                                                TextButton.icon(
-                                                  icon: const Icon(
-                                                      Icons.download),
-                                                  label: const Text('Install'),
-                                                  onPressed: () async {
-                                                    final cmdExists =
-                                                        await isCommandAvailable(
-                                                            serverConfig[
-                                                                'command']);
-                                                    if (!cmdExists) {
-                                                      showErrorDialog(context,
-                                                          'Command "${serverConfig['command']}" does not exist, please install it first\n\nCurrent PATH:\n${Platform.environment['PATH']}');
-                                                    } else {
-                                                      // 安装服务器配置
-                                                      Logger.root.info(
-                                                          'Install server configuration: $serverName ${serverConfig['command']} ${serverConfig['args']}');
-                                                      await _showEditDialog(
-                                                          context,
-                                                          serverName,
-                                                          provider,
-                                                          serverConfig);
-                                                    }
-                                                  },
-                                                ),
-                                            ],
-                                          );
-                                        }
-                                        return const SizedBox.shrink();
-                                      },
-                                    ),
-                                  if (_selectedTab == 'Installed') ...[
-                                    IconButton(
-                                      icon: const Icon(Icons.edit),
-                                      onPressed: () {
-                                        _showEditDialog(context, serverName,
-                                            provider, null);
-                                      },
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.delete),
-                                      onPressed: () {
-                                        _showDeleteConfirmDialog(
-                                            context, serverName, provider);
-                                      },
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    }
-                    return const Center(child: CircularProgressIndicator());
-                  },
-                );
-              },
+  Widget _buildServerCard(
+    BuildContext context,
+    String serverName,
+    dynamic serverConfig,
+    McpServerProvider provider,
+  ) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Colors.grey.withAlpha(51),
+          ),
+        ),
+        child: ExpansionTile(
+          title: Text(
+            serverName,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
             ),
           ),
-        ],
+          shape: const RoundedRectangleBorder(
+            side: BorderSide.none,
+          ),
+          leading: Icon(
+            Icons.dns,
+            color: Theme.of(context).primaryColor,
+          ),
+          childrenPadding: const EdgeInsets.all(16),
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildInfoRow('Command', serverConfig['command'] ?? ''),
+                const SizedBox(height: 8),
+                _buildInfoRow('Arguments',
+                    (serverConfig['args'] as List?)?.join(' ') ?? ''),
+                if (serverConfig['env'] != null) ...[
+                  const SizedBox(height: 8),
+                  _buildInfoRow(
+                    'Environment Variables',
+                    (serverConfig['env'] as Map?)
+                            ?.entries
+                            .map((e) => '${e.key}=${e.value}')
+                            .join('\n') ??
+                        '',
+                  ),
+                ],
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (_selectedTab == 'All')
+                      FutureBuilder<Map<String, dynamic>>(
+                        future: provider.loadServers(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            final installedServers =
+                                snapshot.data?['mcpServers']
+                                        as Map<String, dynamic>? ??
+                                    {};
+                            final isInstalled =
+                                installedServers.containsKey(serverName);
+
+                            return Row(
+                              children: [
+                                if (isInstalled) ...[
+                                  _buildActionButton(
+                                    icon: Icons.edit,
+                                    tooltip: 'Edit',
+                                    onPressed: () => _showEditDialog(
+                                        context, serverName, provider, null),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  _buildActionButton(
+                                    icon: Icons.delete,
+                                    tooltip: 'Delete',
+                                    color: Colors.red,
+                                    onPressed: () => _showDeleteConfirmDialog(
+                                        context, serverName, provider),
+                                  ),
+                                ] else
+                                  ElevatedButton.icon(
+                                    icon: const Icon(Icons.download),
+                                    label: const Text('Install'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor:
+                                          Theme.of(context).primaryColor,
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                    ),
+                                    onPressed: () async {
+                                      final cmdExists =
+                                          await isCommandAvailable(
+                                              serverConfig['command']);
+                                      if (!cmdExists) {
+                                        showErrorDialog(
+                                          context,
+                                          'Command "${serverConfig['command']}" does not exist, please install it first\n\nCurrent PATH:\n${Platform.environment['PATH']}',
+                                        );
+                                      } else {
+                                        Logger.root.info(
+                                          'Install server configuration: $serverName ${serverConfig['command']} ${serverConfig['args']}',
+                                        );
+                                        await _showEditDialog(context,
+                                            serverName, provider, serverConfig);
+                                      }
+                                    },
+                                  ),
+                              ],
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        },
+                      ),
+                    if (_selectedTab == 'Installed') ...[
+                      _buildActionButton(
+                        icon: Icons.edit,
+                        tooltip: 'Edit',
+                        onPressed: () => _showEditDialog(
+                            context, serverName, provider, null),
+                      ),
+                      const SizedBox(width: 8),
+                      _buildActionButton(
+                        icon: Icons.delete,
+                        tooltip: 'Delete',
+                        color: Colors.red,
+                        onPressed: () => _showDeleteConfirmDialog(
+                            context, serverName, provider),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.grey,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(fontSize: 14),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required String tooltip,
+    required VoidCallback onPressed,
+    Color? color,
+  }) {
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(8),
+          onTap: onPressed,
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: color ?? Theme.of(context).primaryColor.withAlpha(51),
+              ),
+            ),
+            child: Icon(
+              icon,
+              size: 20,
+              color: color ?? Theme.of(context).primaryColor,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(String label) {
+    final isSelected = _selectedTab == label;
+    return FilterChip(
+      label: Text(
+        label,
+        style: TextStyle(
+          color: isSelected ? Theme.of(context).primaryColor : null,
+          fontWeight: isSelected ? FontWeight.bold : null,
+        ),
+      ),
+      selected: isSelected,
+      onSelected: (selected) {
+        setState(() {
+          _selectedTab = label;
+        });
+      },
+      selectedColor: Theme.of(context).primaryColor.withAlpha(38),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(
+          color: isSelected
+              ? Theme.of(context).primaryColor.withAlpha(128)
+              : Colors.grey.withAlpha(51),
+        ),
       ),
     );
   }
@@ -397,19 +592,6 @@ class _McpServerState extends State<McpServer> {
       await provider.saveServers(config);
       setState(() {});
     }
-  }
-
-  Widget _buildFilterChip(String label) {
-    return FilterChip(
-      label: Text(label),
-      selected: _selectedTab == label,
-      onSelected: (selected) {
-        setState(() {
-          _selectedTab = label;
-        });
-      },
-      selectedColor: Theme.of(context).primaryColor.withOpacity(0.2),
-    );
   }
 
   Future<void> showErrorDialog(BuildContext context, String message) async {

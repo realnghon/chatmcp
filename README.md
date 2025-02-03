@@ -1,4 +1,7 @@
-# chatmcp
+<div align="center">
+<img src="./macos/Runner/Assets.xcassets/AppIcon.appiconset/icon_128@1x.png" alt="logo">
+<h1>chatmcp</h1>
+</div>
 
 AI Chat with [MCP](https://modelcontextprotocol.io/introduction) Server use Any LLM Model
 

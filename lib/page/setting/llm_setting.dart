@@ -18,6 +18,7 @@ class _LlmSettingsState extends State<LlmSettings> {
   final _claudeApiEndpointController = TextEditingController();
   final _deepseekApiKeyController = TextEditingController();
   final _deepseekApiEndpointController = TextEditingController();
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -61,121 +62,87 @@ class _LlmSettingsState extends State<LlmSettings> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Form(
-        key: _formKey,
-        child: ListView(
-          children: [
-            const Text(
-              'OpenAI API',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _openaiApiKeyController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'API Key',
-                hintText: 'Please enter your OpenAI API Key',
-                border: OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (value != null && value.isNotEmpty && value.length < 10) {
-                  return 'API Key must be at least 10 characters';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _openaiApiEndpointController,
-              decoration: const InputDecoration(
-                labelText: 'API Endpoint',
-                hintText: 'https://api.openai.com/v1',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 32),
-            const Text(
-              'Claude API',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _claudeApiKeyController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'API Key',
-                hintText: 'Please enter your Claude API Key',
-                border: OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (value != null && value.isNotEmpty && value.length < 10) {
-                  return 'API Key must be at least 10 characters';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _claudeApiEndpointController,
-              decoration: const InputDecoration(
-                labelText: 'API Endpoint',
-                hintText: 'https://api.anthropic.com/v1',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 32),
-            const Text(
-              'DeepSeek API',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _deepseekApiKeyController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'API Key',
-                hintText: 'Please enter your DeepSeek API Key',
-                border: OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (value != null && value.isNotEmpty && value.length < 10) {
-                  return 'API Key must be at least 10 characters';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _deepseekApiEndpointController,
-              decoration: const InputDecoration(
-                labelText: 'API Endpoint',
-                hintText: 'https://api.deepseek.com/v1',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _saveSettings,
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 12),
-                  child: Text('Save Settings'),
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Theme.of(context).colorScheme.background,
+              Theme.of(context).colorScheme.background.withOpacity(0.8),
+            ],
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                Expanded(
+                  child: ListView(
+                    children: [
+                      ApiSection(
+                        title: 'OpenAI',
+                        iconPath: 'assets/openai_icon.png',
+                        keyController: _openaiApiKeyController,
+                        endpointController: _openaiApiEndpointController,
+                        accentColor: const Color(0xFF10A37F),
+                      ),
+                      ApiSection(
+                        title: 'Claude',
+                        iconPath: 'assets/claude_icon.png',
+                        keyController: _claudeApiKeyController,
+                        endpointController: _claudeApiEndpointController,
+                        accentColor: const Color(0xFF7C3AED),
+                      ),
+                      ApiSection(
+                        title: 'DeepSeek',
+                        iconPath: 'assets/deepseek_icon.png',
+                        keyController: _deepseekApiKeyController,
+                        endpointController: _deepseekApiEndpointController,
+                        accentColor: const Color(0xFF2563EB),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _saveSettings,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 2,
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : const Text(
+                            'Save Settings',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -183,34 +150,162 @@ class _LlmSettingsState extends State<LlmSettings> {
 
   Future<void> _saveSettings() async {
     if (_formKey.currentState!.validate()) {
-      final settings = ProviderManager.settingsProvider;
+      setState(() => _isLoading = true);
 
-      final openaiSetting = ApiSetting(
-        apiKey: _openaiApiKeyController.text,
-        apiEndpoint: _openaiApiEndpointController.text,
-      );
+      try {
+        final settings = ProviderManager.settingsProvider;
 
-      final claudeSetting = ApiSetting(
-        apiKey: _claudeApiKeyController.text,
-        apiEndpoint: _claudeApiEndpointController.text,
-      );
-
-      final deepseekSetting = ApiSetting(
-        apiKey: _deepseekApiKeyController.text,
-        apiEndpoint: _deepseekApiEndpointController.text,
-      );
-
-      await settings.updateSettings(apiSettings: {
-        'openai': openaiSetting,
-        'claude': claudeSetting,
-        'deepseek': deepseekSetting
-      });
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Settings saved')),
+        final openaiSetting = ApiSetting(
+          apiKey: _openaiApiKeyController.text,
+          apiEndpoint: _openaiApiEndpointController.text,
         );
+
+        final claudeSetting = ApiSetting(
+          apiKey: _claudeApiKeyController.text,
+          apiEndpoint: _claudeApiEndpointController.text,
+        );
+
+        final deepseekSetting = ApiSetting(
+          apiKey: _deepseekApiKeyController.text,
+          apiEndpoint: _deepseekApiEndpointController.text,
+        );
+
+        await settings.updateSettings(apiSettings: {
+          'openai': openaiSetting,
+          'claude': claudeSetting,
+          'deepseek': deepseekSetting
+        });
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Row(
+                children: [
+                  Icon(Icons.check_circle, color: Colors.white),
+                  SizedBox(width: 8),
+                  Text('Settings saved successfully'),
+                ],
+              ),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
       }
     }
+  }
+}
+
+class ApiSection extends StatefulWidget {
+  final String title;
+  final String iconPath;
+  final TextEditingController keyController;
+  final TextEditingController endpointController;
+  final Color accentColor;
+
+  const ApiSection({
+    super.key,
+    required this.title,
+    required this.iconPath,
+    required this.keyController,
+    required this.endpointController,
+    required this.accentColor,
+  });
+
+  @override
+  State<ApiSection> createState() => _ApiSectionState();
+}
+
+class _ApiSectionState extends State<ApiSection> {
+  bool _isKeyVisible = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.withAlpha(51)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.api, color: widget.accentColor),
+                const SizedBox(width: 8),
+                Text(
+                  widget.title,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: widget.accentColor,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: widget.keyController,
+              obscureText: !_isKeyVisible,
+              decoration: InputDecoration(
+                labelText: 'API Key',
+                hintText: 'Enter your ${widget.title} API Key',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                prefixIcon: Icon(Icons.key, color: widget.accentColor),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isKeyVisible ? Icons.visibility_off : Icons.visibility,
+                    color: widget.accentColor,
+                  ),
+                  onPressed: () =>
+                      setState(() => _isKeyVisible = !_isKeyVisible),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: widget.accentColor, width: 2),
+                ),
+              ),
+              validator: (value) {
+                if (value != null && value.isNotEmpty && value.length < 10) {
+                  return 'API Key must be at least 10 characters';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 12),
+            TextFormField(
+              controller: widget.endpointController,
+              decoration: InputDecoration(
+                labelText: 'API Endpoint',
+                hintText: 'Enter API endpoint URL',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                prefixIcon: Icon(Icons.link, color: widget.accentColor),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: widget.accentColor, width: 2),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

@@ -26,7 +26,7 @@ class TopToolbar extends StatelessWidget {
       },
       child: Container(
         height: 40,
-        color: Colors.grey[100],
+        color: Colors.grey[200],
         padding: EdgeInsets.fromLTRB(hideChatHistory ? 70 : 0, 0, 16, 0),
         child: Row(
           children: [

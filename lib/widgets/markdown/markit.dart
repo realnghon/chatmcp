@@ -3,7 +3,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:url_launcher/url_launcher.dart';
 
-import 'builders/code_builder.dart';
+import 'widgets/code_builder.dart';
 import 'utils/text_converter.dart';
 
 class Markit extends StatelessWidget {
