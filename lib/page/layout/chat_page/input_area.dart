@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class InputArea extends StatelessWidget {
   final TextEditingController textController;
@@ -26,21 +27,47 @@ class InputArea extends StatelessWidget {
           child: Row(
             children: [
               Expanded(
-                child: TextField(
-                  controller: textController,
-                  onChanged: onTextChanged,
-                  onSubmitted: onSubmitted,
-                  decoration: const InputDecoration(
-                    hintText: '输入消息...',
-                    border: OutlineInputBorder(),
+                child: Focus(
+                  onKeyEvent: (node, event) {
+                    if (event is KeyDownEvent &&
+                        event.logicalKey == LogicalKeyboardKey.enter &&
+                        HardwareKeyboard.instance.isShiftPressed &&
+                        isComposing) {
+                      onSubmitted(textController.text);
+                      textController.clear();
+                      return KeyEventResult.handled;
+                    }
+                    return KeyEventResult.ignored;
+                  },
+                  child: TextField(
+                    controller: textController,
+                    onChanged: onTextChanged,
+                    maxLines: 5,
+                    minLines: 1,
+                    textInputAction: TextInputAction.newline,
+                    keyboardType: TextInputType.multiline,
+                    style: const TextStyle(fontSize: 14.0),
+                    scrollPhysics: const BouncingScrollPhysics(),
+                    decoration: const InputDecoration(
+                      hintText: '输入消息...',
+                      hintStyle: TextStyle(fontSize: 14.0),
+                      border: OutlineInputBorder(),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 14, vertical: 18),
+                      isDense: true,
+                    ),
                   ),
                 ),
               ),
               const SizedBox(width: 8),
               IconButton(
                 icon: const Icon(Icons.send),
-                onPressed:
-                    isComposing ? () => onSubmitted(textController.text) : null,
+                onPressed: isComposing
+                    ? () {
+                        onSubmitted(textController.text);
+                        textController.clear();
+                      }
+                    : null,
               ),
             ],
           ),

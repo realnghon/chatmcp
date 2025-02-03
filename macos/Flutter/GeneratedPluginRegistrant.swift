@@ -11,6 +11,7 @@ import shared_preferences_foundation
 import sqflite_darwin
 import url_launcher_macos
 import window_manager
+import window_manager_plus
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   PathProviderPlugin.register(with: registry.registrar(forPlugin: "PathProviderPlugin"))
@@ -19,4 +20,5 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   SqflitePlugin.register(with: registry.registrar(forPlugin: "SqflitePlugin"))
   UrlLauncherPlugin.register(with: registry.registrar(forPlugin: "UrlLauncherPlugin"))
   WindowManagerPlugin.register(with: registry.registrar(forPlugin: "WindowManagerPlugin"))
+  WindowManagerPlusPlugin.register(with: registry.registrar(forPlugin: "WindowManagerPlusPlugin"))
 }

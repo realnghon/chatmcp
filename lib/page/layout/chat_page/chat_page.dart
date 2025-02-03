@@ -85,6 +85,34 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    // 将消息分组
+    List<List<ChatMessage>> groupedMessages = [];
+    List<ChatMessage> currentGroup = [];
+
+    for (int i = _messages.length - 1; i >= 0; i--) {
+      if (currentGroup.isEmpty) {
+        currentGroup.add(_messages[i]);
+      } else {
+        final lastMsg = currentGroup.last;
+        final currentMsg = _messages[i];
+
+        // 如果当前消息和上一条消息的角色相同（都是用户或都不是用户），则加入当前组
+        if ((lastMsg.role == MessageRole.user) ==
+            (currentMsg.role == MessageRole.user)) {
+          currentGroup.add(currentMsg);
+        } else {
+          // 角色不同，创建新组
+          groupedMessages.add(List.from(currentGroup));
+          currentGroup = [currentMsg];
+        }
+      }
+    }
+
+    // 添加最后一组
+    if (currentGroup.isNotEmpty) {
+      groupedMessages.add(currentGroup);
+    }
+
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(0),
@@ -310,20 +338,44 @@ class MessageList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 将消息分组
+    List<List<ChatMessage>> groupedMessages = [];
+    List<ChatMessage> currentGroup = [];
+
+    for (int i = messages.length - 1; i >= 0; i--) {
+      if (currentGroup.isEmpty) {
+        currentGroup.add(messages[i]);
+      } else {
+        final lastMsg = currentGroup.last;
+        final currentMsg = messages[i];
+
+        // 如果当前消息和上一条消息的角色相同（都是用户或都不是用户），则加入当前组
+        if ((lastMsg.role == MessageRole.user) ==
+            (currentMsg.role == MessageRole.user)) {
+          currentGroup.add(currentMsg);
+        } else {
+          // 角色不同，创建新组
+          groupedMessages.add(List.from(currentGroup));
+          currentGroup = [currentMsg];
+        }
+      }
+    }
+
+    // 添加最后一组
+    if (currentGroup.isNotEmpty) {
+      groupedMessages.add(currentGroup);
+    }
+
     return ListView.builder(
       padding: const EdgeInsets.all(8.0),
+      itemCount: groupedMessages.length,
       reverse: true,
-      itemCount: messages.length,
       itemBuilder: (context, index) {
-        final reversedIndex = messages.length - 1 - index;
-        final msg = messages[reversedIndex];
-
-        final showAvatar = msg.role != MessageRole.user &&
-            (reversedIndex == 0 ||
-                messages[reversedIndex - 1].role == MessageRole.user);
+        final group = groupedMessages[index];
+        final showAvatar = group.first.role != MessageRole.user;
 
         return ChatUIMessage(
-          msg: msg,
+          messages: group.reversed.toList(),
           showAvatar: showAvatar,
         );
       },
