@@ -76,6 +76,9 @@ class ChatProvider extends ChangeNotifier {
       int chatId, List<llmModel.ChatMessage> messages) async {
     final chatMessageDao = ChatMessageDao();
     for (var message in messages) {
+      if (message.role == llmModel.MessageRole.error) {
+        continue;
+      }
       await chatMessageDao.insert(ChatMessage(
         chatId: chatId,
         body: message.toString(),

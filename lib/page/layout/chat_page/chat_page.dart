@@ -310,7 +310,7 @@ class _ChatPageState extends State<ChatPage> {
       setState(() {
         _messages.last = ChatMessage(
           content: "抱歉，发生错误：${e.toString()}",
-          role: MessageRole.assistant,
+          role: MessageRole.error,
         );
       });
     }
@@ -331,26 +331,20 @@ class MessageList extends StatelessWidget {
     List<List<ChatMessage>> groupedMessages = [];
     List<ChatMessage> currentGroup = [];
 
-    for (int i = messages.length - 1; i >= 0; i--) {
-      if (currentGroup.isEmpty) {
-        currentGroup.add(messages[i]);
-      } else {
-        final lastMsg = currentGroup.last;
-        final currentMsg = messages[i];
-
-        // 如果当前消息和上一条消息的角色相同（都是用户或都不是用户），则加入当前组
-        if ((lastMsg.role == MessageRole.user) ==
-            (currentMsg.role == MessageRole.user)) {
-          currentGroup.add(currentMsg);
-        } else {
-          // 角色不同，创建新组
-          groupedMessages.add(List.from(currentGroup));
-          currentGroup = [currentMsg];
+    for (var msg in messages) {
+      if (msg.role == MessageRole.user) {
+        if (currentGroup.isNotEmpty) {
+          groupedMessages.add(currentGroup);
+          currentGroup = [];
         }
+        currentGroup.add(msg);
+        groupedMessages.add(currentGroup);
+        currentGroup = [];
+      } else {
+        currentGroup.add(msg);
       }
     }
 
-    // 添加最后一组
     if (currentGroup.isNotEmpty) {
       groupedMessages.add(currentGroup);
     }
@@ -358,7 +352,7 @@ class MessageList extends StatelessWidget {
     return ListView.builder(
       padding: const EdgeInsets.all(8.0),
       itemCount: groupedMessages.length,
-      reverse: true,
+      // reverse: true,
       itemBuilder: (context, index) {
         final group = groupedMessages[index];
         final showAvatar = group.first.role != MessageRole.user;

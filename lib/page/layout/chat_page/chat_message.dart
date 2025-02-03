@@ -3,6 +3,8 @@ import 'package:ChatMcp/llm/model.dart';
 import 'dart:convert';
 import 'package:ChatMcp/widgets/collapsible_section.dart';
 import 'package:ChatMcp/widgets/markdown/markit.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 class ChatUIMessage extends StatelessWidget {
   final List<ChatMessage> messages;
@@ -40,9 +42,16 @@ class ChatUIMessage extends StatelessWidget {
             child: Column(
               crossAxisAlignment:
                   isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-              children: messages
-                  .map((msg) => ChatMessageContent(message: msg))
-                  .toList(),
+              children: [
+                for (var msg in messages.length > 1
+                    ? messages.where((m) => m.role != MessageRole.loading)
+                    : messages)
+                  ChatMessageContent(message: msg),
+                if (messages.last.role != MessageRole.loading &&
+                    messages.last.role != MessageRole.error &&
+                    !isUser)
+                  MessageActions(message: messages.last),
+              ],
             ),
           ),
           const SizedBox(width: 8),
@@ -69,7 +78,9 @@ class ChatMessageContent extends StatelessWidget {
           : CrossAxisAlignment.start,
       children: [
         if (message.role == MessageRole.loading)
-          const CircularProgressIndicator(),
+          MessageBubble(
+              message:
+                  ChatMessage(content: 'loading', role: MessageRole.loading)),
         if ((message.role == MessageRole.user ||
                 message.role == MessageRole.assistant) &&
             message.content != null)
@@ -203,6 +214,59 @@ class ChatAvatar extends StatelessWidget {
       child: Icon(
         isUser ? Icons.person : Icons.android,
         color: Colors.white,
+      ),
+    );
+  }
+}
+
+class MessageActions extends StatelessWidget {
+  final ChatMessage message;
+
+  const MessageActions({
+    super.key,
+    required this.message,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8, top: 4),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          IconButton(
+            iconSize: 16,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(
+              minWidth: 24,
+              minHeight: 24,
+            ),
+            icon: const Icon(Icons.copy_outlined),
+            onPressed: () {
+              Clipboard.setData(ClipboardData(
+                text: message.content ?? '',
+              ));
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('已复制到剪贴板'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            },
+          ),
+          IconButton(
+            iconSize: 16,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(
+              minWidth: 24,
+              minHeight: 24,
+            ),
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              // TODO: 实现重试逻辑
+            },
+          ),
+        ],
       ),
     );
   }

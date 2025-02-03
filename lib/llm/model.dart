@@ -7,6 +7,7 @@ enum MessageRole {
   assistant,
   function,
   tool,
+  error,
   loading;
 
   String get value => name;

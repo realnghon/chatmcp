@@ -41,7 +41,18 @@ class _HtmlViewState extends State<HtmlView> {
   Widget build(BuildContext context) {
     return SizedBox(
       height: _height,
-      child: WebViewWidget(controller: controller),
+      child: Stack(
+        children: [
+          WebViewWidget(
+            controller: controller,
+          ),
+          // webview 组件在 消息列表中, 当鼠标在 webview 上滚动时, 无法触发 ListView 的滚动事件
+          // 这里用一个透明的容器来覆盖 webview , 使得滚动事件可以传递到 ListView 上
+          Container(
+            color: Colors.transparent.withAlpha(1),
+          ),
+        ],
+      ),
     );
   }
 }
