@@ -7,7 +7,7 @@ AI Chat with [MCP](https://modelcontextprotocol.io/introduction) Server use Any 
 
 <div align="center">
   <div class="carousel" style="max-width: 800px; margin: auto; overflow: hidden;">
-    <div class="slides" style="display: flex; animation: slide 10s infinite;">
+    <div class="slides" style="display: flex; animation: slide 10s infinite; @keyframes slide { 0%, 30% { transform: translateX(0); } 35%, 65% { transform: translateX(-100%); } 70%, 100% { transform: translateX(-200%); } }">
       <img src="./assets/preview/preview1.png" style="min-width: 100%; object-fit: contain;">
       <img src="./assets/preview/preview2.png" style="min-width: 100%; object-fit: contain;">
       <img src="./assets/preview/preview3.png" style="min-width: 100%; object-fit: contain;">
@@ -15,20 +15,6 @@ AI Chat with [MCP](https://modelcontextprotocol.io/introduction) Server use Any 
     </div>
   </div>
 </div>
-
-<style>
-@keyframes slide {
-    0%, 30% {
-        transform: translateX(0);
-    }
-    35%, 65% {
-        transform: translateX(-100%);
-    }
-    70%, 100% {
-        transform: translateX(-200%);
-    }
-}
-</style>
 
 ## Usage
 
