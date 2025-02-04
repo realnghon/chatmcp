@@ -6,6 +6,7 @@ import 'package:ChatMcp/utils/platform.dart';
 class InputArea extends StatelessWidget {
   final TextEditingController textController;
   final bool isComposing;
+  final bool disabled;
   final ValueChanged<String> onTextChanged;
   final ValueChanged<String> onSubmitted;
 
@@ -13,6 +14,7 @@ class InputArea extends StatelessWidget {
     super.key,
     required this.textController,
     required this.isComposing,
+    required this.disabled,
     required this.onTextChanged,
     required this.onSubmitted,
   });
@@ -44,6 +46,7 @@ class InputArea extends StatelessWidget {
                     return KeyEventResult.ignored;
                   },
                   child: TextField(
+                    enabled: !disabled,
                     controller: textController,
                     onChanged: onTextChanged,
                     maxLines: 5,

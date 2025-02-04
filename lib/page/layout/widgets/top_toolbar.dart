@@ -29,7 +29,9 @@ class TopToolbar extends StatelessWidget {
       child: Container(
         height: 40,
         color: Colors.grey[200],
-        padding: EdgeInsets.fromLTRB(hideSidebar ? 70 : 0, 0, 16, 0),
+        padding: kIsDesktop
+            ? EdgeInsets.fromLTRB(hideSidebar ? 70 : 0, 0, 16, 0)
+            : EdgeInsets.fromLTRB(0, 0, 0, 0),
         child: Row(
           children: [
             if (hideSidebar && kIsDesktop)

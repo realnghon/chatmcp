@@ -116,18 +116,29 @@ class _ChatPageState extends State<ChatPage> {
       body: Column(
         children: [
           Expanded(
-            child: MessageList(
-              key: ValueKey(_messages.length),
-              messages: _isLoading
-                  ? [
-                      ..._messages,
-                      ChatMessage(content: '', role: MessageRole.loading)
-                    ]
-                  : _messages.toList(),
-            ),
+            child: _messages.isEmpty
+                ? const Center(
+                    child: Text(
+                      'How can I help you today?',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  )
+                : MessageList(
+                    key: ValueKey(_messages.length),
+                    messages: _isLoading
+                        ? [
+                            ..._messages,
+                            ChatMessage(content: '', role: MessageRole.loading)
+                          ]
+                        : _messages.toList(),
+                  ),
           ),
           InputArea(
             textController: _textController,
+            disabled: _isLoading,
             isComposing: _isComposing,
             onTextChanged: _handleTextChanged,
             onSubmitted: _handleSubmitted,
@@ -336,21 +347,26 @@ class _MessageListState extends State<MessageList> {
 
   void _scrollToBottom() {
     for (var delay in [50, 150, 300, 500]) {
-      Future.delayed(Duration(milliseconds: delay), () {
-        if (_scrollController.hasClients) {
-          _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeOut,
-          );
-        }
-      });
+      _delayScrollToBottom(delay);
     }
+  }
+
+  void _delayScrollToBottom(int delay) {
+    Future.delayed(Duration(milliseconds: delay), () {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   @override
   void didUpdateWidget(MessageList oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _delayScrollToBottom(100);
     if (widget.messages.length > oldWidget.messages.length) {
       resetUserScrolled();
     }
