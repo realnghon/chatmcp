@@ -39,68 +39,100 @@ class _McpServerState extends State<McpServer> {
             ],
           ),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            children: [
-              // 搜索框
-              Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search server...',
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: Theme.of(context).primaryColor,
+        child: Consumer<McpServerProvider>(
+          builder: (context, provider, child) {
+            if (!provider.isSupported) {
+              return const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.warning_amber_rounded,
+                      size: 64,
+                      color: Colors.orange,
                     ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
+                    SizedBox(height: 16),
+                    Text(
+                      '当前平台不支持 MCP Server',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    filled: true,
-                    fillColor: Theme.of(context).cardColor,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                  ),
-                  onChanged: (value) => setState(() {}),
+                    SizedBox(height: 8),
+                    Text(
+                      'MCP Server 仅支持桌面端（Windows、macOS、Linux）',
+                      style: TextStyle(
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 16),
+              );
+            }
 
-              // 标签选择和操作按钮
-              Row(
+            return Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
                 children: [
-                  _buildFilterChip('All'),
-                  const SizedBox(width: 12),
-                  _buildFilterChip('Installed'),
-                  const Spacer(),
-                  _buildActionButton(
-                    icon: Icons.add,
-                    tooltip: 'Add Server',
-                    onPressed: () {
-                      final provider = Provider.of<McpServerProvider>(context,
-                          listen: false);
-                      _showEditDialog(context, '', provider, null);
-                    },
+                  // 搜索框
+                  Card(
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Search server...',
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        filled: true,
+                        fillColor: Theme.of(context).cardColor,
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 16),
+                      ),
+                      onChanged: (value) => setState(() {}),
+                    ),
                   ),
-                  const SizedBox(width: 8),
-                  _buildActionButton(
-                    icon: Icons.refresh,
-                    tooltip: 'Refresh',
-                    onPressed: () => setState(() {}),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-              // 服务器列表
-              Expanded(
-                child: Consumer<McpServerProvider>(
-                  builder: (context, provider, child) {
-                    return FutureBuilder<Map<String, dynamic>>(
+                  // 标签选择和操作按钮
+                  Row(
+                    children: [
+                      _buildFilterChip('All'),
+                      const SizedBox(width: 12),
+                      _buildFilterChip('Installed'),
+                      const Spacer(),
+                      _buildActionButton(
+                        icon: Icons.add,
+                        tooltip: 'Add Server',
+                        onPressed: () {
+                          final provider = Provider.of<McpServerProvider>(
+                              context,
+                              listen: false);
+                          _showEditDialog(context, '', provider, null);
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                      _buildActionButton(
+                        icon: Icons.refresh,
+                        tooltip: 'Refresh',
+                        onPressed: () => setState(() {}),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // 服务器列表
+                  Expanded(
+                    child: FutureBuilder<Map<String, dynamic>>(
                       future: _selectedTab == 'All'
                           ? provider.loadMarketServers()
                           : provider.loadServers(),
@@ -177,12 +209,12 @@ class _McpServerState extends State<McpServer> {
                         }
                         return const Center(child: CircularProgressIndicator());
                       },
-                    );
-                  },
-                ),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );

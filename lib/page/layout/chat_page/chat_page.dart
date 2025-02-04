@@ -4,6 +4,8 @@ import 'package:ChatMcp/llm/llm_factory.dart';
 import 'package:ChatMcp/llm/base_llm_client.dart';
 import 'package:logging/logging.dart';
 import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/rendering.dart';
 import 'chat_message.dart';
 import 'input_area.dart';
 import 'package:ChatMcp/provider/provider_manager.dart';
@@ -114,6 +116,7 @@ class _ChatPageState extends State<ChatPage> {
         children: [
           Expanded(
             child: MessageList(
+              key: ValueKey(_messages.length),
               messages: _isLoading
                   ? [
                       ..._messages,
@@ -153,72 +156,69 @@ class _ChatPageState extends State<ChatPage> {
     });
 
     try {
-      final mcpServerProvider = ProviderManager.mcpServerProvider;
+      // 只在桌面端使用 mcpServer
+      if (!Platform.isAndroid && !Platform.isIOS) {
+        final mcpServerProvider = ProviderManager.mcpServerProvider;
+        final tools = await mcpServerProvider.getTools();
+        Logger.root.info(
+            'tools:\n${const JsonEncoder.withIndent('  ').convert(tools)}');
 
-      final tools = await mcpServerProvider.getTools();
+        if (tools.isNotEmpty) {
+          final toolCall = await _llmClient!.checkToolCall(text, tools);
 
-      Logger.root
-          .info('tools:\n${const JsonEncoder.withIndent('  ').convert(tools)}');
+          if (toolCall['need_tool_call']) {
+            final toolName = toolCall['tool_calls'][0]['name'];
+            final toolArguments =
+                toolCall['tool_calls'][0]['arguments'] as Map<String, dynamic>;
 
-      // final promptGenerator = SystemPromptGenerator();
-      // final systemPrompt =
-      //     promptGenerator.generatePrompt(tools: {'tools': tools});
-
-      if (tools.isNotEmpty) {
-        final toolCall = await _llmClient!.checkToolCall(text, tools);
-
-        if (toolCall['need_tool_call']) {
-          final toolName = toolCall['tool_calls'][0]['name'];
-          final toolArguments =
-              toolCall['tool_calls'][0]['arguments'] as Map<String, dynamic>;
-
-          String? clientName;
-          for (var entry in tools.entries) {
-            final clientTools = entry.value;
-            if (clientTools.any((tool) => tool['name'] == toolName)) {
-              clientName = entry.key;
-              break;
+            String? clientName;
+            for (var entry in tools.entries) {
+              final clientTools = entry.value;
+              if (clientTools.any((tool) => tool['name'] == toolName)) {
+                clientName = entry.key;
+                break;
+              }
             }
-          }
 
-          setState(() {
-            _messages.add(ChatMessage(
-                content: null,
-                role: MessageRole.assistant,
-                mcpServerName: clientName,
-                toolCalls: [
-                  {
-                    'id': 'call_$toolName',
-                    'type': 'function',
-                    'function': {
-                      'name': toolName,
-                      'arguments': jsonEncode(toolArguments)
+            setState(() {
+              _messages.add(ChatMessage(
+                  content: null,
+                  role: MessageRole.assistant,
+                  mcpServerName: clientName,
+                  toolCalls: [
+                    {
+                      'id': 'call_$toolName',
+                      'type': 'function',
+                      'function': {
+                        'name': toolName,
+                        'arguments': jsonEncode(toolArguments)
+                      }
                     }
+                  ]));
+            });
+
+            if (clientName != null) {
+              final mcpClient = mcpServerProvider.getClient(clientName);
+
+              if (mcpClient != null) {
+                final response = await mcpClient.sendToolCall(
+                  name: toolName,
+                  arguments: toolArguments,
+                );
+
+                setState(() {
+                  _currentResponse = response.result['content'].toString();
+                  if (_currentResponse.isNotEmpty) {
+                    _messages.add(ChatMessage(
+                      content: _currentResponse,
+                      role: MessageRole.tool,
+                      mcpServerName: clientName,
+                      name: toolName,
+                      toolCallId: 'call_$toolName',
+                    ));
                   }
-                ]));
-          });
-
-          if (clientName != null) {
-            final mcpClient = mcpServerProvider.getClient(clientName);
-
-            if (mcpClient != null) {
-              final response = await mcpClient.sendToolCall(
-                name: toolName,
-                arguments: toolArguments,
-              );
-
-              setState(() {
-                _currentResponse = response.result['content'].toString();
-                if (_currentResponse.isNotEmpty) {
-                  _messages.add(ChatMessage(
-                    content: _currentResponse,
-                    role: MessageRole.tool,
-                    mcpServerName: clientName,
-                    name: toolName,
-                    toolCallId: 'call_$toolName',
-                  ));
-                }
-              });
+                });
+              }
             }
           }
         }
@@ -248,14 +248,6 @@ class _ChatPageState extends State<ChatPage> {
         }
       }
 
-      final messages = [
-        // ChatMessage(
-        //   role: MessageRole.system,
-        //   content: systemPrompt,
-        // ),
-        ...messageList,
-      ];
-
       final stream = _llmClient!.chatStreamCompletion(CompletionRequest(
         model: ProviderManager.chatModelProvider.currentModel,
         messages: messageList,
@@ -281,6 +273,7 @@ class _ChatPageState extends State<ChatPage> {
           );
         });
       }
+
       if (ProviderManager.chatProvider.activeChat == null) {
         String title =
             await _llmClient!.genTitle([_messages.first, _messages.last]);
@@ -320,10 +313,76 @@ class _ChatPageState extends State<ChatPage> {
   }
 }
 
-class MessageList extends StatelessWidget {
+class MessageList extends StatefulWidget {
   final List<ChatMessage> messages;
 
   const MessageList({super.key, required this.messages});
+
+  @override
+  State<MessageList> createState() => _MessageListState();
+}
+
+class _MessageListState extends State<MessageList> {
+  final ScrollController _scrollController = ScrollController();
+  bool _userScrolled = false;
+
+  void _scrollToBottom() {
+    if (_userScrolled) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  void resetUserScrolled() {
+    setState(() {
+      _userScrolled = false;
+    });
+    _scrollToBottom();
+  }
+
+  void scrollToBottom2() {
+    for (var delay in [50, 150, 300, 500]) {
+      Future.delayed(Duration(milliseconds: delay), () {
+        if (_scrollController.hasClients) {
+          _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+        }
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(MessageList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.messages.length > oldWidget.messages.length) {
+      resetUserScrolled();
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // 添加滚动监听器
+    _scrollController.addListener(() {
+      if (_scrollController.position.userScrollDirection !=
+          ScrollDirection.idle) {
+        _userScrolled = true;
+      }
+    });
+    _scrollToBottom();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -331,7 +390,7 @@ class MessageList extends StatelessWidget {
     List<List<ChatMessage>> groupedMessages = [];
     List<ChatMessage> currentGroup = [];
 
-    for (var msg in messages) {
+    for (var msg in widget.messages) {
       if (msg.role == MessageRole.user) {
         if (currentGroup.isNotEmpty) {
           groupedMessages.add(currentGroup);
@@ -350,9 +409,9 @@ class MessageList extends StatelessWidget {
     }
 
     return ListView.builder(
+      controller: _scrollController,
       padding: const EdgeInsets.all(8.0),
       itemCount: groupedMessages.length,
-      // reverse: true,
       itemBuilder: (context, index) {
         final group = groupedMessages[index];
         final showAvatar = group.first.role != MessageRole.user;

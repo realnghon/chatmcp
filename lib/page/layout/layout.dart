@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import './chat_page/chat_page.dart';
-import './chat_history.dart';
+import 'sidebar.dart';
 import './widgets/top_toolbar.dart';
 import 'package:ChatMcp/provider/provider_manager.dart';
 import 'package:ChatMcp/provider/chat_model_provider.dart';
+import 'package:ChatMcp/utils/platform.dart';
 
 class LayoutPage extends StatefulWidget {
   const LayoutPage({super.key});
@@ -15,7 +16,7 @@ class LayoutPage extends StatefulWidget {
 }
 
 class _LayoutPageState extends State<LayoutPage> {
-  bool hideChatHistory = false;
+  bool hideSidebar = false;
 
   @override
   void initState() {
@@ -25,9 +26,9 @@ class _LayoutPageState extends State<LayoutPage> {
     });
   }
 
-  void _toggleChatHistory() {
+  void _toggleSidebar() {
     setState(() {
-      hideChatHistory = !hideChatHistory;
+      hideSidebar = !hideSidebar;
     });
   }
 
@@ -38,23 +39,29 @@ class _LayoutPageState extends State<LayoutPage> {
         return Scaffold(
           body: Row(
             children: [
-              if (!hideChatHistory)
+              if (kIsDesktop && !hideSidebar)
                 Container(
                   width: 250,
                   color: Colors.grey[200],
-                  child: ChatHistoryPanel(
-                    onToggle: _toggleChatHistory,
+                  child: SidebarPanel(
+                    onToggle: _toggleSidebar,
                   ),
                 ),
               Expanded(
                 child: Column(
                   children: [
                     TopToolbar(
-                      hideChatHistory: hideChatHistory,
-                      onToggleChatHistory: _toggleChatHistory,
+                      hideSidebar: hideSidebar,
+                      onToggleSidebar: _toggleSidebar,
                     ),
-                    const Expanded(
-                      child: ChatPage(),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () =>
+                            FocusManager.instance.primaryFocus?.unfocus(),
+                        child: Scaffold(
+                          body: ChatPage(),
+                        ),
+                      ),
                     ),
                   ],
                 ),

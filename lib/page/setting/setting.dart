@@ -27,6 +27,37 @@ class _SettingPageState extends State<SettingPage> {
 
   @override
   Widget build(BuildContext context) {
+    // 判断是否为移动端布局
+    final bool isMobile = MediaQuery.of(context).size.width < 600;
+
+    if (isMobile) {
+      return DefaultTabController(
+        length: _tabs.length,
+        child: Scaffold(
+          appBar: AppBar(
+            toolbarHeight: 0,
+            bottom: TabBar(
+              tabs: _tabs
+                  .map((tab) => Tab(
+                        icon: Icon(tab.icon),
+                        text: tab.title,
+                      ))
+                  .toList(),
+              onTap: (index) {
+                setState(() {
+                  _selectedIndex = index;
+                });
+              },
+            ),
+          ),
+          body: TabBarView(
+            children: _tabs.map((tab) => tab.content).toList(),
+          ),
+        ),
+      );
+    }
+
+    // 桌面端布局
     return Row(
       children: [
         // 左侧选项卡列表

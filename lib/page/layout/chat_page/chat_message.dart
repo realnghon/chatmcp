@@ -1,3 +1,4 @@
+import 'package:ChatMcp/utils/platform.dart';
 import 'package:flutter/material.dart';
 import 'package:ChatMcp/llm/model.dart';
 import 'dart:convert';
@@ -47,7 +48,8 @@ class ChatUIMessage extends StatelessWidget {
                     ? messages.where((m) => m.role != MessageRole.loading)
                     : messages)
                   ChatMessageContent(message: msg),
-                if (messages.last.role != MessageRole.loading &&
+                if (kIsDesktop &&
+                    messages.last.role != MessageRole.loading &&
                     messages.last.role != MessageRole.error &&
                     !isUser)
                   MessageActions(message: messages.last),
@@ -72,24 +74,61 @@ class ChatMessageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: message.role == MessageRole.user
-          ? CrossAxisAlignment.end
-          : CrossAxisAlignment.start,
-      children: [
-        if (message.role == MessageRole.loading)
-          MessageBubble(
-              message:
-                  ChatMessage(content: 'loading', role: MessageRole.loading)),
-        if ((message.role == MessageRole.user ||
-                message.role == MessageRole.assistant) &&
-            message.content != null)
-          MessageBubble(message: message),
-        if (message.toolCalls != null && message.toolCalls!.isNotEmpty)
-          ToolCallWidget(message: message),
-        if (message.role == MessageRole.tool && message.toolCallId != null)
-          ToolResultWidget(message: message),
-      ],
+    return GestureDetector(
+      onLongPress: () {
+        showModalBottomSheet(
+          context: context,
+          builder: (context) => Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.copy_outlined),
+                title: const Text('复制'),
+                onTap: () {
+                  Clipboard.setData(ClipboardData(
+                    text: message.content ?? '',
+                  ));
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('已复制到剪贴板'),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                },
+              ),
+              if (message.role != MessageRole.user)
+                ListTile(
+                  leading: const Icon(Icons.refresh),
+                  title: const Text('重试'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    // TODO: 实现重试逻辑
+                  },
+                ),
+            ],
+          ),
+        );
+      },
+      child: Column(
+        crossAxisAlignment: message.role == MessageRole.user
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
+        children: [
+          if (message.role == MessageRole.loading)
+            MessageBubble(
+                message:
+                    ChatMessage(content: 'loading', role: MessageRole.loading)),
+          if ((message.role == MessageRole.user ||
+                  message.role == MessageRole.assistant) &&
+              message.content != null)
+            MessageBubble(message: message),
+          if (message.toolCalls != null && message.toolCalls!.isNotEmpty)
+            ToolCallWidget(message: message),
+          if (message.role == MessageRole.tool && message.toolCallId != null)
+            ToolResultWidget(message: message),
+        ],
+      ),
     );
   }
 }

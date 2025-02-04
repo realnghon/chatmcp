@@ -15,6 +15,11 @@ class McpServerProvider extends ChangeNotifier {
 
   Map<String, StdioClient> get clients => _servers;
 
+  // 判断当前平台是否支持 MCP Server
+  bool get isSupported {
+    return !Platform.isIOS && !Platform.isAndroid;
+  }
+
   // 获取配置文件路径
   Future<String> get _configFilePath async {
     final directory = await getApplicationDocumentsDirectory();
@@ -103,6 +108,11 @@ class McpServerProvider extends ChangeNotifier {
   }
 
   Future<void> init() async {
+    if (!isSupported) {
+      Logger.root.info('当前平台不支持 MCP Server');
+      return;
+    }
+
     try {
       // 先确保配置文件存在
       await _initConfigFile();

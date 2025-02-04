@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import '../setting/setting.dart';
 import 'package:provider/provider.dart';
 import 'package:ChatMcp/provider/chat_provider.dart';
+import 'package:ChatMcp/utils/platform.dart';
 
-class ChatHistoryPanel extends StatelessWidget {
+class SidebarPanel extends StatelessWidget {
   final VoidCallback? onToggle;
-  const ChatHistoryPanel({super.key, this.onToggle});
+  const SidebarPanel({super.key, this.onToggle});
 
   @override
   Widget build(BuildContext context) {
@@ -15,15 +16,17 @@ class ChatHistoryPanel extends StatelessWidget {
         child: Stack(
           children: [
             ChatHistoryList(chatProvider: chatProvider),
-            Positioned(
-              top: 0,
-              right: 4,
-              child: IconButton(
-                icon: const Icon(Icons.menu),
-                onPressed: onToggle,
+            if (kIsDesktop) ...[
+              Positioned(
+                top: 0,
+                right: 4,
+                child: IconButton(
+                  icon: const Icon(Icons.menu),
+                  onPressed: onToggle,
+                ),
               ),
-            ),
-            ChatHistoryToolbar(chatProvider: chatProvider),
+            ],
+            SidebarToolbar(chatProvider: chatProvider),
           ],
         ),
       ),
@@ -107,18 +110,24 @@ class ChatHistoryItem extends StatelessWidget {
             ),
           ],
         ),
-        onTap: () => chatProvider.isSelectMode
-            ? chatProvider.toggleSelectChat(chat.id)
-            : chatProvider.setActiveChat(chat),
+        onTap: () {
+          chatProvider.isSelectMode
+              ? chatProvider.toggleSelectChat(chat.id)
+              : chatProvider.setActiveChat(chat);
+
+          if (kIsMobile) {
+            Navigator.pop(context);
+          }
+        },
       ),
     );
   }
 }
 
-class ChatHistoryToolbar extends StatelessWidget {
+class SidebarToolbar extends StatelessWidget {
   final ChatProvider chatProvider;
 
-  const ChatHistoryToolbar({
+  const SidebarToolbar({
     super.key,
     required this.chatProvider,
   });

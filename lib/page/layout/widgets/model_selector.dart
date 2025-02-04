@@ -43,7 +43,7 @@ class ModelSelector extends StatelessWidget {
                         .firstWhere(
                           (model) =>
                               model.name == chatModelProvider.currentModel,
-                          orElse: () => Model(name: '', label: '未知模型'),
+                          orElse: () => Model(name: '', label: 'NaN'),
                         )
                         .label,
                     style: Theme.of(context).textTheme.bodyMedium,

@@ -4,10 +4,12 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 import 'dart:io' show Platform;
 import 'package:logging/logging.dart';
+import 'package:sqflite/sqflite.dart' as sqflite;
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
   static Database? _database;
+  static const List<String> requiredTables = ['chat', 'chat_message'];
 
   DatabaseHelper._init();
 
@@ -18,11 +20,13 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDB() async {
-    // 初始化 FFI
+    // 初始化数据库工厂
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       sqfliteFfiInit();
-      // 使用 FFI 数据库
       databaseFactory = databaseFactoryFfi;
+    } else if (Platform.isAndroid || Platform.isIOS) {
+      // 在移动端使用 sqflite 的默认工厂
+      databaseFactory = sqflite.databaseFactory;
     }
 
     // 获取应用文档目录
@@ -30,34 +34,122 @@ class DatabaseHelper {
     final dbPath = join(appDocDir.path, 'chatmcp.db');
 
     Logger.root.info('db path: $dbPath');
+    Logger.root.info('platform: ${Platform.operatingSystem}');
 
-    return await databaseFactory.openDatabase(
-      dbPath,
-      options: OpenDatabaseOptions(
-        version: 1,
-        onCreate: _createDB,
-      ),
-    );
+    try {
+      final db = await databaseFactory.openDatabase(
+        dbPath,
+        options: OpenDatabaseOptions(
+          version: 1,
+          onCreate: _createDB,
+          onOpen: (db) async {
+            try {
+              await _ensureTablesExist(db);
+            } catch (e, stackTrace) {
+              Logger.root.severe('检查表存在时出错: $e\n堆栈跟踪:\n$stackTrace');
+              rethrow;
+            }
+          },
+        ),
+      );
+      Logger.root.info('数据库连接成功');
+      return db;
+    } catch (e, stackTrace) {
+      Logger.root.severe('数据库初始化错误: $e\n堆栈跟踪:\n$stackTrace');
+      rethrow;
+    }
+  }
+
+  Future<void> _ensureTablesExist(Database db) async {
+    // 检查所有必需的表是否存在
+    final tables = await db.query('sqlite_master',
+        where:
+            "type = 'table' AND name IN (${requiredTables.map((_) => '?').join(',')})",
+        whereArgs: requiredTables);
+
+    Logger.root.info('现有表: ${tables.length}, 需要的表: ${requiredTables.length}');
+    Logger.root.info('已存在的表: ${tables.map((t) => t['name']).join(', ')}');
+
+    final existingTableNames = tables.map((t) => t['name'] as String).toSet();
+    final missingTables =
+        requiredTables.where((t) => !existingTableNames.contains(t)).toList();
+
+    if (missingTables.isNotEmpty) {
+      Logger.root.info('缺少的表: ${missingTables.join(', ')}，开始创建...');
+      await _createDB(db, 1);
+
+      // 验证表是否创建成功
+      final verifyTables = await db.query('sqlite_master',
+          where:
+              "type = 'table' AND name IN (${requiredTables.map((_) => '?').join(',')})",
+          whereArgs: requiredTables);
+
+      if (verifyTables.length != requiredTables.length) {
+        throw Exception(
+            '表创建失败，预期表数量: ${requiredTables.length}，实际创建: ${verifyTables.length}');
+      }
+      Logger.root.info('所有缺失的表已成功创建');
+    } else {
+      Logger.root.info('所有必需的表都已存在');
+    }
   }
 
   Future<void> _createDB(Database db, int version) async {
-    await db.execute(sql);
+    try {
+      // 检查表是否已存在，如果存在则跳过
+      for (var table in requiredTables) {
+        final tableExists = await db.query('sqlite_master',
+            where: "type = 'table' AND name = ?", whereArgs: [table]);
+
+        if (tableExists.isEmpty) {
+          // 获取对应表的创建语句
+          final createStatement = sql
+              .split(';')
+              .where((s) => s.trim().isNotEmpty)
+              .map((s) => s.trim())
+              .where((s) =>
+                  s.toLowerCase().contains('create table') &&
+                  s.toLowerCase().contains(table.toLowerCase()))
+              .first;
+
+          await db.execute(createStatement);
+          Logger.root.info('创建表: $table');
+        } else {
+          Logger.root.info('表已存在，跳过创建: $table');
+        }
+      }
+
+      Logger.root.info('数据库表检查/创建完成');
+    } catch (e, stackTrace) {
+      Logger.root.severe('创建数据库表失败: $e\n堆栈跟踪:\n$stackTrace');
+      rethrow;
+    }
   }
 }
 
 Future<void> initDb() async {
-  await DatabaseHelper.instance.database;
+  try {
+    Logger.root.info('开始初始化数据库...');
+    final db = await DatabaseHelper.instance.database;
+    // 验证表是否真的创建了
+    final tables = await db.query('sqlite_master', where: "type = 'table'");
+    Logger.root
+        .info('数据库初始化完成，现有表: ${tables.map((t) => t['name']).join(', ')}');
+  } catch (e, stackTrace) {
+    Logger.root.severe('initDb 失败: $e\n堆栈跟踪:\n$stackTrace');
+    rethrow;
+  }
 }
 
 const sql = '''
-CREATE TABLE chat(
+CREATE TABLE IF NOT EXISTS chat(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT,
     createdAt datetime,
     updatedAt datetime
 );
 
-CREATE TABLE chat_message(
+CREATE TABLE IF NOT EXISTS chat_message(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     chatId INTEGER,
     body TEXT,

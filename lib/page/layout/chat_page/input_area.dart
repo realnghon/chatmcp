@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:io' show Platform;
+import 'package:ChatMcp/utils/platform.dart';
 
 class InputArea extends StatelessWidget {
   final TextEditingController textController;
@@ -47,7 +48,17 @@ class InputArea extends StatelessWidget {
                     onChanged: onTextChanged,
                     maxLines: 5,
                     minLines: 1,
-                    textInputAction: TextInputAction.newline,
+                    textInputAction: Platform.isAndroid || Platform.isIOS
+                        ? TextInputAction.send
+                        : TextInputAction.newline,
+                    onSubmitted: Platform.isAndroid || Platform.isIOS
+                        ? (text) {
+                            if (isComposing) {
+                              onSubmitted(text);
+                              textController.clear();
+                            }
+                          }
+                        : null,
                     keyboardType: TextInputType.multiline,
                     style: const TextStyle(fontSize: 14.0),
                     scrollPhysics: const BouncingScrollPhysics(),
@@ -62,16 +73,18 @@ class InputArea extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
-              IconButton(
-                icon: const Icon(Icons.send),
-                onPressed: isComposing
-                    ? () {
-                        onSubmitted(textController.text);
-                        textController.clear();
-                      }
-                    : null,
-              ),
+              if (kIsDesktop) ...[
+                const SizedBox(width: 8),
+                IconButton(
+                  icon: const Icon(Icons.send),
+                  onPressed: isComposing
+                      ? () {
+                          onSubmitted(textController.text);
+                          textController.clear();
+                        }
+                      : null,
+                ),
+              ],
             ],
           ),
         ),

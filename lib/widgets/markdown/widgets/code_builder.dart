@@ -98,15 +98,7 @@ class _CodeBlockState extends State<_CodeBlock>
     Widget previewWidget;
 
     bool supportPreview = false;
-    if (widget.language == 'mermaid' &&
-        (widget.code.contains('sequenceDiagram') ||
-            widget.code.contains('flowchart') ||
-            widget.code.contains('classDiagram') ||
-            widget.code.contains('stateDiagram') ||
-            widget.code.contains('gantt') ||
-            widget.code.contains('pie') ||
-            widget.code.contains('erDiagram') ||
-            widget.code.contains('journey'))) {
+    if (widget.language == 'mermaid') {
       supportPreview = true;
       previewWidget = MermaidDiagramView(code: widget.code);
     } else if (widget.language == 'html') {
