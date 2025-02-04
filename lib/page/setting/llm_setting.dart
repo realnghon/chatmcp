@@ -170,7 +170,7 @@ class _LlmSettingsState extends State<LlmSettings> {
           apiEndpoint: _deepseekApiEndpointController.text,
         );
 
-        await settings.updateSettings(apiSettings: {
+        await settings.updateApiSettings(apiSettings: {
           'openai': openaiSetting,
           'claude': claudeSetting,
           'deepseek': deepseekSetting

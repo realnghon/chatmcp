@@ -1,3 +1,4 @@
+import 'package:ChatMcp/provider/settings_provider.dart';
 import 'package:ChatMcp/utils/platform.dart';
 import 'package:flutter/material.dart';
 import 'package:ChatMcp/llm/model.dart';
@@ -6,15 +7,14 @@ import 'package:ChatMcp/widgets/collapsible_section.dart';
 import 'package:ChatMcp/widgets/markdown/markit.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 class ChatUIMessage extends StatelessWidget {
   final List<ChatMessage> messages;
-  final bool showAvatar;
 
   const ChatUIMessage({
     super.key,
     required this.messages,
-    this.showAvatar = true,
   });
 
   @override
@@ -24,43 +24,52 @@ class ChatUIMessage extends StatelessWidget {
     final firstMsg = messages.first;
     final isUser = firstMsg.role == MessageRole.user;
 
-    return Container(
-      margin: showAvatar
-          ? const EdgeInsets.symmetric(vertical: 8.0)
-          : const EdgeInsets.only(bottom: 8.0),
-      child: Row(
-        mainAxisAlignment:
-            isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (!isUser)
-            SizedBox(
-              width: 40,
-              child: showAvatar ? ChatAvatar(isUser: false) : null,
+    return Consumer<SettingsProvider>(builder: (context, settings, child) {
+      final showAssistantAvatar = settings.generalSetting.showAssistantAvatar;
+      final showUserAvatar = settings.generalSetting.showUserAvatar;
+
+      return Container(
+        margin: const EdgeInsets.symmetric(vertical: 6.0),
+        child: Row(
+          mainAxisAlignment:
+              isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (!isUser && showAssistantAvatar) ...[
+              SizedBox(
+                width: 40,
+                child: ChatAvatar(isUser: false),
+              ),
+              const SizedBox(width: 8),
+            ],
+            Flexible(
+              child: Column(
+                crossAxisAlignment:
+                    isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                children: [
+                  for (var msg in messages.length > 1
+                      ? messages.where((m) => m.role != MessageRole.loading)
+                      : messages)
+                    ChatMessageContent(message: msg),
+                  if (kIsDesktop &&
+                      messages.last.role != MessageRole.loading &&
+                      messages.last.role != MessageRole.error &&
+                      !isUser)
+                    MessageActions(message: messages.last),
+                ],
+              ),
             ),
-          const SizedBox(width: 8),
-          Flexible(
-            child: Column(
-              crossAxisAlignment:
-                  isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-              children: [
-                for (var msg in messages.length > 1
-                    ? messages.where((m) => m.role != MessageRole.loading)
-                    : messages)
-                  ChatMessageContent(message: msg),
-                if (kIsDesktop &&
-                    messages.last.role != MessageRole.loading &&
-                    messages.last.role != MessageRole.error &&
-                    !isUser)
-                  MessageActions(message: messages.last),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          if (isUser) ChatAvatar(isUser: true),
-        ],
-      ),
-    );
+            if (isUser && showUserAvatar) ...[
+              const SizedBox(width: 8),
+              SizedBox(
+                width: 40,
+                child: ChatAvatar(isUser: true),
+              ),
+            ],
+          ],
+        ),
+      );
+    });
   }
 }
 
@@ -245,9 +254,6 @@ class ChatAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isUser) {
-      return Container();
-    }
     return CircleAvatar(
       backgroundColor: Colors.grey,
       child: Icon(

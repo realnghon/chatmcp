@@ -26,6 +26,34 @@ class ApiSetting {
   }
 }
 
+class GeneralSetting {
+  String theme;
+  bool showAssistantAvatar = true;
+  bool showUserAvatar = true;
+
+  GeneralSetting({
+    required this.theme,
+    this.showAssistantAvatar = true,
+    this.showUserAvatar = true,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'theme': theme,
+      'showAssistantAvatar': showAssistantAvatar,
+      'showUserAvatar': showUserAvatar,
+    };
+  }
+
+  factory GeneralSetting.fromJson(Map<String, dynamic> json) {
+    return GeneralSetting(
+      theme: json['theme'] as String,
+      showAssistantAvatar: json['showAssistantAvatar'] as bool,
+      showUserAvatar: json['showUserAvatar'] as bool,
+    );
+  }
+}
+
 class SettingsProvider extends ChangeNotifier {
   static final SettingsProvider _instance = SettingsProvider._internal();
   factory SettingsProvider() => _instance;
@@ -33,7 +61,11 @@ class SettingsProvider extends ChangeNotifier {
 
   Map<String, ApiSetting> _apiSettings = {};
 
+  GeneralSetting _generalSetting = GeneralSetting(theme: 'light');
+
   Map<String, ApiSetting> get apiSettings => _apiSettings;
+
+  GeneralSetting get generalSetting => _generalSetting;
 
   Future<void> loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
@@ -45,10 +77,16 @@ class SettingsProvider extends ChangeNotifier {
           MapEntry(key, ApiSetting.fromJson(value as Map<String, dynamic>)));
     }
 
+    final String? generalSettingsJson = prefs.getString('generalSettings');
+    if (generalSettingsJson != null) {
+      final Map<String, dynamic> decoded = jsonDecode(generalSettingsJson);
+      _generalSetting = GeneralSetting.fromJson(decoded);
+    }
+
     notifyListeners();
   }
 
-  Future<void> updateSettings({
+  Future<void> updateApiSettings({
     required Map<String, ApiSetting> apiSettings,
   }) async {
     final prefs = await SharedPreferences.getInstance();
@@ -60,6 +98,22 @@ class SettingsProvider extends ChangeNotifier {
 
     await prefs.setString('apiSettings', jsonEncode(encodedSettings));
 
+    notifyListeners();
+  }
+
+  Future<void> updateGeneralSettings({
+    required String theme,
+    required bool showAssistantAvatar,
+    required bool showUserAvatar,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    _generalSetting = GeneralSetting(
+      theme: theme,
+      showAssistantAvatar: showAssistantAvatar,
+      showUserAvatar: showUserAvatar,
+    );
+    await prefs.setString(
+        'generalSettings', jsonEncode(_generalSetting.toJson()));
     notifyListeners();
   }
 }

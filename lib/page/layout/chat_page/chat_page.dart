@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'chat_message.dart';
 import 'input_area.dart';
 import 'package:ChatMcp/provider/provider_manager.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 
 import 'package:ChatMcp/dao/chat.dart';
 
@@ -326,20 +327,6 @@ class _MessageListState extends State<MessageList> {
   final ScrollController _scrollController = ScrollController();
   bool _userScrolled = false;
 
-  void _scrollToBottom() {
-    if (_userScrolled) return;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
-      }
-    });
-  }
-
   void resetUserScrolled() {
     setState(() {
       _userScrolled = false;
@@ -347,11 +334,15 @@ class _MessageListState extends State<MessageList> {
     _scrollToBottom();
   }
 
-  void scrollToBottom2() {
+  void _scrollToBottom() {
     for (var delay in [50, 150, 300, 500]) {
       Future.delayed(Duration(milliseconds: delay), () {
         if (_scrollController.hasClients) {
-          _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+          );
         }
       });
     }
@@ -386,39 +377,45 @@ class _MessageListState extends State<MessageList> {
 
   @override
   Widget build(BuildContext context) {
-    // 将消息分组
-    List<List<ChatMessage>> groupedMessages = [];
-    List<ChatMessage> currentGroup = [];
+    return KeyboardVisibilityBuilder(
+      builder: (context, isKeyboardVisible) {
+        if (isKeyboardVisible) {
+          _scrollToBottom();
+        }
 
-    for (var msg in widget.messages) {
-      if (msg.role == MessageRole.user) {
+        // 将消息分组
+        List<List<ChatMessage>> groupedMessages = [];
+        List<ChatMessage> currentGroup = [];
+
+        for (var msg in widget.messages) {
+          if (msg.role == MessageRole.user) {
+            if (currentGroup.isNotEmpty) {
+              groupedMessages.add(currentGroup);
+              currentGroup = [];
+            }
+            currentGroup.add(msg);
+            groupedMessages.add(currentGroup);
+            currentGroup = [];
+          } else {
+            currentGroup.add(msg);
+          }
+        }
+
         if (currentGroup.isNotEmpty) {
           groupedMessages.add(currentGroup);
-          currentGroup = [];
         }
-        currentGroup.add(msg);
-        groupedMessages.add(currentGroup);
-        currentGroup = [];
-      } else {
-        currentGroup.add(msg);
-      }
-    }
 
-    if (currentGroup.isNotEmpty) {
-      groupedMessages.add(currentGroup);
-    }
+        return ListView.builder(
+          controller: _scrollController,
+          padding: const EdgeInsets.all(8.0),
+          itemCount: groupedMessages.length,
+          itemBuilder: (context, index) {
+            final group = groupedMessages[index];
 
-    return ListView.builder(
-      controller: _scrollController,
-      padding: const EdgeInsets.all(8.0),
-      itemCount: groupedMessages.length,
-      itemBuilder: (context, index) {
-        final group = groupedMessages[index];
-        final showAvatar = group.first.role != MessageRole.user;
-
-        return ChatUIMessage(
-          messages: group,
-          showAvatar: showAvatar,
+            return ChatUIMessage(
+              messages: group,
+            );
+          },
         );
       },
     );

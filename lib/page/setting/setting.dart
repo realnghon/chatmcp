@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'llm_setting.dart';
 import 'mcp_server.dart';
+import 'general_setting.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -13,6 +14,11 @@ class _SettingPageState extends State<SettingPage> {
   int _selectedIndex = 0;
 
   final List<SettingTab> _tabs = [
+    SettingTab(
+      title: 'General',
+      icon: Icons.settings,
+      content: const GeneralSettings(),
+    ),
     SettingTab(
       title: 'LLM Model',
       icon: Icons.api,
@@ -66,7 +72,7 @@ class _SettingPageState extends State<SettingPage> {
           decoration: BoxDecoration(
             border: Border(
               right: BorderSide(
-                color: Colors.grey.withOpacity(0.2),
+                color: Colors.grey.withAlpha(100),
                 width: 1,
               ),
             ),
