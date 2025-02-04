@@ -262,7 +262,14 @@ class _ChatPageState extends State<ChatPage> {
 
       final stream = _llmClient!.chatStreamCompletion(CompletionRequest(
         model: ProviderManager.chatModelProvider.currentModel,
-        messages: messageList,
+        messages: [
+          ChatMessage(
+            content:
+                ProviderManager.settingsProvider.generalSetting.systemPrompt,
+            role: MessageRole.assistant,
+          ),
+          ...messageList,
+        ],
       ));
 
       setState(() {

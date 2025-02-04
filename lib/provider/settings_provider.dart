@@ -26,15 +26,26 @@ class ApiSetting {
   }
 }
 
+var defaultSystemPrompt =
+    '''You are an intelligent and helpful AI assistant. Please:
+1. Provide clear and concise responses
+2. If you're not sure about something, please say so
+3. When appropriate, provide examples to illustrate your points
+4. If a user messages you in a specific language, respond in that language
+5. Format responses using markdown when helpful
+6. Use mermaid to generate diagrams''';
+
 class GeneralSetting {
   String theme;
   bool showAssistantAvatar = true;
   bool showUserAvatar = true;
+  String systemPrompt;
 
   GeneralSetting({
     required this.theme,
     this.showAssistantAvatar = true,
     this.showUserAvatar = true,
+    this.systemPrompt = 'You are a helpful assistant.',
   });
 
   Map<String, dynamic> toJson() {
@@ -42,14 +53,16 @@ class GeneralSetting {
       'theme': theme,
       'showAssistantAvatar': showAssistantAvatar,
       'showUserAvatar': showUserAvatar,
+      'systemPrompt': systemPrompt,
     };
   }
 
   factory GeneralSetting.fromJson(Map<String, dynamic> json) {
     return GeneralSetting(
-      theme: json['theme'] as String,
-      showAssistantAvatar: json['showAssistantAvatar'] as bool,
-      showUserAvatar: json['showUserAvatar'] as bool,
+      theme: json['theme'] as String? ?? 'light',
+      showAssistantAvatar: json['showAssistantAvatar'] as bool? ?? true,
+      showUserAvatar: json['showUserAvatar'] as bool? ?? true,
+      systemPrompt: json['systemPrompt'] as String? ?? defaultSystemPrompt,
     );
   }
 }
@@ -61,7 +74,10 @@ class SettingsProvider extends ChangeNotifier {
 
   Map<String, ApiSetting> _apiSettings = {};
 
-  GeneralSetting _generalSetting = GeneralSetting(theme: 'light');
+  GeneralSetting _generalSetting = GeneralSetting(
+    theme: 'light',
+    systemPrompt: defaultSystemPrompt,
+  );
 
   Map<String, ApiSetting> get apiSettings => _apiSettings;
 
@@ -105,12 +121,14 @@ class SettingsProvider extends ChangeNotifier {
     required String theme,
     required bool showAssistantAvatar,
     required bool showUserAvatar,
+    required String systemPrompt,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     _generalSetting = GeneralSetting(
       theme: theme,
       showAssistantAvatar: showAssistantAvatar,
       showUserAvatar: showUserAvatar,
+      systemPrompt: systemPrompt,
     );
     await prefs.setString(
         'generalSettings', jsonEncode(_generalSetting.toJson()));

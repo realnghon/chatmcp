@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../provider/settings_provider.dart';
-import '../../provider/provider_manager.dart';
 
 class GeneralSettings extends StatefulWidget {
   const GeneralSettings({super.key});
@@ -23,8 +22,8 @@ class _GeneralSettingsState extends State<GeneralSettings> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Theme.of(context).colorScheme.background,
-              Theme.of(context).colorScheme.background.withOpacity(0.8),
+              Theme.of(context).colorScheme.surface,
+              Theme.of(context).colorScheme.surface.withAlpha(200),
             ],
           ),
         ),
@@ -41,6 +40,8 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                       _buildThemeCard(context),
                       // 头像显示设置卡片
                       _buildAvatarCard(context),
+                      // System Prompt 设置卡片
+                      _buildSystemPromptCard(context),
                     ],
                   ),
                 ),
@@ -141,6 +142,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                         showAssistantAvatar:
                             settings.generalSetting.showAssistantAvatar,
                         showUserAvatar: settings.generalSetting.showUserAvatar,
+                        systemPrompt: settings.generalSetting.systemPrompt,
                       );
                     }
                   },
@@ -188,6 +190,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                       theme: settings.generalSetting.theme,
                       showAssistantAvatar: value,
                       showUserAvatar: settings.generalSetting.showUserAvatar,
+                      systemPrompt: settings.generalSetting.systemPrompt,
                     );
                   },
                 ),
@@ -202,8 +205,71 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                       showAssistantAvatar:
                           settings.generalSetting.showAssistantAvatar,
                       showUserAvatar: value,
+                      systemPrompt: settings.generalSetting.systemPrompt,
                     );
                   },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSystemPromptCard(BuildContext context) {
+    return Consumer<SettingsProvider>(
+      builder: (context, settings, child) {
+        return Card(
+          elevation: 2,
+          margin: const EdgeInsets.symmetric(vertical: 6),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.psychology, size: 20),
+                    SizedBox(width: 8),
+                    Text(
+                      'System Prompt',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  initialValue: settings.generalSetting.systemPrompt,
+                  decoration: InputDecoration(
+                    labelText: '系统提示词',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    alignLabelWithHint: true,
+                  ),
+                  maxLines: 5,
+                  onChanged: (value) {
+                    settings.updateGeneralSettings(
+                      theme: settings.generalSetting.theme,
+                      showAssistantAvatar:
+                          settings.generalSetting.showAssistantAvatar,
+                      showUserAvatar: settings.generalSetting.showUserAvatar,
+                      systemPrompt: value,
+                    );
+                  },
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  '提示：这是与 AI 助手对话时的系统提示词，用于设定助手的行为和风格。',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
                 ),
               ],
             ),
