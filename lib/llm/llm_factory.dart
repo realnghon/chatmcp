@@ -75,6 +75,10 @@ class LLMFactoryHelper {
       final baseUrl = ProviderManager
               .settingsProvider.apiSettings[provider.key]?.apiEndpoint ??
           '';
+
+      if (baseUrl.isEmpty) {
+        continue;
+      }
       final client =
           LLMFactory.create(provider.value, apiKey: apiKey, baseUrl: baseUrl);
       models.addAll((await client.models()).map((model) =>

@@ -32,7 +32,7 @@ class OllamaClient extends BaseLLMClient {
           .toList();
     } catch (e, trace) {
       Logger.root.severe('获取模型列表失败: $e, trace: $trace');
-      return ['llama2'];
+      return [];
     }
   }
 

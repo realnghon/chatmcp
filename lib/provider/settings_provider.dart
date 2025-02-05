@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'chat_model_provider.dart';
 
 class ApiSetting {
   String apiKey;
@@ -113,6 +114,8 @@ class SettingsProvider extends ChangeNotifier {
         apiSettings.map((key, value) => MapEntry(key, value.toJson()));
 
     await prefs.setString('apiSettings', jsonEncode(encodedSettings));
+
+    await ChatModelProvider().loadAvailableModels();
 
     notifyListeners();
   }

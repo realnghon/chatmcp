@@ -21,7 +21,14 @@ class ChatModelProvider extends ChangeNotifier {
     _availableModels.clear(); // 先清空列表
     _availableModels.addAll(models.toList());
 
-    // 确保当前选择的模型在可用列表中
+    // 确保当前选择的模型在可用列表中，并且列表不为空
+    if (_availableModels.isEmpty) {
+      // 如果没有可用模型，保持使用默认模型
+      _isInitialized = true;
+      notifyListeners();
+      return;
+    }
+
     if (!_availableModels.any((model) => model.name == _currentModel.name)) {
       _currentModel = _availableModels.first;
       _saveSavedModel();
