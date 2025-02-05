@@ -1,6 +1,9 @@
 # build command
 # `flutter_distributor release --name=dev --jobs=linux-deb`
 # `flutter_distributor release --name=dev --jobs=linux-rpm`
+#
+# in detail, see examples
+# https://github.com/leanflutter/flutter_distributor/blob/main/examples/hello_world/distribute_options.yaml
 output: dist/
 releases:
   - name: dev

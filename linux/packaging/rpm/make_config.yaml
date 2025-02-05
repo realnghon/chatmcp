@@ -1,5 +1,6 @@
 display_name: ChatMCP
 package_name: chatmcp
+license: Apache-2.0 license
 
 maintainer:
   name: ""
