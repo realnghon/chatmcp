@@ -114,12 +114,22 @@ class _ChatPageState extends State<ChatPage> {
   // UI 构建相关方法
   Widget _buildMessageList() {
     if (_messages.isEmpty) {
-      return const Center(
-        child: Text(
-          'How can I help you today?',
-          style: TextStyle(
-            fontSize: 18,
-            color: AppColors.grey,
+      return Expanded(
+        child: Container(
+          color: AppColors.transparent,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'How can I help you today?',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: AppColors.grey,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -451,7 +461,11 @@ class _ChatPageState extends State<ChatPage> {
     return Scaffold(
       body: Column(
         children: [
-          Expanded(child: _buildMessageList()),
+          Expanded(
+            child: UnfocusableContainer(
+              child: _buildMessageList(),
+            ),
+          ),
           _buildErrorMessage(),
           InputArea(
             disabled: _isLoading,
@@ -461,6 +475,24 @@ class _ChatPageState extends State<ChatPage> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class UnfocusableContainer extends StatelessWidget {
+  const UnfocusableContainer({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      onPanDown: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+      onVerticalDragStart: (_) => FocusManager.instance.primaryFocus?.unfocus(),
+      onHorizontalDragStart: (_) =>
+          FocusManager.instance.primaryFocus?.unfocus(),
+      child: child,
     );
   }
 }

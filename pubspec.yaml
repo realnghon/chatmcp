@@ -124,6 +124,7 @@ flutter:
   assets:
     - .env
     - assets/mcp_server.json
+    - assets/logo.png
 
 flutter_launcher_icons:
   android: "launcher_icon"

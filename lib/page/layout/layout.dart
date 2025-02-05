@@ -56,17 +56,7 @@ class _LayoutPageState extends State<LayoutPage> {
                       onToggleSidebar: _toggleSidebar,
                     ),
                     Expanded(
-                      child: GestureDetector(
-                        onTap: () =>
-                            FocusManager.instance.primaryFocus?.unfocus(),
-                        onPanDown: (_) =>
-                            FocusManager.instance.primaryFocus?.unfocus(),
-                        onVerticalDragStart: (_) =>
-                            FocusManager.instance.primaryFocus?.unfocus(),
-                        onHorizontalDragStart: (_) =>
-                            FocusManager.instance.primaryFocus?.unfocus(),
-                        child: ChatPage(),
-                      ),
+                      child: ChatPage(),
                     ),
                   ],
                 ),
