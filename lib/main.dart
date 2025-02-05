@@ -1,12 +1,14 @@
+import 'dart:io';
+
 import 'package:ChatMcp/dao/init_db.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_statusbarcolor_ns/flutter_statusbarcolor_ns.dart';
+import 'package:window_manager/window_manager.dart' as wm;
 import './logger.dart';
 import './page/layout/layout.dart';
 import './provider/provider_manager.dart';
 import 'package:logging/logging.dart';
-import 'package:window_manager_plus/window_manager_plus.dart';
+import 'package:window_manager_plus/window_manager_plus.dart' as wmp;
 import 'page/layout/sidebar.dart';
 import 'utils/platform.dart';
 
@@ -28,24 +30,41 @@ void main() async {
   // }
 
   // 只在桌面平台初始化窗口管理器
-  if (kIsDesktop) {
-    await WindowManagerPlus.ensureInitialized(0);
 
-    // 设置窗口选项
-    WindowOptions windowOptions = const WindowOptions(
+  // TODO: Consider unifying the window manager to use either window_manager or window_manager_plus.
+  // WindowManager supports linux, but WindowManagerPlus does'nt support linux
+  if (Platform.isLinux) {
+    await wm.windowManager.ensureInitialized();
+
+    final wm.WindowOptions windowOptions = const wm.WindowOptions(
       size: Size(1200, 800),
       minimumSize: Size(800, 600),
       center: true,
       backgroundColor: Colors.transparent,
       skipTaskbar: false,
-      titleBarStyle: TitleBarStyle.hidden,
+      titleBarStyle: wm.TitleBarStyle.hidden,
     );
 
-    // 等待窗口准备好并显示
-    await WindowManagerPlus.current.waitUntilReadyToShow(windowOptions,
+    await wm.windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await wm.windowManager.show();
+      await wm.windowManager.focus();
+    });
+  } else {
+    await wmp.WindowManagerPlus.ensureInitialized(0);
+
+    final wmp.WindowOptions windowOptions = const wmp.WindowOptions(
+      size: Size(1200, 800),
+      minimumSize: Size(800, 600),
+      center: true,
+      backgroundColor: Colors.transparent,
+      skipTaskbar: false,
+      titleBarStyle: wmp.TitleBarStyle.hidden,
+    );
+
+    await wmp.WindowManagerPlus.current.waitUntilReadyToShow(windowOptions,
         () async {
-      await WindowManagerPlus.current.show();
-      await WindowManagerPlus.current.focus();
+      await wmp.WindowManagerPlus.current.show();
+      await wmp.WindowManagerPlus.current.focus();
     });
   }
 
