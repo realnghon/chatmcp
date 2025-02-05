@@ -89,11 +89,11 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
+            VALUE "CompanyName", "run.daodao" "\0"
             VALUE "FileDescription", "chatmcp" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "chatmcp" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2024 com.example. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2024 run.daodao. All rights reserved." "\0"
             VALUE "OriginalFilename", "chatmcp.exe" "\0"
             VALUE "ProductName", "chatmcp" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"

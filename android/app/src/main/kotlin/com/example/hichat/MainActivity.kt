@@ -1,4 +1,4 @@
-package com.example.chatmcp
+package run.daodao.chatmcp
 
 import io.flutter.embedding.android.FlutterActivity
 
