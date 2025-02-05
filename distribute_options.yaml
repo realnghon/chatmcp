@@ -1,20 +1,15 @@
+# build command
+# `flutter_distributor release --name=dev --jobs=linux-deb`
+# `flutter_distributor release --name=dev --jobs=linux-rpm`
 output: dist/
 releases:
-  - name: linux
+  - name: dev
     jobs:
-      - name: chatmcp-linux-deb
+      - name: linux-deb
         package:
           platform: linux
           target: deb
-          additional_files:
-            - path: debian/control
-              destination: DEBIAN/control
-            - path: debian/postinst
-              destination: DEBIAN/postinst
-      - name: chatmcp-linux-rpm
+      - name: linux-rpm
         package:
           platform: linux
           target: rpm
-
-# 以下のコマンドでdebパッケージをビルドします
-# flutter_distributor release --jobs=chatmcp-linux-deb

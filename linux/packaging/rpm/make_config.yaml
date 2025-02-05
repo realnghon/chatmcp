@@ -16,8 +16,7 @@ dependencies:
 
 essential: false
 
-# TODO
-# icon: ""
+icon: assets/logo.png
 
 postuninstall_scripts:
   - echo "Sorry to see you go."

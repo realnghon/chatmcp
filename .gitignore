@@ -53,4 +53,4 @@ devtools_options.yaml
 # package
 *.deb
 *.rpm
-
+dist/*
