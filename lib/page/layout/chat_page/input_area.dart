@@ -116,122 +116,119 @@ class _InputAreaState extends State<InputArea> {
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
       ),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (_selectedFiles.isNotEmpty)
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                constraints: const BoxConstraints(maxHeight: 60),
-                width: double.infinity,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: _selectedFiles.asMap().entries.map((entry) {
-                      final index = entry.key;
-                      final file = entry.value;
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: Chip(
-                          label: Text(
-                            _truncateFileName(file.name),
-                            style: const TextStyle(fontSize: 12),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          deleteIcon: const Icon(Icons.close, size: 16),
-                          onDeleted: () => _removeFile(index),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (_selectedFiles.isNotEmpty)
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+              constraints: const BoxConstraints(maxHeight: 60),
+              width: double.infinity,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: _selectedFiles.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final file = entry.value;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: Chip(
+                        label: Text(
+                          _truncateFileName(file.name),
+                          style: const TextStyle(fontSize: 12),
+                          overflow: TextOverflow.ellipsis,
                         ),
-                      );
-                    }).toList(),
-                  ),
+                        deleteIcon: const Icon(Icons.close, size: 16),
+                        onDeleted: () => _removeFile(index),
+                      ),
+                    );
+                  }).toList(),
                 ),
               ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Stack(
-                children: [
-                  Focus(
-                    onKeyEvent: (node, event) {
-                      if (event is KeyDownEvent &&
-                          event.logicalKey == LogicalKeyboardKey.enter) {
-                        if (HardwareKeyboard.instance.isShiftPressed) {
-                          return KeyEventResult.ignored;
-                        }
-                        if (widget.isComposing &&
-                            textController.text.trim().isNotEmpty) {
-                          widget.onSubmitted(
-                              SubmitData(textController.text, _selectedFiles));
-                          _afterSubmitted();
-                        }
-                        return KeyEventResult.handled;
-                      }
-                      return KeyEventResult.ignored;
-                    },
-                    child: TextField(
-                      enabled: !widget.disabled,
-                      controller: textController,
-                      onChanged: widget.onTextChanged,
-                      maxLines: 5,
-                      minLines: 1,
-                      textInputAction: Platform.isAndroid || Platform.isIOS
-                          ? TextInputAction.send
-                          : TextInputAction.newline,
-                      onSubmitted: Platform.isAndroid || Platform.isIOS
-                          ? (text) {
-                              if (widget.isComposing &&
-                                  text.trim().isNotEmpty) {
-                                widget.onSubmitted(
-                                    SubmitData(text, _selectedFiles));
-                                _afterSubmitted();
-                              }
-                            }
-                          : null,
-                      keyboardType: TextInputType.multiline,
-                      style: const TextStyle(fontSize: 14.0),
-                      scrollPhysics: const BouncingScrollPhysics(),
-                      decoration: const InputDecoration(
-                        hintText: 'Ask me anything...',
-                        hintStyle: TextStyle(fontSize: 14.0),
-                        border: OutlineInputBorder(),
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 14, vertical: 18),
-                        isDense: true,
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    right: 8,
-                    top: 0,
-                    bottom: 0,
-                    child: Center(
-                      child: Row(
-                        children: [
-                          if (kIsMobile) ...[
-                            UploadMenu(
-                              disabled: widget.disabled,
-                              onPickImages: _pickImages,
-                              onPickFiles: _pickFiles,
-                            ),
-                          ] else ...[
-                            IconButton(
-                              icon: const Icon(Icons.file_present_outlined),
-                              onPressed: widget.disabled ? null : _pickFiles,
-                              tooltip: 'Upload Files',
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
             ),
-          ],
-        ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Stack(
+              children: [
+                Focus(
+                  onKeyEvent: (node, event) {
+                    if (event is KeyDownEvent &&
+                        event.logicalKey == LogicalKeyboardKey.enter) {
+                      if (HardwareKeyboard.instance.isShiftPressed) {
+                        return KeyEventResult.ignored;
+                      }
+                      if (widget.isComposing &&
+                          textController.text.trim().isNotEmpty) {
+                        widget.onSubmitted(
+                            SubmitData(textController.text, _selectedFiles));
+                        _afterSubmitted();
+                      }
+                      return KeyEventResult.handled;
+                    }
+                    return KeyEventResult.ignored;
+                  },
+                  child: TextField(
+                    enabled: !widget.disabled,
+                    controller: textController,
+                    onChanged: widget.onTextChanged,
+                    maxLines: 5,
+                    minLines: 1,
+                    textInputAction: Platform.isAndroid || Platform.isIOS
+                        ? TextInputAction.send
+                        : TextInputAction.newline,
+                    onSubmitted: Platform.isAndroid || Platform.isIOS
+                        ? (text) {
+                            if (widget.isComposing && text.trim().isNotEmpty) {
+                              widget.onSubmitted(
+                                  SubmitData(text, _selectedFiles));
+                              _afterSubmitted();
+                            }
+                          }
+                        : null,
+                    keyboardType: TextInputType.multiline,
+                    style: const TextStyle(fontSize: 14.0),
+                    scrollPhysics: const BouncingScrollPhysics(),
+                    decoration: const InputDecoration(
+                      hintText: 'Ask me anything...',
+                      hintStyle: TextStyle(fontSize: 14.0),
+                      border: OutlineInputBorder(),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 14, vertical: 18),
+                      isDense: true,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  right: 8,
+                  top: 0,
+                  bottom: 0,
+                  child: Center(
+                    child: Row(
+                      children: [
+                        if (kIsMobile) ...[
+                          UploadMenu(
+                            disabled: widget.disabled,
+                            onPickImages: _pickImages,
+                            onPickFiles: _pickFiles,
+                          ),
+                        ] else ...[
+                          IconButton(
+                            icon: const Icon(Icons.file_present_outlined),
+                            onPressed: widget.disabled ? null : _pickFiles,
+                            tooltip: 'Upload Files',
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

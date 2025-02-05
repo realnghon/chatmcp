@@ -462,9 +462,7 @@ class _ChatPageState extends State<ChatPage> {
       body: Column(
         children: [
           Expanded(
-            child: UnfocusableContainer(
-              child: _buildMessageList(),
-            ),
+            child: _buildMessageList(),
           ),
           _buildErrorMessage(),
           InputArea(
@@ -475,24 +473,6 @@ class _ChatPageState extends State<ChatPage> {
           ),
         ],
       ),
-    );
-  }
-}
-
-class UnfocusableContainer extends StatelessWidget {
-  const UnfocusableContainer({super.key, required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-      onPanDown: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-      onVerticalDragStart: (_) => FocusManager.instance.primaryFocus?.unfocus(),
-      onHorizontalDragStart: (_) =>
-          FocusManager.instance.primaryFocus?.unfocus(),
-      child: child,
     );
   }
 }

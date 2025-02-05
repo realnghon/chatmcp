@@ -8,6 +8,7 @@ import 'package:ChatMcp/provider/provider_manager.dart';
 import 'package:ChatMcp/provider/chat_model_provider.dart';
 import 'package:ChatMcp/utils/platform.dart';
 import 'package:ChatMcp/utils/color.dart';
+import 'package:keyboard_dismisser/keyboard_dismisser.dart';
 
 class LayoutPage extends StatefulWidget {
   const LayoutPage({super.key});
@@ -37,31 +38,37 @@ class _LayoutPageState extends State<LayoutPage> {
   Widget build(BuildContext context) {
     return Consumer<ChatModelProvider>(
       builder: (context, chatModelProvider, child) {
-        return SafeArea(
-          child: Row(
-            children: [
-              if (kIsDesktop && !hideSidebar)
-                Container(
-                  width: 250,
-                  color: AppColors.grey[200],
-                  child: SidebarPanel(
-                    onToggle: _toggleSidebar,
+        return KeyboardDismisser(
+          gestures: [
+            GestureType.onTap,
+            GestureType.onPanUpdateDownDirection,
+          ],
+          child: SafeArea(
+            child: Row(
+              children: [
+                if (kIsDesktop && !hideSidebar)
+                  Container(
+                    width: 250,
+                    color: AppColors.grey[200],
+                    child: SidebarPanel(
+                      onToggle: _toggleSidebar,
+                    ),
+                  ),
+                Expanded(
+                  child: Column(
+                    children: [
+                      TopToolbar(
+                        hideSidebar: hideSidebar,
+                        onToggleSidebar: _toggleSidebar,
+                      ),
+                      Expanded(
+                        child: ChatPage(),
+                      ),
+                    ],
                   ),
                 ),
-              Expanded(
-                child: Column(
-                  children: [
-                    TopToolbar(
-                      hideSidebar: hideSidebar,
-                      onToggleSidebar: _toggleSidebar,
-                    ),
-                    Expanded(
-                      child: ChatPage(),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
