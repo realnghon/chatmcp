@@ -5,10 +5,10 @@ import 'package:ChatMcp/llm/model.dart';
 import 'dart:convert';
 import 'package:ChatMcp/widgets/collapsible_section.dart';
 import 'package:ChatMcp/widgets/markdown/markit.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'dart:io' as io;
+import 'package:ChatMcp/utils/color.dart';
 
 class ChatUIMessage extends StatelessWidget {
   final List<ChatMessage> messages;
@@ -140,7 +140,7 @@ class ChatMessageContent extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6, vertical: 6),
                           decoration: BoxDecoration(
-                            color: Colors.grey[200],
+                            color: AppColors.grey[200],
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: file.fileType.startsWith('image')
@@ -160,7 +160,7 @@ class ChatMessageContent extends StatelessWidget {
                                         return Container(
                                           padding: const EdgeInsets.all(8),
                                           decoration: BoxDecoration(
-                                            color: Colors.grey[200],
+                                            color: AppColors.grey[200],
                                             borderRadius:
                                                 BorderRadius.circular(8),
                                           ),
@@ -169,7 +169,7 @@ class ChatMessageContent extends StatelessWidget {
                                             children: [
                                               Icon(
                                                 Icons.broken_image,
-                                                color: Colors.grey[600],
+                                                color: AppColors.grey[600],
                                                 size: 32,
                                               ),
                                             ],
@@ -223,23 +223,13 @@ class MessageBubble extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: message.role == MessageRole.user
-            ? Theme.of(context).primaryColor
-            : Colors.grey[300],
+            ? AppColors.grey[300]
+            : AppColors.grey[300],
         borderRadius: BorderRadius.circular(16),
       ),
-      child: message.role == MessageRole.user
-          ? TextSelectionTheme(
-              data: TextSelectionThemeData(
-                selectionColor: Colors.white.withAlpha(77),
-              ),
-              child: SelectableText(
-                message.content ?? '',
-                style: const TextStyle(color: Colors.white),
-              ),
-            )
-          : message.content != null
-              ? Markit(data: (message.content!).trim())
-              : const Text(''),
+      child: message.content != null
+          ? Markit(data: (message.content!).trim())
+          : const Text(''),
     );
   }
 }
@@ -261,7 +251,7 @@ class ToolCallWidget extends StatelessWidget {
           '${message.mcpServerName} call_${message.toolCalls![0]['function']['name']}',
           style: TextStyle(
             fontSize: 12,
-            color: Colors.grey[600],
+            color: AppColors.grey[600],
             fontStyle: FontStyle.italic,
           ),
         ),
@@ -300,7 +290,7 @@ class ToolResultWidget extends StatelessWidget {
           '${message.mcpServerName} ${message.toolCallId!} result',
           style: TextStyle(
             fontSize: 12,
-            color: Colors.grey[600],
+            color: AppColors.grey[600],
             fontStyle: FontStyle.italic,
           ),
         ),
@@ -321,10 +311,10 @@ class ChatAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CircleAvatar(
-      backgroundColor: Colors.grey,
+      backgroundColor: AppColors.grey,
       child: Icon(
         isUser ? Icons.person : Icons.android,
-        color: Colors.white,
+        color: AppColors.white,
       ),
     );
   }

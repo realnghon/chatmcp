@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../provider/settings_provider.dart';
+import 'package:ChatMcp/utils/color.dart';
 
 class GeneralSettings extends StatefulWidget {
   const GeneralSettings({super.key});
@@ -53,7 +54,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                     onPressed: _isLoading ? null : _saveSettings,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,
-                      foregroundColor: Colors.white,
+                      foregroundColor: AppColors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -65,8 +66,8 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                             height: 24,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColors.white),
                             ),
                           )
                         : const Text(
@@ -268,7 +269,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                   '提示：这是与 AI 助手对话时的系统提示词，用于设定助手的行为和风格。',
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey,
+                    color: AppColors.grey,
                   ),
                 ),
               ],
@@ -292,7 +293,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
               SnackBar(
                 content: const Row(
                   children: [
-                    Icon(Icons.check_circle, color: Colors.white),
+                    Icon(Icons.check_circle, color: AppColors.white),
                     SizedBox(width: 8),
                     Text('Settings saved successfully'),
                   ],
@@ -303,7 +304,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                backgroundColor: Colors.green,
+                backgroundColor: AppColors.green,
               ),
             );
         }

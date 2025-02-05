@@ -3,6 +3,7 @@ import '../setting/setting.dart';
 import 'package:provider/provider.dart';
 import 'package:ChatMcp/provider/chat_provider.dart';
 import 'package:ChatMcp/utils/platform.dart';
+import 'package:ChatMcp/utils/color.dart';
 
 class SidebarPanel extends StatelessWidget {
   final VoidCallback? onToggle;
@@ -103,7 +104,7 @@ class ChatHistoryList extends StatelessWidget {
                   entry.key,
                   style: TextStyle(
                     fontSize: 12,
-                    color: Colors.grey[600],
+                    color: AppColors.grey[600],
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -137,7 +138,7 @@ class ChatHistoryItem extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 1),
       decoration: BoxDecoration(
-        color: isActive ? Colors.grey.withAlpha(25) : null,
+        color: isActive ? AppColors.grey.withAlpha(25) : null,
         borderRadius: BorderRadius.circular(4),
       ),
       child: ListTile(

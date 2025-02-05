@@ -48,3 +48,4 @@ app.*.map.json
 
 # aider
 .aider.*
+devtools_options.yaml

@@ -7,6 +7,7 @@ import 'package:markdown/markdown.dart' as md;
 import 'highlight_view.dart';
 import 'mermaid_diagram_view.dart' show MermaidDiagramView;
 import 'html_view.dart';
+import 'package:ChatMcp/utils/color.dart';
 
 // 添加 Mermaid 语法高亮主题
 final mermaidTheme = {
@@ -40,7 +41,7 @@ class CodeElementBuilder extends MarkdownElementBuilder {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
         decoration: BoxDecoration(
-          color: Colors.grey[200],
+          color: AppColors.grey[200],
           borderRadius: BorderRadius.circular(4),
         ),
         child: Text(
@@ -123,7 +124,7 @@ class _CodeBlockState extends State<_CodeBlock>
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: Colors.grey[300]!,
+          color: AppColors.grey[300]!,
           width: 1,
         ),
       ),
@@ -134,7 +135,7 @@ class _CodeBlockState extends State<_CodeBlock>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
             decoration: BoxDecoration(
-              color: Colors.grey[70],
+              color: AppColors.grey[70],
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -143,7 +144,7 @@ class _CodeBlockState extends State<_CodeBlock>
                 Text(
                   widget.language.isEmpty ? 'plain text' : widget.language,
                   style: TextStyle(
-                    color: Colors.grey[600],
+                    color: AppColors.grey[600],
                     fontSize: 10,
                     fontWeight: FontWeight.w500,
                   ),
@@ -157,7 +158,7 @@ class _CodeBlockState extends State<_CodeBlock>
                       style: TextButton.styleFrom(
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        backgroundColor: Colors.white,
+                        backgroundColor: AppColors.white,
                         padding: const EdgeInsets.symmetric(
                             horizontal: 4, vertical: 1),
                         shape: RoundedRectangleBorder(
@@ -176,7 +177,7 @@ class _CodeBlockState extends State<_CodeBlock>
                         style: TextButton.styleFrom(
                           minimumSize: Size.zero,
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          backgroundColor: Colors.white,
+                          backgroundColor: AppColors.white,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 4, vertical: 1),
                           shape: RoundedRectangleBorder(

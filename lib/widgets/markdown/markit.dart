@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'widgets/code_builder.dart';
+import 'package:ChatMcp/utils/color.dart';
 
 class Markit extends StatelessWidget {
   final String data;
@@ -32,25 +33,25 @@ class Markit extends StatelessWidget {
       },
       styleSheet: MarkdownStyleSheet(
         p: const TextStyle(
-          color: Colors.black,
+          color: AppColors.black,
         ),
         code: TextStyle(
-          backgroundColor: Colors.grey[200],
-          color: Colors.black87,
+          backgroundColor: AppColors.grey[200],
+          color: AppColors.black87,
         ),
         codeblockDecoration: BoxDecoration(
-          color: Colors.grey[200],
+          color: AppColors.grey[200],
           borderRadius: BorderRadius.circular(8),
         ),
         a: const TextStyle(
-          color: Colors.blue,
+          color: AppColors.blue,
           decoration: TextDecoration.none,
         ),
         horizontalRuleDecoration: BoxDecoration(
           border: Border(
             top: BorderSide(
               width: 1,
-              color: Colors.grey,
+              color: AppColors.grey,
             ),
           ),
         ),

@@ -1,7 +1,6 @@
 import './base_dao.dart';
 import './chat_message.dart';
 import 'package:ChatMcp/llm/model.dart' as llmModel;
-import 'dart:convert';
 
 class Chat {
   final int? id;

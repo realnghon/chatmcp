@@ -11,6 +11,7 @@ import 'package:ChatMcp/utils/file_content.dart';
 import 'package:ChatMcp/dao/chat.dart';
 import 'package:uuid/uuid.dart';
 import 'chat_message_list.dart';
+import 'package:ChatMcp/utils/color.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -118,7 +119,7 @@ class _ChatPageState extends State<ChatPage> {
           'How can I help you today?',
           style: TextStyle(
             fontSize: 18,
-            color: Colors.grey,
+            color: AppColors.grey,
           ),
         ),
       );
@@ -140,19 +141,19 @@ class _ChatPageState extends State<ChatPage> {
       margin: const EdgeInsets.all(8.0),
       constraints: const BoxConstraints(maxHeight: 400),
       decoration: BoxDecoration(
-        color: Colors.red.shade100,
+        color: AppColors.red.shade100,
         borderRadius: BorderRadius.circular(8.0),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.error_outline, color: Colors.red),
+          const Icon(Icons.error_outline, color: AppColors.red),
           const SizedBox(width: 8.0),
           Expanded(
             child: SingleChildScrollView(
               child: Text(
                 _errorMessage,
-                style: const TextStyle(color: Colors.red),
+                style: const TextStyle(color: AppColors.red),
                 softWrap: true,
               ),
             ),
@@ -160,7 +161,7 @@ class _ChatPageState extends State<ChatPage> {
           IconButton(
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
-            icon: const Icon(Icons.close, color: Colors.red),
+            icon: const Icon(Icons.close, color: AppColors.red),
             onPressed: () => setState(() => _errorMessage = ''),
           ),
         ],

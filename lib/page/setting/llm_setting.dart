@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../provider/settings_provider.dart';
 import '../../provider/provider_manager.dart';
+import 'package:ChatMcp/utils/color.dart';
 
 class LlmSettings extends StatefulWidget {
   const LlmSettings({super.key});
@@ -77,8 +78,8 @@ class _LlmSettingsState extends State<LlmSettings> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Theme.of(context).colorScheme.background,
-              Theme.of(context).colorScheme.background.withOpacity(0.8),
+              Theme.of(context).colorScheme.surface,
+              Theme.of(context).colorScheme.surface.withOpacity(0.8),
             ],
           ),
         ),
@@ -129,7 +130,7 @@ class _LlmSettingsState extends State<LlmSettings> {
                     onPressed: _isLoading ? null : _saveSettings,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,
-                      foregroundColor: Colors.white,
+                      foregroundColor: AppColors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -141,8 +142,8 @@ class _LlmSettingsState extends State<LlmSettings> {
                             height: 24,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColors.white),
                             ),
                           )
                         : const Text(
@@ -203,7 +204,7 @@ class _LlmSettingsState extends State<LlmSettings> {
               SnackBar(
                 content: const Row(
                   children: [
-                    Icon(Icons.check_circle, color: Colors.white),
+                    Icon(Icons.check_circle, color: AppColors.white),
                     SizedBox(width: 8),
                     Text('Settings saved successfully'),
                   ],
@@ -214,7 +215,7 @@ class _LlmSettingsState extends State<LlmSettings> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                backgroundColor: Colors.green,
+                backgroundColor: AppColors.green,
               ),
             );
         }
@@ -261,7 +262,7 @@ class _ApiSectionState extends State<ApiSection> {
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey.withAlpha(51)),
+          border: Border.all(color: AppColors.grey.withAlpha(51)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

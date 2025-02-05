@@ -7,6 +7,7 @@ import './widgets/top_toolbar.dart';
 import 'package:ChatMcp/provider/provider_manager.dart';
 import 'package:ChatMcp/provider/chat_model_provider.dart';
 import 'package:ChatMcp/utils/platform.dart';
+import 'package:ChatMcp/utils/color.dart';
 
 class LayoutPage extends StatefulWidget {
   const LayoutPage({super.key});
@@ -36,13 +37,13 @@ class _LayoutPageState extends State<LayoutPage> {
   Widget build(BuildContext context) {
     return Consumer<ChatModelProvider>(
       builder: (context, chatModelProvider, child) {
-        return Scaffold(
-          body: Row(
+        return SafeArea(
+          child: Row(
             children: [
               if (kIsDesktop && !hideSidebar)
                 Container(
                   width: 250,
-                  color: Colors.grey[200],
+                  color: AppColors.grey[200],
                   child: SidebarPanel(
                     onToggle: _toggleSidebar,
                   ),
@@ -58,9 +59,7 @@ class _LayoutPageState extends State<LayoutPage> {
                       child: GestureDetector(
                         onTap: () =>
                             FocusManager.instance.primaryFocus?.unfocus(),
-                        child: Scaffold(
-                          body: ChatPage(),
-                        ),
+                        child: ChatPage(),
                       ),
                     ),
                   ],

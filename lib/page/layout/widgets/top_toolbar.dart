@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:ChatMcp/provider/provider_manager.dart';
 import './model_selector.dart';
 import 'package:window_manager_plus/window_manager_plus.dart';
-import 'dart:io';
 import 'package:ChatMcp/utils/platform.dart';
+import 'package:ChatMcp/utils/color.dart';
 
 class TopToolbar extends StatelessWidget {
   final bool hideSidebar;
@@ -27,18 +27,21 @@ class TopToolbar extends StatelessWidget {
         }
       },
       child: Container(
-        height: 40,
-        color: Colors.grey[200],
+        // height: 40,
+        // decoration: BoxDecoration(
+        //   border: Border.all(color: Colors.red), // 添加红色边框用于调试
+        // ),
+        // color: AppColors.grey[200],
         padding: kIsDesktop
             ? EdgeInsets.fromLTRB(hideSidebar ? 70 : 0, 0, 16, 0)
-            : EdgeInsets.fromLTRB(0, 0, 0, 0),
+            : null,
         child: Row(
           children: [
             if (hideSidebar && kIsDesktop)
               IconButton(
                 icon: Icon(
                   Icons.menu,
-                  color: Colors.grey[700],
+                  color: AppColors.grey[700],
                 ),
                 onPressed: onToggleSidebar,
               ),

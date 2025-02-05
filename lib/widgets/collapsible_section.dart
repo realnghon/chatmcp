@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ChatMcp/utils/color.dart';
 
 class CollapsibleSection extends StatefulWidget {
   final Widget title;
@@ -21,7 +22,7 @@ class _CollapsibleSectionState extends State<CollapsibleSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: double.infinity,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -36,7 +37,7 @@ class _CollapsibleSectionState extends State<CollapsibleSection> {
                       ? Icons.keyboard_arrow_down
                       : Icons.keyboard_arrow_right,
                   size: 16,
-                  color: Colors.grey[600],
+                  color: AppColors.grey[600],
                 ),
                 Expanded(child: widget.title),
               ],

@@ -2,7 +2,6 @@ import 'package:ChatMcp/dao/init_db.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_statusbarcolor_ns/flutter_statusbarcolor_ns.dart';
-import 'dart:io';
 import './logger.dart';
 import './page/layout/layout.dart';
 import './provider/provider_manager.dart';
@@ -19,15 +18,14 @@ void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
 
-  if (kIsMobile) {
-    // 在移动端设置状态栏颜色
-    await FlutterStatusbarcolor.setStatusBarColor(Colors.transparent);
-    await FlutterStatusbarcolor.setStatusBarWhiteForeground(false);
-    if (Platform.isAndroid) {
-      await FlutterStatusbarcolor.setNavigationBarColor(Colors.grey[200]!);
-      await FlutterStatusbarcolor.setNavigationBarWhiteForeground(false);
-    }
-  }
+  // if (kIsMobile) {
+  //   await FlutterStatusbarcolor.setStatusBarColor(Colors.green[400]!);
+  //   if (useWhiteForeground(Colors.green[400]!)) {
+  //     FlutterStatusbarcolor.setStatusBarWhiteForeground(true);
+  //   } else {
+  //     FlutterStatusbarcolor.setStatusBarWhiteForeground(false);
+  //   }
+  // }
 
   // 只在桌面平台初始化窗口管理器
   if (kIsDesktop) {
@@ -85,7 +83,6 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: Scaffold(
-        backgroundColor: Colors.grey[200],
         drawer: kIsMobile
             ? Container(
                 width: 250,
@@ -97,12 +94,7 @@ class MyApp extends StatelessWidget {
                 ),
               )
             : null,
-        body: Container(
-          color: Colors.white,
-          child: SafeArea(
-            child: LayoutPage(),
-          ),
-        ),
+        body: LayoutPage(),
       ),
     );
   }

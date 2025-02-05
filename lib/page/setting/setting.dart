@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'llm_setting.dart';
 import 'mcp_server.dart';
 import 'general_setting.dart';
+import 'package:ChatMcp/utils/color.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -72,7 +73,7 @@ class _SettingPageState extends State<SettingPage> {
           decoration: BoxDecoration(
             border: Border(
               right: BorderSide(
-                color: Colors.grey.withAlpha(100),
+                color: AppColors.grey.withAlpha(100),
                 width: 1,
               ),
             ),

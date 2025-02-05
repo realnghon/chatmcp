@@ -6,6 +6,7 @@ import '../../provider/mcp_server_provider.dart';
 import 'package:logging/logging.dart';
 import 'dart:io';
 import 'package:ChatMcp/utils/process.dart';
+import 'package:ChatMcp/utils/color.dart';
 
 class McpServer extends StatefulWidget {
   const McpServer({super.key});
@@ -17,7 +18,7 @@ class McpServer extends StatefulWidget {
 class _McpServerState extends State<McpServer> {
   final TextEditingController _searchController = TextEditingController();
   String _selectedTab = 'All';
-  bool _isLoading = false;
+  final bool _isLoading = false;
 
   @override
   void dispose() {
@@ -34,8 +35,8 @@ class _McpServerState extends State<McpServer> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Theme.of(context).colorScheme.background,
-              Theme.of(context).colorScheme.background.withAlpha(204),
+              Theme.of(context).colorScheme.surface,
+              Theme.of(context).colorScheme.surface.withAlpha(204),
             ],
           ),
         ),
@@ -49,7 +50,7 @@ class _McpServerState extends State<McpServer> {
                     Icon(
                       Icons.warning_amber_rounded,
                       size: 64,
-                      color: Colors.orange,
+                      color: AppColors.orange,
                     ),
                     SizedBox(height: 16),
                     Text(
@@ -63,7 +64,7 @@ class _McpServerState extends State<McpServer> {
                     Text(
                       'MCP Server 仅支持桌面端（Windows、macOS、Linux）',
                       style: TextStyle(
-                        color: Colors.grey,
+                        color: AppColors.grey,
                       ),
                     ),
                   ],
@@ -152,12 +153,12 @@ class _McpServerState extends State<McpServer> {
                                 const Icon(
                                   Icons.error_outline,
                                   size: 48,
-                                  color: Colors.red,
+                                  color: AppColors.red,
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
                                   'Failed to load: ${snapshot.error}',
-                                  style: const TextStyle(color: Colors.red),
+                                  style: const TextStyle(color: AppColors.red),
                                 ),
                               ],
                             ),
@@ -237,7 +238,7 @@ class _McpServerState extends State<McpServer> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Colors.grey.withAlpha(51),
+            color: AppColors.grey.withAlpha(51),
           ),
         ),
         child: ExpansionTile(
@@ -304,7 +305,7 @@ class _McpServerState extends State<McpServer> {
                                   _buildActionButton(
                                     icon: Icons.delete,
                                     tooltip: 'Delete',
-                                    color: Colors.red,
+                                    color: AppColors.red,
                                     onPressed: () => _showDeleteConfirmDialog(
                                         context, serverName, provider),
                                   ),
@@ -315,7 +316,7 @@ class _McpServerState extends State<McpServer> {
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor:
                                           Theme.of(context).primaryColor,
-                                      foregroundColor: Colors.white,
+                                      foregroundColor: AppColors.white,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(8),
                                       ),
@@ -355,7 +356,7 @@ class _McpServerState extends State<McpServer> {
                       _buildActionButton(
                         icon: Icons.delete,
                         tooltip: 'Delete',
-                        color: Colors.red,
+                        color: AppColors.red,
                         onPressed: () => _showDeleteConfirmDialog(
                             context, serverName, provider),
                       ),
@@ -378,7 +379,7 @@ class _McpServerState extends State<McpServer> {
           label,
           style: const TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.grey,
+            color: AppColors.grey,
           ),
         ),
         const SizedBox(height: 4),
@@ -399,7 +400,7 @@ class _McpServerState extends State<McpServer> {
     return Tooltip(
       message: tooltip,
       child: Material(
-        color: Colors.transparent,
+        color: AppColors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
           onTap: onPressed,
@@ -444,7 +445,7 @@ class _McpServerState extends State<McpServer> {
         side: BorderSide(
           color: isSelected
               ? Theme.of(context).primaryColor.withAlpha(128)
-              : Colors.grey.withAlpha(51),
+              : AppColors.grey.withAlpha(51),
         ),
       ),
     );
