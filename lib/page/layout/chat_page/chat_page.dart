@@ -10,6 +10,8 @@ import 'chat_message.dart';
 import 'input_area.dart';
 import 'package:ChatMcp/provider/provider_manager.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:ChatMcp/utils/file_content.dart';
 
 import 'package:ChatMcp/dao/chat.dart';
 
@@ -23,11 +25,11 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   Chat? _chat;
   List<ChatMessage> _messages = [];
-  final TextEditingController _textController = TextEditingController();
   bool _isComposing = false;
   BaseLLMClient? _llmClient;
   String _currentResponse = '';
   bool _isLoading = false;
+  String _errorMessage = '';
 
   @override
   void initState() {
@@ -80,6 +82,24 @@ class _ChatPageState extends State<ChatPage> {
         _chat = activeChat;
       });
     }
+  }
+
+  void _handleFilesSelected(List<PlatformFile> files) async {
+    if (files.isEmpty) return;
+
+    final fileNames = files.map((file) => file.name).join(', ');
+    final message = '已选择文件: $fileNames';
+
+    // setState(() {
+    //   _messages.add(
+    //     ChatMessage(
+    //       content: message,
+    //       role: MessageRole.user,
+    //     ),
+    //   );
+    // });
+
+    // TODO: 处理文件上传逻辑
   }
 
   @override
@@ -136,12 +156,44 @@ class _ChatPageState extends State<ChatPage> {
                         : _messages.toList(),
                   ),
           ),
+          if (_errorMessage.isNotEmpty)
+            Container(
+              padding: const EdgeInsets.all(8.0),
+              margin: const EdgeInsets.all(8.0),
+              constraints: const BoxConstraints(maxHeight: 400),
+              decoration: BoxDecoration(
+                color: Colors.red.shade100,
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.red),
+                  const SizedBox(width: 8.0),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Text(
+                        _errorMessage,
+                        style: const TextStyle(color: Colors.red),
+                        softWrap: true,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    icon: const Icon(Icons.close, color: Colors.red),
+                    onPressed: () => setState(() => _errorMessage = ''),
+                  ),
+                ],
+              ),
+            ),
           InputArea(
-            textController: _textController,
             disabled: _isLoading,
             isComposing: _isComposing,
             onTextChanged: _handleTextChanged,
             onSubmitted: _handleSubmitted,
+            onFilesSelected: _handleFilesSelected,
           ),
         ],
       ),
@@ -154,15 +206,17 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
-  void _handleSubmitted(String text) async {
-    _textController.clear();
+  void _handleSubmitted(SubmitData data) async {
+    final files = data.files.map((file) => platformFileToFile(file)).toList();
+
     setState(() {
       _isLoading = true;
       _isComposing = false;
       _messages.add(
         ChatMessage(
-          content: text,
+          content: data.text,
           role: MessageRole.user,
+          files: files,
         ),
       );
     });
@@ -176,7 +230,7 @@ class _ChatPageState extends State<ChatPage> {
             'tools:\n${const JsonEncoder.withIndent('  ').convert(tools)}');
 
         if (tools.isNotEmpty) {
-          final toolCall = await _llmClient!.checkToolCall(text, tools);
+          final toolCall = await _llmClient!.checkToolCall(data.text, tools);
 
           if (toolCall['need_tool_call']) {
             final toolName = toolCall['tool_calls'][0]['name'];
@@ -244,6 +298,7 @@ class _ChatPageState extends State<ChatPage> {
                 toolCallId: m.toolCallId,
                 name: m.name,
                 toolCalls: m.toolCalls,
+                files: m.files,
               ))
           .toList();
 
@@ -261,7 +316,7 @@ class _ChatPageState extends State<ChatPage> {
       }
 
       final stream = _llmClient!.chatStreamCompletion(CompletionRequest(
-        model: ProviderManager.chatModelProvider.currentModel,
+        model: ProviderManager.chatModelProvider.currentModel.name,
         messages: [
           ChatMessage(
             content:
@@ -314,17 +369,12 @@ class _ChatPageState extends State<ChatPage> {
             : _messages.sublist(_messages.length - 5);
 
         await ProviderManager.chatProvider.addChatMessage(
-            ProviderManager.chatProvider.activeChat!.id!, lastFiveMessages);
+            ProviderManager.chatProvider.activeChat!.id!,
+            lastFiveMessages.where((m) => m.content != null).toList());
       }
-    } catch (e, stack) {
-      Logger.root.severe('Error: $e\n$stack');
-      // 错误处理
-      setState(() {
-        _messages.last = ChatMessage(
-          content: "抱歉，发生错误：${e.toString()}",
-          role: MessageRole.error,
-        );
-      });
+    } catch (e, stackTrace) {
+      _errorMessage = e.toString();
+      Logger.root.severe(e, stackTrace);
     }
     setState(() {
       _isLoading = false;

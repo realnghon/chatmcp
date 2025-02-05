@@ -19,11 +19,6 @@ class ChatProvider extends ChangeNotifier {
   Chat? get activeChat => _activeChat;
   List<Chat> get chats => _chats;
 
-  List<llmModel.Model> get availableModels => [
-        ...openai.models,
-        ...claude.models,
-      ];
-
   Future<void> loadChats() async {
     final chatDao = ChatDao();
     _chats = await chatDao.query(

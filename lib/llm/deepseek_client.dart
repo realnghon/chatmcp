@@ -73,9 +73,8 @@ class DeepSeekClient extends BaseLLMClient {
         toolCalls: toolCalls,
       );
     } catch (e) {
-      final tips =
-          "call deepseek chatCompletion failed: endpoint: $baseUrl/chat/completions body: $body $e";
-      throw Exception(tips);
+      throw await handleError(
+          e, 'DeepSeek', '$baseUrl/chat/completions', jsonEncode(body));
     }
   }
 
@@ -147,8 +146,8 @@ class DeepSeekClient extends BaseLLMClient {
         }
       }
     } catch (e) {
-      throw Exception(
-          "call deepseek chatStreamCompletion failed: endpoint: $baseUrl/chat/completions body: $body $e");
+      throw await handleError(
+          e, 'DeepSeek', '$baseUrl/chat/completions', jsonEncode(body));
     }
   }
 

@@ -11,6 +11,9 @@ import 'package:window_manager_plus/window_manager_plus.dart';
 import 'page/layout/sidebar.dart';
 import 'utils/platform.dart';
 
+final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
+    GlobalKey<ScaffoldMessengerState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -74,6 +77,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scaffoldMessengerKey: _scaffoldMessengerKey,
       debugShowCheckedModeBanner: false,
       title: 'ChatMcp',
       theme: ThemeData(

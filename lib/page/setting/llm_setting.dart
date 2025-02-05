@@ -1,3 +1,4 @@
+import 'package:ChatMcp/utils/platform.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../provider/settings_provider.dart';
@@ -18,6 +19,7 @@ class _LlmSettingsState extends State<LlmSettings> {
   final _claudeApiEndpointController = TextEditingController();
   final _deepseekApiKeyController = TextEditingController();
   final _deepseekApiEndpointController = TextEditingController();
+  final _ollamaApiEndpointController = TextEditingController();
   bool _isLoading = false;
 
   @override
@@ -34,6 +36,7 @@ class _LlmSettingsState extends State<LlmSettings> {
     _claudeApiEndpointController.dispose();
     _deepseekApiKeyController.dispose();
     _deepseekApiEndpointController.dispose();
+    _ollamaApiEndpointController.dispose();
     super.dispose();
   }
 
@@ -57,6 +60,11 @@ class _LlmSettingsState extends State<LlmSettings> {
     if (deepseekSettings != null) {
       _deepseekApiKeyController.text = deepseekSettings.apiKey;
       _deepseekApiEndpointController.text = deepseekSettings.apiEndpoint;
+    }
+
+    final ollamaSettings = settings.apiSettings['ollama'];
+    if (ollamaSettings != null) {
+      _ollamaApiEndpointController.text = ollamaSettings.apiEndpoint;
     }
   }
 
@@ -103,6 +111,12 @@ class _LlmSettingsState extends State<LlmSettings> {
                         keyController: _deepseekApiKeyController,
                         endpointController: _deepseekApiEndpointController,
                         accentColor: const Color(0xFF2563EB),
+                      ),
+                      ApiSection(
+                        title: 'Ollama',
+                        iconPath: 'assets/ollama_icon.png',
+                        endpointController: _ollamaApiEndpointController,
+                        accentColor: const Color(0xFF000000),
                       ),
                     ],
                   ),
@@ -170,29 +184,40 @@ class _LlmSettingsState extends State<LlmSettings> {
           apiEndpoint: _deepseekApiEndpointController.text,
         );
 
+        final ollamaSetting = ApiSetting(
+          apiKey: "",
+          apiEndpoint: _ollamaApiEndpointController.text,
+        );
+
         await settings.updateApiSettings(apiSettings: {
           'openai': openaiSetting,
           'claude': claudeSetting,
-          'deepseek': deepseekSetting
+          'deepseek': deepseekSetting,
+          'ollama': ollamaSetting,
         });
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Row(
-                children: [
-                  Icon(Icons.check_circle, color: Colors.white),
-                  SizedBox(width: 8),
-                  Text('Settings saved successfully'),
-                ],
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              SnackBar(
+                content: const Row(
+                  children: [
+                    Icon(Icons.check_circle, color: Colors.white),
+                    SizedBox(width: 8),
+                    Text('Settings saved successfully'),
+                  ],
+                ),
+                behavior: SnackBarBehavior.floating,
+                margin: const EdgeInsets.all(16),
+                duration: const Duration(seconds: 2),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                backgroundColor: Colors.green,
               ),
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              backgroundColor: Colors.green,
-            ),
-          );
+            );
         }
       } finally {
         if (mounted) {
@@ -206,7 +231,7 @@ class _LlmSettingsState extends State<LlmSettings> {
 class ApiSection extends StatefulWidget {
   final String title;
   final String iconPath;
-  final TextEditingController keyController;
+  final TextEditingController? keyController;
   final TextEditingController endpointController;
   final Color accentColor;
 
@@ -214,7 +239,7 @@ class ApiSection extends StatefulWidget {
     super.key,
     required this.title,
     required this.iconPath,
-    required this.keyController,
+    this.keyController,
     required this.endpointController,
     required this.accentColor,
   });
@@ -256,37 +281,39 @@ class _ApiSectionState extends State<ApiSection> {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: widget.keyController,
-              obscureText: !_isKeyVisible,
-              decoration: InputDecoration(
-                labelText: 'API Key',
-                hintText: 'Enter your ${widget.title} API Key',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                prefixIcon: Icon(Icons.key, color: widget.accentColor),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _isKeyVisible ? Icons.visibility_off : Icons.visibility,
-                    color: widget.accentColor,
+            if (widget.keyController != null) ...[
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: widget.keyController,
+                obscureText: !_isKeyVisible,
+                decoration: InputDecoration(
+                  labelText: 'API Key',
+                  hintText: 'Enter your ${widget.title} API Key',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
                   ),
-                  onPressed: () =>
-                      setState(() => _isKeyVisible = !_isKeyVisible),
+                  prefixIcon: Icon(Icons.key, color: widget.accentColor),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _isKeyVisible ? Icons.visibility_off : Icons.visibility,
+                      color: widget.accentColor,
+                    ),
+                    onPressed: () =>
+                        setState(() => _isKeyVisible = !_isKeyVisible),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: widget.accentColor, width: 2),
+                  ),
                 ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: widget.accentColor, width: 2),
-                ),
+                validator: (value) {
+                  if (value != null && value.isNotEmpty && value.length < 10) {
+                    return 'API Key must be at least 10 characters';
+                  }
+                  return null;
+                },
               ),
-              validator: (value) {
-                if (value != null && value.isNotEmpty && value.length < 10) {
-                  return 'API Key must be at least 10 characters';
-                }
-                return null;
-              },
-            ),
+            ],
             const SizedBox(height: 12),
             TextFormField(
               controller: widget.endpointController,

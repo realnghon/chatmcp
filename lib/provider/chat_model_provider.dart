@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:ChatMcp/llm/model.dart' as llmModel;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:logging/logging.dart';
 import 'package:ChatMcp/llm/llm_factory.dart';
+import 'dart:convert';
 
 class ChatModelProvider extends ChangeNotifier {
   static final ChatModelProvider _instance = ChatModelProvider._internal();
@@ -19,13 +19,11 @@ class ChatModelProvider extends ChangeNotifier {
     final models = await LLMFactoryHelper.getAvailableModels();
 
     _availableModels.clear(); // 先清空列表
-    _availableModels.addAll(models
-        .map((model) => llmModel.Model(name: model, label: model))
-        .toList());
+    _availableModels.addAll(models.toList());
 
     // 确保当前选择的模型在可用列表中
-    if (!_availableModels.any((model) => model.name == _currentModel)) {
-      _currentModel = _availableModels.first.name; // 如果不在，选择第一个可用的模型
+    if (!_availableModels.any((model) => model.name == _currentModel.name)) {
+      _currentModel = _availableModels.first;
       _saveSavedModel();
     }
 
@@ -37,12 +35,14 @@ class ChatModelProvider extends ChangeNotifier {
 
   List<llmModel.Model> get availableModels => _availableModels;
 
+  // 获取当前选中的模型
   static const String _modelKey = 'current_model';
-  String _currentModel = "gpt-4o-mini";
+  llmModel.Model _currentModel = llmModel.Model(
+      name: "gpt-4o-mini", label: "GPT-4o-mini", provider: "openai");
 
-  String get currentModel => _currentModel;
+  llmModel.Model get currentModel => _currentModel;
 
-  set currentModel(String model) {
+  set currentModel(llmModel.Model model) {
     _currentModel = model;
     _saveSavedModel();
     notifyListeners();
@@ -50,14 +50,15 @@ class ChatModelProvider extends ChangeNotifier {
 
   Future<void> _loadSavedModel() async {
     final prefs = await SharedPreferences.getInstance();
-    _currentModel = prefs.getString(_modelKey) ?? "gpt-4o-mini";
-    Logger.root.info(
-        'load model: ${prefs.getString(_modelKey)} currentModel: $_currentModel');
+    final modelName = prefs.getString(_modelKey) ?? "";
+    if (modelName.isNotEmpty) {
+      _currentModel = llmModel.Model.fromJson(jsonDecode(modelName));
+    }
     notifyListeners();
   }
 
   Future<void> _saveSavedModel() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_modelKey, _currentModel);
+    await prefs.setString(_modelKey, _currentModel.toString());
   }
 }

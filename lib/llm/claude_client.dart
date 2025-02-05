@@ -4,21 +4,7 @@ import 'base_llm_client.dart';
 import 'model.dart';
 import 'package:logging/logging.dart';
 import 'package:ChatMcp/provider/provider_manager.dart';
-
-var models = [
-  Model(
-    name: 'claude-3-opus-20240229',
-    label: 'Claude-3 Opus',
-  ),
-  Model(
-    name: 'claude-3-5-sonnet-latest',
-    label: 'Claude-3-5 Sonnet',
-  ),
-  Model(
-    name: 'claude-3-5-haiku-latest',
-    label: 'Claude-3-5 Haiku',
-  ),
-];
+import 'package:ChatMcp/utils/file_content.dart';
 
 class ClaudeClient extends BaseLLMClient {
   final String apiKey;
@@ -43,17 +29,7 @@ class ClaudeClient extends BaseLLMClient {
 
   @override
   Future<LLMResponse> chatCompletion(CompletionRequest request) async {
-    final messages = request.messages
-        .map((m) => {
-              'role': m.role == MessageRole.user ? 'user' : 'assistant',
-              'content': [
-                {
-                  'type': 'text',
-                  'text': m.content ?? '',
-                }
-              ],
-            })
-        .toList();
+    final messages = chatMessageToClaudeMessage(request.messages);
 
     final body = {
       'model': request.model,
@@ -110,12 +86,7 @@ class ClaudeClient extends BaseLLMClient {
 
   @override
   Stream<LLMResponse> chatStreamCompletion(CompletionRequest request) async* {
-    final messages = request.messages
-        .map((m) => {
-              'role': m.role == MessageRole.user ? 'user' : 'assistant',
-              'content': m.content ?? '',
-            })
-        .toList();
+    final messages = chatMessageToClaudeMessage(request.messages);
 
     final body = {
       'model': request.model,
@@ -202,8 +173,8 @@ class ClaudeClient extends BaseLLMClient {
         }
       }
     } catch (e) {
-      throw Exception(
-          "Claude streaming API call failed: $baseUrl/messages body: ${jsonEncode(body)} error: $e");
+      throw await handleError(
+          e, 'Claude', '$baseUrl/messages', jsonEncode(body));
     }
   }
 
@@ -341,8 +312,8 @@ $conversationText""",
         'tool_calls': toolCalls,
       };
     } catch (e) {
-      throw Exception(
-          'Claude tool call check failed: $baseUrl/messages body: ${jsonEncode(body)} error: $e');
+      throw await handleError(
+          e, 'Claude', '$baseUrl/messages', jsonEncode(body));
     }
   }
 
@@ -370,4 +341,54 @@ $conversationText""",
       return [];
     }
   }
+}
+
+List<Map<String, dynamic>> chatMessageToClaudeMessage(
+    List<ChatMessage> messages) {
+  return messages.map((message) {
+    final List<Map<String, dynamic>> contentParts = [];
+
+    // 添加文件内容（如果有）
+    if (message.files != null) {
+      for (final file in message.files!) {
+        if (isImageFile(file.fileType)) {
+          contentParts.add({
+            'type': 'image',
+            'source': {
+              'type': 'base64',
+              'media_type': file.fileType,
+              'data': file.fileContent,
+            },
+          });
+        }
+        if (isTextFile(file.fileType)) {
+          contentParts.add({
+            'type': 'text',
+            'text': file.fileContent,
+          });
+        }
+      }
+    }
+
+    // 添加文本内容
+    if (message.content != null) {
+      contentParts.add({
+        'type': 'text',
+        'text': message.content,
+      });
+    }
+
+    final json = {
+      'role': message.role == MessageRole.user ? 'user' : 'assistant',
+      'content': contentParts,
+    };
+
+    if (contentParts.length == 1 && message.files == null) {
+      json['content'] = message.content ?? '';
+    } else {
+      json['content'] = contentParts;
+    }
+
+    return json;
+  }).toList();
 }

@@ -42,17 +42,77 @@ class ChatHistoryList extends StatelessWidget {
     required this.chatProvider,
   });
 
+  Map<String, List<dynamic>> _groupChats(List<dynamic> chats) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final previous7Days = today.subtract(const Duration(days: 7));
+    final previous30Days = today.subtract(const Duration(days: 30));
+
+    return {
+      '今天': chats.where((chat) {
+        final chatDate = DateTime(
+            chat.updatedAt.year, chat.updatedAt.month, chat.updatedAt.day);
+        return chatDate.isAtSameMomentAs(today);
+      }).toList(),
+      '昨天': chats.where((chat) {
+        final chatDate = DateTime(
+            chat.updatedAt.year, chat.updatedAt.month, chat.updatedAt.day);
+        return chatDate.isAtSameMomentAs(yesterday);
+      }).toList(),
+      '前 7 天': chats.where((chat) {
+        final chatDate = DateTime(
+            chat.updatedAt.year, chat.updatedAt.month, chat.updatedAt.day);
+        return chatDate.isBefore(yesterday) && chatDate.isAfter(previous7Days);
+      }).toList(),
+      '前 30 天': chats.where((chat) {
+        final chatDate = DateTime(
+            chat.updatedAt.year, chat.updatedAt.month, chat.updatedAt.day);
+        return chatDate.isBefore(previous7Days) &&
+            chatDate.isAfter(previous30Days);
+      }).toList(),
+      '更早': chats.where((chat) {
+        final chatDate = DateTime(
+            chat.updatedAt.year, chat.updatedAt.month, chat.updatedAt.day);
+        return chatDate.isBefore(previous30Days);
+      }).toList(),
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
+    final groupedChats = _groupChats(chatProvider.chats);
+
     return Container(
       padding: const EdgeInsets.only(top: 30, left: 4, right: 4, bottom: 40),
       child: ListView.builder(
-        itemCount: chatProvider.chats.length,
+        itemCount: groupedChats.entries.length,
         itemBuilder: (context, index) {
-          final chat = chatProvider.chats[index];
-          return ChatHistoryItem(
-            chat: chat,
-            chatProvider: chatProvider,
+          final entry = groupedChats.entries.elementAt(index);
+          if (entry.value.isEmpty) {
+            return const SizedBox.shrink();
+          }
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                child: Text(
+                  entry.key,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              ...entry.value.map((chat) => ChatHistoryItem(
+                    chat: chat,
+                    chatProvider: chatProvider,
+                  )),
+            ],
           );
         },
       ),
@@ -103,10 +163,6 @@ class ChatHistoryItem extends StatelessWidget {
                 style: const TextStyle(fontSize: 14),
                 overflow: TextOverflow.ellipsis,
               ),
-            ),
-            Text(
-              '${chat.updatedAt.month}/${chat.updatedAt.day}',
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
           ],
         ),

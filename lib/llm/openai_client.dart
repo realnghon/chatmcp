@@ -3,25 +3,7 @@ import 'base_llm_client.dart';
 import 'dart:convert';
 import 'model.dart';
 import 'package:logging/logging.dart';
-
-var models = [
-  Model(
-    name: 'gpt-4o-mini',
-    label: 'GPT-4o-mini',
-  ),
-  Model(
-    name: 'gpt-4o',
-    label: 'GPT-4o',
-  ),
-  Model(
-    name: 'gpt-3.5-turbo',
-    label: 'GPT-3.5',
-  ),
-  Model(
-    name: 'gpt-4',
-    label: 'GPT-4',
-  ),
-];
+import 'package:ChatMcp/utils/file_content.dart';
 
 class OpenAIClient extends BaseLLMClient {
   final String apiKey;
@@ -92,9 +74,8 @@ class OpenAIClient extends BaseLLMClient {
         toolCalls: toolCalls,
       );
     } catch (e) {
-      final tips =
-          "call openai chatCompletion failed: endpoint: $baseUrl/chat/completions body: $body $e";
-      throw Exception(tips);
+      throw await handleError(
+          e, 'OpenAI', '$baseUrl/chat/completions', bodyStr);
     }
   }
 
@@ -102,7 +83,7 @@ class OpenAIClient extends BaseLLMClient {
   Stream<LLMResponse> chatStreamCompletion(CompletionRequest request) async* {
     final body = {
       'model': request.model,
-      'messages': request.messages.map((m) => m.toJson()).toList(),
+      'messages': chatMessageToOpenAIMessage(request.messages),
       'stream': true,
     };
 
@@ -166,8 +147,8 @@ class OpenAIClient extends BaseLLMClient {
         }
       }
     } catch (e) {
-      throw Exception(
-          "call openai chatStreamCompletion failed: endpoint: $baseUrl/chat/completions body: $body $e");
+      throw await handleError(
+          e, 'OpenAI', '$baseUrl/chat/completions', jsonEncode(body));
     }
   }
 
@@ -219,4 +200,67 @@ $conversationText""",
       return [];
     }
   }
+}
+
+List<Map<String, dynamic>> chatMessageToOpenAIMessage(
+    List<ChatMessage> messages) {
+  return messages.map((message) {
+    final json = <String, dynamic>{
+      'role': message.role.value,
+    };
+
+    // 如果同时有文本内容和文件，需要使用数组格式
+    if (message.content != null || message.files != null) {
+      final List<Map<String, dynamic>> contentParts = [];
+
+      // 添加文件内容
+      if (message.files != null) {
+        for (final file in message.files!) {
+          if (isImageFile(file.fileType)) {
+            contentParts.add({
+              'type': 'image_url',
+              'image_url': {
+                "url": "data:${file.fileType};base64,${file.fileContent}",
+              },
+            });
+          }
+          if (isTextFile(file.fileType)) {
+            contentParts.add({
+              'type': 'text',
+              'text': file.fileContent,
+            });
+          }
+        }
+      }
+
+      // 添加文本内容
+      if (message.content != null) {
+        contentParts.add({
+          'type': 'text',
+          'text': message.content,
+        });
+      }
+
+      // 如果只有一个文本内容且没有文件，使用简单字符串格式
+      if (contentParts.length == 1 && message.files == null) {
+        json['content'] = message.content;
+      } else {
+        json['content'] = contentParts;
+      }
+    }
+
+    // 添加工具调用相关字段
+    if (message.role == MessageRole.tool &&
+        message.name != null &&
+        message.toolCallId != null) {
+      json['name'] = message.name!;
+      json['tool_call_id'] = message.toolCallId!;
+    }
+
+    if (message.toolCalls != null) {
+      json['tool_calls'] = message.toolCalls;
+    }
+
+    return json;
+  }).toList();
 }

@@ -8,18 +8,13 @@ import 'package:ChatMcp/llm/llm_factory.dart';
 class ModelSelector extends StatelessWidget {
   const ModelSelector({super.key});
 
-  bool _isModelSupported(String modelName) {
-    return LLMFactoryHelper.modelMapping.keys
-        .any((key) => modelName.startsWith(key));
-  }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<ChatModelProvider>(
       builder: (context, chatModelProvider, child) {
         final availableModels = ProviderManager
             .chatModelProvider.availableModels
-            .where((model) => _isModelSupported(model.name))
+            .where((model) => LLMFactoryHelper.isChatModel(model))
             .toList();
 
         return Container(
@@ -38,16 +33,20 @@ class ModelSelector extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    availableModels
-                        .firstWhere(
-                          (model) =>
-                              model.name == chatModelProvider.currentModel,
-                          orElse: () => Model(name: '', label: 'NaN'),
-                        )
-                        .label,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    overflow: TextOverflow.ellipsis,
+                  Flexible(
+                    child: Text(
+                      availableModels
+                          .firstWhere(
+                            (model) =>
+                                model.name ==
+                                chatModelProvider.currentModel.name,
+                            orElse: () =>
+                                Model(name: '', label: 'NaN', provider: ''),
+                          )
+                          .label,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                   const SizedBox(width: 4),
                   Icon(
@@ -58,40 +57,80 @@ class ModelSelector extends StatelessWidget {
                 ],
               ),
             ),
-            itemBuilder: (context) => availableModels
-                .map(
-                  (model) => PopupMenuItem<String>(
-                    value: model.name,
-                    child: Row(
-                      children: [
-                        if (model.name == chatModelProvider.currentModel)
-                          Icon(
-                            Icons.check,
-                            size: 18,
+            itemBuilder: (context) {
+              // 按 provider 对模型进行分组
+              final modelsByProvider = <String, List<Model>>{};
+              for (var model in availableModels) {
+                modelsByProvider
+                    .putIfAbsent(model.provider, () => [])
+                    .add(model);
+              }
+
+              // 构建菜单项列表
+              final menuItems = <PopupMenuEntry<String>>[];
+              modelsByProvider.forEach((provider, models) {
+                // 添加 provider 标题
+                if (menuItems.isNotEmpty) {
+                  menuItems.add(const PopupMenuDivider());
+                }
+                menuItems.add(
+                  PopupMenuItem<String>(
+                    enabled: false,
+                    height: 16,
+                    child: Text(
+                      provider,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
                             color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.bold,
                           ),
-                        if (model.name == chatModelProvider.currentModel)
-                          const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            model.label,
-                            style: TextStyle(
-                              color:
-                                  model.name == chatModelProvider.currentModel
-                                      ? Theme.of(context).colorScheme.primary
-                                      : null,
-                            ),
-                          ),
-                        ),
-                      ],
                     ),
                   ),
-                )
-                .toList(),
+                );
+
+                // 添加该 provider 下的所有模型
+                for (var model in models) {
+                  menuItems.add(
+                    PopupMenuItem<String>(
+                      value: model.name,
+                      height: 32,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: Row(
+                          children: [
+                            if (model.name == chatModelProvider.currentModel)
+                              Icon(
+                                Icons.check,
+                                size: 18,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            if (model.name == chatModelProvider.currentModel)
+                              const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                model.label,
+                                style: TextStyle(
+                                  color: model.name ==
+                                          chatModelProvider.currentModel
+                                      ? Theme.of(context).colorScheme.primary
+                                      : null,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }
+              });
+
+              return menuItems;
+            },
             onSelected: (String value) {
-              if (_isModelSupported(value)) {
-                ProviderManager.chatModelProvider.currentModel = value;
-              }
+              final selectedModel = availableModels.firstWhere(
+                (model) => model.name == value,
+              );
+              ProviderManager.chatModelProvider.currentModel = selectedModel;
             },
           ),
         );

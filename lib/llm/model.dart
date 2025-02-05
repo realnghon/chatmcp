@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
+
 // 消息角色枚举
 enum MessageRole {
   system,
@@ -13,6 +15,42 @@ enum MessageRole {
   String get value => name;
 }
 
+class File {
+  final String name;
+  final int size;
+  final String? path;
+  final String fileType;
+  final String fileContent;
+
+  File({
+    required this.name,
+    required this.path,
+    required this.size,
+    required this.fileType,
+    this.fileContent = '',
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'path': path,
+      'size': size,
+      'fileType': fileType,
+      'fileContent': fileContent,
+    };
+  }
+
+  factory File.fromJson(Map<String, dynamic> json) {
+    return File(
+      name: json['name'],
+      path: json['path'],
+      size: json['size'],
+      fileType: json['fileType'],
+      fileContent: json['fileContent'],
+    );
+  }
+}
+
 // 消息结构体
 class ChatMessage {
   final MessageRole role;
@@ -21,6 +59,7 @@ class ChatMessage {
   final String? mcpServerName;
   final String? toolCallId;
   final List<Map<String, dynamic>>? toolCalls;
+  final List<File>? files;
 
   ChatMessage({
     required this.role,
@@ -29,6 +68,7 @@ class ChatMessage {
     this.mcpServerName,
     this.toolCallId,
     this.toolCalls,
+    this.files,
   });
 
   Map<String, dynamic> toJson() {
@@ -50,6 +90,10 @@ class ChatMessage {
       json['mcpServerName'] = mcpServerName!;
     }
 
+    if (files != null) {
+      json['files'] = files?.map((file) => file.toJson()).toList();
+    }
+
     return json;
   }
 
@@ -62,6 +106,13 @@ class ChatMessage {
           .toList();
     }
 
+    List<File>? files;
+    if (json['files'] != null) {
+      files = (json['files'] as List)
+          .map((item) => File.fromJson(Map<String, dynamic>.from(item)))
+          .toList();
+    }
+
     return ChatMessage(
       role: MessageRole.values.firstWhere((e) => e.value == json['role']),
       content: json['content'],
@@ -69,6 +120,7 @@ class ChatMessage {
       mcpServerName: json['mcpServerName'],
       toolCallId: json['tool_call_id'],
       toolCalls: toolCalls,
+      files: files,
     );
   }
 
@@ -136,14 +188,30 @@ class LLMResponse {
 class Model {
   final String name;
   final String label;
+  final String provider;
 
   Model({
     required this.name,
     required this.label,
+    required this.provider,
   });
 
+  factory Model.fromJson(Map<String, dynamic> json) {
+    return Model(
+      name: json['name'],
+      label: json['label'],
+      provider: json['provider'],
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'label': label,
+        'provider': provider,
+      };
+
   @override
-  String toString() => 'Model(name: $name, label: $label)';
+  String toString() => jsonEncode(toJson());
 }
 
 class CompletionRequest {

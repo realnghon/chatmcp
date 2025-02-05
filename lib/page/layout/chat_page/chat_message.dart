@@ -8,6 +8,7 @@ import 'package:ChatMcp/widgets/markdown/markit.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'dart:io' as io;
 
 class ChatUIMessage extends StatelessWidget {
   final List<ChatMessage> messages;
@@ -128,6 +129,50 @@ class ChatMessageContent extends StatelessWidget {
             MessageBubble(
                 message:
                     ChatMessage(content: 'loading', role: MessageRole.loading)),
+          if (message.files != null && message.files!.isNotEmpty)
+            Container(
+              margin: const EdgeInsets.only(top: 8),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: message.files!
+                    .map((file) => Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: file.fileType.startsWith('image')
+                              ? ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxWidth:
+                                        MediaQuery.of(context).size.width * 0.6,
+                                    maxHeight: 300,
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Image.file(
+                                      io.File(file.path!),
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ),
+                                )
+                              : Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.attach_file, size: 16),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      file.name,
+                                      style: const TextStyle(fontSize: 12),
+                                    ),
+                                  ],
+                                ),
+                        ))
+                    .toList(),
+              ),
+            ),
           if ((message.role == MessageRole.user ||
                   message.role == MessageRole.assistant) &&
               message.content != null)
