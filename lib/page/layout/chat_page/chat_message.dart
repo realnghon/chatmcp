@@ -155,6 +155,27 @@ class ChatMessageContent extends StatelessWidget {
                                     child: Image.file(
                                       io.File(file.path!),
                                       fit: BoxFit.contain,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Container(
+                                          padding: const EdgeInsets.all(8),
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey[200],
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                Icons.broken_image,
+                                                color: Colors.grey[600],
+                                                size: 32,
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      },
                                     ),
                                   ),
                                 )
