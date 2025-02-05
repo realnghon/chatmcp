@@ -24,9 +24,13 @@ class _MessageListState extends State<MessageList> {
     _scrollToBottom();
   }
 
-  void _scrollToBottom() {
-    for (var delay in [150, 300, 500]) {
-      _delayScrollToBottom(delay);
+  void _scrollToBottom({bool withDelay = true}) {
+    if (withDelay) {
+      for (var delay in [50, 150, 300, 500]) {
+        _delayScrollToBottom(delay);
+      }
+    } else {
+      _scrollToBottom1();
     }
   }
 
@@ -35,17 +39,27 @@ class _MessageListState extends State<MessageList> {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
+          duration: Duration(milliseconds: delay),
           curve: Curves.easeInOutCubic,
         );
       }
     });
   }
 
+  void _scrollToBottom1() {
+    if (_scrollController.hasClients) {
+      _scrollController.animateTo(
+        _scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOutCubic,
+      );
+    }
+  }
+
   @override
   void didUpdateWidget(MessageList oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _delayScrollToBottom(100);
+    _scrollToBottom(withDelay: false);
     if (widget.messages.length > oldWidget.messages.length) {
       resetUserScrolled();
     }

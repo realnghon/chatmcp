@@ -152,83 +152,81 @@ class _InputAreaState extends State<InputArea> {
               ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Row(
+              child: Stack(
                 children: [
-                  Expanded(
-                    child: Focus(
-                      onKeyEvent: (node, event) {
-                        if (event is KeyDownEvent &&
-                                event.logicalKey == LogicalKeyboardKey.enter &&
-                                Platform.isMacOS
-                            ? HardwareKeyboard.instance.isMetaPressed
-                            : HardwareKeyboard.instance.isControlPressed &&
-                                widget.isComposing) {
+                  Focus(
+                    onKeyEvent: (node, event) {
+                      if (event is KeyDownEvent &&
+                          event.logicalKey == LogicalKeyboardKey.enter) {
+                        if (HardwareKeyboard.instance.isShiftPressed) {
+                          return KeyEventResult.ignored;
+                        }
+                        if (widget.isComposing &&
+                            textController.text.trim().isNotEmpty) {
                           widget.onSubmitted(
                               SubmitData(textController.text, _selectedFiles));
                           _afterSubmitted();
-                          return KeyEventResult.handled;
                         }
-                        return KeyEventResult.ignored;
-                      },
-                      child: TextField(
-                        enabled: !widget.disabled,
-                        controller: textController,
-                        onChanged: widget.onTextChanged,
-                        maxLines: 5,
-                        minLines: 1,
-                        textInputAction: Platform.isAndroid || Platform.isIOS
-                            ? TextInputAction.send
-                            : TextInputAction.newline,
-                        onSubmitted: Platform.isAndroid || Platform.isIOS
-                            ? (text) {
-                                if (widget.isComposing) {
-                                  widget.onSubmitted(
-                                      SubmitData(text, _selectedFiles));
-                                  _afterSubmitted();
-                                }
+                        return KeyEventResult.handled;
+                      }
+                      return KeyEventResult.ignored;
+                    },
+                    child: TextField(
+                      enabled: !widget.disabled,
+                      controller: textController,
+                      onChanged: widget.onTextChanged,
+                      maxLines: 5,
+                      minLines: 1,
+                      textInputAction: Platform.isAndroid || Platform.isIOS
+                          ? TextInputAction.send
+                          : TextInputAction.newline,
+                      onSubmitted: Platform.isAndroid || Platform.isIOS
+                          ? (text) {
+                              if (widget.isComposing &&
+                                  text.trim().isNotEmpty) {
+                                widget.onSubmitted(
+                                    SubmitData(text, _selectedFiles));
+                                _afterSubmitted();
                               }
-                            : null,
-                        keyboardType: TextInputType.multiline,
-                        style: const TextStyle(fontSize: 14.0),
-                        scrollPhysics: const BouncingScrollPhysics(),
-                        decoration: const InputDecoration(
-                          hintText: 'Ask me anything...',
-                          hintStyle: TextStyle(fontSize: 14.0),
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(
-                              horizontal: 14, vertical: 18),
-                          isDense: true,
-                        ),
+                            }
+                          : null,
+                      keyboardType: TextInputType.multiline,
+                      style: const TextStyle(fontSize: 14.0),
+                      scrollPhysics: const BouncingScrollPhysics(),
+                      decoration: const InputDecoration(
+                        hintText: 'Ask me anything...',
+                        hintStyle: TextStyle(fontSize: 14.0),
+                        border: OutlineInputBorder(),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 14, vertical: 18),
+                        isDense: true,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  if (kIsMobile) ...[
-                    UploadMenu(
-                      disabled: widget.disabled,
-                      onPickImages: _pickImages,
-                      onPickFiles: _pickFiles,
+                  Positioned(
+                    right: 8,
+                    top: 0,
+                    bottom: 0,
+                    child: Center(
+                      child: Row(
+                        children: [
+                          if (kIsMobile) ...[
+                            UploadMenu(
+                              disabled: widget.disabled,
+                              onPickImages: _pickImages,
+                              onPickFiles: _pickFiles,
+                            ),
+                          ] else ...[
+                            IconButton(
+                              icon: const Icon(Icons.file_present_outlined),
+                              onPressed: widget.disabled ? null : _pickFiles,
+                              tooltip: 'Upload Files',
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
-                  ] else ...[
-                    IconButton(
-                      icon: const Icon(Icons.file_upload),
-                      onPressed: widget.disabled ? null : _pickFiles,
-                      tooltip: 'Upload Files',
-                    ),
-                  ],
-                  if (kIsDesktop) ...[
-                    const SizedBox(width: 8),
-                    IconButton(
-                      icon: const Icon(Icons.send),
-                      onPressed: widget.isComposing
-                          ? () {
-                              widget.onSubmitted(SubmitData(
-                                  textController.text, _selectedFiles));
-                              _afterSubmitted();
-                            }
-                          : null,
-                    ),
-                  ],
+                  ),
                 ],
               ),
             ),

@@ -63,7 +63,7 @@ class UploadMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: const Icon(Icons.upload),
+      icon: const Icon(Icons.file_present_outlined),
       onPressed: disabled ? null : () => _showUploadOptions(context),
       tooltip: '上传文件',
     );

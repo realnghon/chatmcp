@@ -289,7 +289,7 @@ class _ChatPageState extends State<ChatPage> {
         ChatMessage(
           messageId: msgId,
           parentMessageId: _parentMessageId,
-          content: text,
+          content: text.replaceAll('\n', '\n\n'),
           role: MessageRole.user,
           files: files,
         ),

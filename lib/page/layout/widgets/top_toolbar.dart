@@ -17,43 +17,49 @@ class TopToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onDoubleTap: () async {
-        bool isMaximized = await WindowManagerPlus.current.isMaximized();
-        if (isMaximized) {
-          await WindowManagerPlus.current.unmaximize();
-        } else {
-          await WindowManagerPlus.current.maximize();
-        }
-      },
-      child: Container(
-        // height: 40,
-        // decoration: BoxDecoration(
-        //   border: Border.all(color: Colors.red), // 添加红色边框用于调试
-        // ),
-        // color: AppColors.grey[200],
-        padding: kIsDesktop
-            ? EdgeInsets.fromLTRB(hideSidebar ? 70 : 0, 0, 16, 0)
-            : null,
-        child: Row(
-          children: [
-            if (hideSidebar && kIsDesktop)
-              IconButton(
-                icon: Icon(
-                  Icons.menu,
-                  color: AppColors.grey[700],
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onDoubleTap: () async {
+          debugPrint('double tap');
+          if (kIsDesktop) {
+            try {
+              bool isMaximized = await WindowManagerPlus.current.isMaximized();
+              if (isMaximized) {
+                await WindowManagerPlus.current.unmaximize();
+              } else {
+                await WindowManagerPlus.current.maximize();
+              }
+            } catch (e) {
+              debugPrint('窗口操作失败: $e');
+            }
+          }
+        },
+        child: Container(
+          padding: kIsDesktop
+              ? EdgeInsets.fromLTRB(hideSidebar ? 70 : 0, 0, 16, 0)
+              : null,
+          child: Row(
+            children: [
+              if (hideSidebar && kIsDesktop)
+                IconButton(
+                  icon: Icon(
+                    Icons.menu,
+                    color: AppColors.grey[700],
+                  ),
+                  onPressed: onToggleSidebar,
                 ),
-                onPressed: onToggleSidebar,
+              const ModelSelector(),
+              const Spacer(),
+              IconButton(
+                icon: const Icon(Icons.add),
+                onPressed: () {
+                  ProviderManager.chatProvider.clearActiveChat();
+                },
               ),
-            const ModelSelector(),
-            const Spacer(),
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: () {
-                ProviderManager.chatProvider.clearActiveChat();
-              },
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
