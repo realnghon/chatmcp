@@ -197,7 +197,6 @@ class _LlmSettingsState extends State<LlmSettings> {
         });
 
         if (mounted) {
-          Navigator.of(context).pop();
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(

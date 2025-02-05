@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'package:ChatMcp/utils/platform.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
 import 'dart:io' show Platform;
 import 'package:logging/logging.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
+import 'dart:io';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -20,21 +22,18 @@ class DatabaseHelper {
   }
 
   Future<Database> _initDB() async {
-    // 初始化数据库工厂
-    if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    if (kIsDesktop) {
       sqfliteFfiInit();
       databaseFactory = databaseFactoryFfi;
-    } else if (Platform.isAndroid || Platform.isIOS) {
-      // 在移动端使用 sqflite 的默认工厂
+    } else if (kIsMobile) {
       databaseFactory = sqflite.databaseFactory;
     }
 
-    // 获取应用文档目录
-    final appDocDir = await getApplicationDocumentsDirectory();
-    final dbPath = join(appDocDir.path, 'chatmcp.db');
+    final Directory appDataDir = await getAppDir('ChatMcp');
+    final dbPath = join(appDataDir.path, 'chatmcp.db');
 
-    Logger.root.info('db path: $dbPath');
-    Logger.root.info('platform: ${Platform.operatingSystem}');
+    Logger.root.fine('db path: $dbPath');
+    Logger.root.fine('platform: ${Platform.operatingSystem}');
 
     try {
       final db = await databaseFactory.openDatabase(
@@ -152,6 +151,8 @@ CREATE TABLE IF NOT EXISTS chat(
 CREATE TABLE IF NOT EXISTS chat_message(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     chatId INTEGER,
+    messageId TEXT,
+    parentMessageId TEXT,
     body TEXT,
     createdAt datetime,
     updatedAt datetime,

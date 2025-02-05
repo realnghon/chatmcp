@@ -1,6 +1,5 @@
 import 'dart:convert';
-
-import 'package:flutter/foundation.dart';
+import 'package:uuid/uuid.dart';
 
 // 消息角色枚举
 enum MessageRole {
@@ -53,6 +52,7 @@ class File {
 
 // 消息结构体
 class ChatMessage {
+  final String uuid;
   final MessageRole role;
   final String? content;
   final String? name;
@@ -62,6 +62,7 @@ class ChatMessage {
   final List<File>? files;
 
   ChatMessage({
+    String? uuid,
     required this.role,
     this.content,
     this.name,
@@ -69,7 +70,7 @@ class ChatMessage {
     this.toolCallId,
     this.toolCalls,
     this.files,
-  });
+  }) : uuid = uuid ?? const Uuid().v4();
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{

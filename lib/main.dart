@@ -15,6 +15,8 @@ final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
 
 void main() async {
+  initializeLogger();
+
   WidgetsFlutterBinding.ensureInitialized();
 
   if (kIsMobile) {
@@ -50,7 +52,6 @@ void main() async {
   }
 
   try {
-    initializeLogger();
     await Future.wait([
       ProviderManager.init(),
       initDb(),

@@ -286,7 +286,6 @@ class _GeneralSettingsState extends State<GeneralSettings> {
       try {
         // 由于设置是实时保存的，这里只需要显示保存成功的提示
         if (mounted) {
-          Navigator.of(context).pop();
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(

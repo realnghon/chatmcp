@@ -1,4 +1,5 @@
 import './base_dao.dart';
+import 'package:uuid/uuid.dart';
 
 class ChatMessage {
   final int? id;
@@ -6,6 +7,8 @@ class ChatMessage {
   final String body;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String messageId;
+  final String parentMessageId;
 
   ChatMessage({
     this.id,
@@ -13,13 +16,18 @@ class ChatMessage {
     required this.body,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? messageId,
+    this.parentMessageId = '',
   })  : createdAt = createdAt ?? DateTime.now(),
-        updatedAt = updatedAt ?? DateTime.now();
+        updatedAt = updatedAt ?? DateTime.now(),
+        messageId = messageId ?? const Uuid().v4();
 
   Map<String, dynamic> toJson() {
     return {
       if (id != null) 'id': id,
       'chatId': chatId,
+      'messageId': messageId,
+      'parentMessageId': parentMessageId,
       'body': body,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
