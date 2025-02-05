@@ -54,7 +54,6 @@ class ChatUIMessage extends StatelessWidget {
                     ChatMessageContent(message: msg),
                   if (kIsDesktop &&
                       messages.last.role != MessageRole.loading &&
-                      messages.last.role != MessageRole.error &&
                       !isUser)
                     MessageActions(message: messages.last),
                 ],
@@ -127,8 +126,7 @@ class ChatMessageContent extends StatelessWidget {
         children: [
           if (message.role == MessageRole.loading)
             MessageBubble(
-                message:
-                    ChatMessage(content: 'loading', role: MessageRole.loading)),
+                message: ChatMessage(content: '', role: MessageRole.loading)),
           if (message.files != null && message.files!.isNotEmpty)
             Container(
               margin: const EdgeInsets.only(top: 8),

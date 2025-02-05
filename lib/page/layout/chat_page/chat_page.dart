@@ -126,7 +126,6 @@ class _ChatPageState extends State<ChatPage> {
     }
 
     return MessageList(
-      key: ValueKey(_messages.length),
       messages: _isLoading
           ? [..._messages, ChatMessage(content: '', role: MessageRole.loading)]
           : _messages.toList(),
