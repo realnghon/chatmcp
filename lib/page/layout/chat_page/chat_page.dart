@@ -1,19 +1,16 @@
+import 'package:ChatMcp/utils/platform.dart';
 import 'package:flutter/material.dart';
 import 'package:ChatMcp/llm/model.dart';
 import 'package:ChatMcp/llm/llm_factory.dart';
 import 'package:ChatMcp/llm/base_llm_client.dart';
 import 'package:logging/logging.dart';
 import 'dart:convert';
-import 'dart:io';
-import 'package:flutter/rendering.dart';
-import 'chat_message.dart';
 import 'input_area.dart';
 import 'package:ChatMcp/provider/provider_manager.dart';
-import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:ChatMcp/utils/file_content.dart';
-
 import 'package:ChatMcp/dao/chat.dart';
+import 'package:uuid/uuid.dart';
+import 'chat_message_list.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -23,6 +20,7 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
+  // 状态变量
   Chat? _chat;
   List<ChatMessage> _messages = [];
   bool _isComposing = false;
@@ -30,42 +28,53 @@ class _ChatPageState extends State<ChatPage> {
   String _currentResponse = '';
   bool _isLoading = false;
   String _errorMessage = '';
+  String _parentMessageId = '';
 
   @override
   void initState() {
     super.initState();
-    _initializeLLMClient();
+    _initializeState();
+  }
 
-    // Add settings change listener, when settings changed, we need to reinitialize LLM client
-    ProviderManager.settingsProvider.addListener(_onSettingsChanged);
-    // Add chat model change listener, when model changed, we need to reinitialize LLM client
-    ProviderManager.chatModelProvider.addListener(_initializeLLMClient);
-    // Add chat change listener, when chat changed, we need to reinitialize history messages
-    ProviderManager.chatProvider.addListener(_onChatProviderChanged);
+  @override
+  void dispose() {
+    _removeListeners();
+    super.dispose();
+  }
+
+  // 初始化相关方法
+  void _initializeState() {
+    _initializeLLMClient();
+    _addListeners();
     _initializeHistoryMessages();
   }
 
-  void _onChatProviderChanged() {
-    _initializeHistoryMessages();
+  void _addListeners() {
+    ProviderManager.settingsProvider.addListener(_onSettingsChanged);
+    ProviderManager.chatModelProvider.addListener(_initializeLLMClient);
+    ProviderManager.chatProvider.addListener(_onChatProviderChanged);
+  }
+
+  void _removeListeners() {
+    ProviderManager.settingsProvider.removeListener(_onSettingsChanged);
+    ProviderManager.chatProvider.removeListener(_onChatProviderChanged);
   }
 
   void _initializeLLMClient() {
     _llmClient = LLMFactoryHelper.createFromModel(
         ProviderManager.chatModelProvider.currentModel);
-    setState(() {}); // Refresh UI after client change
+    setState(() {});
   }
 
   void _onSettingsChanged() {
     _initializeLLMClient();
   }
 
-  @override
-  void dispose() {
-    ProviderManager.settingsProvider.removeListener(_onSettingsChanged);
-    ProviderManager.chatProvider.removeListener(_onChatProviderChanged);
-    super.dispose();
+  void _onChatProviderChanged() {
+    _initializeHistoryMessages();
   }
 
+  // 消息处理相关方法
   Future<void> _initializeHistoryMessages() async {
     final activeChat = ProviderManager.chatProvider.activeChat;
     if (activeChat == null) {
@@ -77,420 +86,381 @@ class _ChatPageState extends State<ChatPage> {
     }
     if (_chat?.id != activeChat.id) {
       final messages = await activeChat.getChatMessages();
+      Logger.root.info(
+          'messages:\n${const JsonEncoder.withIndent('  ').convert(messages)}');
+
+      // 找到最后一条用户消息的索引
+      final lastUserIndex =
+          messages.lastIndexWhere((m) => m.role == MessageRole.user);
+      String parentId = '';
+
+      // 如果找到用户消息，且其后有助手消息，则使用助手消息的ID
+      if (lastUserIndex != -1 && lastUserIndex + 1 < messages.length) {
+        parentId = messages[lastUserIndex + 1].messageId;
+      } else if (messages.isNotEmpty) {
+        // 如果没有找到合适的消息，使用最后一条消息的ID
+        parentId = messages.last.messageId;
+      }
+
       setState(() {
         _messages = messages;
         _chat = activeChat;
+        _parentMessageId = parentId;
       });
     }
   }
 
-  void _handleFilesSelected(List<PlatformFile> files) async {
-    if (files.isEmpty) return;
+  // UI 构建相关方法
+  Widget _buildMessageList() {
+    if (_messages.isEmpty) {
+      return const Center(
+        child: Text(
+          'How can I help you today?',
+          style: TextStyle(
+            fontSize: 18,
+            color: Colors.grey,
+          ),
+        ),
+      );
+    }
 
-    final fileNames = files.map((file) => file.name).join(', ');
-    final message = '已选择文件: $fileNames';
-
-    // setState(() {
-    //   _messages.add(
-    //     ChatMessage(
-    //       content: message,
-    //       role: MessageRole.user,
-    //     ),
-    //   );
-    // });
-
-    // TODO: 处理文件上传逻辑
+    return MessageList(
+      key: ValueKey(_messages.length),
+      messages: _isLoading
+          ? [..._messages, ChatMessage(content: '', role: MessageRole.loading)]
+          : _messages.toList(),
+    );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // 将消息分组
-    List<List<ChatMessage>> groupedMessages = [];
-    List<ChatMessage> currentGroup = [];
+  Widget _buildErrorMessage() {
+    if (_errorMessage.isEmpty) return const SizedBox.shrink();
 
-    for (int i = _messages.length - 1; i >= 0; i--) {
-      if (currentGroup.isEmpty) {
-        currentGroup.add(_messages[i]);
-      } else {
-        final lastMsg = currentGroup.last;
-        final currentMsg = _messages[i];
-
-        // 如果当前消息和上一条消息的角色相同（都是用户或都不是用户），则加入当前组
-        if ((lastMsg.role == MessageRole.user) ==
-            (currentMsg.role == MessageRole.user)) {
-          currentGroup.add(currentMsg);
-        } else {
-          // 角色不同，创建新组
-          groupedMessages.add(List.from(currentGroup));
-          currentGroup = [currentMsg];
-        }
-      }
-    }
-
-    // 添加最后一组
-    if (currentGroup.isNotEmpty) {
-      groupedMessages.add(currentGroup);
-    }
-
-    return Scaffold(
-      body: Column(
+    return Container(
+      padding: const EdgeInsets.all(8.0),
+      margin: const EdgeInsets.all(8.0),
+      constraints: const BoxConstraints(maxHeight: 400),
+      decoration: BoxDecoration(
+        color: Colors.red.shade100,
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const Icon(Icons.error_outline, color: Colors.red),
+          const SizedBox(width: 8.0),
           Expanded(
-            child: _messages.isEmpty
-                ? const Center(
-                    child: Text(
-                      'How can I help you today?',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  )
-                : MessageList(
-                    key: ValueKey(_messages.length),
-                    messages: _isLoading
-                        ? [
-                            ..._messages,
-                            ChatMessage(content: '', role: MessageRole.loading)
-                          ]
-                        : _messages.toList(),
-                  ),
-          ),
-          if (_errorMessage.isNotEmpty)
-            Container(
-              padding: const EdgeInsets.all(8.0),
-              margin: const EdgeInsets.all(8.0),
-              constraints: const BoxConstraints(maxHeight: 400),
-              decoration: BoxDecoration(
-                color: Colors.red.shade100,
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Icon(Icons.error_outline, color: Colors.red),
-                  const SizedBox(width: 8.0),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Text(
-                        _errorMessage,
-                        style: const TextStyle(color: Colors.red),
-                        softWrap: true,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    icon: const Icon(Icons.close, color: Colors.red),
-                    onPressed: () => setState(() => _errorMessage = ''),
-                  ),
-                ],
+            child: SingleChildScrollView(
+              child: Text(
+                _errorMessage,
+                style: const TextStyle(color: Colors.red),
+                softWrap: true,
               ),
             ),
-          InputArea(
-            disabled: _isLoading,
-            isComposing: _isComposing,
-            onTextChanged: _handleTextChanged,
-            onSubmitted: _handleSubmitted,
-            onFilesSelected: _handleFilesSelected,
+          ),
+          IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            icon: const Icon(Icons.close, color: Colors.red),
+            onPressed: () => setState(() => _errorMessage = ''),
           ),
         ],
       ),
     );
   }
 
+  // 消息处理相关方法
   void _handleTextChanged(String text) {
     setState(() {
       _isComposing = text.isNotEmpty;
     });
   }
 
-  void _handleSubmitted(SubmitData data) async {
-    final files = data.files.map((file) => platformFileToFile(file)).toList();
+  // MCP 服务器相关方法
+  Future<void> _handleMcpServerTools(String text) async {
+    if (kIsMobile) return;
+
+    final mcpServerProvider = ProviderManager.mcpServerProvider;
+    final tools = await mcpServerProvider.getTools();
+    Logger.root
+        .info('tools:\n${const JsonEncoder.withIndent('  ').convert(tools)}');
+
+    if (tools.isEmpty) return;
+
+    final toolCall = await _llmClient!.checkToolCall(text, tools);
+    if (!toolCall['need_tool_call']) return;
+
+    await _processMcpToolCall(toolCall, tools);
+  }
+
+  Future<void> _processMcpToolCall(
+      Map<String, dynamic> toolCall, Map<String, dynamic> tools) async {
+    final toolName = toolCall['tool_calls'][0]['name'];
+    final toolArguments =
+        toolCall['tool_calls'][0]['arguments'] as Map<String, dynamic>;
+
+    String? clientName = _findClientName(tools, toolName);
+    if (clientName == null) return;
+
+    _addToolCallMessage(clientName, toolName, toolArguments);
+    await _sendToolCallAndProcessResponse(clientName, toolName, toolArguments);
+  }
+
+  String? _findClientName(Map<String, dynamic> tools, String toolName) {
+    for (var entry in tools.entries) {
+      final clientTools = entry.value;
+      if (clientTools.any((tool) => tool['name'] == toolName)) {
+        return entry.key;
+      }
+    }
+    return null;
+  }
+
+  void _addToolCallMessage(
+      String clientName, String toolName, Map<String, dynamic> toolArguments) {
+    setState(() {
+      _messages.add(ChatMessage(
+          content: null,
+          role: MessageRole.assistant,
+          parentMessageId: _parentMessageId,
+          mcpServerName: clientName,
+          toolCalls: [
+            {
+              'id': 'call_$toolName',
+              'type': 'function',
+              'function': {
+                'name': toolName,
+                'arguments': jsonEncode(toolArguments)
+              }
+            }
+          ]));
+    });
+  }
+
+  Future<void> _sendToolCallAndProcessResponse(String clientName,
+      String toolName, Map<String, dynamic> toolArguments) async {
+    final mcpClient = ProviderManager.mcpServerProvider.getClient(clientName);
+    if (mcpClient == null) return;
+
+    final response = await mcpClient.sendToolCall(
+      name: toolName,
+      arguments: toolArguments,
+    );
 
     setState(() {
-      _isLoading = true;
-      _isComposing = false;
-      _messages.add(
-        ChatMessage(
-          content: data.text,
-          role: MessageRole.user,
-          files: files,
-        ),
-      );
+      _currentResponse = response.result['content'].toString();
+      if (_currentResponse.isNotEmpty) {
+        _messages.add(ChatMessage(
+          content: _currentResponse,
+          role: MessageRole.tool,
+          mcpServerName: clientName,
+          name: toolName,
+          toolCallId: 'call_$toolName',
+          parentMessageId: _parentMessageId,
+        ));
+      }
     });
+  }
+
+  // 消息提交处理
+  Future<void> _handleSubmitted(SubmitData data) async {
+    final files = data.files.map((file) => platformFileToFile(file)).toList();
+
+    _addUserMessage(data.text, files);
 
     try {
-      // 只在桌面端使用 mcpServer
-      if (!Platform.isAndroid && !Platform.isIOS) {
-        final mcpServerProvider = ProviderManager.mcpServerProvider;
-        final tools = await mcpServerProvider.getTools();
-        Logger.root.info(
-            'tools:\n${const JsonEncoder.withIndent('  ').convert(tools)}');
-
-        if (tools.isNotEmpty) {
-          final toolCall = await _llmClient!.checkToolCall(data.text, tools);
-
-          if (toolCall['need_tool_call']) {
-            final toolName = toolCall['tool_calls'][0]['name'];
-            final toolArguments =
-                toolCall['tool_calls'][0]['arguments'] as Map<String, dynamic>;
-
-            String? clientName;
-            for (var entry in tools.entries) {
-              final clientTools = entry.value;
-              if (clientTools.any((tool) => tool['name'] == toolName)) {
-                clientName = entry.key;
-                break;
-              }
-            }
-
-            setState(() {
-              _messages.add(ChatMessage(
-                  content: null,
-                  role: MessageRole.assistant,
-                  mcpServerName: clientName,
-                  toolCalls: [
-                    {
-                      'id': 'call_$toolName',
-                      'type': 'function',
-                      'function': {
-                        'name': toolName,
-                        'arguments': jsonEncode(toolArguments)
-                      }
-                    }
-                  ]));
-            });
-
-            if (clientName != null) {
-              final mcpClient = mcpServerProvider.getClient(clientName);
-
-              if (mcpClient != null) {
-                final response = await mcpClient.sendToolCall(
-                  name: toolName,
-                  arguments: toolArguments,
-                );
-
-                setState(() {
-                  _currentResponse = response.result['content'].toString();
-                  if (_currentResponse.isNotEmpty) {
-                    _messages.add(ChatMessage(
-                      content: _currentResponse,
-                      role: MessageRole.tool,
-                      mcpServerName: clientName,
-                      name: toolName,
-                      toolCallId: 'call_$toolName',
-                    ));
-                  }
-                });
-              }
-            }
-          }
-        }
-      }
-
-      // 先将消息转换为 ChatMessage 列表
-      final List<ChatMessage> messageList = _messages
-          .map((m) => ChatMessage(
-                role: m.role,
-                content: m.content,
-                toolCallId: m.toolCallId,
-                name: m.name,
-                toolCalls: m.toolCalls,
-                files: m.files,
-              ))
-          .toList();
-
-      // 重新排序消息，确保 user 和 tool 消息的正确顺序
-      for (int i = 0; i < messageList.length - 1; i++) {
-        if (messageList[i].role == MessageRole.user &&
-            messageList[i + 1].role == MessageRole.tool) {
-          // 交换相邻的 user 和 tool 消息
-          final temp = messageList[i];
-          messageList[i] = messageList[i + 1];
-          messageList[i + 1] = temp;
-          // 跳过下一个消息，因为已经处理过了
-          i++;
-        }
-      }
-
-      final stream = _llmClient!.chatStreamCompletion(CompletionRequest(
-        model: ProviderManager.chatModelProvider.currentModel.name,
-        messages: [
-          ChatMessage(
-            content:
-                ProviderManager.settingsProvider.generalSetting.systemPrompt,
-            role: MessageRole.assistant,
-          ),
-          ...messageList,
-        ],
-      ));
-
-      setState(() {
-        _currentResponse = '';
-        _messages.add(
-          ChatMessage(
-            content: _currentResponse,
-            role: MessageRole.assistant,
-          ),
-        );
-      });
-
-      // 取消注释并使用流处理响应
-      await for (final chunk in stream) {
-        setState(() {
-          _currentResponse += chunk.content ?? '';
-          _messages.last = ChatMessage(
-            content: _currentResponse,
-            role: MessageRole.assistant,
-          );
-        });
-      }
-
-      if (ProviderManager.chatProvider.activeChat == null) {
-        String title =
-            await _llmClient!.genTitle([_messages.first, _messages.last]);
-        await ProviderManager.chatProvider.createChat(
-            Chat(
-              title: title,
-            ),
-            _messages);
-      } else {
-        await ProviderManager.chatProvider.updateChat(Chat(
-          id: ProviderManager.chatProvider.activeChat!.id!,
-          title: ProviderManager.chatProvider.activeChat!.title,
-          createdAt: ProviderManager.chatProvider.activeChat!.createdAt,
-          updatedAt: DateTime.now(),
-        ));
-
-        final lastFiveMessages = _messages.length <= 5
-            ? _messages
-            : _messages.sublist(_messages.length - 5);
-
-        await ProviderManager.chatProvider.addChatMessage(
-            ProviderManager.chatProvider.activeChat!.id!,
-            lastFiveMessages.where((m) => m.content != null).toList());
-      }
+      await _handleMcpServerTools(data.text);
+      await _processLLMResponse();
+      await _updateChat();
     } catch (e, stackTrace) {
-      _errorMessage = e.toString();
-      Logger.root.severe(e, stackTrace);
+      _handleError(e, stackTrace);
     }
+
     setState(() {
       _isLoading = false;
     });
   }
-}
 
-class MessageList extends StatefulWidget {
-  final List<ChatMessage> messages;
-
-  const MessageList({super.key, required this.messages});
-
-  @override
-  State<MessageList> createState() => _MessageListState();
-}
-
-class _MessageListState extends State<MessageList> {
-  final ScrollController _scrollController = ScrollController();
-  bool _userScrolled = false;
-
-  void resetUserScrolled() {
+  void _addUserMessage(String text, List<File> files) {
     setState(() {
-      _userScrolled = false;
+      _isLoading = true;
+      _isComposing = false;
+      final msgId = Uuid().v4();
+      _messages.add(
+        ChatMessage(
+          messageId: msgId,
+          parentMessageId: _parentMessageId,
+          content: text,
+          role: MessageRole.user,
+          files: files,
+        ),
+      );
+      _parentMessageId = msgId;
     });
-    _scrollToBottom();
   }
 
-  void _scrollToBottom() {
-    for (var delay in [50, 150, 300, 500]) {
-      _delayScrollToBottom(delay);
+  Future<void> _processLLMResponse() async {
+    final List<ChatMessage> messageList = _prepareMessageList();
+    final stream = _llmClient!.chatStreamCompletion(CompletionRequest(
+      model: ProviderManager.chatModelProvider.currentModel.name,
+      messages: [
+        ChatMessage(
+          content: ProviderManager.settingsProvider.generalSetting.systemPrompt,
+          role: MessageRole.assistant,
+        ),
+        ...messageList,
+      ],
+    ));
+
+    _initializeAssistantResponse();
+    await _processResponseStream(stream);
+  }
+
+  List<ChatMessage> _prepareMessageList() {
+    final List<ChatMessage> messageList = _messages
+        .map((m) => ChatMessage(
+              role: m.role,
+              content: m.content,
+              toolCallId: m.toolCallId,
+              name: m.name,
+              toolCalls: m.toolCalls,
+              files: m.files,
+            ))
+        .toList();
+
+    _reorderMessages(messageList);
+    return messageList;
+  }
+
+  void _reorderMessages(List<ChatMessage> messageList) {
+    for (int i = 0; i < messageList.length - 1; i++) {
+      if (messageList[i].role == MessageRole.user &&
+          messageList[i + 1].role == MessageRole.tool) {
+        final temp = messageList[i];
+        messageList[i] = messageList[i + 1];
+        messageList[i + 1] = temp;
+        i++;
+      }
     }
   }
 
-  void _delayScrollToBottom(int delay) {
-    Future.delayed(Duration(milliseconds: delay), () {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOut,
+  void _initializeAssistantResponse() {
+    setState(() {
+      _currentResponse = '';
+      _messages.add(
+        ChatMessage(
+          content: _currentResponse,
+          role: MessageRole.assistant,
+          parentMessageId: _parentMessageId,
+        ),
+      );
+    });
+  }
+
+  Future<void> _processResponseStream(Stream<LLMResponse> stream) async {
+    await for (final chunk in stream) {
+      setState(() {
+        _currentResponse += chunk.content ?? '';
+        _messages.last = ChatMessage(
+          content: _currentResponse,
+          role: MessageRole.assistant,
+          parentMessageId: _parentMessageId,
+        );
+      });
+    }
+  }
+
+  Future<void> _updateChat() async {
+    if (ProviderManager.chatProvider.activeChat == null) {
+      await _createNewChat();
+    } else {
+      await _updateExistingChat();
+    }
+  }
+
+  Future<void> _createNewChat() async {
+    String title =
+        await _llmClient!.genTitle([_messages.first, _messages.last]);
+    await ProviderManager.chatProvider
+        .createChat(Chat(title: title), _handleParentMessageId(_messages));
+  }
+
+  // messages parentMessageId 处理
+  List<ChatMessage> _handleParentMessageId(List<ChatMessage> messages) {
+    if (messages.isEmpty) return [];
+
+    // 找到最后一条用户消息的索引
+    int lastUserIndex =
+        messages.lastIndexWhere((m) => m.role == MessageRole.user);
+    if (lastUserIndex == -1) return messages;
+
+    // 获取从最后一条用户消息开始的所有消息
+    List<ChatMessage> relevantMessages = messages.sublist(lastUserIndex);
+
+    // 如果消息数大于2，重置第二条之后消息的parentMessageId
+    if (relevantMessages.length > 2) {
+      String secondMessageId = relevantMessages[1].messageId;
+      for (int i = 2; i < relevantMessages.length; i++) {
+        relevantMessages[i] = ChatMessage(
+          messageId: relevantMessages[i].messageId,
+          content: relevantMessages[i].content,
+          role: relevantMessages[i].role,
+          parentMessageId: secondMessageId,
+          files: relevantMessages[i].files,
+          toolCalls: relevantMessages[i].toolCalls,
+          toolCallId: relevantMessages[i].toolCallId,
+          name: relevantMessages[i].name,
+          mcpServerName: relevantMessages[i].mcpServerName,
         );
       }
-    });
-  }
-
-  @override
-  void didUpdateWidget(MessageList oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _delayScrollToBottom(100);
-    if (widget.messages.length > oldWidget.messages.length) {
-      resetUserScrolled();
     }
+
+    return relevantMessages;
   }
 
-  @override
-  void initState() {
-    super.initState();
-    // 添加滚动监听器
-    _scrollController.addListener(() {
-      if (_scrollController.position.userScrollDirection !=
-          ScrollDirection.idle) {
-        _userScrolled = true;
-      }
+  Future<void> _updateExistingChat() async {
+    final activeChat = ProviderManager.chatProvider.activeChat!;
+    await ProviderManager.chatProvider.updateChat(Chat(
+      id: activeChat.id!,
+      title: activeChat.title,
+      createdAt: activeChat.createdAt,
+      updatedAt: DateTime.now(),
+    ));
+
+    final lastFiveMessages = _messages.length <= 5
+        ? _messages
+        : _messages.sublist(_messages.length - 5);
+
+    await ProviderManager.chatProvider.addChatMessage(
+        activeChat.id!,
+        _handleParentMessageId(
+            lastFiveMessages.where((m) => m.content != null).toList()));
+  }
+
+  void _handleError(dynamic error, StackTrace stackTrace) {
+    setState(() {
+      _errorMessage = error.toString();
     });
-    _scrollToBottom();
-  }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
+    print('error: $error');
+    print('stackTrace: $stackTrace');
+    Logger.root.severe(error, stackTrace);
   }
 
   @override
   Widget build(BuildContext context) {
-    return KeyboardVisibilityBuilder(
-      builder: (context, isKeyboardVisible) {
-        if (isKeyboardVisible) {
-          _scrollToBottom();
-        }
-
-        // 将消息分组
-        List<List<ChatMessage>> groupedMessages = [];
-        List<ChatMessage> currentGroup = [];
-
-        for (var msg in widget.messages) {
-          if (msg.role == MessageRole.user) {
-            if (currentGroup.isNotEmpty) {
-              groupedMessages.add(currentGroup);
-              currentGroup = [];
-            }
-            currentGroup.add(msg);
-            groupedMessages.add(currentGroup);
-            currentGroup = [];
-          } else {
-            currentGroup.add(msg);
-          }
-        }
-
-        if (currentGroup.isNotEmpty) {
-          groupedMessages.add(currentGroup);
-        }
-
-        return ListView.builder(
-          controller: _scrollController,
-          padding: const EdgeInsets.all(8.0),
-          itemCount: groupedMessages.length,
-          itemBuilder: (context, index) {
-            final group = groupedMessages[index];
-
-            return ChatUIMessage(
-              messages: group,
-            );
-          },
-        );
-      },
+    return Scaffold(
+      body: Column(
+        children: [
+          Expanded(child: _buildMessageList()),
+          _buildErrorMessage(),
+          InputArea(
+            disabled: _isLoading,
+            isComposing: _isComposing,
+            onTextChanged: _handleTextChanged,
+            onSubmitted: _handleSubmitted,
+          ),
+        ],
+      ),
     );
   }
 }

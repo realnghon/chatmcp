@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:uuid/uuid.dart';
+import 'package:ChatMcp/dao/chat_message.dart';
 
 // 消息角色枚举
 enum MessageRole {
@@ -52,7 +53,8 @@ class File {
 
 // 消息结构体
 class ChatMessage {
-  final String uuid;
+  final String messageId;
+  final String parentMessageId;
   final MessageRole role;
   final String? content;
   final String? name;
@@ -62,7 +64,6 @@ class ChatMessage {
   final List<File>? files;
 
   ChatMessage({
-    String? uuid,
     required this.role,
     this.content,
     this.name,
@@ -70,7 +71,10 @@ class ChatMessage {
     this.toolCallId,
     this.toolCalls,
     this.files,
-  }) : uuid = uuid ?? const Uuid().v4();
+    String? messageId,
+    String? parentMessageId,
+  })  : messageId = messageId ?? Uuid().v4(),
+        parentMessageId = parentMessageId ?? '';
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{
@@ -95,10 +99,19 @@ class ChatMessage {
       json['files'] = files?.map((file) => file.toJson()).toList();
     }
 
+    json['messageId'] = messageId;
+    json['parentMessageId'] = parentMessageId;
+
     return json;
   }
 
-  factory ChatMessage.fromJson(Map<String, dynamic> json) {
+  factory ChatMessage.fromDb(DbChatMessage dbChatMessage) {
+    return ChatMessage.fromJson(dbChatMessage.messageId,
+        dbChatMessage.parentMessageId, jsonDecode(dbChatMessage.body));
+  }
+
+  factory ChatMessage.fromJson(
+      String messageId, String parentMessageId, Map<String, dynamic> json) {
     // 处理 toolCalls 的类型转换
     List<Map<String, dynamic>>? toolCalls;
     if (json['tool_calls'] != null) {
@@ -122,6 +135,8 @@ class ChatMessage {
       toolCallId: json['tool_call_id'],
       toolCalls: toolCalls,
       files: files,
+      messageId: messageId,
+      parentMessageId: parentMessageId,
     );
   }
 

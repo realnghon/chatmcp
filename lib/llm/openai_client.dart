@@ -29,7 +29,7 @@ class OpenAIClient extends BaseLLMClient {
   Future<LLMResponse> chatCompletion(CompletionRequest request) async {
     final body = {
       'model': request.model,
-      'messages': request.messages.map((m) => m.toJson()).toList(),
+      'messages': chatMessageToOpenAIMessage(request.messages),
     };
 
     if (request.tools != null && request.tools!.isNotEmpty) {

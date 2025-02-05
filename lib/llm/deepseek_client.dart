@@ -28,7 +28,7 @@ class DeepSeekClient extends BaseLLMClient {
   Future<LLMResponse> chatCompletion(CompletionRequest request) async {
     final body = {
       'model': request.model,
-      'messages': request.messages.map((m) => m.toJson()).toList(),
+      'messages': chatMessageToDeepSeekMessage(request.messages),
     };
 
     if (request.tools != null && request.tools!.isNotEmpty) {
@@ -82,7 +82,7 @@ class DeepSeekClient extends BaseLLMClient {
   Stream<LLMResponse> chatStreamCompletion(CompletionRequest request) async* {
     final body = {
       'model': request.model,
-      'messages': request.messages.map((m) => m.toJson()).toList(),
+      'messages': chatMessageToDeepSeekMessage(request.messages),
       'stream': true,
     };
 
@@ -199,4 +199,9 @@ $conversationText""",
       return [];
     }
   }
+}
+
+List<Map<String, dynamic>> chatMessageToDeepSeekMessage(
+    List<ChatMessage> messages) {
+  return messages.map((m) => m.toJson()).toList();
 }

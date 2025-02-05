@@ -31,9 +31,7 @@ class Chat {
     final chatMessages =
         await ChatMessageDao().query(where: 'chatId = ?', whereArgs: [id!]);
 
-    return chatMessages
-        .map((e) => llmModel.ChatMessage.fromJson(jsonDecode(e.body)))
-        .toList();
+    return chatMessages.map((e) => llmModel.ChatMessage.fromDb(e)).toList();
   }
 }
 

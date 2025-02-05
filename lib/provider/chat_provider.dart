@@ -3,8 +3,6 @@ import 'package:ChatMcp/dao/chat.dart';
 import 'package:ChatMcp/dao/chat_message.dart';
 import 'package:logging/logging.dart';
 import 'package:ChatMcp/llm/model.dart' as llmModel;
-import 'package:ChatMcp/llm/openai_client.dart' as openai;
-import 'package:ChatMcp/llm/claude_client.dart' as claude;
 
 class ChatProvider extends ChangeNotifier {
   static final ChatProvider _instance = ChatProvider._internal();
@@ -74,8 +72,15 @@ class ChatProvider extends ChangeNotifier {
       if (message.role == llmModel.MessageRole.error) {
         continue;
       }
-      await chatMessageDao.insert(ChatMessage(
+      final chatMessages = await chatMessageDao
+          .query(where: 'messageId = ?', whereArgs: [message.messageId]);
+      if (chatMessages.isNotEmpty) {
+        continue;
+      }
+      await chatMessageDao.insert(DbChatMessage(
         chatId: chatId,
+        messageId: message.messageId,
+        parentMessageId: message.parentMessageId,
         body: message.toString(),
       ));
     }

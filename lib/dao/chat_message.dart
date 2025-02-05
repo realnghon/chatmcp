@@ -1,7 +1,7 @@
 import './base_dao.dart';
 import 'package:uuid/uuid.dart';
 
-class ChatMessage {
+class DbChatMessage {
   final int? id;
   final int chatId;
   final String body;
@@ -10,7 +10,7 @@ class ChatMessage {
   final String messageId;
   final String parentMessageId;
 
-  ChatMessage({
+  DbChatMessage({
     this.id,
     required this.chatId,
     required this.body,
@@ -35,14 +35,16 @@ class ChatMessage {
   }
 }
 
-class ChatMessageDao extends BaseDao<ChatMessage> {
+class ChatMessageDao extends BaseDao<DbChatMessage> {
   ChatMessageDao() : super('chat_message');
 
   @override
-  ChatMessage fromJson(Map<String, dynamic> json) {
-    return ChatMessage(
+  DbChatMessage fromJson(Map<String, dynamic> json) {
+    return DbChatMessage(
       id: json['id'] ?? 0,
       chatId: json['chatId'] ?? 0,
+      messageId: json['messageId'] ?? '',
+      parentMessageId: json['parentMessageId'] ?? '',
       body: json['body'] ?? '',
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
@@ -54,7 +56,7 @@ class ChatMessageDao extends BaseDao<ChatMessage> {
   }
 
   @override
-  Map<String, dynamic> toJson(ChatMessage entity) {
+  Map<String, dynamic> toJson(DbChatMessage entity) {
     return entity.toJson();
   }
 }
