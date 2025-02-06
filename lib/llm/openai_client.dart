@@ -188,10 +188,8 @@ $conversationText""",
 
       final data = response.data;
 
-      final models = (data['data'] as List)
-          .map((m) => m['id'].toString())
-          .where((id) => id.contains('gpt') || id.contains('o1'))
-          .toList();
+      final models =
+          (data['data'] as List).map((m) => m['id'].toString()).toList();
 
       return models;
     } catch (e, trace) {

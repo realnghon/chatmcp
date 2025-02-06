@@ -103,14 +103,15 @@ class ModelSelector extends StatelessWidget {
                                 size: 18,
                                 color: Theme.of(context).colorScheme.primary,
                               ),
-                            if (model.name == chatModelProvider.currentModel)
+                            if (model.name ==
+                                chatModelProvider.currentModel.name)
                               const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 model.label,
                                 style: TextStyle(
                                   color: model.name ==
-                                          chatModelProvider.currentModel
+                                          chatModelProvider.currentModel.name
                                       ? Theme.of(context).colorScheme.primary
                                       : null,
                                 ),

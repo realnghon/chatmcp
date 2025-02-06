@@ -62,6 +62,8 @@ class ChatMessage {
   final String? toolCallId;
   final List<Map<String, dynamic>>? toolCalls;
   final List<File>? files;
+  List<String>? brotherMessageIds;
+  List<String>? childMessageIds;
 
   ChatMessage({
     required this.role,
@@ -71,6 +73,8 @@ class ChatMessage {
     this.toolCallId,
     this.toolCalls,
     this.files,
+    this.brotherMessageIds,
+    this.childMessageIds,
     String? messageId,
     String? parentMessageId,
   })  : messageId = messageId ?? Uuid().v4(),
@@ -101,6 +105,13 @@ class ChatMessage {
 
     json['messageId'] = messageId;
     json['parentMessageId'] = parentMessageId;
+    if (brotherMessageIds != null) {
+      json['brotherMessageIds'] = brotherMessageIds;
+    }
+
+    if (childMessageIds != null) {
+      json['childMessageIds'] = childMessageIds;
+    }
 
     return json;
   }
@@ -143,6 +154,23 @@ class ChatMessage {
   @override
   String toString() {
     return jsonEncode(toJson());
+  }
+
+  ChatMessage copyWith({
+    String? messageId,
+    String? parentMessageId,
+  }) {
+    return ChatMessage(
+      messageId: messageId ?? this.messageId,
+      parentMessageId: parentMessageId ?? this.parentMessageId,
+      role: role,
+      content: content,
+      name: name,
+      mcpServerName: mcpServerName,
+      toolCallId: toolCallId,
+      toolCalls: toolCalls,
+      files: files,
+    );
   }
 }
 

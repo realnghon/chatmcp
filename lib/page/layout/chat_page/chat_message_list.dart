@@ -6,8 +6,14 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 
 class MessageList extends StatefulWidget {
   final List<ChatMessage> messages;
-
-  const MessageList({super.key, required this.messages});
+  final Function(ChatMessage) onRetry;
+  final Function(String messageId) onSwitch;
+  const MessageList({
+    super.key,
+    required this.messages,
+    required this.onRetry,
+    required this.onSwitch,
+  });
 
   @override
   State<MessageList> createState() => _MessageListState();
@@ -124,6 +130,8 @@ class _MessageListState extends State<MessageList> {
 
             return ChatUIMessage(
               messages: group,
+              onRetry: widget.onRetry,
+              onSwitch: widget.onSwitch,
             );
           },
         );

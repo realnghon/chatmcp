@@ -9,13 +9,18 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'dart:io' as io;
 import 'package:ChatMcp/utils/color.dart';
+import 'chat_message_action.dart';
 
 class ChatUIMessage extends StatelessWidget {
   final List<ChatMessage> messages;
+  final Function(ChatMessage) onRetry;
+  final Function(String messageId) onSwitch;
 
   const ChatUIMessage({
     super.key,
     required this.messages,
+    required this.onRetry,
+    required this.onSwitch,
   });
 
   @override
@@ -51,11 +56,15 @@ class ChatUIMessage extends StatelessWidget {
                   for (var msg in messages.length > 1
                       ? messages.where((m) => m.role != MessageRole.loading)
                       : messages)
-                    ChatMessageContent(message: msg),
+                    ChatMessageContent(message: msg, onRetry: onRetry),
                   if (kIsDesktop &&
                       messages.last.role != MessageRole.loading &&
                       !isUser)
-                    MessageActions(message: messages.last),
+                    MessageActions(
+                      messages: messages,
+                      onRetry: onRetry,
+                      onSwitch: onSwitch,
+                    ),
                 ],
               ),
             ),
@@ -75,134 +84,140 @@ class ChatUIMessage extends StatelessWidget {
 
 class ChatMessageContent extends StatelessWidget {
   final ChatMessage message;
-
+  final Function(ChatMessage) onRetry;
   const ChatMessageContent({
     super.key,
     required this.message,
+    required this.onRetry,
   });
+
+  Widget _buildMessage(BuildContext context) {
+    return Column(
+      crossAxisAlignment: message.role == MessageRole.user
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
+      children: [
+        if (message.role == MessageRole.loading)
+          MessageBubble(
+              message: ChatMessage(content: '', role: MessageRole.loading)),
+        if (message.files != null && message.files!.isNotEmpty)
+          Container(
+            margin: const EdgeInsets.only(top: 8),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: message.files!
+                  .map((file) => Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: AppColors.grey[200],
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: file.fileType.startsWith('image')
+                            ? ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxWidth:
+                                      MediaQuery.of(context).size.width * 0.6,
+                                  maxHeight: 300,
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.file(
+                                    io.File(file.path!),
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.grey[200],
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.broken_image,
+                                              color: AppColors.grey[600],
+                                              size: 32,
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              )
+                            : Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(Icons.attach_file, size: 16),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    file.name,
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                      ))
+                  .toList(),
+            ),
+          ),
+        if ((message.role == MessageRole.user ||
+                message.role == MessageRole.assistant) &&
+            message.content != null)
+          MessageBubble(message: message),
+        if (message.toolCalls != null && message.toolCalls!.isNotEmpty)
+          ToolCallWidget(message: message),
+        if (message.role == MessageRole.tool && message.toolCallId != null)
+          ToolResultWidget(message: message),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onLongPress: () {
-        showModalBottomSheet(
-          context: context,
-          builder: (context) => Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.copy_outlined),
-                title: const Text('复制'),
-                onTap: () {
-                  Clipboard.setData(ClipboardData(
-                    text: message.content ?? '',
-                  ));
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('已复制到剪贴板'),
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                },
-              ),
-              if (message.role != MessageRole.user)
-                ListTile(
-                  leading: const Icon(Icons.refresh),
-                  title: const Text('重试'),
-                  onTap: () {
-                    Navigator.pop(context);
-                    // TODO: 实现重试逻辑
-                  },
-                ),
-            ],
-          ),
-        );
-      },
-      child: Column(
-        crossAxisAlignment: message.role == MessageRole.user
-            ? CrossAxisAlignment.end
-            : CrossAxisAlignment.start,
-        children: [
-          if (message.role == MessageRole.loading)
-            MessageBubble(
-                message: ChatMessage(content: '', role: MessageRole.loading)),
-          if (message.files != null && message.files!.isNotEmpty)
-            Container(
-              margin: const EdgeInsets.only(top: 8),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: message.files!
-                    .map((file) => Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 6, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: AppColors.grey[200],
-                            borderRadius: BorderRadius.circular(16),
+    return kIsDesktop
+        ? _buildMessage(context)
+        : GestureDetector(
+            onLongPress: () {
+              showModalBottomSheet(
+                context: context,
+                builder: (context) => Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.copy_outlined),
+                      title: const Text('复制'),
+                      onTap: () {
+                        Clipboard.setData(ClipboardData(
+                          text: message.content ?? '',
+                        ));
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('已复制到剪贴板'),
+                            duration: Duration(seconds: 2),
                           ),
-                          child: file.fileType.startsWith('image')
-                              ? ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                    maxWidth:
-                                        MediaQuery.of(context).size.width * 0.6,
-                                    maxHeight: 300,
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.file(
-                                      io.File(file.path!),
-                                      fit: BoxFit.contain,
-                                      errorBuilder:
-                                          (context, error, stackTrace) {
-                                        return Container(
-                                          padding: const EdgeInsets.all(8),
-                                          decoration: BoxDecoration(
-                                            color: AppColors.grey[200],
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                          ),
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon(
-                                                Icons.broken_image,
-                                                color: AppColors.grey[600],
-                                                size: 32,
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                )
-                              : Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(Icons.attach_file, size: 16),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      file.name,
-                                      style: const TextStyle(fontSize: 12),
-                                    ),
-                                  ],
-                                ),
-                        ))
-                    .toList(),
-              ),
-            ),
-          if ((message.role == MessageRole.user ||
-                  message.role == MessageRole.assistant) &&
-              message.content != null)
-            MessageBubble(message: message),
-          if (message.toolCalls != null && message.toolCalls!.isNotEmpty)
-            ToolCallWidget(message: message),
-          if (message.role == MessageRole.tool && message.toolCallId != null)
-            ToolResultWidget(message: message),
-        ],
-      ),
-    );
+                        );
+                      },
+                    ),
+                    if (message.role != MessageRole.user)
+                      ListTile(
+                        leading: const Icon(Icons.refresh),
+                        title: const Text('重试'),
+                        onTap: () {
+                          Navigator.pop(context);
+                          onRetry(message);
+                        },
+                      ),
+                  ],
+                ),
+              );
+            },
+            child: _buildMessage(context),
+          );
   }
 }
 
@@ -313,59 +328,6 @@ class ChatAvatar extends StatelessWidget {
       child: Icon(
         isUser ? Icons.person : Icons.android,
         color: AppColors.white,
-      ),
-    );
-  }
-}
-
-class MessageActions extends StatelessWidget {
-  final ChatMessage message;
-
-  const MessageActions({
-    super.key,
-    required this.message,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 8, top: 4),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            iconSize: 16,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(
-              minWidth: 24,
-              minHeight: 24,
-            ),
-            icon: const Icon(Icons.copy_outlined),
-            onPressed: () {
-              Clipboard.setData(ClipboardData(
-                text: message.content ?? '',
-              ));
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('已复制到剪贴板'),
-                  duration: Duration(seconds: 2),
-                ),
-              );
-            },
-          ),
-          IconButton(
-            iconSize: 16,
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(
-              minWidth: 24,
-              minHeight: 24,
-            ),
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              // TODO: 实现重试逻辑
-            },
-          ),
-        ],
       ),
     );
   }

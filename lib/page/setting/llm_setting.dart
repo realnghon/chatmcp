@@ -1,4 +1,3 @@
-import 'package:ChatMcp/utils/platform.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../provider/settings_provider.dart';
@@ -170,22 +169,22 @@ class _LlmSettingsState extends State<LlmSettings> {
       try {
         final settings = ProviderManager.settingsProvider;
 
-        final openaiSetting = ApiSetting(
+        final openaiSetting = LLMSetting(
           apiKey: _openaiApiKeyController.text,
           apiEndpoint: _openaiApiEndpointController.text,
         );
 
-        final claudeSetting = ApiSetting(
+        final claudeSetting = LLMSetting(
           apiKey: _claudeApiKeyController.text,
           apiEndpoint: _claudeApiEndpointController.text,
         );
 
-        final deepseekSetting = ApiSetting(
+        final deepseekSetting = LLMSetting(
           apiKey: _deepseekApiKeyController.text,
           apiEndpoint: _deepseekApiEndpointController.text,
         );
 
-        final ollamaSetting = ApiSetting(
+        final ollamaSetting = LLMSetting(
           apiKey: "",
           apiEndpoint: _ollamaApiEndpointController.text,
         );
@@ -198,26 +197,29 @@ class _LlmSettingsState extends State<LlmSettings> {
         });
 
         if (mounted) {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(
-                content: const Row(
-                  children: [
-                    Icon(Icons.check_circle, color: AppColors.white),
-                    SizedBox(width: 8),
-                    Text('Settings saved successfully'),
-                  ],
+          await ProviderManager.chatModelProvider.loadAvailableModels();
+          if (mounted) {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                SnackBar(
+                  content: const Row(
+                    children: [
+                      Icon(Icons.check_circle, color: AppColors.white),
+                      SizedBox(width: 8),
+                      Text('Settings saved successfully'),
+                    ],
+                  ),
+                  behavior: SnackBarBehavior.floating,
+                  margin: const EdgeInsets.all(16),
+                  duration: const Duration(seconds: 2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  backgroundColor: AppColors.green,
                 ),
-                behavior: SnackBarBehavior.floating,
-                margin: const EdgeInsets.all(16),
-                duration: const Duration(seconds: 2),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                backgroundColor: AppColors.green,
-              ),
-            );
+              );
+          }
         }
       } finally {
         if (mounted) {

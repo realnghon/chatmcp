@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ChatMcp/provider/provider_manager.dart';
 import './model_selector.dart';
-import 'package:window_manager_plus/window_manager_plus.dart';
+import 'package:window_manager/window_manager.dart' as wm;
 import 'package:ChatMcp/utils/platform.dart';
 import 'package:ChatMcp/utils/color.dart';
 
@@ -25,11 +25,11 @@ class TopToolbar extends StatelessWidget {
           debugPrint('double tap');
           if (kIsDesktop) {
             try {
-              bool isMaximized = await WindowManagerPlus.current.isMaximized();
+              bool isMaximized = await wm.windowManager.isMaximized();
               if (isMaximized) {
-                await WindowManagerPlus.current.unmaximize();
+                await wm.windowManager.unmaximize();
               } else {
-                await WindowManagerPlus.current.maximize();
+                await wm.windowManager.maximize();
               }
             } catch (e) {
               debugPrint('窗口操作失败: $e');

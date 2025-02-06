@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:ChatMcp/dao/init_db.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -8,7 +6,6 @@ import './logger.dart';
 import './page/layout/layout.dart';
 import './provider/provider_manager.dart';
 import 'package:logging/logging.dart';
-import 'package:window_manager_plus/window_manager_plus.dart' as wmp;
 import 'page/layout/sidebar.dart';
 import 'utils/platform.dart';
 
@@ -29,42 +26,22 @@ void main() async {
   //   }
   // }
 
-  // 只在桌面平台初始化窗口管理器
-
-  // TODO: Consider unifying the window manager to use either window_manager or window_manager_plus.
-  // WindowManager supports linux, but WindowManagerPlus does'nt support linux
-  if (Platform.isLinux) {
+  if (kIsDesktop) {
     await wm.windowManager.ensureInitialized();
 
-    final wm.WindowOptions windowOptions = const wm.WindowOptions(
+    final wm.WindowOptions windowOptions = wm.WindowOptions(
       size: Size(1200, 800),
-      minimumSize: Size(800, 600),
+      minimumSize: Size(400, 600),
       center: true,
       backgroundColor: Colors.transparent,
       skipTaskbar: false,
-      titleBarStyle: wm.TitleBarStyle.normal,
+      titleBarStyle:
+          kIsLinux ? wm.TitleBarStyle.normal : wm.TitleBarStyle.hidden,
     );
 
     await wm.windowManager.waitUntilReadyToShow(windowOptions, () async {
       await wm.windowManager.show();
       await wm.windowManager.focus();
-    });
-  } else {
-    await wmp.WindowManagerPlus.ensureInitialized(0);
-
-    final wmp.WindowOptions windowOptions = const wmp.WindowOptions(
-      size: Size(1200, 800),
-      minimumSize: Size(800, 600),
-      center: true,
-      backgroundColor: Colors.transparent,
-      skipTaskbar: false,
-      titleBarStyle: wmp.TitleBarStyle.hidden,
-    );
-
-    await wmp.WindowManagerPlus.current.waitUntilReadyToShow(windowOptions,
-        () async {
-      await wmp.WindowManagerPlus.current.show();
-      await wmp.WindowManagerPlus.current.focus();
     });
   }
 

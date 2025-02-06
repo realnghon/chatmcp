@@ -75,6 +75,148 @@ class _ChatPageState extends State<ChatPage> {
     _initializeHistoryMessages();
   }
 
+  int _activeTreeIndex = 0;
+  List<ChatMessage> _allMessages = [];
+
+  Future<List<ChatMessage>> _getHistoryTreeMessages() async {
+    final activeChat = ProviderManager.chatProvider.activeChat;
+    if (activeChat == null) return [];
+
+    Map<String, List<String>> messageMap = {};
+
+    final messages = await activeChat.getChatMessages();
+
+    for (var message in messages) {
+      if (message.role == MessageRole.user) {
+        continue;
+      }
+      // final parentMessage =
+      //     messages.firstWhere((m) => m.messageId == message.parentMessageId);
+      // if (parentMessage.role != MessageRole.user) {
+      //   continue;
+      // }
+      if (messageMap[message.parentMessageId] == null) {
+        messageMap[message.parentMessageId] = [];
+      }
+
+      messageMap[message.parentMessageId]?.add(message.messageId);
+    }
+
+    for (var message in messages) {
+      final brotherIds = messageMap[message.messageId] ?? [];
+
+      if (brotherIds.length > 1) {
+        int index =
+            messages.indexWhere((m) => m.messageId == message.messageId);
+        if (index != -1) {
+          messages[index].childMessageIds ??= brotherIds;
+        }
+
+        for (var brotherId in brotherIds) {
+          final index = messages.indexWhere((m) => m.messageId == brotherId);
+          if (index != -1) {
+            messages[index].brotherMessageIds ??= brotherIds;
+          }
+        }
+      }
+    }
+
+    setState(() {
+      _allMessages = messages;
+    });
+
+    // print('messages:\n${const JsonEncoder.withIndent('  ').convert(messages)}');
+
+    final lastMessage = messages.last;
+    return _getTreeMessages(lastMessage.messageId, messages);
+  }
+
+  List<ChatMessage> _getTreeMessages(
+      String messageId, List<ChatMessage> messages) {
+    final lastMessage = messages.firstWhere((m) => m.messageId == messageId);
+    List<ChatMessage> treeMessages = [];
+
+    ChatMessage? currentMessage = lastMessage;
+    while (currentMessage != null) {
+      if (currentMessage.role != MessageRole.user) {
+        final childMessageIds = currentMessage.childMessageIds;
+        if (childMessageIds != null && childMessageIds.isNotEmpty) {
+          for (var childId in childMessageIds.reversed) {
+            final childMessage = messages.firstWhere(
+              (m) => m.messageId == childId,
+              orElse: () => ChatMessage(content: '', role: MessageRole.user),
+            );
+            if (treeMessages
+                .any((m) => m.messageId == childMessage.messageId)) {
+              continue;
+            }
+            treeMessages.insert(0, childMessage);
+          }
+        }
+      }
+
+      treeMessages.insert(0, currentMessage);
+
+      final parentId = currentMessage.parentMessageId;
+      if (parentId == null || parentId.isEmpty) break;
+
+      currentMessage = messages.firstWhere(
+        (m) => m.messageId == parentId,
+        orElse: () => ChatMessage(
+          messageId: '',
+          content: '',
+          role: MessageRole.user,
+          parentMessageId: '',
+        ),
+      );
+
+      if (currentMessage.messageId.isEmpty) break;
+    }
+
+    // print('messageId: ${lastMessage.messageId}');
+
+    ChatMessage? nextMessage = messages
+        .where((m) => m.role == MessageRole.user)
+        .firstWhere(
+          (m) => m.parentMessageId == lastMessage.messageId,
+          orElse: () =>
+              ChatMessage(messageId: '', content: '', role: MessageRole.user),
+        );
+
+    // print(
+    // 'nextMessage:\n${const JsonEncoder.withIndent('  ').convert(nextMessage)}');
+
+    while (nextMessage != null && nextMessage.messageId.isNotEmpty) {
+      if (!treeMessages.any((m) => m.messageId == nextMessage!.messageId)) {
+        treeMessages.add(nextMessage);
+      }
+      final childMessageIds = nextMessage.childMessageIds;
+      if (childMessageIds != null && childMessageIds.isNotEmpty) {
+        for (var childId in childMessageIds) {
+          final childMessage = messages.firstWhere(
+            (m) => m.messageId == childId,
+            orElse: () =>
+                ChatMessage(messageId: '', content: '', role: MessageRole.user),
+          );
+          if (treeMessages.any((m) => m.messageId == childMessage.messageId)) {
+            continue;
+          }
+          treeMessages.add(childMessage);
+        }
+      }
+
+      nextMessage = messages.firstWhere(
+        (m) => m.parentMessageId == nextMessage!.messageId,
+        orElse: () =>
+            ChatMessage(messageId: '', content: '', role: MessageRole.user),
+      );
+    }
+
+    // print(
+    //     'treeMessages:\n${const JsonEncoder.withIndent('  ').convert(treeMessages)}');
+    return treeMessages;
+  }
+
   // 消息处理相关方法
   Future<void> _initializeHistoryMessages() async {
     final activeChat = ProviderManager.chatProvider.activeChat;
@@ -82,14 +224,12 @@ class _ChatPageState extends State<ChatPage> {
       setState(() {
         _messages = [];
         _chat = null;
+        _parentMessageId = '';
       });
       return;
     }
     if (_chat?.id != activeChat.id) {
-      final messages = await activeChat.getChatMessages();
-      Logger.root.info(
-          'messages:\n${const JsonEncoder.withIndent('  ').convert(messages)}');
-
+      final messages = await _getHistoryTreeMessages();
       // 找到最后一条用户消息的索引
       final lastUserIndex =
           messages.lastIndexWhere((m) => m.role == MessageRole.user);
@@ -107,6 +247,7 @@ class _ChatPageState extends State<ChatPage> {
         _messages = messages;
         _chat = activeChat;
         _parentMessageId = parentId;
+        _activeTreeIndex = 0;
       });
     }
   }
@@ -114,22 +255,20 @@ class _ChatPageState extends State<ChatPage> {
   // UI 构建相关方法
   Widget _buildMessageList() {
     if (_messages.isEmpty) {
-      return Expanded(
-        child: Container(
-          color: AppColors.transparent,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'How can I help you today?',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: AppColors.grey,
-                  ),
+      return Container(
+        color: AppColors.transparent,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'How can I help you today?',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: AppColors.grey,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       );
@@ -139,7 +278,16 @@ class _ChatPageState extends State<ChatPage> {
       messages: _isLoading
           ? [..._messages, ChatMessage(content: '', role: MessageRole.loading)]
           : _messages.toList(),
+      onRetry: _onRetry,
+      onSwitch: _onSwitch,
     );
+  }
+
+  void _onSwitch(String messageId) {
+    final messages = _getTreeMessages(messageId, _allMessages);
+    setState(() {
+      _messages = messages;
+    });
   }
 
   Widget _buildErrorMessage() {
@@ -268,6 +416,52 @@ class _ChatPageState extends State<ChatPage> {
           parentMessageId: _parentMessageId,
         ));
       }
+    });
+  }
+
+  ChatMessage? _findUserMessage(ChatMessage message) {
+    final parentMessage = _messages.firstWhere(
+      (m) => m.messageId == message.parentMessageId,
+      orElse: () =>
+          ChatMessage(messageId: '', content: '', role: MessageRole.user),
+    );
+
+    if (parentMessage.messageId.isEmpty) return null;
+
+    if (parentMessage.role != MessageRole.user) {
+      return _findUserMessage(parentMessage);
+    }
+
+    return parentMessage;
+  }
+
+  Future<void> _onRetry(ChatMessage message) async {
+    final userMessage = _findUserMessage(message);
+    if (userMessage == null) return;
+
+    // 找到从开始到 userMessage 的所有消息
+    final messageIndex = _messages.indexOf(userMessage);
+    if (messageIndex == -1) return;
+
+    final previousMessages = _messages.sublist(0, messageIndex + 1);
+
+    // 移除从 userMessage 之后的所有消息
+    setState(() {
+      _messages = previousMessages;
+      _parentMessageId = userMessage.messageId;
+      _isLoading = true;
+    });
+
+    try {
+      await _handleMcpServerTools(userMessage.content ?? '');
+      await _processLLMResponse();
+      await _updateChat();
+    } catch (e, stackTrace) {
+      _handleError(e, stackTrace);
+    }
+
+    setState(() {
+      _isLoading = false;
     });
   }
 
@@ -410,16 +604,8 @@ class _ChatPageState extends State<ChatPage> {
     if (relevantMessages.length > 2) {
       String secondMessageId = relevantMessages[1].messageId;
       for (int i = 2; i < relevantMessages.length; i++) {
-        relevantMessages[i] = ChatMessage(
-          messageId: relevantMessages[i].messageId,
-          content: relevantMessages[i].content,
-          role: relevantMessages[i].role,
+        relevantMessages[i] = relevantMessages[i].copyWith(
           parentMessageId: secondMessageId,
-          files: relevantMessages[i].files,
-          toolCalls: relevantMessages[i].toolCalls,
-          toolCallId: relevantMessages[i].toolCallId,
-          name: relevantMessages[i].name,
-          mcpServerName: relevantMessages[i].mcpServerName,
         );
       }
     }
@@ -436,14 +622,8 @@ class _ChatPageState extends State<ChatPage> {
       updatedAt: DateTime.now(),
     ));
 
-    final lastFiveMessages = _messages.length <= 5
-        ? _messages
-        : _messages.sublist(_messages.length - 5);
-
-    await ProviderManager.chatProvider.addChatMessage(
-        activeChat.id!,
-        _handleParentMessageId(
-            lastFiveMessages.where((m) => m.content != null).toList()));
+    await ProviderManager.chatProvider
+        .addChatMessage(activeChat.id!, _handleParentMessageId(_messages));
   }
 
   void _handleError(dynamic error, StackTrace stackTrace) {

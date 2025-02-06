@@ -54,7 +54,6 @@ dependencies:
   url_launcher: ^6.3.1
   curl_logger_dio_interceptor: ^1.0.0
   window_manager: ^0.4.3
-  window_manager_plus: ^1.0.5
   webview_flutter: ^4.0.0
   flutter_keyboard_visibility: ^6.0.0
   file_picker: ^8.0.7

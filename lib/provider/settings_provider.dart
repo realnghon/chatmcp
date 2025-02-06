@@ -3,11 +3,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'chat_model_provider.dart';
 
-class ApiSetting {
+class LLMSetting {
   String apiKey;
   String apiEndpoint;
 
-  ApiSetting({
+  LLMSetting({
     required this.apiKey,
     required this.apiEndpoint,
   });
@@ -19,8 +19,8 @@ class ApiSetting {
     };
   }
 
-  factory ApiSetting.fromJson(Map<String, dynamic> json) {
-    return ApiSetting(
+  factory LLMSetting.fromJson(Map<String, dynamic> json) {
+    return LLMSetting(
       apiKey: json['apiKey'] as String,
       apiEndpoint: json['apiEndpoint'] as String,
     );
@@ -73,25 +73,25 @@ class SettingsProvider extends ChangeNotifier {
   factory SettingsProvider() => _instance;
   SettingsProvider._internal();
 
-  Map<String, ApiSetting> _apiSettings = {};
+  Map<String, LLMSetting> _apiSettings = {};
 
   GeneralSetting _generalSetting = GeneralSetting(
     theme: 'light',
     systemPrompt: defaultSystemPrompt,
   );
 
-  Map<String, ApiSetting> get apiSettings => _apiSettings;
+  Map<String, LLMSetting> get apiSettings => _apiSettings;
 
   GeneralSetting get generalSetting => _generalSetting;
 
-  Future<void> loadSettings() async {
+  Future<Map<String, LLMSetting>> loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     final String? settingsJson = prefs.getString('apiSettings');
 
     if (settingsJson != null) {
       final Map<String, dynamic> decoded = jsonDecode(settingsJson);
       _apiSettings = decoded.map((key, value) =>
-          MapEntry(key, ApiSetting.fromJson(value as Map<String, dynamic>)));
+          MapEntry(key, LLMSetting.fromJson(value as Map<String, dynamic>)));
     }
 
     final String? generalSettingsJson = prefs.getString('generalSettings');
@@ -101,10 +101,12 @@ class SettingsProvider extends ChangeNotifier {
     }
 
     notifyListeners();
+
+    return _apiSettings;
   }
 
   Future<void> updateApiSettings({
-    required Map<String, ApiSetting> apiSettings,
+    required Map<String, LLMSetting> apiSettings,
   }) async {
     final prefs = await SharedPreferences.getInstance();
 
