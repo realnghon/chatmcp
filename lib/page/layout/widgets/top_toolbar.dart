@@ -4,6 +4,7 @@ import './model_selector.dart';
 import 'package:window_manager/window_manager.dart' as wm;
 import 'package:ChatMcp/utils/platform.dart';
 import 'package:ChatMcp/utils/color.dart';
+import 'package:ChatMcp/widgets/markdown/markit_widget.dart';
 
 class TopToolbar extends StatelessWidget {
   final bool hideSidebar;
@@ -58,6 +59,18 @@ class TopToolbar extends StatelessWidget {
                   ProviderManager.chatProvider.clearActiveChat();
                 },
               ),
+              if (kIsDebug)
+                IconButton(
+                  icon: const Icon(Icons.bug_report),
+                  onPressed: () {
+                    // jump to the top of the page
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const MarkitTestPage(),
+                      ),
+                    );
+                  },
+                ),
             ],
           ),
         ),

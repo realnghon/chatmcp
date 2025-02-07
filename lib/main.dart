@@ -73,7 +73,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       scaffoldMessengerKey: _scaffoldMessengerKey,
-      debugShowCheckedModeBanner: false,
       title: 'ChatMcp',
       theme: ThemeData(
         useMaterial3: true,

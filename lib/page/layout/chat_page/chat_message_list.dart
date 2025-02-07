@@ -36,7 +36,9 @@ class _MessageListState extends State<MessageList> {
         _delayScrollToBottom(delay);
       }
     } else {
-      _scrollToBottom1();
+      for (var i = 0; i < 5; i++) {
+        _scrollToBottom1();
+      }
     }
   }
 
@@ -56,7 +58,7 @@ class _MessageListState extends State<MessageList> {
     if (_scrollController.hasClients) {
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 100),
         curve: Curves.easeInOutCubic,
       );
     }
@@ -124,7 +126,7 @@ class _MessageListState extends State<MessageList> {
           controller: _scrollController,
           padding: const EdgeInsets.all(8.0),
           itemCount: groupedMessages.length,
-          physics: const ClampingScrollPhysics(),
+          // physics: const ClampingScrollPhysics(), // 禁用弹性效果
           itemBuilder: (context, index) {
             final group = groupedMessages[index];
 

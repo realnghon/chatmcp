@@ -34,22 +34,22 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
-  flutter_statusbarcolor_ns: ^0.5.0
-  dio: ^5.7.0
+  flutter_statusbarcolor_ns: ^0.6.0
+  dio: ^5.8.0+1
   dotenv: ^4.2.0
   flutter_dotenv: ^5.2.1
   synchronized: ^3.3.0+3
   provider: ^6.1.2
-  flutter_markdown: ^0.7.4+3
+  flutter_markdown: ^0.7.6+1
   logging: ^1.2.0
-  shared_preferences: ^2.3.3
+  shared_preferences: ^2.5.1
   path_provider: ^2.1.5
   path: ^1.9.0
-  sqlite3: ^2.5.0
+  sqlite3: ^2.7.2
   sqflite: ^2.3.0
   sqflite_common_ffi: ^2.3.2
   flutter_highlighter: ^0.1.1
-  markdown: ^7.2.2
+  markdown: ^7.3.0
   highlighter: ^0.1.1
   url_launcher: ^6.3.1
   curl_logger_dio_interceptor: ^1.0.0
@@ -61,6 +61,10 @@ dependencies:
   uuid: ^4.5.1
   flutter_markdown_latex: ^0.3.4
   keyboard_dismisser: ^3.0.0
+  markdown_widget: ^2.3.2+6
+  flutter_math_fork: ^0.7.3
+  flutter_highlight: ^0.7.0
+  highlight: ^0.7.0
 
 dev_dependencies:
   flutter_test:
@@ -76,7 +80,7 @@ dev_dependencies:
   test: ^1.24.0
   mockito: ^5.4.0
   build_runner: ^2.4.0
-  flutter_launcher_icons: ^0.13.1
+  flutter_launcher_icons: ^0.14.3
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

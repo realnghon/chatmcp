@@ -453,7 +453,10 @@ class _ChatPageState extends State<ChatPage> {
     });
 
     try {
-      await _handleMcpServerTools(userMessage.content ?? '');
+      if (!ProviderManager.chatModelProvider.currentModel.name
+          .contains('deepseek')) {
+        await _handleMcpServerTools(userMessage.content ?? '');
+      }
       await _processLLMResponse();
       await _updateChat();
     } catch (e, stackTrace) {
@@ -472,7 +475,10 @@ class _ChatPageState extends State<ChatPage> {
     _addUserMessage(data.text, files);
 
     try {
-      await _handleMcpServerTools(data.text);
+      if (!ProviderManager.chatModelProvider.currentModel.name
+          .contains('deepseek')) {
+        await _handleMcpServerTools(data.text);
+      }
       await _processLLMResponse();
       await _updateChat();
     } catch (e, stackTrace) {

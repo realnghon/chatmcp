@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:ChatMcp/llm/model.dart';
 import 'dart:convert';
 import 'package:ChatMcp/widgets/collapsible_section.dart';
-import 'package:ChatMcp/widgets/markdown/markit.dart';
+import 'package:ChatMcp/widgets/markdown/markit_widget.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'dart:io' as io;
@@ -236,7 +236,7 @@ class MessageBubble extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: message.role == MessageRole.user
-            ? AppColors.grey[300]
+            ? AppColors.grey[200]
             : AppColors.grey[300],
         borderRadius: BorderRadius.circular(16),
       ),

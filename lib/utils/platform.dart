@@ -2,6 +2,15 @@ import 'dart:io' show Platform, Directory;
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
 
+final bool kIsDebug = (() {
+  bool isDebug = false;
+  assert(() {
+    isDebug = true;
+    return true;
+  }());
+  return isDebug;
+}());
+
 final bool kIsLinux = Platform.isLinux;
 
 final bool kIsDesktop =
