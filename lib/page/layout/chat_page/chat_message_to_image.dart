@@ -11,6 +11,7 @@ import 'package:ChatMcp/utils/platform.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:logging/logging.dart';
 
 class ListViewToImageScreen extends StatefulWidget {
   final List<ChatMessage> messages;
@@ -61,53 +62,50 @@ class _ListViewToImageScreenState extends State<ListViewToImageScreen> {
           ),
         ],
       ),
-      body: Container(
-        child: Screenshot(
-          controller: screenshotController,
-          child: SingleChildScrollView(
-            controller: _scrollController,
-            child: Container(
-              color: Colors.white,
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (ProviderManager.chatProvider.activeChat?.title !=
-                      null) ...[
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: Row(
-                        children: [
-                          Text(
-                            ProviderManager.chatProvider.activeChat!.title!,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
+      body: Screenshot(
+        controller: screenshotController,
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          child: Container(
+            color: Colors.white,
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (ProviderManager.chatProvider.activeChat?.title != null) ...[
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Row(
+                      children: [
+                        Text(
+                          ProviderManager.chatProvider.activeChat!.title!,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
                           ),
-                          Spacer(),
-                          Text(
-                            "by ChatMcp",
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          )
-                        ],
-                      ),
+                        ),
+                        Spacer(),
+                        Text(
+                          "by ChatMcp",
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )
+                      ],
                     ),
-                    const Divider(height: 1),
-                    const SizedBox(height: 16),
-                  ],
-                  ...groupedMessages.map((group) {
-                    return ChatUIMessage(
-                      messages: group,
-                      onRetry: (ChatMessage message) {},
-                      onSwitch: (String messageId) {},
-                    );
-                  }).toList(),
+                  ),
+                  const Divider(height: 1),
+                  const SizedBox(height: 16),
                 ],
-              ),
+                ...groupedMessages.map((group) {
+                  return ChatUIMessage(
+                    messages: group,
+                    onRetry: (ChatMessage message) {},
+                    onSwitch: (String messageId) {},
+                  );
+                }).toList(),
+              ],
             ),
           ),
         ),
@@ -119,14 +117,9 @@ class _ListViewToImageScreenState extends State<ListViewToImageScreen> {
     final BuildContext context = this.context;
     try {
       final List<Uint8List> imageParts = [];
-
-      // 获取总高度和视口高度
-      final totalHeight = _scrollController.position.maxScrollExtent +
-          MediaQuery.of(context).size.height;
       final viewportHeight = MediaQuery.of(context).size.height;
 
-      // 如果内容高度小于或等于视口高度，只需要截取一次
-      if (_scrollController.position.maxScrollExtent <= 0) {
+      if (_scrollController.position.maxScrollExtent <= viewportHeight * 0.2) {
         final image = await screenshotController.capture(
           pixelRatio: 3.0,
         );
@@ -134,11 +127,9 @@ class _ListViewToImageScreenState extends State<ListViewToImageScreen> {
           imageParts.add(image);
         }
       } else {
-        // 设置每次滚动的高度为视口高度的80%，确保有20%的重叠区域
         final scrollStep = (viewportHeight * 0.8).toInt();
         double currentScroll = 0;
 
-        // 先滚动到顶部
         await _scrollController.animateTo(
           0,
           duration: const Duration(milliseconds: 100),
@@ -147,7 +138,6 @@ class _ListViewToImageScreenState extends State<ListViewToImageScreen> {
         await Future.delayed(const Duration(milliseconds: 200));
 
         while (true) {
-          // 截取当前视图
           final image = await screenshotController.capture(
             pixelRatio: 3.0,
           );
@@ -156,14 +146,12 @@ class _ListViewToImageScreenState extends State<ListViewToImageScreen> {
             imageParts.add(image);
           }
 
-          // 如果已经到达底部，退出循环
-          if (currentScroll >= _scrollController.position.maxScrollExtent) {
+          if (currentScroll >=
+              _scrollController.position.maxScrollExtent - scrollStep * 0.1) {
             break;
           }
 
-          // 计算下一次滚动的位置
           currentScroll += scrollStep;
-          // 确保最后一次滚动不会超出范围
           final nextScroll = currentScroll.clamp(
               0.0, _scrollController.position.maxScrollExtent);
 
@@ -173,17 +161,15 @@ class _ListViewToImageScreenState extends State<ListViewToImageScreen> {
             curve: Curves.linear,
           );
 
-          // 等待滚动和重绘完成
           await Future.delayed(const Duration(milliseconds: 200));
         }
       }
 
       if (imageParts.isEmpty) {
-        print('截图失败: 无法获取图片');
+        Logger.root.severe('截图失败: 无法获取图片');
         return;
       }
 
-      // 拼接图片
       final firstImage = await ui.instantiateImageCodec(imageParts[0]);
       final firstFrame = await firstImage.getNextFrame();
       final width = firstFrame.image.width;
@@ -193,29 +179,22 @@ class _ListViewToImageScreenState extends State<ListViewToImageScreen> {
       final recorder = ui.PictureRecorder();
       final canvas = Canvas(recorder);
 
-      // 计算最终高度（考虑重叠区域）
       double finalHeight = singleHeight; // 第一张图完整高度
       if (imageParts.length > 1) {
-        // 中间的图片每张减去重叠区域
         finalHeight += (imageParts.length - 2) * (singleHeight - overlapHeight);
-        // 最后一张图片完整添加
         finalHeight += singleHeight - overlapHeight;
       }
 
-      // 第一张图完整绘制
       canvas.drawImage(firstFrame.image, Offset.zero, Paint());
       double currentHeight = singleHeight - overlapHeight;
 
-      // 从第二张图开始，每次跳过重叠区域
       for (int i = 1; i < imageParts.length; i++) {
         final codec = await ui.instantiateImageCodec(imageParts[i]);
         final frameInfo = await codec.getNextFrame();
         canvas.drawImage(frameInfo.image, Offset(0, currentHeight), Paint());
-        // 如果不是最后一张图片，才减去重叠区域
         if (i < imageParts.length - 1) {
           currentHeight += singleHeight - overlapHeight;
         } else {
-          // 最后一张图片完整显示
           currentHeight += singleHeight;
         }
       }
@@ -229,13 +208,12 @@ class _ListViewToImageScreenState extends State<ListViewToImageScreen> {
           await finalImage.toByteData(format: ui.ImageByteFormat.png);
       final Uint8List finalImageBytes = finalByteData!.buffer.asUint8List();
 
-      // 保存或分享
       if (kIsDesktop) {
         final path = await FilePicker.platform.saveFile(
           dialogTitle: ProviderManager.chatProvider.activeChat?.title ??
               'Save chat image',
           fileName:
-              'chat-${ProviderManager.chatProvider.activeChat?.title ?? DateTime.now().millisecondsSinceEpoch}.png',
+              'ChatMcp-${ProviderManager.chatProvider.activeChat?.title ?? DateTime.now().millisecondsSinceEpoch}.png',
           type: FileType.custom,
           allowedExtensions: ['png'],
         );
@@ -247,25 +225,26 @@ class _ListViewToImageScreenState extends State<ListViewToImageScreen> {
       if (kIsMobile) {
         final title =
             ProviderManager.chatProvider.activeChat?.title ?? 'Chat Image';
+        final safeTitle = title
+            .replaceAll(RegExp(r'[<>:"/\\|?*]'), '_')
+            .replaceAll(RegExp(r'\s+'), '_');
+
         final tempDir = await getTemporaryDirectory();
-        final tempFile =
-            io.File('${tempDir.path}/${title.replaceAll(' ', '_')}.png');
+        final tempFile = io.File(
+            '${tempDir.path}/ChatMcp_${safeTitle}_${DateTime.now().millisecondsSinceEpoch}.png');
         await tempFile.writeAsBytes(finalImageBytes);
 
         await Share.shareXFiles(
           [XFile(tempFile.path)],
-          subject: title,
-          // text: title,
+          subject: "ChatMcp $title",
         );
       }
 
       if (mounted) {
         Navigator.of(context).pop();
       }
-
-      print('图片已保存');
     } catch (e) {
-      print('截图失败: $e');
+      Logger.root.severe('截图失败: $e');
     }
   }
 }
