@@ -42,11 +42,13 @@ class CodeBlockNode extends ElementNode {
       return WidgetSpan(child: codeBuilder.call(content, language ?? ''));
     }
 
+    final isClosed = element.attributes['isClosed'] == 'true';
     final widget = Container(
       width: double.infinity,
       child: _CodeBlock(
           code: content,
           language: language ?? '',
+          isClosed: isClosed,
           preConfig: preConfig,
           splitContents: splitContents,
           visitor: visitor),
@@ -63,6 +65,7 @@ class CodeBlockNode extends ElementNode {
 class _CodeBlock extends StatefulWidget {
   final String code;
   final String language;
+  final bool isClosed;
 
   final PreConfig preConfig;
   final WidgetVisitor visitor;
@@ -70,6 +73,7 @@ class _CodeBlock extends StatefulWidget {
   const _CodeBlock({
     required this.code,
     required this.language,
+    required this.isClosed,
     required this.preConfig,
     required this.splitContents,
     required this.visitor,
@@ -99,6 +103,9 @@ class _CodeBlockState extends State<_CodeBlock>
 
     setState(() {
       _isSupportPreview = supportPreview;
+      // if (supportPreview && widget.isClosed) {
+      //   _isPreviewVisible = true;
+      // }
     });
   }
 
@@ -240,5 +247,68 @@ class _CodeBlockState extends State<_CodeBlock>
         ],
       ),
     );
+  }
+}
+
+class FencedCodeBlockSyntax extends m.BlockSyntax {
+  static final _pattern = RegExp(r'^[ ]{0,3}(~{3,}|`{3,})(.*)$');
+
+  @override
+  RegExp get pattern => _pattern;
+
+  const FencedCodeBlockSyntax();
+
+  @override
+  m.Node parse(m.BlockParser parser) {
+    // 获取开始标记和语言
+    final match = pattern.firstMatch(parser.current.content)!;
+    final openingFence = match.group(1)!;
+    final infoString = match.group(2)!.trim();
+
+    bool isClosed = false;
+    final lines = <String>[];
+
+    // 前进到内容行
+    parser.advance();
+
+    // 收集内容直到找到结束标记
+    while (!parser.isDone) {
+      final currentLine = parser.current.content;
+      final closingMatch = pattern.firstMatch(currentLine);
+
+      // 检查是否是结束标记
+      if (closingMatch != null &&
+          closingMatch.group(1)!.startsWith(openingFence) &&
+          closingMatch.group(2)!.trim().isEmpty) {
+        isClosed = true;
+        parser.advance();
+        break;
+      }
+
+      lines.add(currentLine);
+      parser.advance();
+    }
+
+    // 如果最后一行是空行且未找到结束标记，移除它
+    if (!isClosed && lines.isNotEmpty && lines.last.trim().isEmpty) {
+      lines.removeLast();
+    }
+
+    // 创建代码元素
+    final code = m.Element.text('code', lines.join('\n') + '\n');
+
+    // 如果有语言标记，添加 class
+    if (infoString.isNotEmpty) {
+      code.attributes['class'] = 'language-$infoString';
+    }
+
+    // 添加是否闭合的标记
+    code.attributes['isClosed'] = isClosed.toString();
+
+    // 创建 pre 元素
+    final pre = m.Element('pre', [code]);
+    pre.attributes['isClosed'] = isClosed.toString();
+
+    return pre;
   }
 }
