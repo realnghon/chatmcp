@@ -9,7 +9,6 @@ import 'package:ChatMcp/provider/provider_manager.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:ChatMcp/utils/platform.dart';
 import 'package:screenshot/screenshot.dart';
-import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:logging/logging.dart';
 
@@ -64,48 +63,54 @@ class _ListViewToImageScreenState extends State<ListViewToImageScreen> {
       ),
       body: Screenshot(
         controller: screenshotController,
-        child: SingleChildScrollView(
-          controller: _scrollController,
-          child: Container(
-            color: Colors.white,
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (ProviderManager.chatProvider.activeChat?.title != null) ...[
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: Row(
-                      children: [
-                        Text(
-                          ProviderManager.chatProvider.activeChat!.title!,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+        child: ScrollConfiguration(
+          behavior: ScrollConfiguration.of(context).copyWith(
+            scrollbars: false, // 完全禁用滚动条
+          ),
+          child: SingleChildScrollView(
+            controller: _scrollController,
+            child: Container(
+              color: Colors.white,
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (ProviderManager.chatProvider.activeChat?.title !=
+                      null) ...[
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Row(
+                        children: [
+                          Text(
+                            ProviderManager.chatProvider.activeChat!.title!,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        Spacer(),
-                        Text(
-                          "by ChatMcp",
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      ],
+                          Spacer(),
+                          Text(
+                            "by ChatMcp",
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          )
+                        ],
+                      ),
                     ),
-                  ),
-                  const Divider(height: 1),
-                  const SizedBox(height: 16),
+                    const Divider(height: 1),
+                    const SizedBox(height: 16),
+                  ],
+                  ...groupedMessages.map((group) {
+                    return ChatUIMessage(
+                      messages: group,
+                      onRetry: (ChatMessage message) {},
+                      onSwitch: (String messageId) {},
+                    );
+                  }).toList(),
                 ],
-                ...groupedMessages.map((group) {
-                  return ChatUIMessage(
-                    messages: group,
-                    onRetry: (ChatMessage message) {},
-                    onSwitch: (String messageId) {},
-                  );
-                }).toList(),
-              ],
+              ),
             ),
           ),
         ),
