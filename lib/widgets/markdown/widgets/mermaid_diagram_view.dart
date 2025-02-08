@@ -1,5 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter/foundation.dart';
+
+// todo: fix this error
+
+// [ERROR:flutter/runtime/dart_vm_initializer.cc(40)] Unhandled Exception: PlatformException(recreating_view, trying to create an already created view, view id: '0', null)
+// #0      StandardMethodCodec.decodeEnvelope (package:flutter/src/services/message_codecs.dart:646:7)
+// #1      MethodChannel._invokeMethod (package:flutter/src/services/platform_channel.dart:334:18)
+// <asynchronous suspension>
+// #2      PlatformViewsService.initAppKitView (package:flutter/src/services/platform_views.dart:294:5)
+// <asynchronous suspension>
+// #3      _DarwinViewState._createNewUiKitView (package:flutter/src/widgets/platform_view.dart:921:36)
+// <asynchronous suspension>
 
 class MermaidDiagramView extends StatefulWidget {
   final String code;
@@ -15,26 +27,24 @@ class MermaidDiagramView extends StatefulWidget {
 
 class _MermaidDiagramViewState extends State<MermaidDiagramView> {
   double _height = 100;
-  late final WebViewController controller;
+  InAppWebViewController? controller;
+  Uint8List? _screenshot;
+  double _progress = 0;
+  bool _isLoaded = false;
+  bool _hasError = false;
+  int _retryCount = 0;
+  static const int maxRetries = 3;
 
   @override
-  void initState() {
-    super.initState();
-    controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageFinished: (_) async {
-            final height = await controller.runJavaScriptReturningResult(
-              'document.body.scrollHeight',
-            );
-            setState(() {
-              _height = (height as num).toDouble();
-            });
-          },
-        ),
-      )
-      ..loadHtmlString('''
+  void dispose() {
+    controller?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _initWebView(InAppWebViewController controller) async {
+    this.controller = controller;
+    try {
+      await controller.loadData(data: '''
         <!DOCTYPE html>
         <html>
         <head>
@@ -74,20 +84,6 @@ class _MermaidDiagramViewState extends State<MermaidDiagramView> {
                 textPosition: 0.5,
               },
             });
-            
-            // 监听图表渲染完成事件
-            document.addEventListener('DOMContentLoaded', function() {
-              const observer = new MutationObserver(function(mutations) {
-                const height = document.body.scrollHeight;
-                window.flutter_inappwebview?.callHandler('onHeightChanged', height);
-              });
-              
-              observer.observe(document.body, {
-                attributes: true,
-                childList: true,
-                subtree: true
-              });
-            });
           </script>
           <style>
             html, body {
@@ -122,24 +118,100 @@ class _MermaidDiagramViewState extends State<MermaidDiagramView> {
         </body>
         </html>
       ''');
+    } catch (e) {
+      debugPrint('Error loading WebView data: $e');
+      _handleError();
+    }
+  }
+
+  void _handleError() {
+    if (_retryCount < maxRetries) {
+      _retryCount++;
+      setState(() {
+        _hasError = false;
+      });
+    } else {
+      setState(() {
+        _hasError = true;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_hasError) {
+      return const SizedBox(
+        height: 100,
+        child: Center(
+          child: Text('加载图表失败，请重试'),
+        ),
+      );
+    }
+
     return SizedBox(
       height: _height,
       child: Stack(
         children: [
-          WebViewWidget(
-            controller: controller,
+          InAppWebView(
+            initialSettings: InAppWebViewSettings(
+              javaScriptEnabled: true,
+              transparentBackground: true,
+              isInspectable: kDebugMode,
+            ),
+            onWebViewCreated: _initWebView,
+            onLoadStop: (controller, url) async {
+              try {
+                final height = await controller.evaluateJavascript(
+                    source: 'document.body.scrollHeight');
+                if (mounted) {
+                  setState(() {
+                    _height = (height as num).toDouble();
+                    _isLoaded = true;
+                  });
+                  print('takeScreenshot');
+                  await takeScreenshot();
+                }
+              } catch (e) {
+                debugPrint('Error on load stop: $e');
+                _handleError();
+              }
+            },
+            onProgressChanged: (controller, progress) {
+              if (mounted) {
+                setState(() {
+                  _progress = progress / 100;
+                });
+              }
+            },
           ),
-          // webview 组件在 消息列表中, 当鼠标在 webview 上滚动时, 无法触发 ListView 的滚动事件
-          // 这里用一个透明的容器来覆盖 webview , 使得滚动事件可以传递到 ListView 上
-          Container(
-            color: Colors.transparent.withAlpha(1),
-          ),
+          _progress < 1.0
+              ? LinearProgressIndicator(value: _progress)
+              : Container(),
+          if (_screenshot != null) Image.memory(_screenshot!),
         ],
       ),
     );
+  }
+
+  Future<Uint8List?> takeScreenshot() async {
+    try {
+      if (!_isLoaded) {
+        await Future.delayed(const Duration(milliseconds: 1000));
+      }
+
+      await Future.delayed(const Duration(milliseconds: 500));
+      final result = await controller!.takeScreenshot();
+
+      if (result != null) {
+        _screenshot = result;
+        if (mounted) {
+          setState(() {});
+        }
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Failed to take screenshot: $e');
+      return null;
+    }
   }
 }

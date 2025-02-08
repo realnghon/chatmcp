@@ -59,6 +59,13 @@ class TopToolbar extends StatelessWidget {
                   ProviderManager.chatProvider.clearActiveChat();
                 },
               ),
+              // share icon
+              IconButton(
+                icon: const Icon(Icons.arrow_outward),
+                onPressed: () {
+                  ProviderManager.shareProvider.shareCurrentChat();
+                },
+              ),
               if (kIsDebug)
                 IconButton(
                   icon: const Icon(Icons.bug_report),

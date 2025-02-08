@@ -30,20 +30,32 @@ class _MessageListState extends State<MessageList> {
     _scrollToBottom();
   }
 
+  bool _isScrolledToBottom() {
+    if (!_scrollController.hasClients) return false;
+    final maxScroll = _scrollController.position.maxScrollExtent;
+    final currentScroll = _scrollController.offset;
+    // 允许1像素的误差
+    return (maxScroll - currentScroll).abs() <= 1.0;
+  }
+
   void _scrollToBottom({bool withDelay = true}) {
     if (withDelay) {
-      for (var delay in [50, 150, 300, 500]) {
+      for (var delay in [50, 150, 300]) {
         _delayScrollToBottom(delay);
       }
     } else {
-      for (var i = 0; i < 5; i++) {
-        _scrollToBottom1();
+      if (_isScrolledToBottom()) {
+        return;
       }
+      _scrollToBottom1();
     }
   }
 
   void _delayScrollToBottom(int delay) {
     Future.delayed(Duration(milliseconds: delay), () {
+      if (_isScrolledToBottom()) {
+        return;
+      }
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,

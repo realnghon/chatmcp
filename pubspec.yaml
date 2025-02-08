@@ -54,9 +54,8 @@ dependencies:
   url_launcher: ^6.3.1
   curl_logger_dio_interceptor: ^1.0.0
   window_manager: ^0.4.3
-  webview_flutter: ^4.0.0
   flutter_keyboard_visibility: ^6.0.0
-  file_picker: ^8.0.7
+  file_picker: ^8.3.2
   mime: ^2.0.0
   uuid: ^4.5.1
   flutter_markdown_latex: ^0.3.4
@@ -65,6 +64,10 @@ dependencies:
   flutter_math_fork: ^0.7.3
   flutter_highlight: ^0.7.0
   highlight: ^0.7.0
+  widgets_to_image: ^1.0.0
+  share_plus: ^10.1.4
+  screenshot: ^3.0.0
+  flutter_inappwebview: ^6.1.5
 
 dev_dependencies:
   flutter_test:

@@ -1,3 +1,6 @@
+import 'dart:typed_data';
+import 'dart:io' as io;
+
 import 'package:ChatMcp/utils/platform.dart';
 import 'package:flutter/material.dart';
 import 'package:ChatMcp/llm/model.dart';
@@ -12,6 +15,9 @@ import 'package:ChatMcp/dao/chat.dart';
 import 'package:uuid/uuid.dart';
 import 'chat_message_list.dart';
 import 'package:ChatMcp/utils/color.dart';
+import 'package:ChatMcp/widgets/widgets_to_image/widgets_to_image.dart';
+import 'package:ChatMcp/widgets/widgets_to_image/utils.dart';
+import 'chat_message_to_image.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -31,6 +37,10 @@ class _ChatPageState extends State<ChatPage> {
   String _errorMessage = '';
   String _parentMessageId = '';
 
+  WidgetsToImageController toImagecontroller = WidgetsToImageController();
+  // to save image bytes of widget
+  Uint8List? bytes;
+
   @override
   void initState() {
     super.initState();
@@ -39,6 +49,8 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   void dispose() {
+    // 移除分享事件监听
+    ProviderManager.shareProvider.removeListener(_handleShare);
     _removeListeners();
     super.dispose();
   }
@@ -54,6 +66,8 @@ class _ChatPageState extends State<ChatPage> {
     ProviderManager.settingsProvider.addListener(_onSettingsChanged);
     ProviderManager.chatModelProvider.addListener(_initializeLLMClient);
     ProviderManager.chatProvider.addListener(_onChatProviderChanged);
+    // 添加分享事件监听
+    ProviderManager.shareProvider.addListener(_handleShare);
   }
 
   void _removeListeners() {
@@ -274,12 +288,18 @@ class _ChatPageState extends State<ChatPage> {
       );
     }
 
-    return MessageList(
-      messages: _isLoading
-          ? [..._messages, ChatMessage(content: '', role: MessageRole.loading)]
-          : _messages.toList(),
-      onRetry: _onRetry,
-      onSwitch: _onSwitch,
+    return WidgetsToImage(
+      controller: toImagecontroller,
+      child: MessageList(
+        messages: _isLoading
+            ? [
+                ..._messages,
+                ChatMessage(content: '', role: MessageRole.loading)
+              ]
+            : _messages.toList(),
+        onRetry: _onRetry,
+        onSwitch: _onSwitch,
+      ),
     );
   }
 
@@ -308,10 +328,9 @@ class _ChatPageState extends State<ChatPage> {
           const SizedBox(width: 8.0),
           Expanded(
             child: SingleChildScrollView(
-              child: Text(
+              child: SelectableText(
                 _errorMessage,
                 style: const TextStyle(color: AppColors.red),
-                softWrap: true,
               ),
             ),
           ),
@@ -640,6 +659,27 @@ class _ChatPageState extends State<ChatPage> {
     print('error: $error');
     print('stackTrace: $stackTrace');
     Logger.root.severe(error, stackTrace);
+  }
+
+  // 处理分享事件
+  Future<void> _handleShare() async {
+    if (_messages.isEmpty) return;
+    await Future.delayed(const Duration(milliseconds: 100));
+    if (mounted) {
+      if (kIsMobile) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ListViewToImageScreen(messages: _messages),
+          ),
+        );
+      } else {
+        showDialog(
+          context: context,
+          builder: (context) => ListViewToImageScreen(messages: _messages),
+        );
+      }
+    }
   }
 
   @override

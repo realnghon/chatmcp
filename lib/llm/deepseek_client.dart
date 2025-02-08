@@ -3,6 +3,7 @@ import 'base_llm_client.dart';
 import 'dart:convert';
 import 'model.dart';
 import 'package:logging/logging.dart';
+import './openai_client.dart';
 
 class DeepSeekClient extends BaseLLMClient {
   final String apiKey;
@@ -133,8 +134,17 @@ class DeepSeekClient extends BaseLLMClient {
 
               // 只在有内容或工具调用时才yield响应
               if (delta['content'] != null || toolCalls != null) {
+                String content = delta['content'] ?? '';
+                if (content.isNotEmpty && content.contains('<think>')) {
+                  content = content.replaceAll('<think>',
+                      '<think start-time="${DateTime.now().toIso8601String()}">');
+                }
+                if (content.isNotEmpty && content.contains('</think>')) {
+                  content = content.replaceAll('</think>',
+                      '</think end-time="${DateTime.now().toIso8601String()}">');
+                }
                 yield LLMResponse(
-                  content: delta['content'],
+                  content: content,
                   toolCalls: toolCalls,
                 );
               }
@@ -203,5 +213,5 @@ $conversationText""",
 
 List<Map<String, dynamic>> chatMessageToDeepSeekMessage(
     List<ChatMessage> messages) {
-  return messages.map((m) => m.toJson()).toList();
+  return chatMessageToOpenAIMessage(messages);
 }

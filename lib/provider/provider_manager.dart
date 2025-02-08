@@ -4,6 +4,7 @@ import 'settings_provider.dart';
 import 'mcp_server_provider.dart';
 import 'chat_provider.dart';
 import 'chat_model_provider.dart';
+import 'share_provider.dart';
 
 class ProviderManager {
   static List<ChangeNotifierProvider> providers = [
@@ -49,6 +50,8 @@ class ProviderManager {
     _chatModelProvider ??= ChatModelProvider();
     return _chatModelProvider!;
   }
+
+  static final shareProvider = ShareProvider();
 
   static Future<void> init() async {
     await SettingsProvider().loadSettings();

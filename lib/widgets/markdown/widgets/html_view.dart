@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter/foundation.dart';
 
 class HtmlView extends StatefulWidget {
   final String html;
@@ -15,43 +16,75 @@ class HtmlView extends StatefulWidget {
 
 class _HtmlViewState extends State<HtmlView> {
   double _height = 100;
-  late final WebViewController controller;
+  InAppWebViewController? controller;
+  bool _hasError = false;
+  int _retryCount = 0;
+  static const int maxRetries = 3;
+
+  Key _webViewKey = UniqueKey();
 
   @override
-  void initState() {
-    super.initState();
-    controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onPageFinished: (_) async {
-            final height = await controller.runJavaScriptReturningResult(
-              'document.body.scrollHeight',
-            );
-            setState(() {
-              _height = (height as num).toDouble();
-            });
-          },
-        ),
-      )
-      ..loadHtmlString(widget.html);
+  void dispose() {
+    controller?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _initWebView(InAppWebViewController controller) async {
+    this.controller = controller;
+    try {
+      await controller.loadData(data: widget.html);
+    } catch (e) {
+      debugPrint('Error loading WebView data: $e');
+      _handleError();
+    }
+  }
+
+  void _handleError() {
+    if (_retryCount < maxRetries) {
+      _retryCount++;
+      _resetWebView();
+    } else {
+      setState(() => _hasError = true);
+    }
+  }
+
+  void _resetWebView() {
+    controller?.dispose();
+    controller = null;
+    setState(() => _webViewKey = UniqueKey());
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_hasError) {
+      return const SizedBox(
+        height: 100,
+        child: Center(child: Text('加载内容失败，请重试')),
+      );
+    }
+
     return SizedBox(
       height: _height,
-      child: Stack(
-        children: [
-          WebViewWidget(
-            controller: controller,
-          ),
-          // webview 组件在 消息列表中, 当鼠标在 webview 上滚动时, 无法触发 ListView 的滚动事件
-          // 这里用一个透明的容器来覆盖 webview , 使得滚动事件可以传递到 ListView 上
-          Container(
-            color: Colors.transparent.withAlpha(1),
-          ),
-        ],
+      child: InAppWebView(
+        key: _webViewKey,
+        initialSettings: InAppWebViewSettings(
+          javaScriptEnabled: true,
+          transparentBackground: true,
+          isInspectable: kDebugMode,
+        ),
+        onWebViewCreated: (controller) => _initWebView(controller),
+        onLoadStop: (controller, url) async {
+          try {
+            final height = await controller.evaluateJavascript(
+              source: 'document.body.scrollHeight',
+            );
+            if (mounted) setState(() => _height = (height as num).toDouble());
+          } catch (e) {
+            debugPrint('Error on load stop: $e');
+            _handleError();
+          }
+        },
+        onCreateWindow: (controller, request) => Future.value(false),
       ),
     );
   }

@@ -40,8 +40,8 @@ class ModelSelector extends StatelessWidget {
                             (model) =>
                                 model.name ==
                                 chatModelProvider.currentModel.name,
-                            orElse: () =>
-                                Model(name: '', label: 'NaN', provider: ''),
+                            orElse: () => Model(
+                                name: '', label: 'Loading...', provider: ''),
                           )
                           .label,
                       style: Theme.of(context).textTheme.bodyMedium,
@@ -97,15 +97,6 @@ class ModelSelector extends StatelessWidget {
                         padding: const EdgeInsets.only(left: 8.0),
                         child: Row(
                           children: [
-                            if (model.name == chatModelProvider.currentModel)
-                              Icon(
-                                Icons.check,
-                                size: 18,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                            if (model.name ==
-                                chatModelProvider.currentModel.name)
-                              const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 model.label,
@@ -117,6 +108,13 @@ class ModelSelector extends StatelessWidget {
                                 ),
                               ),
                             ),
+                            if (model.name ==
+                                chatModelProvider.currentModel.name)
+                              Icon(
+                                Icons.check,
+                                size: 18,
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
                           ],
                         ),
                       ),

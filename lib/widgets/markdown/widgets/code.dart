@@ -91,19 +91,30 @@ class _CodeBlockState extends State<_CodeBlock>
   void initState() {
     super.initState();
     bool supportPreview = false;
-    if (widget.language == 'mermaid') {
+    if (widget.language == 'mermaid' || widget.language == 'html') {
       supportPreview = true;
-      previewWidget = MermaidDiagramView(code: widget.code);
-    } else if (widget.language == 'html') {
-      supportPreview = true;
-      previewWidget = HtmlView(html: widget.code);
-    } else {
-      supportPreview = false;
+      // 在初始化时创建预览组件
+      previewWidget = _buildPreviewWidget();
     }
 
     setState(() {
       _isSupportPreview = supportPreview;
     });
+  }
+
+  Widget? _buildPreviewWidget() {
+    if (widget.language == 'mermaid') {
+      return MermaidDiagramView(
+        key: ValueKey(widget.code), // 使用基于内容的Key
+        code: widget.code,
+      );
+    } else if (widget.language == 'html') {
+      return HtmlView(
+        key: ValueKey(widget.code), // 使用基于内容的Key
+        html: widget.code,
+      );
+    }
+    return null;
   }
 
   Future<void> _copyToClipboard() async {
@@ -219,10 +230,13 @@ class _CodeBlockState extends State<_CodeBlock>
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           buildToolBar(),
-          if (_isSupportPreview && _isPreviewVisible)
-            previewWidget!
-          else
-            ...buildCodeBlockList(),
+          // if (_isSupportPreview)
+          //   Offstage(
+          //     offstage: !_isPreviewVisible,
+          //     child: previewWidget!,
+          //   ),
+          if (_isSupportPreview && _isPreviewVisible) previewWidget!,
+          if (!_isPreviewVisible) ...buildCodeBlockList(),
         ],
       ),
     );
