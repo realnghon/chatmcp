@@ -26,28 +26,8 @@ class _ListViewToImageScreenState extends State<ListViewToImageScreen> {
 
   @override
   Widget build(BuildContext context) {
-    List<List<ChatMessage>> groupedMessages = [];
-    List<ChatMessage> currentGroup = [];
-
-    for (var msg in widget.messages) {
-      if (msg.role == MessageRole.user) {
-        if (currentGroup.isNotEmpty) {
-          groupedMessages.add(currentGroup);
-          currentGroup = [];
-        }
-        currentGroup.add(msg);
-        groupedMessages.add(currentGroup);
-        currentGroup = [];
-      } else {
-        currentGroup.add(msg);
-      }
-    }
-
-    if (currentGroup.isNotEmpty) {
-      groupedMessages.add(currentGroup);
-    }
     return Scaffold(
-      backgroundColor: Colors.grey[300], // 设置背景色为浅灰色
+      backgroundColor: Colors.white, // 设置背景色为浅灰色
       appBar: AppBar(
         title: Text('Share Chat Image'),
         leading: IconButton(
@@ -67,55 +47,13 @@ class _ListViewToImageScreenState extends State<ListViewToImageScreen> {
         ),
         child: SingleChildScrollView(
           controller: _scrollController,
-          child: Container(
-            color: Colors.white,
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (ProviderManager.chatProvider.activeChat?.title != null) ...[
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: Row(
-                      children: [
-                        Text(
-                          ProviderManager.chatProvider.activeChat!.title!,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Spacer(),
-                        Text(
-                          "by ChatMcp",
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                  const Divider(height: 1),
-                  const SizedBox(height: 16),
-                ],
-                ...groupedMessages.map((group) {
-                  return ChatUIMessage(
-                    messages: group,
-                    onRetry: (ChatMessage message) {},
-                    onSwitch: (String messageId) {},
-                  );
-                }).toList(),
-              ],
-            ),
-          ),
+          child: _buildMessage(),
         ),
       ),
     );
   }
 
-  Future<void> _captureListViewAsImage() async {
-    final BuildContext context = this.context;
+  Widget _buildMessage() {
     List<List<ChatMessage>> groupedMessages = [];
     List<ChatMessage> currentGroup = [];
 
@@ -136,10 +74,53 @@ class _ListViewToImageScreenState extends State<ListViewToImageScreen> {
     if (currentGroup.isNotEmpty) {
       groupedMessages.add(currentGroup);
     }
-    try {
-      // 创建一个临时的滚动控制器，用于测量内容高度
-      final ScrollController measureController = ScrollController();
+    return Container(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (ProviderManager.chatProvider.activeChat?.title != null) ...[
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      ProviderManager.chatProvider.activeChat!.title!,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    "by ChatMcp",
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            const SizedBox(height: 16),
+          ],
+          ...groupedMessages.map((group) {
+            return ChatUIMessage(
+              messages: group,
+              onRetry: (ChatMessage message) {},
+              onSwitch: (String messageId) {},
+            );
+          }).toList(),
+        ],
+      ),
+    );
+  }
 
+  Future<void> _captureListViewAsImage() async {
+    try {
       // 创建一个离屏widget来渲染完整内容
       final renderWidget = Screenshot(
         controller: screenshotController,
@@ -151,50 +132,7 @@ class _ListViewToImageScreenState extends State<ListViewToImageScreen> {
             ),
             child: Material(
               color: Colors.white,
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (ProviderManager.chatProvider.activeChat?.title !=
-                        null) ...[
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                ProviderManager.chatProvider.activeChat!.title!,
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            Text(
-                              "by ChatMcp",
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                      const Divider(height: 1),
-                      const SizedBox(height: 16),
-                    ],
-                    ...groupedMessages.map((group) {
-                      return ChatUIMessage(
-                        messages: group,
-                        onRetry: (ChatMessage message) {},
-                        onSwitch: (String messageId) {},
-                      );
-                    }).toList(),
-                  ],
-                ),
-              ),
+              child: _buildMessage(),
             ),
           ),
         ),
