@@ -5,6 +5,7 @@ import 'package:markdown_widget/markdown_widget.dart';
 import './widgets/latex.dart';
 import './widgets/link.dart';
 import './widgets/code.dart';
+import './widgets/details.dart';
 import './widgets/think_builder.dart';
 import 'package:flutter_highlight/themes/github.dart';
 
@@ -76,6 +77,7 @@ class Markit extends StatelessWidget {
               ),
               PreConfig().copy(
                   textStyle: const TextStyle(fontSize: 12), theme: githubTheme),
+              DetailConfig(),
             ],
           ),
           generator: MarkdownGenerator(
@@ -85,13 +87,16 @@ class Markit extends StatelessWidget {
               latexGenerator,
               codeBlockGenerator,
               thinkGenerator,
+              detailsGenerator,
             ],
             inlineSyntaxList: [
+              DetailsSyntax(),
               LinkSyntax(),
               LatexSyntax(),
               ThinkInlineSyntax(),
             ],
             blockSyntaxList: [
+              DetailsBlockSyntax(),
               LatexBlockSyntax(),
               ThinkBlockSyntax(),
             ],
