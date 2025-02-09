@@ -18,6 +18,7 @@ import 'package:ChatMcp/utils/color.dart';
 import 'package:ChatMcp/widgets/widgets_to_image/widgets_to_image.dart';
 import 'package:ChatMcp/widgets/widgets_to_image/utils.dart';
 import 'chat_message_to_image.dart';
+import 'package:ChatMcp/tool/tools.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -358,6 +359,7 @@ class _ChatPageState extends State<ChatPage> {
 
     final mcpServerProvider = ProviderManager.mcpServerProvider;
     final tools = await mcpServerProvider.getTools();
+    tools["local"] = await getTools();
     Logger.root
         .info('tools:\n${const JsonEncoder.withIndent('  ').convert(tools)}');
 
@@ -413,8 +415,34 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
+  Future<dynamic> _processLocalToolCall(
+      String toolName, Map<String, dynamic> toolArguments) async {
+    return await useTool(toolName, toolArguments);
+  }
+
   Future<void> _sendToolCallAndProcessResponse(String clientName,
       String toolName, Map<String, dynamic> toolArguments) async {
+    if (clientName == "local") {
+      final response = await _processLocalToolCall(toolName, toolArguments);
+
+      setState(() {
+        print(
+            'response: $response, type: ${response.runtimeType}, ${response.toString()}');
+        _currentResponse = response.toString();
+        if (_currentResponse.isNotEmpty) {
+          _messages.add(ChatMessage(
+            content: _currentResponse,
+            role: MessageRole.tool,
+            mcpServerName: clientName,
+            name: toolName,
+            toolCallId: 'call_$toolName',
+            parentMessageId: _parentMessageId,
+          ));
+        }
+      });
+      return;
+    }
+
     final mcpClient = ProviderManager.mcpServerProvider.getClient(clientName);
     if (mcpClient == null) return;
 

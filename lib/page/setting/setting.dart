@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'llm_setting.dart';
+import 'keys_setting.dart';
 import 'mcp_server.dart';
 import 'general_setting.dart';
 import 'package:ChatMcp/utils/color.dart';
@@ -21,9 +21,9 @@ class _SettingPageState extends State<SettingPage> {
       content: const GeneralSettings(),
     ),
     SettingTab(
-      title: 'LLM Model',
+      title: 'LLM & Tool',
       icon: Icons.api,
-      content: const LlmSettings(),
+      content: const KeysSettings(),
     ),
     SettingTab(
       title: 'MCP Server',

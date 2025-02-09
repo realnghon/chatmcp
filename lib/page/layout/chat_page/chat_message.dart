@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'dart:io' as io;
 import 'package:ChatMcp/utils/color.dart';
 import 'chat_message_action.dart';
+import 'package:ChatMcp/tool/tavily.dart';
 
 class ChatUIMessage extends StatelessWidget {
   final List<ChatMessage> messages;
@@ -260,6 +261,7 @@ class ToolCallWidget extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       child: CollapsibleSection(
+        initiallyExpanded: false,
         title: Text(
           '${message.mcpServerName} call_${message.toolCalls![0]['function']['name']}',
           style: TextStyle(
@@ -294,11 +296,47 @@ class ToolResultWidget extends StatelessWidget {
     required this.message,
   });
 
+  Widget _buildContent(BuildContext context) {
+    return SelectableText(message.content ?? '');
+  }
+
+  Widget _buildFactory(BuildContext context) {
+    switch (message.toolCallId) {
+      case 'call_web_search':
+        try {
+          final jsonData = jsonDecode(message.content ?? '');
+          return TavilySearchResultWidget(
+              response: TavilySearchResponse.fromJson(jsonData));
+        } catch (e) {
+          return Container(
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '解析搜索结果失败',
+                  style: TextStyle(
+                    color: AppColors.grey[600],
+                    fontSize: 12,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                SelectableText(message.content ?? ''),
+              ],
+            ),
+          );
+        }
+      default:
+        return _buildContent(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       child: CollapsibleSection(
+        initiallyExpanded: true,
         title: Text(
           '${message.mcpServerName} ${message.toolCallId!} result',
           style: TextStyle(
@@ -307,7 +345,7 @@ class ToolResultWidget extends StatelessWidget {
             fontStyle: FontStyle.italic,
           ),
         ),
-        content: Markit(data: (message.content ?? '').trim()),
+        content: _buildFactory(context),
       ),
     );
   }

@@ -7,6 +7,7 @@ import '../mcp/mcp.dart';
 import 'package:logging/logging.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:dio/dio.dart';
+import 'package:ChatMcp/utils/platform.dart';
 
 class McpServerProvider extends ChangeNotifier {
   static const _configFileName = 'mcp_server.json';
@@ -22,7 +23,7 @@ class McpServerProvider extends ChangeNotifier {
 
   // 获取配置文件路径
   Future<String> get _configFilePath async {
-    final directory = await getApplicationDocumentsDirectory();
+    final directory = await getAppDir('ChatMcp');
     return '${directory.path}/$_configFileName';
   }
 

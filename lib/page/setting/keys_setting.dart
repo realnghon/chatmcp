@@ -4,39 +4,94 @@ import '../../provider/settings_provider.dart';
 import '../../provider/provider_manager.dart';
 import 'package:ChatMcp/utils/color.dart';
 
-class LlmSettings extends StatefulWidget {
-  const LlmSettings({super.key});
+class KeysSettings extends StatefulWidget {
+  const KeysSettings({super.key});
 
   @override
-  State<LlmSettings> createState() => _LlmSettingsState();
+  State<KeysSettings> createState() => _KeysSettingsState();
 }
 
-class _LlmSettingsState extends State<LlmSettings> {
+class _KeysSettingsState extends State<KeysSettings> {
   final _formKey = GlobalKey<FormState>();
-  final _openaiApiKeyController = TextEditingController();
-  final _openaiApiEndpointController = TextEditingController();
-  final _claudeApiKeyController = TextEditingController();
-  final _claudeApiEndpointController = TextEditingController();
-  final _deepseekApiKeyController = TextEditingController();
-  final _deepseekApiEndpointController = TextEditingController();
-  final _ollamaApiEndpointController = TextEditingController();
   bool _isLoading = false;
+
+  // 定义LLM API配置
+  final Map<String, ApiConfig> _llmApiConfigs = {
+    'openai': ApiConfig(
+      title: 'OpenAI',
+      iconPath: 'assets/openai_icon.png',
+      accentColor: const Color(0xFF10A37F),
+      requiresKey: true,
+      requiresEndpoint: true,
+    ),
+    'claude': ApiConfig(
+      title: 'Claude',
+      iconPath: 'assets/claude_icon.png',
+      accentColor: const Color(0xFF7C3AED),
+      requiresKey: true,
+      requiresEndpoint: true,
+    ),
+    'deepseek': ApiConfig(
+      title: 'DeepSeek',
+      iconPath: 'assets/deepseek_icon.png',
+      accentColor: const Color(0xFF1A73E8),
+      requiresKey: true,
+      requiresEndpoint: true,
+    ),
+    'ollama': ApiConfig(
+      title: 'Ollama',
+      iconPath: 'assets/ollama_icon.png',
+      accentColor: const Color(0xFF1A73E8),
+      requiresKey: false,
+      requiresEndpoint: true,
+    ),
+  };
+
+  // 定义Tools API配置
+  final Map<String, ApiConfig> _toolsApiConfigs = {
+    'tavily': ApiConfig(
+      title: 'Tavily Search',
+      iconPath: 'assets/tavily_icon.png',
+      accentColor: const Color(0xFF6366F1),
+      requiresKey: true,
+      requiresEndpoint: false,
+    ),
+  };
+
+  // 使用Map统一管理控制器
+  final Map<String, ApiControllers> _controllers = {};
 
   @override
   void initState() {
     super.initState();
+    _initializeControllers();
     _loadSettings();
+  }
+
+  void _initializeControllers() {
+    // 初始化 LLM API 控制器
+    for (var entry in _llmApiConfigs.entries) {
+      _controllers[entry.key] = ApiControllers(
+        keyController: entry.value.requiresKey ? TextEditingController() : null,
+        endpointController:
+            entry.value.requiresEndpoint ? TextEditingController() : null,
+      );
+    }
+    // 初始化 Tools API 控制器
+    for (var entry in _toolsApiConfigs.entries) {
+      _controllers[entry.key] = ApiControllers(
+        keyController: entry.value.requiresKey ? TextEditingController() : null,
+        endpointController:
+            entry.value.requiresEndpoint ? TextEditingController() : null,
+      );
+    }
   }
 
   @override
   void dispose() {
-    _openaiApiKeyController.dispose();
-    _openaiApiEndpointController.dispose();
-    _claudeApiKeyController.dispose();
-    _claudeApiEndpointController.dispose();
-    _deepseekApiKeyController.dispose();
-    _deepseekApiEndpointController.dispose();
-    _ollamaApiEndpointController.dispose();
+    for (var controller in _controllers.values) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -44,27 +99,30 @@ class _LlmSettingsState extends State<LlmSettings> {
     final settings = Provider.of<SettingsProvider>(context, listen: false);
     await settings.loadSettings();
 
-    final openaiSettings = settings.apiSettings['openai'];
-    if (openaiSettings != null) {
-      _openaiApiKeyController.text = openaiSettings.apiKey;
-      _openaiApiEndpointController.text = openaiSettings.apiEndpoint;
+    for (var entry in _llmApiConfigs.entries) {
+      final apiSettings = settings.apiSettings[entry.key];
+      if (apiSettings != null) {
+        final controller = _controllers[entry.key]!;
+        if (controller.keyController != null) {
+          controller.keyController!.text = apiSettings.apiKey;
+        }
+        if (controller.endpointController != null) {
+          controller.endpointController!.text = apiSettings.apiEndpoint;
+        }
+      }
     }
 
-    final claudeSettings = settings.apiSettings['claude'];
-    if (claudeSettings != null) {
-      _claudeApiKeyController.text = claudeSettings.apiKey;
-      _claudeApiEndpointController.text = claudeSettings.apiEndpoint;
-    }
-
-    final deepseekSettings = settings.apiSettings['deepseek'];
-    if (deepseekSettings != null) {
-      _deepseekApiKeyController.text = deepseekSettings.apiKey;
-      _deepseekApiEndpointController.text = deepseekSettings.apiEndpoint;
-    }
-
-    final ollamaSettings = settings.apiSettings['ollama'];
-    if (ollamaSettings != null) {
-      _ollamaApiEndpointController.text = ollamaSettings.apiEndpoint;
+    for (var entry in _toolsApiConfigs.entries) {
+      final apiSettings = settings.apiSettings[entry.key];
+      if (apiSettings != null) {
+        final controller = _controllers[entry.key]!;
+        if (controller.keyController != null) {
+          controller.keyController!.text = apiSettings.apiKey;
+        }
+        if (controller.endpointController != null) {
+          controller.endpointController!.text = apiSettings.apiEndpoint;
+        }
+      }
     }
   }
 
@@ -91,33 +149,15 @@ class _LlmSettingsState extends State<LlmSettings> {
                 Expanded(
                   child: ListView(
                     children: [
-                      ApiSection(
-                        title: 'OpenAI',
-                        iconPath: 'assets/openai_icon.png',
-                        keyController: _openaiApiKeyController,
-                        endpointController: _openaiApiEndpointController,
-                        accentColor: const Color(0xFF10A37F),
-                      ),
-                      ApiSection(
-                        title: 'Claude',
-                        iconPath: 'assets/claude_icon.png',
-                        keyController: _claudeApiKeyController,
-                        endpointController: _claudeApiEndpointController,
-                        accentColor: const Color(0xFF7C3AED),
-                      ),
-                      ApiSection(
-                        title: 'DeepSeek',
-                        iconPath: 'assets/deepseek_icon.png',
-                        keyController: _deepseekApiKeyController,
-                        endpointController: _deepseekApiEndpointController,
-                        accentColor: const Color(0xFF2563EB),
-                      ),
-                      ApiSection(
-                        title: 'Ollama',
-                        iconPath: 'assets/ollama_icon.png',
-                        endpointController: _ollamaApiEndpointController,
-                        accentColor: const Color(0xFF000000),
-                      ),
+                      Text('LLM Kye',
+                          style: TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.bold)),
+                      ..._buildLlmApiSections(),
+                      const SizedBox(height: 12),
+                      Text('Tool Key',
+                          style: TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.bold)),
+                      ..._buildToolsApiSections(),
                     ],
                   ),
                 ),
@@ -162,39 +202,57 @@ class _LlmSettingsState extends State<LlmSettings> {
     );
   }
 
+  List<Widget> _buildLlmApiSections() {
+    return _llmApiConfigs.entries
+        .map((entry) => ApiSection(
+              title: entry.value.title,
+              iconPath: entry.value.iconPath,
+              keyController: _controllers[entry.key]?.keyController,
+              endpointController: _controllers[entry.key]?.endpointController,
+              accentColor: entry.value.accentColor,
+            ))
+        .toList();
+  }
+
+  List<Widget> _buildToolsApiSections() {
+    return _toolsApiConfigs.entries
+        .map((entry) => ApiSection(
+              title: entry.value.title,
+              iconPath: entry.value.iconPath,
+              keyController: _controllers[entry.key]?.keyController,
+              endpointController: _controllers[entry.key]?.endpointController,
+              accentColor: entry.value.accentColor,
+            ))
+        .toList();
+  }
+
   Future<void> _saveSettings() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
 
       try {
         final settings = ProviderManager.settingsProvider;
+        final Map<String, KeysSetting> apiSettings = {};
 
-        final openaiSetting = LLMSetting(
-          apiKey: _openaiApiKeyController.text,
-          apiEndpoint: _openaiApiEndpointController.text,
-        );
+        // 保存 LLM API 设置
+        for (var entry in _llmApiConfigs.entries) {
+          final controller = _controllers[entry.key]!;
+          apiSettings[entry.key] = KeysSetting(
+            apiKey: controller.keyController?.text ?? '',
+            apiEndpoint: controller.endpointController?.text ?? '',
+          );
+        }
 
-        final claudeSetting = LLMSetting(
-          apiKey: _claudeApiKeyController.text,
-          apiEndpoint: _claudeApiEndpointController.text,
-        );
+        // 保存 Tools API 设置
+        for (var entry in _toolsApiConfigs.entries) {
+          final controller = _controllers[entry.key]!;
+          apiSettings[entry.key] = KeysSetting(
+            apiKey: controller.keyController?.text ?? '',
+            apiEndpoint: controller.endpointController?.text ?? '',
+          );
+        }
 
-        final deepseekSetting = LLMSetting(
-          apiKey: _deepseekApiKeyController.text,
-          apiEndpoint: _deepseekApiEndpointController.text,
-        );
-
-        final ollamaSetting = LLMSetting(
-          apiKey: "",
-          apiEndpoint: _ollamaApiEndpointController.text,
-        );
-
-        await settings.updateApiSettings(apiSettings: {
-          'openai': openaiSetting,
-          'claude': claudeSetting,
-          'deepseek': deepseekSetting,
-          'ollama': ollamaSetting,
-        });
+        await settings.updateApiSettings(apiSettings: apiSettings);
 
         if (mounted) {
           await ProviderManager.chatModelProvider.loadAvailableModels();
@@ -234,7 +292,7 @@ class ApiSection extends StatefulWidget {
   final String title;
   final String iconPath;
   final TextEditingController? keyController;
-  final TextEditingController endpointController;
+  final TextEditingController? endpointController;
   final Color accentColor;
 
   const ApiSection({
@@ -242,7 +300,7 @@ class ApiSection extends StatefulWidget {
     required this.title,
     required this.iconPath,
     this.keyController,
-    required this.endpointController,
+    this.endpointController,
     required this.accentColor,
   });
 
@@ -316,25 +374,56 @@ class _ApiSectionState extends State<ApiSection> {
                 },
               ),
             ],
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: widget.endpointController,
-              decoration: InputDecoration(
-                labelText: 'API Endpoint',
-                hintText: 'Enter API endpoint URL',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                prefixIcon: Icon(Icons.link, color: widget.accentColor),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: BorderSide(color: widget.accentColor, width: 2),
+            if (widget.endpointController != null) ...[
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: widget.endpointController,
+                decoration: InputDecoration(
+                  labelText: 'API Endpoint',
+                  hintText: 'Enter API endpoint URL',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  prefixIcon: Icon(Icons.link, color: widget.accentColor),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: widget.accentColor, width: 2),
+                  ),
                 ),
               ),
-            ),
+            ],
           ],
         ),
       ),
     );
+  }
+}
+
+// 新增的辅助类
+class ApiConfig {
+  final String title;
+  final String iconPath;
+  final Color accentColor;
+  final bool requiresKey;
+  final bool requiresEndpoint;
+
+  ApiConfig({
+    required this.title,
+    required this.iconPath,
+    this.accentColor = const Color(0xFF1A73E8),
+    this.requiresKey = true,
+    this.requiresEndpoint = true,
+  });
+}
+
+class ApiControllers {
+  final TextEditingController? keyController;
+  final TextEditingController? endpointController;
+
+  ApiControllers({this.keyController, this.endpointController});
+
+  void dispose() {
+    keyController?.dispose();
+    endpointController?.dispose();
   }
 }

@@ -5,12 +5,14 @@ class CollapsibleSection extends StatefulWidget {
   final Widget title;
   final Widget content;
   final EdgeInsetsGeometry? padding;
+  final bool initiallyExpanded;
 
   const CollapsibleSection({
     super.key,
     required this.title,
     required this.content,
     this.padding,
+    this.initiallyExpanded = false,
   });
 
   @override
@@ -18,7 +20,13 @@ class CollapsibleSection extends StatefulWidget {
 }
 
 class _CollapsibleSectionState extends State<CollapsibleSection> {
-  bool _isExpanded = false;
+  late bool _isExpanded;
+
+  @override
+  void initState() {
+    super.initState();
+    _isExpanded = widget.initiallyExpanded;
+  }
 
   @override
   Widget build(BuildContext context) {
