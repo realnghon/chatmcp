@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'model.dart';
 import 'package:logging/logging.dart';
 import './openai_client.dart';
+import 'package:ChatMcp/provider/provider_manager.dart';
 
 class DeepSeekClient extends BaseLLMClient {
   final String apiKey;
@@ -88,13 +89,18 @@ class DeepSeekClient extends BaseLLMClient {
     };
 
     try {
+      Logger.root.info('deepseek request chat stream completion');
       _dio.options.responseType = ResponseType.stream;
       final response = await _dio.post(
         '$baseUrl/chat/completions',
         data: jsonEncode(body),
       );
 
+      Logger.root.info('deepseek start stream response');
       String buffer = '';
+      bool reasoningContentStart = false;
+      bool reasoningContentEnd = false;
+      bool reasoningStyle = false;
       await for (final chunk in response.data.stream) {
         final decodedChunk = utf8.decode(chunk);
         buffer += decodedChunk;
@@ -103,6 +109,7 @@ class DeepSeekClient extends BaseLLMClient {
         while (buffer.contains('\n')) {
           final index = buffer.indexOf('\n');
           final line = buffer.substring(0, index).trim();
+          Logger.root.info('deepseek stream response line: $line');
           buffer = buffer.substring(index + 1);
 
           if (line.startsWith('data: ')) {
@@ -113,7 +120,9 @@ class DeepSeekClient extends BaseLLMClient {
               final json = jsonDecode(jsonStr);
 
               // 检查 choices 数组是否为空
-              if (json['choices'] == null || json['choices'].isEmpty) {
+              if (json['choices'] == null ||
+                  json['choices'].isEmpty ||
+                  json['choices'].length < 1) {
                 continue;
               }
 
@@ -132,30 +141,73 @@ class DeepSeekClient extends BaseLLMClient {
                       ))
                   ?.toList();
 
-              // 只在有内容或工具调用时才yield响应
-              if (delta['content'] != null || toolCalls != null) {
-                String content = delta['content'] ?? '';
-                if (content.isNotEmpty && content.contains('<think>')) {
-                  content = content.replaceAll('<think>',
-                      '<think start-time="${DateTime.now().toIso8601String()}">');
+              final reasoningContent =
+                  delta != null ? (delta['reasoning_content'] ?? '') : '';
+
+              if (reasoningContent.isNotEmpty) {
+                reasoningStyle = true;
+                if (!reasoningContentStart) {
+                  reasoningContentStart = true;
+                  yield LLMResponse(
+                    content:
+                        '<think start-time="${DateTime.now().toIso8601String()}">$reasoningContent',
+                    toolCalls: toolCalls,
+                  );
+                } else {
+                  yield LLMResponse(
+                    content: reasoningContent,
+                    toolCalls: toolCalls,
+                  );
                 }
-                if (content.isNotEmpty && content.contains('</think>')) {
-                  content = content.replaceAll('</think>',
-                      '</think end-time="${DateTime.now().toIso8601String()}">');
-                }
-                yield LLMResponse(
-                  content: content,
-                  toolCalls: toolCalls,
-                );
               }
-            } catch (e) {
-              Logger.root.severe('Failed to parse chunk: $jsonStr $e');
+
+              if (reasoningStyle) {
+                final content = delta != null ? (delta['content'] ?? '') : '';
+                if (content.isNotEmpty) {
+                  if (!reasoningContentEnd) {
+                    reasoningContentEnd = true;
+                    yield LLMResponse(
+                      content:
+                          '</think end-time="${DateTime.now().toIso8601String()}">$content',
+                      toolCalls: toolCalls,
+                    );
+                  } else {
+                    yield LLMResponse(
+                      content: content,
+                      toolCalls: toolCalls,
+                    );
+                  }
+                }
+              } else {
+                // 只在有内容或工具调用时才yield响应
+                if (delta != null && delta['content'] != null) {
+                  String content =
+                      delta != null ? (delta['content'] ?? '') : '';
+                  if (content.isNotEmpty && content.contains('<think>')) {
+                    content = content.replaceAll('<think>',
+                        '<think start-time="${DateTime.now().toIso8601String()}">');
+                  }
+                  if (content.isNotEmpty && content.contains('</think>')) {
+                    content = content.replaceAll('</think>',
+                        '</think end-time="${DateTime.now().toIso8601String()}">');
+                  }
+
+                  yield LLMResponse(
+                    content: content,
+                    toolCalls: toolCalls,
+                  );
+                }
+              }
+            } catch (e, trace) {
+              Logger.root.severe(
+                  'Failed to parse chunk: $jsonStr, error: $e, trace: $trace');
               continue;
             }
           }
         }
       }
-    } catch (e) {
+    } catch (e, trace) {
+      Logger.root.severe('DeepSeek stream completion error: $e, trace: $trace');
       throw await handleError(
           e, 'DeepSeek', '$baseUrl/chat/completions', jsonEncode(body));
     }
@@ -168,21 +220,32 @@ class DeepSeekClient extends BaseLLMClient {
       return "$role: ${msg.content}";
     }).join("\n");
 
-    final prompt = ChatMessage(
-      role: MessageRole.assistant,
-      content:
-          """You are a conversation title generator. Generate a concise title (max 20 characters) for the following conversation.
+    try {
+      final prompt = ChatMessage(
+        role: MessageRole.assistant,
+        content:
+            """You are a conversation title generator. Generate a concise title (max 20 characters) for the following conversation.
 The title should summarize the main topic. Return only the title without any explanation or extra punctuation.
 
 Conversation:
 $conversationText""",
-    );
+      );
 
-    final response = await chatCompletion(CompletionRequest(
-      model: "deepseek-chat",
-      messages: [prompt],
-    ));
-    return response.content?.trim() ?? "New Chat";
+      final models = ProviderManager.chatModelProvider.getModels();
+      String modelName = "deepseek-chat";
+      if (models.any((m) => m.name == "deepseek-v3")) {
+        modelName = "deepseek-v3";
+      }
+
+      final response = await chatCompletion(CompletionRequest(
+        model: modelName,
+        messages: [prompt],
+      ));
+      return response.content?.trim() ?? "New Chat";
+    } catch (e, trace) {
+      Logger.root.severe('DeepSeek gen title error: $e, trace: $trace');
+      return "New Chat";
+    }
   }
 
   @override

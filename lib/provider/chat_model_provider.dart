@@ -42,6 +42,10 @@ class ChatModelProvider extends ChangeNotifier {
 
   List<llmModel.Model> get availableModels => _availableModels;
 
+  List<llmModel.Model> getModels() {
+    return _availableModels;
+  }
+
   // 获取当前选中的模型
   static const String _modelKey = 'current_model';
   llmModel.Model _currentModel = llmModel.Model(

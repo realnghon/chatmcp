@@ -103,7 +103,7 @@ class ChatMessageContent extends StatelessWidget {
               message: ChatMessage(content: '', role: MessageRole.loading)),
         if (message.files != null && message.files!.isNotEmpty)
           Container(
-            margin: const EdgeInsets.only(top: 8),
+            margin: const EdgeInsets.fromLTRB(0, 8, 0, 8),
             child: Wrap(
               spacing: 8,
               runSpacing: 8,

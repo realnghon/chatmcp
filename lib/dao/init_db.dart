@@ -10,6 +10,41 @@ class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
   static Database? _database;
   static const List<String> requiredTables = ['chat', 'chat_message'];
+  static const int currentVersion = 2;
+
+  // 定义数据库版本迁移脚本
+  static final List<DatabaseMigration> migrations = [
+    DatabaseMigration(
+      version: 1,
+      sql: [
+        '''
+        CREATE TABLE IF NOT EXISTS chat(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT,
+          createdAt datetime,
+          updatedAt datetime
+        )
+        ''',
+        '''
+        CREATE TABLE IF NOT EXISTS chat_message(
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          chatId INTEGER,
+          messageId TEXT,
+          parentMessageId TEXT,
+          body TEXT,
+          createdAt datetime,
+          updatedAt datetime,
+          FOREIGN KEY (chatId) REFERENCES chat(id)
+        )
+        '''
+      ],
+    ),
+    DatabaseMigration(
+      version: 2,
+      sql: ['ALTER TABLE chat ADD COLUMN model TEXT'],
+    ),
+    // 后续版本可以继续在这里添加
+  ];
 
   DatabaseHelper._init();
 
@@ -37,8 +72,9 @@ class DatabaseHelper {
       final db = await databaseFactory.openDatabase(
         dbPath,
         options: OpenDatabaseOptions(
-          version: 1,
+          version: currentVersion,
           onCreate: _createDB,
+          onUpgrade: _onUpgrade,
           onOpen: (db) async {
             try {
               await _ensureTablesExist(db);
@@ -93,35 +129,56 @@ class DatabaseHelper {
 
   Future<void> _createDB(Database db, int version) async {
     try {
-      // 检查表是否已存在，如果存在则跳过
-      for (var table in requiredTables) {
-        final tableExists = await db.query('sqlite_master',
-            where: "type = 'table' AND name = ?", whereArgs: [table]);
-
-        if (tableExists.isEmpty) {
-          // 获取对应表的创建语句
-          final createStatement = sql
-              .split(';')
-              .where((s) => s.trim().isNotEmpty)
-              .map((s) => s.trim())
-              .where((s) =>
-                  s.toLowerCase().contains('create table') &&
-                  s.toLowerCase().contains(table.toLowerCase()))
-              .first;
-
-          await db.execute(createStatement);
-          Logger.root.info('创建表: $table');
-        } else {
-          Logger.root.info('表已存在，跳过创建: $table');
-        }
+      // 执行初始版本的建表语句
+      final initialMigration = migrations.first;
+      for (var statement in initialMigration.sql) {
+        await db.execute(statement);
+        Logger.root.info('执行SQL: $statement');
       }
-
-      Logger.root.info('数据库表检查/创建完成');
+      Logger.root.info('数据库初始化完成');
     } catch (e, stackTrace) {
       Logger.root.severe('创建数据库表失败: $e\n堆栈跟踪:\n$stackTrace');
       rethrow;
     }
   }
+
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    Logger.root.info('数据库升级：从版本 $oldVersion 升级到 $newVersion');
+
+    try {
+      // 获取需要执行的迁移脚本
+      final pendingMigrations = migrations
+          .where((migration) =>
+              migration.version > oldVersion && migration.version <= newVersion)
+          .toList()
+        ..sort((a, b) => a.version.compareTo(b.version));
+
+      // 按顺序执行迁移脚本
+      for (var migration in pendingMigrations) {
+        Logger.root.info('执行版本 ${migration.version} 的迁移脚本');
+        for (var statement in migration.sql) {
+          await db.execute(statement);
+          Logger.root.info('执行SQL: $statement');
+        }
+      }
+
+      Logger.root.info('数据库升级完成');
+    } catch (e, stackTrace) {
+      Logger.root.severe('数据库升级失败: $e\n堆栈跟踪:\n$stackTrace');
+      rethrow;
+    }
+  }
+}
+
+// 定义数据库迁移类
+class DatabaseMigration {
+  final int version;
+  final List<String> sql;
+
+  const DatabaseMigration({
+    required this.version,
+    required this.sql,
+  });
 }
 
 Future<void> initDb() async {
@@ -137,23 +194,3 @@ Future<void> initDb() async {
     rethrow;
   }
 }
-
-const sql = '''
-CREATE TABLE IF NOT EXISTS chat(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT,
-    createdAt datetime,
-    updatedAt datetime
-);
-
-CREATE TABLE IF NOT EXISTS chat_message(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    chatId INTEGER,
-    messageId TEXT,
-    parentMessageId TEXT,
-    body TEXT,
-    createdAt datetime,
-    updatedAt datetime,
-    FOREIGN KEY (chatId) REFERENCES chat(id)
-);
-''';

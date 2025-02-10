@@ -557,6 +557,7 @@ class _ChatPageState extends State<ChatPage> {
 
   Future<void> _processLLMResponse() async {
     final List<ChatMessage> messageList = _prepareMessageList();
+    Logger.root.info('start process llm response');
     final stream = _llmClient!.chatStreamCompletion(CompletionRequest(
       model: ProviderManager.chatModelProvider.currentModel.name,
       messages: [
@@ -570,6 +571,7 @@ class _ChatPageState extends State<ChatPage> {
 
     _initializeAssistantResponse();
     await _processResponseStream(stream);
+    Logger.root.info('end process llm response');
   }
 
   List<ChatMessage> _prepareMessageList() {

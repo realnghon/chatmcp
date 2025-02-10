@@ -159,21 +159,26 @@ class OpenAIClient extends BaseLLMClient {
       return "$role: ${msg.content}";
     }).join("\n");
 
-    final prompt = ChatMessage(
-      role: MessageRole.assistant,
-      content:
-          """You are a conversation title generator. Generate a concise title (max 20 characters) for the following conversation.
+    try {
+      final prompt = ChatMessage(
+        role: MessageRole.assistant,
+        content:
+            """You are a conversation title generator. Generate a concise title (max 20 characters) for the following conversation.
 The title should summarize the main topic. Return only the title without any explanation or extra punctuation.
 
 Conversation:
 $conversationText""",
-    );
+      );
 
-    final response = await chatCompletion(CompletionRequest(
-      model: "gpt-4o-mini",
-      messages: [prompt],
-    ));
-    return response.content?.trim() ?? "New Chat";
+      final response = await chatCompletion(CompletionRequest(
+        model: "gpt-4o-mini",
+        messages: [prompt],
+      ));
+      return response.content?.trim() ?? "New Chat";
+    } catch (e, trace) {
+      Logger.root.severe('OpenAI gen title error: $e, trace: $trace');
+      return "New Chat";
+    }
   }
 
   @override
