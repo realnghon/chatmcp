@@ -140,7 +140,7 @@ class ChatHistoryItem extends StatelessWidget {
       decoration: BoxDecoration(
         color: isActive
             ? AppColors.getThemeColor(context,
-                lightColor: AppColors.grey[200], darkColor: AppColors.grey[800])
+                lightColor: AppColors.grey[300], darkColor: AppColors.grey[700])
             : null,
         borderRadius: BorderRadius.circular(4),
       ),
