@@ -149,7 +149,7 @@ class _KeysSettingsState extends State<KeysSettings> {
                 Expanded(
                   child: ListView(
                     children: [
-                      Text('LLM Kye',
+                      Text('LLM Key',
                           style: TextStyle(
                               fontSize: 24, fontWeight: FontWeight.bold)),
                       ..._buildLlmApiSections(),

@@ -112,7 +112,11 @@ class ChatMessageContent extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 6, vertical: 6),
                         decoration: BoxDecoration(
-                          color: AppColors.grey[200],
+                          color: AppColors.getThemeColor(
+                            context,
+                            lightColor: AppColors.grey[200],
+                            darkColor: AppColors.grey[800],
+                          ),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: file.fileType.startsWith('image')
@@ -131,7 +135,11 @@ class ChatMessageContent extends StatelessWidget {
                                       return Container(
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(
-                                          color: AppColors.grey[200],
+                                          color: AppColors.getThemeColor(
+                                            context,
+                                            lightColor: AppColors.grey[200],
+                                            darkColor: AppColors.grey[800],
+                                          ),
                                           borderRadius:
                                               BorderRadius.circular(8),
                                         ),
@@ -140,7 +148,11 @@ class ChatMessageContent extends StatelessWidget {
                                           children: [
                                             Icon(
                                               Icons.broken_image,
-                                              color: AppColors.grey[600],
+                                              color: AppColors.getThemeColor(
+                                                context,
+                                                lightColor: AppColors.grey[600],
+                                                darkColor: AppColors.grey[400],
+                                              ),
                                               size: 32,
                                             ),
                                           ],
@@ -237,8 +249,11 @@ class MessageBubble extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: message.role == MessageRole.user
-            ? AppColors.grey[200]
-            : AppColors.grey[300],
+            ? AppColors.getThemeColor(context,
+                lightColor: AppColors.grey[200], darkColor: AppColors.grey[800])
+            : AppColors.getThemeColor(context,
+                lightColor: AppColors.grey[300],
+                darkColor: AppColors.grey[900]),
         borderRadius: BorderRadius.circular(16),
       ),
       child: message.content != null

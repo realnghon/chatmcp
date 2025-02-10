@@ -140,7 +140,8 @@ class _CodeBlockState extends State<_CodeBlock>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.grey[100],
+        color: AppColors.getThemeColor(context,
+            lightColor: AppColors.grey[100], darkColor: AppColors.grey[900]),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
       ),
       child: Row(
@@ -150,7 +151,9 @@ class _CodeBlockState extends State<_CodeBlock>
           Text(
             widget.language.isEmpty ? 'text' : widget.language,
             style: TextStyle(
-              color: AppColors.grey[600],
+              color: AppColors.getThemeColor(context,
+                  lightColor: AppColors.grey[600],
+                  darkColor: AppColors.grey[300]),
               fontSize: 10,
               fontWeight: FontWeight.w500,
             ),
@@ -164,7 +167,9 @@ class _CodeBlockState extends State<_CodeBlock>
                 style: TextButton.styleFrom(
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  backgroundColor: AppColors.white,
+                  backgroundColor: AppColors.getThemeColor(context,
+                      lightColor: AppColors.grey[100],
+                      darkColor: AppColors.grey[900]),
                   padding:
                       const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                   shape: RoundedRectangleBorder(
@@ -183,7 +188,9 @@ class _CodeBlockState extends State<_CodeBlock>
                   style: TextButton.styleFrom(
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    backgroundColor: AppColors.white,
+                    backgroundColor: AppColors.getThemeColor(context,
+                        lightColor: AppColors.grey[100],
+                        darkColor: AppColors.grey[900]),
                     padding:
                         const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                     shape: RoundedRectangleBorder(

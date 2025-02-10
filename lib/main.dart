@@ -8,6 +8,8 @@ import './provider/provider_manager.dart';
 import 'package:logging/logging.dart';
 import 'page/layout/sidebar.dart';
 import 'utils/platform.dart';
+import 'package:ChatMcp/provider/settings_provider.dart';
+import 'utils/color.dart';
 
 final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
@@ -71,26 +73,53 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      scaffoldMessengerKey: _scaffoldMessengerKey,
-      title: 'ChatMcp',
-      theme: ThemeData(
-        useMaterial3: true,
-      ),
-      home: Scaffold(
-        drawer: kIsMobile
-            ? Container(
-                width: 250,
-                color: Theme.of(context).scaffoldBackgroundColor,
-                child: SafeArea(
-                  child: SidebarPanel(
-                    onToggle: () {},
-                  ),
-                ),
-              )
-            : null,
-        body: LayoutPage(),
-      ),
+    return Consumer<SettingsProvider>(
+      builder: (context, settings, child) {
+        return MaterialApp(
+          scaffoldMessengerKey: _scaffoldMessengerKey,
+          title: 'ChatMcp',
+          theme: ThemeData(
+            useMaterial3: true,
+            brightness: Brightness.light,
+          ),
+          darkTheme: ThemeData(
+            useMaterial3: true,
+            brightness: Brightness.dark,
+          ),
+          themeMode: _getThemeMode(settings.generalSetting.theme),
+          home: Scaffold(
+            drawer: kIsMobile
+                ? Builder(
+                    builder: (BuildContext context) => Theme(
+                      data: Theme.of(context),
+                      child: Container(
+                        width: 250,
+                        color: AppColors.getThemeBackgroundColor(context),
+                        child: SafeArea(
+                          child: SidebarPanel(
+                            onToggle: () {},
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                : null,
+            body: LayoutPage(),
+          ),
+        );
+      },
     );
+  }
+
+  ThemeMode _getThemeMode(String theme) {
+    switch (theme) {
+      case 'light':
+        return ThemeMode.light;
+      case 'dark':
+        return ThemeMode.dark;
+      case 'system':
+      default:
+        return ThemeMode.system;
+    }
   }
 }

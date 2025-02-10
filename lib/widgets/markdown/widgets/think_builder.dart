@@ -1,50 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:markdown/markdown.dart' as md;
 
 import 'package:markdown_widget/markdown_widget.dart';
-
+import 'package:ChatMcp/utils/color.dart';
 import '../markit_widget.dart';
-
-class ThinkElementBuilder extends MarkdownElementBuilder {
-  @override
-  Widget? visitElementAfter(md.Element element, TextStyle? preferredStyle) {
-    final textContent = element.textContent;
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        border: Border.all(color: Colors.grey[300]!),
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Row(
-            children: [
-              Icon(Icons.lightbulb_outline, color: Colors.orange),
-              SizedBox(width: 8),
-              Text(
-                '思考',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            textContent,
-            style: preferredStyle ??
-                const TextStyle(
-                  fontSize: 14,
-                  color: Colors.black87,
-                ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 // 属性匹配正则表达式
 final _attributeRegex =
@@ -232,8 +191,12 @@ class _ThinkWidgetState extends State<ThinkWidget> {
       padding: const EdgeInsets.all(16.0),
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
-        border: Border.all(color: Colors.grey[300]!),
+        color: AppColors.getThemeColor(context,
+            lightColor: AppColors.grey[100], darkColor: AppColors.grey[900]),
+        border: Border.all(
+            color: AppColors.getThemeColor(context,
+                lightColor: AppColors.grey[300],
+                darkColor: AppColors.grey[700])),
         borderRadius: BorderRadius.circular(8.0),
       ),
       child: Column(
@@ -241,18 +204,24 @@ class _ThinkWidgetState extends State<ThinkWidget> {
         children: [
           Row(
             children: [
-              Icon(Icons.lightbulb_outline, color: Colors.orange),
+              Icon(Icons.lightbulb_outline,
+                  color: AppColors.getThemeColor(context,
+                      lightColor: Colors.orange, darkColor: Colors.orange)),
               const SizedBox(width: 8),
               Expanded(
                 child: Text("$prefix$durationTips",
-                    style: TextStyle(color: Colors.grey[500])),
+                    style: TextStyle(
+                        color: AppColors.getThemeColor(context,
+                            lightColor: AppColors.grey[500],
+                            darkColor: AppColors.grey[300]))),
               ),
               if (!widget.isClosed)
-                const SizedBox(
+                SizedBox(
                   width: 12,
                   height: 12,
                   child: CircularProgressIndicator(
-                    color: Colors.orange,
+                    color: AppColors.getThemeColor(context,
+                        lightColor: Colors.orange, darkColor: Colors.orange),
                     strokeWidth: 1.5,
                   ),
                 )
@@ -262,7 +231,9 @@ class _ThinkWidgetState extends State<ThinkWidget> {
                   constraints: const BoxConstraints(),
                   icon: Icon(
                     _isExpanded ? Icons.expand_less : Icons.expand_more,
-                    color: Colors.grey[600],
+                    color: AppColors.getThemeColor(context,
+                        lightColor: AppColors.grey[600],
+                        darkColor: AppColors.grey[300]),
                   ),
                   onPressed: () {
                     setState(() {

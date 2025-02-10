@@ -79,7 +79,9 @@ class _LayoutPageState extends State<LayoutPage> {
           if (kIsDesktop && !hideSidebar)
             Container(
               width: 250,
-              color: AppColors.grey[200],
+              color: AppColors.getThemeColor(context,
+                  lightColor: AppColors.grey[200],
+                  darkColor: AppColors.grey[800]),
               child: SidebarPanel(
                 onToggle: _toggleSidebar,
               ),

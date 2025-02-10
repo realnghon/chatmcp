@@ -43,14 +43,13 @@ class _McpServerState extends State<McpServer> {
         child: Consumer<McpServerProvider>(
           builder: (context, provider, child) {
             if (!provider.isSupported) {
-              return const Center(
+              return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
                       Icons.warning_amber_rounded,
                       size: 64,
-                      color: AppColors.orange,
                     ),
                     SizedBox(height: 16),
                     Text(
@@ -64,7 +63,7 @@ class _McpServerState extends State<McpServer> {
                     Text(
                       'MCP Server 仅支持桌面端（Windows、macOS、Linux）',
                       style: TextStyle(
-                        color: AppColors.grey,
+                        color: AppColors.getThemeTextColor(context),
                       ),
                     ),
                   ],
@@ -88,14 +87,16 @@ class _McpServerState extends State<McpServer> {
                         hintText: 'Search server...',
                         prefixIcon: Icon(
                           Icons.search,
-                          color: Theme.of(context).primaryColor,
+                          color: AppColors.getThemeTextColor(context),
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
                         ),
                         filled: true,
-                        fillColor: Theme.of(context).cardColor,
+                        fillColor: AppColors.getThemeColor(context,
+                            lightColor: AppColors.grey[200],
+                            darkColor: AppColors.grey[800]),
                         contentPadding:
                             const EdgeInsets.symmetric(horizontal: 16),
                       ),
@@ -178,13 +179,14 @@ class _McpServerState extends State<McpServer> {
                                   Icon(
                                     Icons.dns_outlined,
                                     size: 64,
-                                    color: Theme.of(context).disabledColor,
+                                    color: AppColors.getThemeTextColor(context),
                                   ),
                                   const SizedBox(height: 16),
                                   Text(
                                     'No server configurations found',
                                     style: TextStyle(
-                                      color: Theme.of(context).disabledColor,
+                                      color:
+                                          AppColors.getThemeTextColor(context),
                                       fontSize: 16,
                                     ),
                                   ),
@@ -254,7 +256,7 @@ class _McpServerState extends State<McpServer> {
           ),
           leading: Icon(
             Icons.dns,
-            color: Theme.of(context).primaryColor,
+            color: AppColors.getThemeTextColor(context),
           ),
           childrenPadding: const EdgeInsets.all(16),
           children: [
@@ -315,7 +317,7 @@ class _McpServerState extends State<McpServer> {
                                     label: const Text('Install'),
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor:
-                                          Theme.of(context).primaryColor,
+                                          AppColors.getThemeTextColor(context),
                                       foregroundColor: AppColors.white,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(8),
@@ -429,7 +431,9 @@ class _McpServerState extends State<McpServer> {
       label: Text(
         label,
         style: TextStyle(
-          color: isSelected ? Theme.of(context).primaryColor : null,
+          color: isSelected
+              ? AppColors.getThemeTextColor(context)
+              : AppColors.getThemeTextColor(context),
           fontWeight: isSelected ? FontWeight.bold : null,
         ),
       ),
@@ -439,12 +443,12 @@ class _McpServerState extends State<McpServer> {
           _selectedTab = label;
         });
       },
-      selectedColor: Theme.of(context).primaryColor.withAlpha(38),
+      selectedColor: AppColors.getThemeTextColor(context).withAlpha(38),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
         side: BorderSide(
           color: isSelected
-              ? Theme.of(context).primaryColor.withAlpha(128)
+              ? AppColors.getThemeTextColor(context).withAlpha(128)
               : AppColors.grey.withAlpha(51),
         ),
       ),

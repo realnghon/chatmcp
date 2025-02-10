@@ -50,57 +50,67 @@ class Markit extends StatelessWidget {
           minHeight: 0,
           maxHeight: double.infinity,
         ),
-        child: buildMarkdown(),
+        child: buildMarkdown(context),
       );
 
-  Widget buildMarkdown() => SingleChildScrollView(
-        child: MarkdownBlock(
-          data: data,
-          config: MarkdownConfig(
-            configs: [
-              PConfig(
-                  textStyle: textStyle ??
-                      const TextStyle(fontSize: 14, height: 20 / 14)),
-              H1Config(style: const TextStyle(fontSize: 24, height: 24 / 24)),
-              H2Config(style: const TextStyle(fontSize: 20, height: 20 / 20)),
-              H3Config(style: const TextStyle(fontSize: 16, height: 16 / 16)),
-              H4Config(style: const TextStyle(fontSize: 12, height: 12 / 12)),
-              H5Config(style: const TextStyle(fontSize: 14, height: 14 / 14)),
-              H6Config(style: const TextStyle(fontSize: 14, height: 14 / 14)),
-              TableConfig(),
-              CodeConfig(),
-              LinkConfig(
-                style: const TextStyle(
-                  color: Colors.yellow,
-                  decoration: TextDecoration.underline,
-                ),
+  Widget buildMarkdown(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final config =
+        isDark ? MarkdownConfig.darkConfig : MarkdownConfig.defaultConfig;
+    return SingleChildScrollView(
+      child: MarkdownBlock(
+        data: data,
+        config: MarkdownConfig(
+          configs: [
+            PConfig(
+                textStyle: textStyle ??
+                    const TextStyle(fontSize: 14, height: 20 / 14)),
+            H1Config(style: const TextStyle(fontSize: 24, height: 24 / 24)),
+            H2Config(style: const TextStyle(fontSize: 20, height: 20 / 20)),
+            H3Config(style: const TextStyle(fontSize: 16, height: 16 / 16)),
+            H4Config(style: const TextStyle(fontSize: 12, height: 12 / 12)),
+            H5Config(style: const TextStyle(fontSize: 14, height: 14 / 14)),
+            H6Config(style: const TextStyle(fontSize: 14, height: 14 / 14)),
+            TableConfig(),
+            CodeConfig(),
+            LinkConfig(
+              style: const TextStyle(
+                color: Colors.yellow,
+                decoration: TextDecoration.underline,
               ),
-              PreConfig().copy(
-                  textStyle: const TextStyle(fontSize: 12), theme: githubTheme),
-              DetailConfig(),
-            ],
-          ),
-          generator: MarkdownGenerator(
-            linesMargin: const EdgeInsets.symmetric(vertical: 4),
-            generators: [
-              linkGenerator,
-              latexGenerator,
-              codeBlockGenerator,
-              thinkGenerator,
-              detailsGenerator,
-            ],
-            inlineSyntaxList: [
-              DetailsSyntax(),
-              LinkSyntax(),
-              LatexSyntax(),
-              ThinkInlineSyntax(),
-            ],
-            blockSyntaxList: [
-              DetailsBlockSyntax(),
-              LatexBlockSyntax(),
-              ThinkBlockSyntax(),
-            ],
-          ),
+            ),
+            isDark
+                ? PreConfig.darkConfig.copy(
+                    textStyle: const TextStyle(fontSize: 12),
+                    theme: githubTheme)
+                : PreConfig().copy(
+                    textStyle: const TextStyle(fontSize: 12),
+                    theme: githubTheme),
+            DetailConfig(),
+          ],
         ),
-      );
+        generator: MarkdownGenerator(
+          linesMargin: const EdgeInsets.symmetric(vertical: 4),
+          generators: [
+            linkGenerator,
+            latexGenerator,
+            codeBlockGenerator,
+            thinkGenerator,
+            detailsGenerator,
+          ],
+          inlineSyntaxList: [
+            DetailsSyntax(),
+            LinkSyntax(),
+            LatexSyntax(),
+            ThinkInlineSyntax(),
+          ],
+          blockSyntaxList: [
+            DetailsBlockSyntax(),
+            LatexBlockSyntax(),
+            ThinkBlockSyntax(),
+          ],
+        ),
+      ),
+    );
+  }
 }

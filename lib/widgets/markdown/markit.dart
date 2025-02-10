@@ -34,18 +34,26 @@ class Markit extends StatelessWidget {
         }
       },
       styleSheet: MarkdownStyleSheet(
-        p: const TextStyle(
-          color: AppColors.black,
+        p: TextStyle(
+          color: AppColors.getThemeTextColor(context),
         ),
         code: TextStyle(
-          backgroundColor: AppColors.grey[200],
-          color: AppColors.black87,
+          backgroundColor: AppColors.getThemeColor(
+            context,
+            lightColor: AppColors.grey[200],
+            darkColor: AppColors.grey[800],
+          ),
+          color: AppColors.getThemeTextColor(context),
         ),
         codeblockDecoration: BoxDecoration(
-          color: AppColors.grey[200],
+          color: AppColors.getThemeColor(
+            context,
+            lightColor: AppColors.grey[200],
+            darkColor: AppColors.grey[800],
+          ),
           borderRadius: BorderRadius.circular(8),
         ),
-        a: const TextStyle(
+        a: TextStyle(
           color: AppColors.blue,
           decoration: TextDecoration.none,
         ),
@@ -53,7 +61,11 @@ class Markit extends StatelessWidget {
           border: Border(
             top: BorderSide(
               width: 1,
-              color: AppColors.grey,
+              color: AppColors.getThemeColor(
+                context,
+                lightColor: AppColors.grey,
+                darkColor: AppColors.grey[700]!,
+              ),
             ),
           ),
         ),

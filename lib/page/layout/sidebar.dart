@@ -104,7 +104,7 @@ class ChatHistoryList extends StatelessWidget {
                   entry.key,
                   style: TextStyle(
                     fontSize: 12,
-                    color: AppColors.grey[600],
+                    color: AppColors.getThemeTextColor(context).withAlpha(128),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -138,7 +138,10 @@ class ChatHistoryItem extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 1),
       decoration: BoxDecoration(
-        color: isActive ? AppColors.grey.withAlpha(25) : null,
+        color: isActive
+            ? AppColors.getThemeColor(context,
+                lightColor: AppColors.grey[200], darkColor: AppColors.grey[800])
+            : null,
         borderRadius: BorderRadius.circular(4),
       ),
       child: ListTile(
