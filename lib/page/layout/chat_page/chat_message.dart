@@ -167,9 +167,13 @@ class ChatMessageContent extends StatelessWidget {
                                 children: [
                                   const Icon(Icons.attach_file, size: 16),
                                   const SizedBox(width: 4),
-                                  Text(
-                                    file.name,
-                                    style: const TextStyle(fontSize: 12),
+                                  Flexible(
+                                    child: Text(
+                                      file.name,
+                                      style: const TextStyle(fontSize: 12),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 1,
+                                    ),
                                   ),
                                 ],
                               ),
