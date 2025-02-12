@@ -14,7 +14,7 @@ AI Chat with [MCP](https://modelcontextprotocol.io/introduction) Server use Any 
 ![preview](./assets/preview/artifact.jpg)
 
 ### Dalle Gen Image
-![preview](./assets/preview/gen_image.png)
+![preview](./assets/preview/gen_img.png)
 
 ### HTML Code Preview
 ![preview](./assets/preview/html.png)
