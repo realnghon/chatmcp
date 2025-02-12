@@ -8,7 +8,7 @@ AI Chat with [MCP](https://modelcontextprotocol.io/introduction) Server use Any 
 ## Preview
 
 ### Artifact
-![preview](./assets/preview/artifact.png)
+![preview](./assets/preview/artifact.jpg)
 
 ### Gen Image
 ![preview](./assets/preview/gen_image.png)
