@@ -7,6 +7,7 @@ import './widgets/link.dart';
 import './widgets/code.dart';
 import './widgets/details.dart';
 import './widgets/think_builder.dart';
+import './widgets/artifact.dart';
 import 'package:flutter_highlight/themes/github.dart';
 
 class MarkitTestPage extends StatelessWidget {
@@ -95,10 +96,14 @@ class Markit extends StatelessWidget {
             linkGenerator,
             latexGenerator,
             codeBlockGenerator,
+            artifactAntThinkingGenerator,
+            artifactAntArtifactGenerator,
             thinkGenerator,
             detailsGenerator,
           ],
           inlineSyntaxList: [
+            ArtifactAntThinkingInlineSyntax(),
+            ArtifactAntArtifactInlineSyntax(),
             DetailsSyntax(),
             LinkSyntax(),
             LatexSyntax(),
@@ -108,6 +113,8 @@ class Markit extends StatelessWidget {
             DetailsBlockSyntax(),
             LatexBlockSyntax(),
             ThinkBlockSyntax(),
+            ArtifactAntThinkingBlockSyntax(),
+            ArtifactAntArtifactBlockSyntax(),
           ],
         ),
       ),

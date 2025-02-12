@@ -6,17 +6,23 @@ import 'package:ChatMcp/utils/color.dart';
 import '../markit_widget.dart';
 
 // 属性匹配正则表达式
-final _attributeRegex =
+final attributeRegex =
     RegExp(r'''([\w-]+)\s*=\s*(?:["']([^"'>]+)["']|([^\s>"']+))''');
 
 class ThinkInlineSyntax extends md.InlineSyntax {
-  static const _pattern = r'<think\s*([^>]*)>([^<]*)(?:</think\s*([^>]*)>)?';
+  static const defaultTagName = 'think';
+  final String tag;
 
-  ThinkInlineSyntax() : super(_pattern, caseSensitive: false);
+  ThinkInlineSyntax({String? tag, bool caseSensitive = false})
+      : tag = tag ?? defaultTagName,
+        super(_getPattern(tag ?? defaultTagName), caseSensitive: caseSensitive);
+
+  static String _getPattern(String tag) =>
+      r'<' + tag + r'\s*([^>]*)>([^<]*)(?:</' + tag + r'\s*([^>]*)>)?';
 
   Map<String, String> _parseAttributes(String attributeString) {
     final attributes = <String, String>{};
-    final matches = _attributeRegex.allMatches(attributeString);
+    final matches = attributeRegex.allMatches(attributeString);
 
     for (final match in matches) {
       if (match.groupCount >= 1) {
@@ -38,7 +44,7 @@ class ThinkInlineSyntax extends md.InlineSyntax {
     final closingAttributes =
         match[3] != null ? _parseAttributes(match[3]!) : <String, String>{};
 
-    final element = md.Element('think', [md.Text(content)]);
+    final element = md.Element(tag, [md.Text(content)]);
 
     // 合并开始和结束标签的属性
     element.attributes.addAll(openingAttributes);
@@ -54,17 +60,23 @@ class ThinkInlineSyntax extends md.InlineSyntax {
 }
 
 class ThinkBlockSyntax extends md.BlockSyntax {
-  static final _startPattern = RegExp(r'^<think\s*([^>]*)>$');
-  static final _endPattern = RegExp(r'^</think\s*([^>]*)>$');
+  static const defaultTagName = 'think';
+  final String tag;
+
+  ThinkBlockSyntax({String? tag}) : tag = tag ?? defaultTagName;
+
+  @protected
+  RegExp get startPattern => RegExp(r'^<' + tag + r'\s*([^>]*)>$');
+
+  @protected
+  RegExp get endPattern => RegExp(r'^</' + tag + r'\s*([^>]*)>$');
 
   @override
-  RegExp get pattern => _startPattern;
-
-  ThinkBlockSyntax();
+  RegExp get pattern => startPattern;
 
   Map<String, String> _parseAttributes(String attributeString) {
     final attributes = <String, String>{};
-    final matches = _attributeRegex.allMatches(attributeString);
+    final matches = attributeRegex.allMatches(attributeString);
 
     for (final match in matches) {
       if (match.groupCount >= 1) {
@@ -81,13 +93,13 @@ class ThinkBlockSyntax extends md.BlockSyntax {
 
   @override
   bool canParse(md.BlockParser parser) {
-    final match = pattern.firstMatch(parser.current.content);
+    final match = startPattern.firstMatch(parser.current.content);
     return match != null;
   }
 
   @override
   md.Node parse(md.BlockParser parser) {
-    final startMatch = pattern.firstMatch(parser.current.content);
+    final startMatch = startPattern.firstMatch(parser.current.content);
     final openingAttributes = startMatch != null
         ? _parseAttributes(startMatch[1] ?? '')
         : <String, String>{};
@@ -100,7 +112,7 @@ class ThinkBlockSyntax extends md.BlockSyntax {
 
     while (!parser.isDone) {
       final line = parser.current.content;
-      final endMatch = _endPattern.firstMatch(line);
+      final endMatch = endPattern.firstMatch(line);
       if (endMatch != null) {
         isClosed = true;
         closingAttributes = _parseAttributes(endMatch[1] ?? '');
@@ -112,7 +124,7 @@ class ThinkBlockSyntax extends md.BlockSyntax {
     }
 
     final content = lines.join('\n');
-    md.Element el = md.Element.text(_thinkTag, content);
+    md.Element el = md.Element.text(tag, content);
 
     // 合并开始和结束标签的属性
     el.attributes.addAll(openingAttributes);

@@ -1,6 +1,6 @@
 import 'dart:typed_data';
-import 'dart:io' as io;
 
+import 'package:ChatMcp/llm/prompt.dart';
 import 'package:ChatMcp/utils/platform.dart';
 import 'package:flutter/material.dart';
 import 'package:ChatMcp/llm/model.dart';
@@ -19,6 +19,8 @@ import 'package:ChatMcp/widgets/widgets_to_image/widgets_to_image.dart';
 import 'package:ChatMcp/widgets/widgets_to_image/utils.dart';
 import 'chat_message_to_image.dart';
 import 'package:ChatMcp/tool/tools.dart';
+import 'package:ChatMcp/utils/event_bus.dart';
+import 'chat_code_preview.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -29,6 +31,7 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   // 状态变量
+  bool _showCodePreview = false;
   Chat? _chat;
   List<ChatMessage> _messages = [];
   bool _isComposing = false;
@@ -42,16 +45,33 @@ class _ChatPageState extends State<ChatPage> {
   // to save image bytes of widget
   Uint8List? bytes;
 
+  bool mobile = kIsMobile;
+
   @override
   void initState() {
     super.initState();
     _initializeState();
+    on<CodePreviewEvent>(_onArtifactEvent);
+    on<ShareEvent>(_handleShare);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_isMobile() != mobile) {
+        setState(() {
+          mobile = _isMobile();
+          _showCodePreview = false;
+        });
+      }
+      if (!mobile && showModalCodePreview) {
+        setState(() {
+          Navigator.pop(context);
+          showModalCodePreview = false;
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
-    // 移除分享事件监听
-    ProviderManager.shareProvider.removeListener(_handleShare);
     _removeListeners();
     super.dispose();
   }
@@ -67,8 +87,6 @@ class _ChatPageState extends State<ChatPage> {
     ProviderManager.settingsProvider.addListener(_onSettingsChanged);
     ProviderManager.chatModelProvider.addListener(_initializeLLMClient);
     ProviderManager.chatProvider.addListener(_onChatProviderChanged);
-    // 添加分享事件监听
-    ProviderManager.shareProvider.addListener(_handleShare);
   }
 
   void _removeListeners() {
@@ -90,7 +108,6 @@ class _ChatPageState extends State<ChatPage> {
     _initializeHistoryMessages();
   }
 
-  int _activeTreeIndex = 0;
   List<ChatMessage> _allMessages = [];
 
   Future<List<ChatMessage>> _getHistoryTreeMessages() async {
@@ -105,11 +122,6 @@ class _ChatPageState extends State<ChatPage> {
       if (message.role == MessageRole.user) {
         continue;
       }
-      // final parentMessage =
-      //     messages.firstWhere((m) => m.messageId == message.parentMessageId);
-      // if (parentMessage.role != MessageRole.user) {
-      //   continue;
-      // }
       if (messageMap[message.parentMessageId] == null) {
         messageMap[message.parentMessageId] = [];
       }
@@ -235,6 +247,9 @@ class _ChatPageState extends State<ChatPage> {
   // 消息处理相关方法
   Future<void> _initializeHistoryMessages() async {
     final activeChat = ProviderManager.chatProvider.activeChat;
+    setState(() {
+      _showCodePreview = false;
+    });
     if (activeChat == null) {
       setState(() {
         _messages = [];
@@ -262,7 +277,6 @@ class _ChatPageState extends State<ChatPage> {
         _messages = messages;
         _chat = activeChat;
         _parentMessageId = parentId;
-        _activeTreeIndex = 0;
       });
     }
   }
@@ -270,36 +284,35 @@ class _ChatPageState extends State<ChatPage> {
   // UI 构建相关方法
   Widget _buildMessageList() {
     if (_messages.isEmpty) {
-      return Container(
-        color: AppColors.transparent,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'How can I help you today?',
-                style: TextStyle(
-                  fontSize: 18,
-                  color: AppColors.grey,
-                ),
+      return Expanded(
+        child: Container(
+          color: AppColors.transparent,
+          child: Center(
+            child: Text(
+              'How can I help you today?',
+              style: TextStyle(
+                fontSize: 18,
+                color: AppColors.grey,
               ),
-            ],
+            ),
           ),
         ),
       );
     }
 
-    return WidgetsToImage(
-      controller: toImagecontroller,
-      child: MessageList(
-        messages: _isLoading
-            ? [
-                ..._messages,
-                ChatMessage(content: '', role: MessageRole.loading)
-              ]
-            : _messages.toList(),
-        onRetry: _onRetry,
-        onSwitch: _onSwitch,
+    return Expanded(
+      child: WidgetsToImage(
+        controller: toImagecontroller,
+        child: MessageList(
+          messages: _isLoading
+              ? [
+                  ..._messages,
+                  ChatMessage(content: '', role: MessageRole.loading)
+                ]
+              : _messages.toList(),
+          onRetry: _onRetry,
+          onSwitch: _onSwitch,
+        ),
       ),
     );
   }
@@ -562,7 +575,8 @@ class _ChatPageState extends State<ChatPage> {
       model: ProviderManager.chatModelProvider.currentModel.name,
       messages: [
         ChatMessage(
-          content: ProviderManager.settingsProvider.generalSetting.systemPrompt,
+          content:
+              "${ProviderManager.settingsProvider.generalSetting.systemPrompt} \n $artifactPrompt",
           role: MessageRole.assistant,
         ),
         ...messageList,
@@ -692,7 +706,7 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   // 处理分享事件
-  Future<void> _handleShare() async {
+  Future<void> _handleShare(ShareEvent event) async {
     if (_messages.isEmpty) return;
     await Future.delayed(const Duration(milliseconds: 100));
     if (mounted) {
@@ -712,10 +726,15 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
+  bool _isMobile() {
+    final height = MediaQuery.of(context).size.height;
+    final width = MediaQuery.of(context).size.width;
+    return height > width;
+  }
+
+  Widget _buildBody() {
+    if (mobile) {
+      return Column(
         children: [
           Expanded(
             child: _buildMessageList(),
@@ -728,7 +747,114 @@ class _ChatPageState extends State<ChatPage> {
             onSubmitted: _handleSubmitted,
           ),
         ],
-      ),
+      );
+    }
+
+    return Row(
+      children: [
+        Expanded(
+          flex: 1,
+          child: Column(
+            children: [
+              _buildMessageList(),
+              _buildErrorMessage(),
+              InputArea(
+                disabled: _isLoading,
+                isComposing: _isComposing,
+                onTextChanged: _handleTextChanged,
+                onSubmitted: _handleSubmitted,
+              ),
+            ],
+          ),
+        ),
+        if (!mobile && _showCodePreview)
+          Expanded(
+            flex: 1,
+            child: _codePreviewEvent != null
+                ? ChatCodePreview(
+                    codePreviewEvent: _codePreviewEvent!,
+                  )
+                : const SizedBox.shrink(),
+          ),
+      ],
+    );
+  }
+
+  CodePreviewEvent? _codePreviewEvent;
+
+  void _onArtifactEvent(CodePreviewEvent event) {
+    _toggleCodePreview();
+    setState(() {
+      _codePreviewEvent = event;
+    });
+  }
+
+  bool showModalCodePreview = false;
+  void _showMobileCodePreview() {
+    setState(() {
+      showModalCodePreview = true;
+    });
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // 允许弹窗内容超过半屏高度
+      builder: (BuildContext context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.6, // 初始高度为屏幕的60%
+          minChildSize: 0.3, // 最小高度为屏幕的30%
+          maxChildSize: 0.9, // 最大高度为屏幕的90%
+          expand: false,
+          builder: (context, scrollController) {
+            return Container(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: AppColors.grey.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      controller: scrollController,
+                      child: _codePreviewEvent != null
+                          ? ChatCodePreview(
+                              codePreviewEvent: _codePreviewEvent!,
+                            )
+                          : const SizedBox.shrink(),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _toggleCodePreview() {
+    if (_isMobile()) {
+      _showMobileCodePreview();
+      if (_showCodePreview) {
+        setState(() {
+          _showCodePreview = false;
+        });
+      }
+    } else {
+      setState(() {
+        _showCodePreview = !_showCodePreview;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _buildBody(),
     );
   }
 }

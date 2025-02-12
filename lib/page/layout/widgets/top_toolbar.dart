@@ -4,9 +4,13 @@ import './model_selector.dart';
 import 'package:window_manager/window_manager.dart' as wm;
 import 'package:ChatMcp/utils/platform.dart';
 import 'package:ChatMcp/utils/color.dart';
-import 'package:ChatMcp/widgets/markdown/markit_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:ChatMcp/provider/chat_provider.dart';
+
+// test page
+import 'package:ChatMcp/widgets/markdown/markit_widget.dart';
+import 'package:ChatMcp/widgets/browser/browser.dart';
+import 'package:ChatMcp/utils/event_bus.dart';
 
 class TopToolbar extends StatelessWidget {
   final bool hideSidebar;
@@ -68,21 +72,28 @@ class TopToolbar extends StatelessWidget {
                     IconButton(
                       icon: const Icon(Icons.arrow_outward),
                       onPressed: () {
-                        ProviderManager.shareProvider.shareCurrentChat();
+                        emit(ShareEvent(false));
                       },
                     ),
-                  if (kIsDebug)
-                    IconButton(
-                      icon: const Icon(Icons.bug_report),
-                      onPressed: () {
-                        // jump to the top of the page
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const MarkitTestPage(),
+                  // if (kIsDebug)
+                  IconButton(
+                    icon: const Icon(Icons.bug_report),
+                    onPressed: () {
+                      // jump to the top of the page
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => Scaffold(
+                            appBar: AppBar(
+                              title: const Text('web search 测试'),
+                            ),
+                            body: BrowserView(
+                              url: 'rag embeddings',
+                            ),
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      );
+                    },
+                  ),
                 ],
               ),
             ),

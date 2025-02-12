@@ -11,6 +11,7 @@ import 'dart:io' as io;
 import 'package:ChatMcp/utils/color.dart';
 import 'chat_message_action.dart';
 import 'package:ChatMcp/tool/tavily.dart';
+import 'package:ChatMcp/tool/dalle.dart';
 
 class ChatUIMessage extends StatelessWidget {
   final List<ChatMessage> messages;
@@ -261,7 +262,9 @@ class MessageBubble extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
       ),
       child: message.content != null
-          ? Markit(data: (message.content!).trim())
+          ? message.role == MessageRole.user
+              ? Markit(data: (message.content!).trim())
+              : Markit(data: (message.content!).trim())
           : const Text(''),
     );
   }
@@ -344,6 +347,14 @@ class ToolResultWidget extends StatelessWidget {
               ],
             ),
           );
+        }
+      case 'call_generate_image':
+        try {
+          final jsonData = jsonDecode(message.content ?? '');
+          return DalleImageResultWidget(
+              result: GenerationImageResult.fromJson(jsonData));
+        } catch (e) {
+          return _buildContent(context);
         }
       default:
         return _buildContent(context);

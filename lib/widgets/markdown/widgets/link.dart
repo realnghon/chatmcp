@@ -20,8 +20,8 @@ class MyLinkNode extends SpanNode {
 
   @override
   InlineSpan build() {
-    final href = attributes['href'];
-    final content = attributes['content'] ?? "";
+    final href = attributes['href'] ?? '';
+    final content = attributes['content'] ?? href;
     return TextSpan(
       text: content,
       style: TextStyle(
@@ -31,9 +31,10 @@ class MyLinkNode extends SpanNode {
       recognizer: TapGestureRecognizer()
         ..onTap = () {
           final url = href;
-          if (url != null) {
-            launchUrl(Uri.parse(url));
+          if (url.startsWith("#")) {
+            return;
           }
+          launchUrl(Uri.parse(url));
         },
     );
   }

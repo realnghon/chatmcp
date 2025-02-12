@@ -12,40 +12,6 @@ class DatabaseHelper {
   static const List<String> requiredTables = ['chat', 'chat_message'];
   static const int currentVersion = 2;
 
-  // 定义数据库版本迁移脚本
-  static final List<DatabaseMigration> migrations = [
-    DatabaseMigration(
-      version: 1,
-      sql: [
-        '''
-        CREATE TABLE IF NOT EXISTS chat(
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          title TEXT,
-          createdAt datetime,
-          updatedAt datetime
-        )
-        ''',
-        '''
-        CREATE TABLE IF NOT EXISTS chat_message(
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          chatId INTEGER,
-          messageId TEXT,
-          parentMessageId TEXT,
-          body TEXT,
-          createdAt datetime,
-          updatedAt datetime,
-          FOREIGN KEY (chatId) REFERENCES chat(id)
-        )
-        '''
-      ],
-    ),
-    DatabaseMigration(
-      version: 2,
-      sql: ['ALTER TABLE chat ADD COLUMN model TEXT'],
-    ),
-    // 后续版本可以继续在这里添加
-  ];
-
   DatabaseHelper._init();
 
   Future<Database> get database async {
@@ -68,103 +34,21 @@ class DatabaseHelper {
     Logger.root.fine('db path: $dbPath');
     Logger.root.fine('platform: ${Platform.operatingSystem}');
 
+    final DatabaseSchemaManager schemaManager = DatabaseSchemaManager();
+
     try {
       final db = await databaseFactory.openDatabase(
         dbPath,
         options: OpenDatabaseOptions(
           version: currentVersion,
-          onCreate: _createDB,
-          onUpgrade: _onUpgrade,
-          onOpen: (db) async {
-            try {
-              await _ensureTablesExist(db);
-            } catch (e, stackTrace) {
-              Logger.root.severe('检查表存在时出错: $e\n堆栈跟踪:\n$stackTrace');
-              rethrow;
-            }
-          },
+          onCreate: schemaManager.onCreate,
+          onUpgrade: schemaManager.onUpgrade,
         ),
       );
       Logger.root.info('数据库连接成功');
       return db;
     } catch (e, stackTrace) {
       Logger.root.severe('数据库初始化错误: $e\n堆栈跟踪:\n$stackTrace');
-      rethrow;
-    }
-  }
-
-  Future<void> _ensureTablesExist(Database db) async {
-    // 检查所有必需的表是否存在
-    final tables = await db.query('sqlite_master',
-        where:
-            "type = 'table' AND name IN (${requiredTables.map((_) => '?').join(',')})",
-        whereArgs: requiredTables);
-
-    Logger.root.info('现有表: ${tables.length}, 需要的表: ${requiredTables.length}');
-    Logger.root.info('已存在的表: ${tables.map((t) => t['name']).join(', ')}');
-
-    final existingTableNames = tables.map((t) => t['name'] as String).toSet();
-    final missingTables =
-        requiredTables.where((t) => !existingTableNames.contains(t)).toList();
-
-    if (missingTables.isNotEmpty) {
-      Logger.root.info('缺少的表: ${missingTables.join(', ')}，开始创建...');
-      await _createDB(db, 1);
-
-      // 验证表是否创建成功
-      final verifyTables = await db.query('sqlite_master',
-          where:
-              "type = 'table' AND name IN (${requiredTables.map((_) => '?').join(',')})",
-          whereArgs: requiredTables);
-
-      if (verifyTables.length != requiredTables.length) {
-        throw Exception(
-            '表创建失败，预期表数量: ${requiredTables.length}，实际创建: ${verifyTables.length}');
-      }
-      Logger.root.info('所有缺失的表已成功创建');
-    } else {
-      Logger.root.info('所有必需的表都已存在');
-    }
-  }
-
-  Future<void> _createDB(Database db, int version) async {
-    try {
-      // 执行初始版本的建表语句
-      final initialMigration = migrations.first;
-      for (var statement in initialMigration.sql) {
-        await db.execute(statement);
-        Logger.root.info('执行SQL: $statement');
-      }
-      Logger.root.info('数据库初始化完成');
-    } catch (e, stackTrace) {
-      Logger.root.severe('创建数据库表失败: $e\n堆栈跟踪:\n$stackTrace');
-      rethrow;
-    }
-  }
-
-  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    Logger.root.info('数据库升级：从版本 $oldVersion 升级到 $newVersion');
-
-    try {
-      // 获取需要执行的迁移脚本
-      final pendingMigrations = migrations
-          .where((migration) =>
-              migration.version > oldVersion && migration.version <= newVersion)
-          .toList()
-        ..sort((a, b) => a.version.compareTo(b.version));
-
-      // 按顺序执行迁移脚本
-      for (var migration in pendingMigrations) {
-        Logger.root.info('执行版本 ${migration.version} 的迁移脚本');
-        for (var statement in migration.sql) {
-          await db.execute(statement);
-          Logger.root.info('执行SQL: $statement');
-        }
-      }
-
-      Logger.root.info('数据库升级完成');
-    } catch (e, stackTrace) {
-      Logger.root.severe('数据库升级失败: $e\n堆栈跟踪:\n$stackTrace');
       rethrow;
     }
   }
@@ -192,5 +76,80 @@ Future<void> initDb() async {
   } catch (e, stackTrace) {
     Logger.root.severe('initDb 失败: $e\n堆栈跟踪:\n$stackTrace');
     rethrow;
+  }
+}
+
+/// 抽象命令类，封装每个版本升级所需执行的 SQL 语句
+abstract class CommandScript {
+  /// 利用 [Batch] 批量执行语句，避免多次调用数据库
+  Future<void> execute(Batch batch);
+}
+
+/// 例如 v1 版本的建表逻辑
+class CommandScriptV1 extends CommandScript {
+  @override
+  Future<void> execute(Batch batch) async {
+    // 此处为初始建表的所有脚本
+    Logger.root.info('开始创建表...');
+    batch.execute('''
+      CREATE TABLE IF NOT EXISTS chat(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT,
+        modelTEXT,
+        createdAt datetime,
+        updatedAt datetime
+      )
+    ''');
+    batch.execute('''
+      CREATE TABLE IF NOT EXISTS chat_message(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        chatId INTEGER,
+        messageId TEXT,
+        parentMessageId TEXT,
+        body TEXT,
+        createdAt datetime,
+        updatedAt datetime,
+        FOREIGN KEY (chatId) REFERENCES chat(id)
+      )
+    ''');
+    Logger.root.info('表创建完成');
+  }
+}
+
+/// 用来组织多个版本迁移脚本的管理类
+class DatabaseSchemaManager {
+  /// 将版本与对应的 CommandScript 做映射
+  final Map<int, CommandScript> _commands = {};
+
+  DatabaseSchemaManager() {
+    // 这里将各版本的命令加入到 Map 中
+    _commands[1] = CommandScriptV1();
+    // 需要更多版本时，依次在此添加
+  }
+
+  /// 数据库创建时：创建表 (version=1)
+  Future<void> onCreate(Database db, int version) async {
+    final batch = db.batch();
+    // 从 version=1 开始依次执行，直到当前版本
+    for (int v = 1; v <= version; v++) {
+      final script = _commands[v];
+      if (script != null) {
+        await script.execute(batch);
+      }
+    }
+    await batch.commit();
+  }
+
+  /// 数据库升级时：从 oldVersion+1 到 newVersion，依次执行脚本
+  Future<void> onUpgrade(Database db, int oldVersion, int newVersion) async {
+    final batch = db.batch();
+    Logger.root.info('开始升级数据库... 从 $oldVersion 到 $newVersion');
+    for (int v = oldVersion + 1; v <= newVersion; v++) {
+      final script = _commands[v];
+      if (script != null) {
+        await script.execute(batch);
+      }
+    }
+    await batch.commit();
   }
 }

@@ -5,16 +5,25 @@
 AI Chat with [MCP](https://modelcontextprotocol.io/introduction) Server use Any LLM Model
 </div>
 
-<div align="center">
-  <div class="carousel" style="max-width: 800px; margin: auto; overflow: hidden;">
-    <div class="slides" style="display: flex; animation: slide 10s infinite; @keyframes slide { 0%, 30% { transform: translateX(0); } 35%, 65% { transform: translateX(-100%); } 70%, 100% { transform: translateX(-200%); } }">
-      <img src="./assets/preview/preview1.png" style="min-width: 100%; object-fit: contain;">
-      <img src="./assets/preview/preview2.png" style="min-width: 100%; object-fit: contain;">
-      <img src="./assets/preview/preview3.png" style="min-width: 100%; object-fit: contain;">
-      <img src="./assets/preview/preview4.png" style="min-width: 100%; object-fit: contain;">
-    </div>
-  </div>
-</div>
+## Preview
+
+### Artifact
+![preview](./assets/artifact.png)
+
+### Gen Image
+![preview](./assets/gen_image.png)
+
+### HTML
+![preview](./assets/html.png)
+
+### Fetch
+![preview](./assets/mcp_fetch.png)
+
+### Mermaid
+![preview](./assets/mermain.png)
+
+### Web Search
+![preview](./assets/web_search.png)
 
 ## Usage
 
@@ -39,26 +48,20 @@ brew install node
 
 ## Debug 
 
-
 - logs 
 
 `~/Library/Application Support/run.daodao.chatmcp/logs`
 
-- chatmcp.db  chat history
+- data
 
-`~/Documents/chatmcp.db`
-
-- mcp_server.json  mcp server config
-
-`~/Documents/mcp_server.json`
+`~/Library/Application Support/ChatMcp`
 
 
 reset app can use this command
 
 ```bash
 rm -rf ~/Library/Application\ Support/run.daodao.chatmcp
-rm -rf ~/Documents/chatmcp.db
-rm -rf ~/Documents/mcp_server.json
+rm -rf ~/Library/Application\ Support/ChatMcp
 ```
 
 ## Development
@@ -72,7 +75,7 @@ download [test.db](./assets/test.db) to test sqlite mcp server
 
 ![](./assets/test.png)
 
-`~/Documents/mcp_server.json` is the configuration file for the mcp server
+`~/Library/Application Support/ChatMcp/mcp_server.json` is the configuration file for the mcp server
 
 ## Features
 
@@ -83,8 +86,9 @@ download [test.db](./assets/test.db) to test sqlite mcp server
 - [x] Auto Choose MCP Server
 - [x] Chat History
 - [x] OpenAI LLM Model
-- [ ] Claude LLM Model
-- [ ] OLLama LLM Model
+- [x] Claude LLM Model
+- [x] OLLama LLM Model
+- [x] DeepSeek LLM Model
 - [ ] RAG 
 - [ ] Better UI Design
 
@@ -93,13 +97,6 @@ All features are welcome to submit, you can submit your ideas or bugs in [Issues
 ## MCP Server Market
 
 You can install MCP Server from MCP Server Market, MCP Server Market is a collection of MCP Server, you can use it to chat with different data.
-
-## Community & Feedback
-
-We value your feedback! If you're using chatmcp, please consider sharing your experience with the community:
-- 🌟 [Leave a Review](https://glama.ai/mcp/clients/chatmcp)
-- 🐛 [Report Issues](https://github.com/daodao97/chatmcp/issues)
-- 💡 [Feature Requests](https://github.com/daodao97/chatmcp/issues)
 
 Your feedback helps us improve chatmcp and helps other users make informed decisions.
 
