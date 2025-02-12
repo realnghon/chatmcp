@@ -48,6 +48,7 @@ brew install node
 
 [Download](https://github.com/daodao97/chatmcp/releases)  MacOS | Windows | Linux
 
+Android | iOS  Need to build in your local
 
 ## Debug 
 
@@ -94,6 +95,7 @@ download [test.db](./assets/test.db) to test sqlite mcp server
 - [x] DeepSeek LLM Model
 - [ ] RAG 
 - [ ] Better UI Design
+- [x] Dark/Light Theme
 
 All features are welcome to submit, you can submit your ideas or bugs in [Issues](https://github.com/daodao97/chatmcp/issues)
 
