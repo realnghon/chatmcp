@@ -12,7 +12,7 @@ Cross-platform `Macos | Windows | Linux | iOS | Android` AI Chat Client
 ![preview](./assets/preview/think.png)
 
 ### Artifact generation and review
-![preview](./assets/preview/artifact.jpg)
+![preview](./assets/preview/artifact.png)
 
 ### Dalle Gen Image
 ![preview](./assets/preview/gen_img.png)
