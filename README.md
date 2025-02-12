@@ -8,7 +8,7 @@ Cross-platform `Macos | Windows | Linux | iOS | Android` AI Chat Client
 
 ## Preview
 
-### Deep Thinking
+### Deep Think
 ![preview](./assets/preview/think.png)
 
 ### Artifact generation and review
