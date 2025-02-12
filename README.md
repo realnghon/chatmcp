@@ -7,19 +7,22 @@ AI Chat with [MCP](https://modelcontextprotocol.io/introduction) Server use Any 
 
 ## Preview
 
-### Artifact
+### Deep Thinking
+![preview](./assets/preview/think.png)
+
+### Artifact generation and review
 ![preview](./assets/preview/artifact.jpg)
 
-### Gen Image
+### Dalle Gen Image
 ![preview](./assets/preview/gen_image.png)
 
-### HTML
+### HTML Code Preview
 ![preview](./assets/preview/html.png)
 
-### Fetch
-![preview](./assets/preview/fetch.png)
+### MCP Fetch Url
+![preview](./assets/preview/mcp_fetch.png)
 
-### Mermaid
+### Mermaid Diagram
 ![preview](./assets/preview/mermaid.png)
 
 ### Web Search
