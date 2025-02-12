@@ -8,22 +8,22 @@ AI Chat with [MCP](https://modelcontextprotocol.io/introduction) Server use Any 
 ## Preview
 
 ### Artifact
-![preview](./assets/artifact.png)
+![preview](./assets/preview/artifact.png)
 
 ### Gen Image
-![preview](./assets/gen_image.png)
+![preview](./assets/preview/gen_image.png)
 
 ### HTML
-![preview](./assets/html.png)
+![preview](./assets/preview/html.png)
 
 ### Fetch
-![preview](./assets/mcp_fetch.png)
+![preview](./assets/preview/fetch.png)
 
 ### Mermaid
-![preview](./assets/mermain.png)
+![preview](./assets/preview/mermaid.png)
 
 ### Web Search
-![preview](./assets/web_search.png)
+![preview](./assets/preview/web_search.png)
 
 ## Usage
 
