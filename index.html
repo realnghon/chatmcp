@@ -51,17 +51,20 @@
     const iframe = document.getElementById('sp-preview-iframe');
 
     iframe.onload = () => {
-
+        // 首先注册 iframe
         iframe.contentWindow.postMessage({
             "type": "register-frame",
-            "origin": "https://sandbox-plum-nine.vercel.app",
+            "origin": window.location.origin,  // 使用当前页面的实际源
             "id": 113370
-        }, "*")
+        }, "https://1-20-9-sandpack.codesandbox.io")  // 明确指定目标源
 
-        //         updateCode(`export default function App() {
-        // return <h1>Hello World</h1>
-        // }
-        // `)
+        window.addEventListener('message', function (event) {
+            // 验证消息来源
+            if (event.origin !== 'https://1-20-9-sandpack.codesandbox.io') return;
+
+            // 处理来自 iframe 的消息
+            console.log('Received message:', event.data);
+        });
     }
 
     function updateCode(code) {
@@ -102,7 +105,7 @@
             "skipEval": false,
             "clearConsoleDisabled": true,
             "logLevel": 30
-        }, "*")
+        }, "https://1-20-9-sandpack.codesandbox.io")  // 明确指定目标源
     }
 
 </script>
