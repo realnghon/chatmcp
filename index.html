@@ -43,71 +43,78 @@
 <body>
     <div id="root">
         <iframe id="sp-preview-iframe" class="sp-preview-iframe sp-c-fgviib" title="Sandpack Preview"
-            src="https://1-20-9-sandpack.codesandbox.io/"></iframe>
+            src="https://1-20-9-sandpack.codesandbox.io/"
+            allow="accelerometer; ambient-light-sensor; camera; encrypted-media; geolocation; gyroscope; hid; microphone; midi; payment; usb; vr; xr-spatial-tracking"
+            sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts"></iframe>
     </div>
 </body>
 
 <script>
     const iframe = document.getElementById('sp-preview-iframe');
 
-    iframe.onload = () => {
-        // 首先注册 iframe
-        iframe.contentWindow.postMessage({
-            "type": "register-frame",
-            "origin": window.location.origin,  // 使用当前页面的实际源
-            "id": 113370
-        }, "https://1-20-9-sandpack.codesandbox.io")  // 明确指定目标源
-
-        window.addEventListener('message', function (event) {
-            // 验证消息来源
-            if (event.origin !== 'https://1-20-9-sandpack.codesandbox.io') return;
-
-            // 处理来自 iframe 的消息
-            console.log('Received message:', event.data);
-        });
-    }
+    // 等待 iframe 加载完成
+    window.addEventListener('load', () => {
+        // 使用 setTimeout 确保 iframe 内容完全加载
+        setTimeout(() => {
+            try {
+                window.addEventListener('message', function (event) {
+                    // 只接受来自 codesandbox 的消息
+                    if (event.origin === 'https://1-20-9-sandpack.codesandbox.io') {
+                        console.log('Received:', event.data);
+                    }
+                });
+            } catch (error) {
+                console.error('Communication error:', error);
+            }
+        }, 1000);
+    });
 
     function updateCode(code) {
-        code = decodeURIComponent(code)
-        iframe.contentWindow.postMessage({
-            "$id": 113370,
-            "codesandbox": true,
-            "type": "compile",
-            "version": 3,
-            "modules": {
-                "/App.js": {
-                    "code": code,
-                    "path": "/App.js"
+        try {
+            code = decodeURIComponent(code);
+            const message = {
+                $id: 113370,
+                codesandbox: true,
+                type: "compile",
+                version: 3,
+                modules: {
+                    "/App.js": {
+                        code: code,
+                        path: "/App.js"
+                    },
+                    "/index.js": {
+                        code: "import React, { StrictMode } from \"react\";\nimport { createRoot } from \"react-dom/client\";\nimport \"./styles.css\";\n\nimport App from \"./App\";\n\nconst root = createRoot(document.getElementById(\"root\"));\nroot.render(\n<StrictMode>\n  <App />\n</StrictMode>\n);",
+                        path: "/index.js"
+                    },
+                    "/styles.css": {
+                        code: "body {\nfont-family: sans-serif;\n-webkit-font-smoothing: auto;\n-moz-font-smoothing: auto;\n-moz-osx-font-smoothing: grayscale;\nfont-smoothing: auto;\ntext-rendering: optimizeLegibility;\nfont-smooth: always;\n-webkit-tap-highlight-color: transparent;\n-webkit-touch-callout: none;\n}\n\nh1 {\nfont-size: 1.5rem;\n}",
+                        path: "/styles.css"
+                    },
+                    "/public/index.html": {
+                        code: "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Document</title>\n</head>\n<body>\n  <div id=\"root\"></div>\n</body>\n</html>",
+                        path: "/public/index.html"
+                    },
+                    "/package.json": {
+                        code: "{\n  \"name\": \"sandpack-project\",\n  \"main\": \"/index.js\",\n  \"dependencies\": {\n    \"react\": \"^18.0.0\",\n    \"react-dom\": \"^18.0.0\",\n    \"react-scripts\": \"^4.0.0\"\n  },\n  \"devDependencies\": {}\n}",
+                        path: "/package.json"
+                    }
                 },
-                "/index.js": {
-                    "code": "import React, { StrictMode } from \"react\";\nimport { createRoot } from \"react-dom/client\";\nimport \"./styles.css\";\n\nimport App from \"./App\";\n\nconst root = createRoot(document.getElementById(\"root\"));\nroot.render(\n<StrictMode>\n  <App />\n</StrictMode>\n);",
-                    "path": "/index.js"
-                },
-                "/styles.css": {
-                    "code": "body {\nfont-family: sans-serif;\n-webkit-font-smoothing: auto;\n-moz-font-smoothing: auto;\n-moz-osx-font-smoothing: grayscale;\nfont-smoothing: auto;\ntext-rendering: optimizeLegibility;\nfont-smooth: always;\n-webkit-tap-highlight-color: transparent;\n-webkit-touch-callout: none;\n}\n\nh1 {\nfont-size: 1.5rem;\n}",
-                    "path": "/styles.css"
-                },
-                "/public/index.html": {
-                    "code": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Document</title>\n</head>\n<body>\n  <div id=\"root\"></div>\n</body>\n</html>",
-                    "path": "/public/index.html"
-                },
-                "/package.json": {
-                    "code": "{\n  \"name\": \"sandpack-project\",\n  \"main\": \"/index.js\",\n  \"dependencies\": {\n    \"react\": \"^18.0.0\",\n    \"react-dom\": \"^18.0.0\",\n    \"react-scripts\": \"^4.0.0\"\n  },\n  \"devDependencies\": {}\n}",
-                    "path": "/package.json"
-                }
-            },
-            "externalResources": [],
-            "hasFileResolver": false,
-            "template": "create-react-app",
-            "showOpenInCodeSandbox": false,
-            "showErrorScreen": false,
-            "showLoadingScreen": false,
-            "skipEval": false,
-            "clearConsoleDisabled": true,
-            "logLevel": 30
-        }, "https://1-20-9-sandpack.codesandbox.io")  // 明确指定目标源
-    }
+                externalResources: [],
+                hasFileResolver: false,
+                template: "create-react-app",
+                showOpenInCodeSandbox: false,
+                showErrorScreen: false,
+                showLoadingScreen: false,
+                skipEval: false,
+                clearConsoleDisabled: true,
+                logLevel: 30
+            };
 
+            iframe.contentWindow.postMessage(message, 'https://1-20-9-sandpack.codesandbox.io');
+        } catch (error) {
+            console.error('Update code error:', error);
+        }
+    }
 </script>
 
 </html>
