@@ -1,4 +1,5 @@
 import 'package:ChatMcp/dao/init_db.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart' as wm;
@@ -10,6 +11,8 @@ import 'page/layout/sidebar.dart';
 import 'utils/platform.dart';
 import 'package:ChatMcp/provider/settings_provider.dart';
 import 'utils/color.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'dart:io';
 
 final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
@@ -18,6 +21,23 @@ void main() async {
   initializeLogger();
 
   WidgetsFlutterBinding.ensureInitialized();
+
+  if (!kIsWeb) {
+    // 获取一个可用的端口
+    final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
+    final port = server.port;
+    await server.close();
+
+    final InAppLocalhostServer localhostServer =
+        InAppLocalhostServer(documentRoot: 'assets/sandbox', port: port);
+
+    ProviderManager.settingsProvider.updateSandboxServerPort(port: port);
+
+    // start the localhost server
+    await localhostServer.start();
+
+    Logger.root.info('Sandbox server started @ http://localhost:$port');
+  }
 
   // if (kIsMobile) {
   //   await FlutterStatusbarcolor.setStatusBarColor(Colors.green[400]!);

@@ -84,6 +84,13 @@ class SettingsProvider extends ChangeNotifier {
 
   GeneralSetting get generalSetting => _generalSetting;
 
+  int sandboxServerPort = 0;
+
+  Future<void> updateSandboxServerPort({required int port}) async {
+    sandboxServerPort = port;
+    notifyListeners();
+  }
+
   Future<Map<String, KeysSetting>> loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     final String? settingsJson = prefs.getString('apiSettings');

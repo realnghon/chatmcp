@@ -1,3 +1,4 @@
+import 'package:ChatMcp/provider/provider_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter/foundation.dart';
@@ -199,6 +200,9 @@ class _ChatCodePreviewState extends State<ChatCodePreview> {
       language = "c";
     }
 
+    final sandboxServerPort =
+        ProviderManager.settingsProvider.sandboxServerPort;
+
     return Container(
       decoration: BoxDecoration(
         border: Border.all(
@@ -221,7 +225,7 @@ class _ChatCodePreviewState extends State<ChatCodePreview> {
                       isInspectable: kDebugMode,
                     ),
                     initialUrlRequest: URLRequest(
-                      url: WebUri('https://sandbox-plum-nine.vercel.app/'),
+                      url: WebUri('http://localhost:$sandboxServerPort'),
                       headers: {
                         'Content-Type': 'text/html; charset=UTF-8',
                       },

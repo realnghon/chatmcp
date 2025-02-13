@@ -102,6 +102,7 @@ flutter:
     - assets/mcp_server.json
     - assets/logo.png
     - assets/js/turndown.js
+    - assets/sandbox/
 
 flutter_launcher_icons:
   android: "launcher_icon"
