@@ -79,8 +79,8 @@ class _MessageListState extends State<MessageList> {
   @override
   void didUpdateWidget(MessageList oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _scrollToBottom(withDelay: false);
     if (widget.messages.length != oldWidget.messages.length) {
-      _scrollToBottom(withDelay: false);
       resetUserScrolled();
     }
   }

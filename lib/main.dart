@@ -35,7 +35,7 @@ void main() async {
       size: Size(1200, 800),
       minimumSize: Size(400, 600),
       center: true,
-      backgroundColor: Colors.transparent,
+      // backgroundColor: Colors.transparent,
       skipTaskbar: false,
       titleBarStyle:
           kIsLinux ? wm.TitleBarStyle.normal : wm.TitleBarStyle.hidden,
@@ -76,6 +76,7 @@ class MyApp extends StatelessWidget {
     return Consumer<SettingsProvider>(
       builder: (context, settings, child) {
         return MaterialApp(
+          debugShowCheckedModeBanner: false,
           scaffoldMessengerKey: _scaffoldMessengerKey,
           title: 'ChatMcp',
           theme: ThemeData(

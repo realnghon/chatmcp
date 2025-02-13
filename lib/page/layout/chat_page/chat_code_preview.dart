@@ -221,7 +221,7 @@ class _ChatCodePreviewState extends State<ChatCodePreview> {
                       isInspectable: kDebugMode,
                     ),
                     initialUrlRequest: URLRequest(
-                      url: WebUri('http://localhost:8080'),
+                      url: WebUri('https://sandbox-plum-nine.vercel.app/'),
                       headers: {
                         'Content-Type': 'text/html; charset=UTF-8',
                       },

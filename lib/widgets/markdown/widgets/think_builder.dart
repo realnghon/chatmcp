@@ -213,6 +213,7 @@ class _ThinkWidgetState extends State<ThinkWidget> {
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
