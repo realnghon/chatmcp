@@ -577,7 +577,7 @@ class _ChatPageState extends State<ChatPage> {
         ChatMessage(
           content:
               "${ProviderManager.settingsProvider.generalSetting.systemPrompt} \n $artifactPrompt",
-          role: MessageRole.assistant,
+          role: MessageRole.system,
         ),
         ...messageList,
       ],

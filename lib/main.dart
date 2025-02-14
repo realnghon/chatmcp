@@ -23,20 +23,26 @@ void main() async {
   initializeLogger();
 
   if (!kIsWeb) {
+    if (!kIsDesktop) {
+      await InAppWebViewController.setWebContentsDebuggingEnabled(true);
+    }
+
     // 获取一个可用的端口
     final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
     final port = server.port;
     await server.close();
 
-    final InAppLocalhostServer localhostServer =
-        InAppLocalhostServer(documentRoot: 'assets/sandbox', port: port);
+    if (!kIsDesktop) {
+      final InAppLocalhostServer localhostServer =
+          InAppLocalhostServer(documentRoot: 'assets/sandbox', port: port);
 
-    ProviderManager.settingsProvider.updateSandboxServerPort(port: port);
+      ProviderManager.settingsProvider.updateSandboxServerPort(port: port);
 
-    // start the localhost server
-    await localhostServer.start();
+      // start the localhost server
+      await localhostServer.start();
 
-    Logger.root.info('Sandbox server started @ http://localhost:$port');
+      Logger.root.info('Sandbox server started @ http://localhost:$port');
+    }
   }
 
   // if (kIsMobile) {
