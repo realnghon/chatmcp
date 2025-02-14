@@ -736,9 +736,7 @@ class _ChatPageState extends State<ChatPage> {
     if (mobile) {
       return Column(
         children: [
-          Expanded(
-            child: _buildMessageList(),
-          ),
+          _buildMessageList(),
           _buildErrorMessage(),
           InputArea(
             disabled: _isLoading,
@@ -796,41 +794,46 @@ class _ChatPageState extends State<ChatPage> {
     });
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true, // 允许弹窗内容超过半屏高度
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
-        return DraggableScrollableSheet(
-          initialChildSize: 0.6, // 初始高度为屏幕的60%
-          minChildSize: 0.3, // 最小高度为屏幕的30%
-          maxChildSize: 0.9, // 最大高度为屏幕的90%
-          expand: false,
-          builder: (context, scrollController) {
-            return Container(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 4,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: AppColors.grey.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(2),
+        return SafeArea(
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: DraggableScrollableSheet(
+              initialChildSize: 0.6,
+              minChildSize: 0.3,
+              maxChildSize: 0.9,
+              expand: false,
+              builder: (context, scrollController) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.symmetric(vertical: 16),
+                      decoration: BoxDecoration(
+                        color: AppColors.grey.withOpacity(0.3),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      controller: scrollController,
+                    Expanded(
                       child: _codePreviewEvent != null
                           ? ChatCodePreview(
                               codePreviewEvent: _codePreviewEvent!,
                             )
                           : const SizedBox.shrink(),
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
+                  ],
+                );
+              },
+            ),
+          ),
         );
       },
     );

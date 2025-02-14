@@ -2,6 +2,7 @@ import 'package:logging/logging.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
+import 'package:flutter/widgets.dart';
 
 // 定义颜色代码
 const ansiReset = '\x1B[0m';

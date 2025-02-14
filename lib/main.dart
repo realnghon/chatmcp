@@ -18,9 +18,9 @@ final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
 
 void main() async {
-  initializeLogger();
-
   WidgetsFlutterBinding.ensureInitialized();
+
+  initializeLogger();
 
   if (!kIsWeb) {
     // 获取一个可用的端口

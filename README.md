@@ -6,6 +6,14 @@ Cross-platform `Macos | Windows | Linux | iOS | Android` AI Chat Client
 
 </div>
 
+## Install
+
+Desktop: MacOS | Windows | Linux [Download](https://github.com/daodao97/chatmcp/releases) 
+
+Ios: [TestFlight](https://testflight.apple.com/join/dCXksFJV)
+
+Android: need to build in your local
+
 ## Preview
 
 ### Deep Think
@@ -44,12 +52,6 @@ brew install node
 1. Configure Your LLM API Key and Endpoint in `Setting` Page
 2. Install MCP Server from `MCP Server` Page
 3. Chat with MCP Server
-
-## Install
-
-[Download](https://github.com/daodao97/chatmcp/releases)  MacOS | Windows | Linux
-
-Android | iOS  Need to build in your local
 
 ## Debug 
 
