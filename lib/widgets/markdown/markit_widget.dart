@@ -8,6 +8,7 @@ import './widgets/code.dart';
 import './widgets/details.dart';
 import './widgets/think_builder.dart';
 import './widgets/artifact.dart';
+import './widgets/image.dart';
 import 'package:flutter_highlight/themes/github.dart';
 
 class MarkitTestPage extends StatelessWidget {
@@ -100,6 +101,7 @@ class Markit extends StatelessWidget {
             artifactAntArtifactGenerator,
             thinkGenerator,
             detailsGenerator,
+            imageGenerator,
           ],
           inlineSyntaxList: [
             ArtifactAntThinkingInlineSyntax(),

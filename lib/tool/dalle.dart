@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:ChatMcp/provider/provider_manager.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:convert';
+import 'package:ChatMcp/widgets/cache_image.dart';
 
 class GenerationImageRequest {
   final String model;
@@ -223,22 +224,7 @@ class DalleImageResultWidget extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CachedNetworkImage(
-                    imageUrl: result.url,
-                    placeholder: (context, url) => Container(
-                      width: double.infinity,
-                      height: 200,
-                      alignment: Alignment.center,
-                      child: const CircularProgressIndicator(),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      width: double.infinity,
-                      height: 200,
-                      alignment: Alignment.center,
-                      child: const Icon(Icons.error),
-                    ),
-                    fit: BoxFit.contain,
-                  ),
+                  CacheImage(imageUrl: result.url),
                   // 尺寸信息
                   Padding(
                     padding: const EdgeInsets.all(8.0),

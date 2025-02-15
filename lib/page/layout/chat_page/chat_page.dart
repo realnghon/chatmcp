@@ -366,13 +366,16 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
-  // MCP 服务器相关方法
-  Future<void> _handleMcpServerTools(String text) async {
-    if (kIsMobile) return;
+  // 工具调用
+  Future<void> _handleToolCall(String text) async {
+    var tools = {
+      "local": await getTools(),
+    };
 
-    final mcpServerProvider = ProviderManager.mcpServerProvider;
-    final tools = await mcpServerProvider.getTools();
-    tools["local"] = await getTools();
+    if (kIsDesktop) {
+      final mcpServerProvider = ProviderManager.mcpServerProvider;
+      tools = await mcpServerProvider.getTools();
+    }
     Logger.root
         .info('tools:\n${const JsonEncoder.withIndent('  ').convert(tools)}');
 
@@ -515,7 +518,7 @@ class _ChatPageState extends State<ChatPage> {
     try {
       if (!ProviderManager.chatModelProvider.currentModel.name
           .contains('deepseek')) {
-        await _handleMcpServerTools(userMessage.content ?? '');
+        await _handleToolCall(userMessage.content ?? '');
       }
       await _processLLMResponse();
       await _updateChat();
@@ -537,7 +540,7 @@ class _ChatPageState extends State<ChatPage> {
     try {
       if (!ProviderManager.chatModelProvider.currentModel.name
           .contains('deepseek')) {
-        await _handleMcpServerTools(data.text);
+        await _handleToolCall(data.text);
       }
       await _processLLMResponse();
       await _updateChat();
@@ -576,7 +579,7 @@ class _ChatPageState extends State<ChatPage> {
       messages: [
         ChatMessage(
           content:
-              "${ProviderManager.settingsProvider.generalSetting.systemPrompt} \n $artifactPrompt",
+              "${ProviderManager.settingsProvider.generalSetting.systemPrompt}",
           role: MessageRole.system,
         ),
         ...messageList,

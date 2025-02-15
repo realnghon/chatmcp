@@ -75,25 +75,25 @@ class TopToolbar extends StatelessWidget {
                         emit(ShareEvent(false));
                       },
                     ),
-                  // if (kIsDebug)
-                  IconButton(
-                    icon: const Icon(Icons.bug_report),
-                    onPressed: () {
-                      // jump to the top of the page
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => Scaffold(
-                            appBar: AppBar(
-                              title: const Text('web search 测试'),
-                            ),
-                            body: BrowserView(
-                              url: 'rag embeddings',
+                  if (kIsDebug)
+                    IconButton(
+                      icon: const Icon(Icons.bug_report),
+                      onPressed: () {
+                        // jump to the top of the page
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => Scaffold(
+                              appBar: AppBar(
+                                title: const Text('web search 测试'),
+                              ),
+                              body: BrowserView(
+                                url: 'rag embeddings',
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
+                        );
+                      },
+                    ),
                 ],
               ),
             ),

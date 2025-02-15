@@ -23,9 +23,10 @@ void main() async {
   initializeLogger();
 
   if (!kIsWeb) {
-    if (!kIsDesktop) {
-      await InAppWebViewController.setWebContentsDebuggingEnabled(true);
-    }
+    // 移动端不支持
+    // if (!kIsDesktop) {
+    //   await InAppWebViewController.setWebContentsDebuggingEnabled(true);
+    // }
 
     // 获取一个可用的端口
     final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
