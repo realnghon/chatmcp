@@ -73,7 +73,6 @@ dependencies:
   event_bus: ^2.0.1
   permission_handler: ^11.3.0
   flutter_cache_manager: ^3.3.1
-  image_gallery_saver: ^2.0.3
 
 dependency_overrides:
   webview_flutter_wkwebview: 3.17.0
@@ -104,7 +103,6 @@ flutter:
     - .env
     - assets/mcp_server.json
     - assets/logo.png
-    - assets/js/turndown.js
     - assets/sandbox/
 
 flutter_launcher_icons:
