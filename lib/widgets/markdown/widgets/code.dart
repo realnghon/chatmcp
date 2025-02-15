@@ -91,11 +91,15 @@ class _CodeBlockState extends State<_CodeBlock>
   @override
   bool get wantKeepAlive => true;
 
+  final List<String> _supportedLanguages = ['mermaid', 'html', 'svg'];
+
+  final List<String> _htmlLanguages = ['html', 'svg'];
+
   @override
   void initState() {
     super.initState();
     bool supportPreview = false;
-    if (widget.language == 'mermaid' || widget.language == 'html') {
+    if (_supportedLanguages.contains(widget.language)) {
       supportPreview = true;
       // 在初始化时创建预览组件
       previewWidget = _buildPreviewWidget();
@@ -110,12 +114,13 @@ class _CodeBlockState extends State<_CodeBlock>
   }
 
   Widget? _buildPreviewWidget() {
+    print('widget.language: ${widget.language}');
     if (widget.language == 'mermaid') {
       return MermaidDiagramView(
         key: ValueKey(widget.code), // 使用基于内容的Key
         code: widget.code,
       );
-    } else if (widget.language == 'html') {
+    } else if (_htmlLanguages.contains(widget.language)) {
       return HtmlView(
         key: ValueKey(widget.code), // 使用基于内容的Key
         html: widget.code,

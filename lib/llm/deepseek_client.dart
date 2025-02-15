@@ -32,6 +32,15 @@ class DeepSeekClient extends BaseLLMClient {
       'model': request.model,
       'messages': chatMessageToDeepSeekMessage(request.messages),
     };
+    if (request.modelSetting != null) {
+      body['temperature'] = request.modelSetting!.temperature;
+      body['top_p'] = request.modelSetting!.topP;
+      body['frequency_penalty'] = request.modelSetting!.frequencyPenalty;
+      body['presence_penalty'] = request.modelSetting!.presencePenalty;
+      if (request.modelSetting!.maxTokens != null) {
+        body['max_tokens'] = request.modelSetting!.maxTokens!;
+      }
+    }
 
     if (request.tools != null && request.tools!.isNotEmpty) {
       body['tools'] = request.tools!;
@@ -87,6 +96,15 @@ class DeepSeekClient extends BaseLLMClient {
       'messages': chatMessageToDeepSeekMessage(request.messages),
       'stream': true,
     };
+    if (request.modelSetting != null) {
+      body['temperature'] = request.modelSetting!.temperature;
+      body['top_p'] = request.modelSetting!.topP;
+      body['frequency_penalty'] = request.modelSetting!.frequencyPenalty;
+      body['presence_penalty'] = request.modelSetting!.presencePenalty;
+      if (request.modelSetting!.maxTokens != null) {
+        body['max_tokens'] = request.modelSetting!.maxTokens!;
+      }
+    }
 
     try {
       Logger.root.info('deepseek request chat stream completion');

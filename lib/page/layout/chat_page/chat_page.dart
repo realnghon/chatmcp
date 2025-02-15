@@ -571,19 +571,31 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
+  String _getSystemPrompt() {
+    final systemPrompt =
+        ProviderManager.settingsProvider.generalSetting.systemPrompt;
+    if (ProviderManager.settingsProvider.generalSetting.enableArtifacts) {
+      return "$systemPrompt\n\n$artifactPrompt";
+    }
+    return systemPrompt;
+  }
+
   Future<void> _processLLMResponse() async {
     final List<ChatMessage> messageList = _prepareMessageList();
     Logger.root.info('start process llm response');
+
+    final modelSetting = ProviderManager.settingsProvider.modelSetting;
+
     final stream = _llmClient!.chatStreamCompletion(CompletionRequest(
       model: ProviderManager.chatModelProvider.currentModel.name,
       messages: [
         ChatMessage(
-          content:
-              "${ProviderManager.settingsProvider.generalSetting.systemPrompt}",
+          content: _getSystemPrompt(),
           role: MessageRole.system,
         ),
         ...messageList,
       ],
+      modelSetting: modelSetting,
     ));
 
     _initializeAssistantResponse();

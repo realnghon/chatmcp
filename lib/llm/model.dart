@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:ChatMcp/provider/settings_provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:ChatMcp/dao/chat_message.dart';
 
@@ -263,11 +264,13 @@ class CompletionRequest {
   final List<ChatMessage> messages;
   final List<Map<String, dynamic>>? tools;
   final bool stream;
+  ChatSetting? modelSetting;
 
   CompletionRequest({
     required this.model,
     required this.messages,
     this.tools,
     this.stream = false,
+    this.modelSetting,
   });
 }

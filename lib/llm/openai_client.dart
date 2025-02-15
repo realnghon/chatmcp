@@ -32,6 +32,16 @@ class OpenAIClient extends BaseLLMClient {
       'messages': chatMessageToOpenAIMessage(request.messages),
     };
 
+    if (request.modelSetting != null) {
+      body['temperature'] = request.modelSetting!.temperature;
+      body['top_p'] = request.modelSetting!.topP;
+      body['frequency_penalty'] = request.modelSetting!.frequencyPenalty;
+      body['presence_penalty'] = request.modelSetting!.presencePenalty;
+      if (request.modelSetting!.maxTokens != null) {
+        body['max_tokens'] = request.modelSetting!.maxTokens!;
+      }
+    }
+
     if (request.tools != null && request.tools!.isNotEmpty) {
       body['tools'] = request.tools!;
       body['tool_choice'] = 'auto';
@@ -86,6 +96,18 @@ class OpenAIClient extends BaseLLMClient {
       'messages': chatMessageToOpenAIMessage(request.messages),
       'stream': true,
     };
+
+    if (request.modelSetting != null) {
+      body['temperature'] = request.modelSetting!.temperature;
+      body['top_p'] = request.modelSetting!.topP;
+      body['frequency_penalty'] = request.modelSetting!.frequencyPenalty;
+      body['presence_penalty'] = request.modelSetting!.presencePenalty;
+      if (request.modelSetting!.maxTokens != null) {
+        body['max_tokens'] = request.modelSetting!.maxTokens!;
+      }
+    }
+
+    print("openai stream body: ${jsonEncode(body)}");
 
     try {
       _dio.options.responseType = ResponseType.stream;

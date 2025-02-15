@@ -325,36 +325,17 @@ class ToolResultWidget extends StatelessWidget {
   Widget _buildFactory(BuildContext context) {
     switch (message.toolCallId) {
       case 'call_web_search':
-        try {
-          final jsonData = jsonDecode(message.content ?? '');
-          return TavilySearchResultWidget(
-              response: TavilySearchResponse.fromJson(jsonData));
-        } catch (e) {
-          return Container(
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '解析搜索结果失败',
-                  style: TextStyle(
-                    color: AppColors.grey[600],
-                    fontSize: 12,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                SelectableText(message.content ?? ''),
-              ],
-            ),
-          );
-        }
+        return TavilySearchResultWidget(
+            response: TavilySearchResponse.fromJson(
+                json.decode(message.content ?? '')));
       case 'call_generate_image':
         try {
-          final jsonData = jsonDecode(message.content ?? '');
-          return DalleImageResultWidget(
-              result: GenerationImageResult.fromJson(jsonData));
+          final jsonData = json.decode(message.content ?? '');
+          return Markit(
+              data:
+                  "```json\n${const JsonEncoder.withIndent('  ').convert(jsonData)}\n```");
         } catch (e) {
-          return _buildContent(context);
+          return Markit(data: "```\n${message.content}\n```");
         }
       default:
         return _buildContent(context);

@@ -40,12 +40,14 @@ class GeneralSetting {
   String theme;
   bool showAssistantAvatar = false;
   bool showUserAvatar = false;
+  bool enableArtifacts = true;
   String systemPrompt;
 
   GeneralSetting({
     required this.theme,
     this.showAssistantAvatar = true,
     this.showUserAvatar = true,
+    this.enableArtifacts = true,
     this.systemPrompt = 'You are a helpful assistant.',
   });
 
@@ -54,6 +56,7 @@ class GeneralSetting {
       'theme': theme,
       'showAssistantAvatar': showAssistantAvatar,
       'showUserAvatar': showUserAvatar,
+      'enableArtifacts': enableArtifacts,
       'systemPrompt': systemPrompt,
     };
   }
@@ -63,7 +66,44 @@ class GeneralSetting {
       theme: json['theme'] as String? ?? 'light',
       showAssistantAvatar: json['showAssistantAvatar'] as bool? ?? true,
       showUserAvatar: json['showUserAvatar'] as bool? ?? true,
+      enableArtifacts: json['enableArtifacts'] as bool? ?? false,
       systemPrompt: json['systemPrompt'] as String? ?? defaultSystemPrompt,
+    );
+  }
+}
+
+class ChatSetting {
+  double temperature = 1.0;
+  int? maxTokens;
+  double topP = 1.0;
+  double frequencyPenalty = 0.0;
+  double presencePenalty = 0.0;
+
+  ChatSetting({
+    this.temperature = 1.0,
+    this.maxTokens,
+    this.topP = 1.0,
+    this.frequencyPenalty = 0.0,
+    this.presencePenalty = 0.0,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'temperature': temperature,
+      'maxTokens': maxTokens,
+      'topP': topP,
+      'frequencyPenalty': frequencyPenalty,
+      'presencePenalty': presencePenalty,
+    };
+  }
+
+  factory ChatSetting.fromJson(Map<String, dynamic> json) {
+    return ChatSetting(
+      temperature: json['temperature'] as double? ?? 1.0,
+      maxTokens: json['maxTokens'] == null ? null : json['maxTokens'] as int,
+      topP: json['topP'] as double? ?? 1.0,
+      frequencyPenalty: json['frequencyPenalty'] as double? ?? 0.0,
+      presencePenalty: json['presencePenalty'] as double? ?? 0.0,
     );
   }
 }
@@ -80,9 +120,13 @@ class SettingsProvider extends ChangeNotifier {
     systemPrompt: defaultSystemPrompt,
   );
 
+  ChatSetting _modelSetting = ChatSetting();
+
   Map<String, KeysSetting> get apiSettings => _apiSettings;
 
   GeneralSetting get generalSetting => _generalSetting;
+
+  ChatSetting get modelSetting => _modelSetting;
 
   int sandboxServerPort = 0;
 
@@ -105,6 +149,12 @@ class SettingsProvider extends ChangeNotifier {
     if (generalSettingsJson != null) {
       final Map<String, dynamic> decoded = jsonDecode(generalSettingsJson);
       _generalSetting = GeneralSetting.fromJson(decoded);
+    }
+
+    final String? modelSettingsJson = prefs.getString('modelSettings');
+    if (modelSettingsJson != null) {
+      final Map<String, dynamic> decoded = jsonDecode(modelSettingsJson);
+      _modelSetting = ChatSetting.fromJson(decoded);
     }
 
     notifyListeners();
@@ -134,6 +184,7 @@ class SettingsProvider extends ChangeNotifier {
     required bool showAssistantAvatar,
     required bool showUserAvatar,
     required String systemPrompt,
+    required bool enableArtifacts,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     _generalSetting = GeneralSetting(
@@ -141,9 +192,38 @@ class SettingsProvider extends ChangeNotifier {
       showAssistantAvatar: showAssistantAvatar,
       showUserAvatar: showUserAvatar,
       systemPrompt: systemPrompt,
+      enableArtifacts: enableArtifacts,
     );
     await prefs.setString(
         'generalSettings', jsonEncode(_generalSetting.toJson()));
+    notifyListeners();
+  }
+
+  Future<void> updateModelSettings({
+    required double temperature,
+    required int? maxTokens,
+    required double topP,
+    required double frequencyPenalty,
+    required double presencePenalty,
+  }) async {
+    _modelSetting = ChatSetting(
+      temperature: temperature,
+      maxTokens: maxTokens,
+      topP: topP,
+      frequencyPenalty: frequencyPenalty,
+      presencePenalty: presencePenalty,
+    );
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('modelSettings', jsonEncode(_modelSetting.toJson()));
+    notifyListeners();
+  }
+
+  Future<void> resetModelSettings() async {
+    _modelSetting = ChatSetting();
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('modelSettings', jsonEncode(_modelSetting.toJson()));
     notifyListeners();
   }
 }
