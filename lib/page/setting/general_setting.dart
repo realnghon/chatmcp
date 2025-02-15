@@ -46,39 +46,6 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _saveSettings,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor,
-                      foregroundColor: AppColors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 2,
-                    ),
-                    child: _isLoading
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                  AppColors.white),
-                            ),
-                          )
-                        : const Text(
-                            '保存设置',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                  ),
-                ),
               ],
             ),
           ),
@@ -104,7 +71,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                     Icon(Icons.palette, size: 20),
                     SizedBox(width: 8),
                     Text(
-                      '主题设置',
+                      'Theme Settings',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -116,7 +83,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                 DropdownButtonFormField<String>(
                   value: settings.generalSetting.theme,
                   decoration: InputDecoration(
-                    labelText: '主题',
+                    labelText: 'Theme',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -125,15 +92,15 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                   items: const [
                     DropdownMenuItem(
                       value: 'light',
-                      child: Text('浅色主题'),
+                      child: Text('Light Theme'),
                     ),
                     DropdownMenuItem(
                       value: 'dark',
-                      child: Text('深色主题'),
+                      child: Text('Dark Theme'),
                     ),
                     DropdownMenuItem(
                       value: 'system',
-                      child: Text('跟随系统'),
+                      child: Text('Follow System'),
                     ),
                   ],
                   onChanged: (value) {
@@ -173,7 +140,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                     Icon(Icons.face, size: 20),
                     SizedBox(width: 8),
                     Text(
-                      '头像显示',
+                      'Show Avatar',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -183,8 +150,9 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                 ),
                 const SizedBox(height: 16),
                 SwitchListTile(
-                  title: const Text('显示助手头像'),
-                  subtitle: const Text('在对话中显示AI助手的头像'),
+                  title: const Text('Show Assistant Avatar'),
+                  subtitle: const Text(
+                      'Show the avatar of the AI assistant in the conversation'),
                   value: settings.generalSetting.showAssistantAvatar,
                   onChanged: (bool value) {
                     settings.updateGeneralSettings(
@@ -197,8 +165,9 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                 ),
                 const Divider(),
                 SwitchListTile(
-                  title: const Text('显示用户头像'),
-                  subtitle: const Text('在对话中显示用户的头像'),
+                  title: const Text('Show User Avatar'),
+                  subtitle: const Text(
+                      'Show the avatar of the user in the conversation'),
                   value: settings.generalSetting.showUserAvatar,
                   onChanged: (bool value) {
                     settings.updateGeneralSettings(
@@ -247,7 +216,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                 TextFormField(
                   initialValue: settings.generalSetting.systemPrompt,
                   decoration: InputDecoration(
-                    labelText: '系统提示词',
+                    labelText: 'System Prompt',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -266,7 +235,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  '提示：这是与 AI 助手对话时的系统提示词，用于设定助手的行为和风格。',
+                  'Note: This is the system prompt for the conversation with the AI assistant, used to set the behavior and style of the assistant.',
                   style: TextStyle(
                     fontSize: 12,
                     color: AppColors.grey,

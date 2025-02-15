@@ -38,8 +38,8 @@ var defaultSystemPrompt =
 
 class GeneralSetting {
   String theme;
-  bool showAssistantAvatar = true;
-  bool showUserAvatar = true;
+  bool showAssistantAvatar = false;
+  bool showUserAvatar = false;
   String systemPrompt;
 
   GeneralSetting({

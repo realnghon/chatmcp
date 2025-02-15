@@ -1,4 +1,5 @@
 import 'package:ChatMcp/provider/provider_manager.dart';
+import 'package:ChatMcp/utils/platform.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter/foundation.dart';
@@ -78,6 +79,10 @@ class _ChatCodePreviewState extends State<ChatCodePreview> {
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
                 onPressed: () {
+                  if (kIsMobile) {
+                    Navigator.pop(context);
+                    return;
+                  }
                   setState(() {
                     emit(CodePreviewEvent(widget.codePreviewEvent.textContent,
                         widget.codePreviewEvent.attributes));
