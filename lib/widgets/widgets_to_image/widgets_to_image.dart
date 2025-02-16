@@ -8,11 +8,11 @@ class WidgetsToImage extends StatelessWidget {
   final bool captureAll;
 
   const WidgetsToImage({
-    Key? key,
+    super.key,
     required this.child,
     required this.controller,
     this.captureAll = false, // 默认为false
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

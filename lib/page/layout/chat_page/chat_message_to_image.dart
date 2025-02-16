@@ -11,6 +11,7 @@ import 'package:ChatMcp/utils/platform.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:logging/logging.dart';
+import 'package:ChatMcp/utils/color.dart';
 
 class ListViewToImageScreen extends StatefulWidget {
   final List<ChatMessage> messages;
@@ -27,7 +28,6 @@ class _ListViewToImageScreenState extends State<ListViewToImageScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // 设置背景色为浅灰色
       appBar: AppBar(
         title: Text('Share Chat Image'),
         leading: IconButton(
@@ -124,16 +124,12 @@ class _ListViewToImageScreenState extends State<ListViewToImageScreen> {
       // 创建一个离屏widget来渲染完整内容
       final renderWidget = Screenshot(
         controller: screenshotController,
-        child: Container(
-          color: Colors.white,
-          child: MediaQuery(
-            data: MediaQuery.of(context).copyWith(
-              devicePixelRatio: 3.0,
-            ),
-            child: Material(
-              color: Colors.white,
-              child: _buildMessage(),
-            ),
+        child: MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            devicePixelRatio: 3.0,
+          ),
+          child: Material(
+            child: _buildMessage(),
           ),
         ),
       );

@@ -301,18 +301,15 @@ class _ChatPageState extends State<ChatPage> {
     }
 
     return Expanded(
-      child: WidgetsToImage(
-        controller: toImagecontroller,
-        child: MessageList(
-          messages: _isLoading
-              ? [
-                  ..._messages,
-                  ChatMessage(content: '', role: MessageRole.loading)
-                ]
-              : _messages.toList(),
-          onRetry: _onRetry,
-          onSwitch: _onSwitch,
-        ),
+      child: MessageList(
+        messages: _isLoading
+            ? [
+                ..._messages,
+                ChatMessage(content: '', role: MessageRole.loading)
+              ]
+            : _messages.toList(),
+        onRetry: _onRetry,
+        onSwitch: _onSwitch,
       ),
     );
   }
