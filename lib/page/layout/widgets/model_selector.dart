@@ -8,6 +8,12 @@ import 'package:ChatMcp/llm/llm_factory.dart';
 class ModelSelector extends StatelessWidget {
   const ModelSelector({super.key});
 
+  bool isCurrentModel(Model model) {
+    return model.name == ProviderManager.chatModelProvider.currentModel.name &&
+        model.provider ==
+            ProviderManager.chatModelProvider.currentModel.provider;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<ChatModelProvider>(
@@ -37,9 +43,7 @@ class ModelSelector extends StatelessWidget {
                     child: Text(
                       availableModels
                           .firstWhere(
-                            (model) =>
-                                model.name ==
-                                chatModelProvider.currentModel.name,
+                            (model) => isCurrentModel(model),
                             orElse: () => Model(
                                 name: '', label: 'Loading...', provider: ''),
                           )
@@ -91,7 +95,7 @@ class ModelSelector extends StatelessWidget {
                 for (var model in models) {
                   menuItems.add(
                     PopupMenuItem<String>(
-                      value: model.name,
+                      value: "${model.provider}|${model.name}",
                       height: 32,
                       child: Padding(
                         padding: const EdgeInsets.only(left: 8.0),
@@ -101,15 +105,13 @@ class ModelSelector extends StatelessWidget {
                               child: Text(
                                 model.label,
                                 style: TextStyle(
-                                  color: model.name ==
-                                          chatModelProvider.currentModel.name
+                                  color: isCurrentModel(model)
                                       ? Theme.of(context).colorScheme.primary
                                       : null,
                                 ),
                               ),
                             ),
-                            if (model.name ==
-                                chatModelProvider.currentModel.name)
+                            if (isCurrentModel(model))
                               Icon(
                                 Icons.check,
                                 size: 18,
@@ -126,8 +128,11 @@ class ModelSelector extends StatelessWidget {
               return menuItems;
             },
             onSelected: (String value) {
+              final selectedValue = value.split('|');
               final selectedModel = availableModels.firstWhere(
-                (model) => model.name == value,
+                (model) =>
+                    model.name == selectedValue[1] &&
+                    model.provider == selectedValue[0],
               );
               ProviderManager.chatModelProvider.currentModel = selectedModel;
             },
