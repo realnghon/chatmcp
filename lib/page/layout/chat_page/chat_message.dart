@@ -347,7 +347,7 @@ class ToolResultWidget extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       child: CollapsibleSection(
-        initiallyExpanded: true,
+        initiallyExpanded: false,
         title: Text(
           '${message.mcpServerName} ${message.toolCallId!} result',
           style: TextStyle(

@@ -49,5 +49,7 @@
 	<string>Need to access the photo library to save images.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Need to access the photo library to save images.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>This app needs to access local networks for device-to-device communication.</string>
 </dict>
 </plist>

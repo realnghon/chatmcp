@@ -1,19 +1,19 @@
 import 'dart:io';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import '../mcp/stdio/stdio_client.dart';
 import '../mcp/mcp.dart';
 import 'package:logging/logging.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:dio/dio.dart';
 import 'package:ChatMcp/utils/platform.dart';
+import '../mcp/client/mcp_client_interface.dart';
 
 class McpServerProvider extends ChangeNotifier {
   static const _configFileName = 'mcp_server.json';
 
-  Map<String, StdioClient> _servers = {};
+  Map<String, McpClient> _servers = {};
 
-  Map<String, StdioClient> get clients => _servers;
+  Map<String, McpClient> get clients => _servers;
 
   // 判断当前平台是否支持 MCP Server
   bool get isSupported {
@@ -79,12 +79,12 @@ class McpServerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void addClient(String key, StdioClient client) {
+  void addClient(String key, McpClient client) {
     _servers[key] = client;
     notifyListeners();
   }
 
-  StdioClient? getClient(String key) {
+  McpClient? getClient(String key) {
     return _servers[key];
   }
 
@@ -94,6 +94,7 @@ class McpServerProvider extends ChangeNotifier {
     for (var entry in _servers.entries) {
       final clientName = entry.key;
       final client = entry.value;
+      Logger.root.info('getTools: $clientName ${client.runtimeType}');
       final response = await client.sendToolList();
       final tools = (response.toJson()['result']['tools'] as List<dynamic>)
           .cast<Map<String, dynamic>>();

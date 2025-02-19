@@ -6,8 +6,10 @@ import 'package:synchronized/synchronized.dart';
 import '../models/json_rpc_message.dart';
 import '../models/server.dart';
 import '../../utils/process.dart';
+import '../client/mcp_client_interface.dart';
 
-class StdioClient {
+class StdioClient implements McpClient {
+  @override
   final ServerConfig serverConfig;
   late final Process process;
   final _writeLock = Lock();

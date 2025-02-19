@@ -89,7 +89,7 @@ download [test.db](./assets/test.db) to test sqlite mcp server
 - [x] Chat with MCP Server
 - [ ] MCP Server Market
 - [ ] Auto install MCP Server
-- [ ] SSE MCP Transport Support
+- [x] SSE MCP Transport Support
 - [x] Auto Choose MCP Server
 - [x] Chat History
 - [x] OpenAI LLM Model
