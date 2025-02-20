@@ -3,6 +3,7 @@ import 'package:ChatMcp/llm/model.dart' as llmModel;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ChatMcp/llm/llm_factory.dart';
 import 'dart:convert';
+import 'package:logging/logging.dart';
 
 class ChatModelProvider extends ChangeNotifier {
   static final ChatModelProvider _instance = ChatModelProvider._internal();
@@ -11,20 +12,15 @@ class ChatModelProvider extends ChangeNotifier {
     _loadSavedModel();
   }
 
-  bool _isInitialized = false;
-
   Future<void> loadAvailableModels() async {
-    if (_isInitialized) return;
-
     final models = await LLMFactoryHelper.getAvailableModels();
+    Logger.root.info('getAvailableModels: $models');
 
     _availableModels.clear(); // 先清空列表
     _availableModels.addAll(models.toList());
 
     // 确保当前选择的模型在可用列表中，并且列表不为空
     if (_availableModels.isEmpty) {
-      // 如果没有可用模型，保持使用默认模型
-      _isInitialized = true;
       notifyListeners();
       return;
     }
@@ -34,7 +30,6 @@ class ChatModelProvider extends ChangeNotifier {
       _saveSavedModel();
     }
 
-    _isInitialized = true;
     notifyListeners();
   }
 

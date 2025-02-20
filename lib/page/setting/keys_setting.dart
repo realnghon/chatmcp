@@ -253,32 +253,6 @@ class _KeysSettingsState extends State<KeysSettings> {
         }
 
         await settings.updateApiSettings(apiSettings: apiSettings);
-
-        if (mounted) {
-          await ProviderManager.chatModelProvider.loadAvailableModels();
-          if (mounted) {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(
-                  content: const Row(
-                    children: [
-                      Icon(Icons.check_circle, color: AppColors.white),
-                      SizedBox(width: 8),
-                      Text('Settings saved successfully'),
-                    ],
-                  ),
-                  behavior: SnackBarBehavior.floating,
-                  margin: const EdgeInsets.all(16),
-                  duration: const Duration(seconds: 2),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  backgroundColor: AppColors.green,
-                ),
-              );
-          }
-        }
       } finally {
         if (mounted) {
           setState(() => _isLoading = false);
