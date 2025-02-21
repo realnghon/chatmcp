@@ -34,12 +34,13 @@ class _ChatPageState extends State<ChatPage> {
   bool _showCodePreview = false;
   Chat? _chat;
   List<ChatMessage> _messages = [];
-  bool _isComposing = false;
+  bool _isComposing = false; // 是否正在输入
   BaseLLMClient? _llmClient;
   String _currentResponse = '';
-  bool _isLoading = false;
-  String _errorMessage = '';
-  String _parentMessageId = '';
+  bool _isLoading = false; // 是否正在加载
+  String _errorMessage = ''; // 错误信息
+  String _parentMessageId = ''; // 父消息ID
+  bool _isCancelled = false; // 是否取消
 
   WidgetsToImageController toImagecontroller = WidgetsToImageController();
   // to save image bytes of widget
@@ -530,6 +531,9 @@ class _ChatPageState extends State<ChatPage> {
 
   // 消息提交处理
   Future<void> _handleSubmitted(SubmitData data) async {
+    setState(() {
+      _isCancelled = false;
+    });
     final files = data.files.map((file) => platformFileToFile(file)).toList();
 
     _addUserMessage(data.text, files);
@@ -643,6 +647,7 @@ class _ChatPageState extends State<ChatPage> {
 
   Future<void> _processResponseStream(Stream<LLMResponse> stream) async {
     await for (final chunk in stream) {
+      if (_isCancelled) break;
       setState(() {
         _currentResponse += chunk.content ?? '';
         _messages.last = ChatMessage(
@@ -652,6 +657,7 @@ class _ChatPageState extends State<ChatPage> {
         );
       });
     }
+    _isCancelled = false;
   }
 
   Future<void> _updateChat() async {
@@ -744,6 +750,14 @@ class _ChatPageState extends State<ChatPage> {
     return height > width;
   }
 
+  void _handleCancel() {
+    setState(() {
+      _isComposing = false;
+      _isLoading = false;
+      _isCancelled = true;
+    });
+  }
+
   Widget _buildBody() {
     if (mobile) {
       return Column(
@@ -755,6 +769,7 @@ class _ChatPageState extends State<ChatPage> {
             isComposing: _isComposing,
             onTextChanged: _handleTextChanged,
             onSubmitted: _handleSubmitted,
+            onCancel: _handleCancel,
           ),
         ],
       );
@@ -773,6 +788,7 @@ class _ChatPageState extends State<ChatPage> {
                 isComposing: _isComposing,
                 onTextChanged: _handleTextChanged,
                 onSubmitted: _handleSubmitted,
+                onCancel: _handleCancel,
               ),
             ],
           ),

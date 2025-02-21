@@ -22,6 +22,7 @@ class InputArea extends StatefulWidget {
   final bool disabled;
   final ValueChanged<String> onTextChanged;
   final ValueChanged<SubmitData> onSubmitted;
+  final VoidCallback? onCancel;
   final ValueChanged<List<PlatformFile>>? onFilesSelected;
 
   const InputArea({
@@ -31,6 +32,7 @@ class InputArea extends StatefulWidget {
     required this.onTextChanged,
     required this.onSubmitted,
     this.onFilesSelected,
+    this.onCancel,
   });
 
   @override
@@ -207,21 +209,32 @@ class _InputAreaState extends State<InputArea> {
                   bottom: 0,
                   child: Center(
                     child: Row(
-                      children: [
-                        if (kIsMobile) ...[
-                          UploadMenu(
-                            disabled: widget.disabled,
-                            onPickImages: _pickImages,
-                            onPickFiles: _pickFiles,
-                          ),
-                        ] else ...[
-                          IconButton(
-                            icon: const Icon(Icons.file_present_outlined),
-                            onPressed: widget.disabled ? null : _pickFiles,
-                            tooltip: 'Upload Files',
-                          ),
-                        ],
-                      ],
+                      children: widget.disabled
+                          ? [
+                              IconButton(
+                                  onPressed: widget.onCancel != null
+                                      ? () {
+                                          widget.onCancel!();
+                                        }
+                                      : null,
+                                  icon: const Icon(Icons.stop_circle_outlined))
+                            ]
+                          : [
+                              if (kIsMobile) ...[
+                                UploadMenu(
+                                  disabled: widget.disabled,
+                                  onPickImages: _pickImages,
+                                  onPickFiles: _pickFiles,
+                                ),
+                              ] else ...[
+                                IconButton(
+                                  icon: const Icon(Icons.file_present_outlined),
+                                  onPressed:
+                                      widget.disabled ? null : _pickFiles,
+                                  tooltip: 'Upload Files',
+                                ),
+                              ],
+                            ],
                     ),
                   ),
                 ),
