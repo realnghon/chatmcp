@@ -4,6 +4,8 @@
 
 Cross-platform `Macos | Windows | Linux | iOS | Android` AI Chat Client
 
+[English](./README.md) | [简体中文](./README_ZH.md)
+
 </div>
 
 ## Install
