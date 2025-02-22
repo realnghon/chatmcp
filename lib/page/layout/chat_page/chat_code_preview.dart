@@ -29,6 +29,8 @@ class _ChatCodePreviewState extends State<ChatCodePreview> {
 
   bool _showCode = true;
 
+  bool _supportPreview = false;
+
   @override
   void initState() {
     super.initState();
@@ -124,40 +126,42 @@ class _ChatCodePreviewState extends State<ChatCodePreview> {
                   ),
                 ),
               ),
-              const SizedBox(width: 4),
-              TextButton(
-                style: TextButton.styleFrom(
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  backgroundColor: !_showCode
-                      ? AppColors.getThemeColor(context,
-                          lightColor: AppColors.blue[300],
-                          darkColor: AppColors.blue[100])
-                      : AppColors.getThemeColor(context,
-                          lightColor: AppColors.grey[300],
-                          darkColor: AppColors.grey[100]),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4),
+              if (_supportPreview) ...[
+                const SizedBox(width: 4),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    backgroundColor: !_showCode
+                        ? AppColors.getThemeColor(context,
+                            lightColor: AppColors.blue[300],
+                            darkColor: AppColors.blue[100])
+                        : AppColors.getThemeColor(context,
+                            lightColor: AppColors.grey[300],
+                            darkColor: AppColors.grey[100]),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _showCode = false;
+                    });
+                  },
+                  child: Text(
+                    '预览',
+                    style: TextStyle(
+                      fontSize: 9,
+                      height: 1,
+                      color: !_showCode
+                          ? Theme.of(context).primaryColor
+                          : AppColors.grey[600],
+                    ),
                   ),
                 ),
-                onPressed: () {
-                  setState(() {
-                    _showCode = false;
-                  });
-                },
-                child: Text(
-                  '预览',
-                  style: TextStyle(
-                    fontSize: 9,
-                    height: 1,
-                    color: !_showCode
-                        ? Theme.of(context).primaryColor
-                        : AppColors.grey[600],
-                  ),
-                ),
-              ),
+              ]
             ],
           ),
           const Spacer(),
@@ -187,10 +191,12 @@ class _ChatCodePreviewState extends State<ChatCodePreview> {
     String language = widget.codePreviewEvent.attributes['type'] ?? '';
     if (language.contains("react")) {
       language = "react";
+      _supportPreview = true;
     } else if (language.contains("vue")) {
       language = "vue";
     } else if (language.contains("html")) {
       language = "html";
+      _supportPreview = true;
     } else if (language.contains("css")) {
       language = "css";
     } else if (language.contains("js")) {
@@ -207,6 +213,32 @@ class _ChatCodePreviewState extends State<ChatCodePreview> {
 
     final sandboxServerPort =
         ProviderManager.settingsProvider.sandboxServerPort;
+
+    if (!_supportPreview) {
+      return Container(
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: AppColors.getThemeColor(context,
+                lightColor: AppColors.grey[200],
+                darkColor: AppColors.grey[800]),
+          ),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildToolBar(),
+            Expanded(
+              child: language == "text/markdown"
+                  ? Markit(data: widget.codePreviewEvent.textContent)
+                  : Markit(data: '''```$language
+${widget.codePreviewEvent.textContent}
+```'''),
+            ),
+          ],
+        ),
+      );
+    }
 
     return Container(
       decoration: BoxDecoration(
@@ -250,7 +282,7 @@ class _ChatCodePreviewState extends State<ChatCodePreview> {
                       _handleError();
                     },
                   )
-                : Markit(data: '''```${language}
+                : Markit(data: '''```$language
 ${widget.codePreviewEvent.textContent}
 ```'''),
           ),
