@@ -10,11 +10,11 @@
 
 ## 安装
 
-桌面端：MacOS | Windows | Linux [下载发布版本](https://github.com/daodao97/chatmcp/releases)
+桌面端：MacOS | Windows | Linux [release](https://github.com/daodao97/chatmcp/releases)
 
 iOS：[TestFlight](https://testflight.apple.com/join/dCXksFJV)
 
-Android：需要本地构建
+Android：[release](https://github.com/daodao97/chatmcp/releases)
 
 ## 预览
 

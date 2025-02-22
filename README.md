@@ -10,11 +10,11 @@ Cross-platform `Macos | Windows | Linux | iOS | Android` AI Chat Client
 
 ## Install
 
-Desktop: MacOS | Windows | Linux [Download for release](https://github.com/daodao97/chatmcp/releases) 
+Desktop: MacOS | Windows | Linux [Release](https://github.com/daodao97/chatmcp/releases) 
 
 IOS: [TestFlight](https://testflight.apple.com/join/dCXksFJV)
 
-Android: need to build in your local
+Android: [Release](https://github.com/daodao97/chatmcp/releases)
 
 ## Preview
 

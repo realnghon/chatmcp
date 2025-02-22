@@ -127,7 +127,6 @@ class DeepSeekClient extends BaseLLMClient {
         while (buffer.contains('\n')) {
           final index = buffer.indexOf('\n');
           final line = buffer.substring(0, index).trim();
-          Logger.root.info('deepseek stream response line: $line');
           buffer = buffer.substring(index + 1);
 
           if (line.startsWith('data: ')) {
