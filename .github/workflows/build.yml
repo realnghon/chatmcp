@@ -62,6 +62,7 @@ jobs:
         run: flutter pub get
       
       - name: Build ${{ matrix.build_target }}
+        shell: bash
         run: |
           flutter build ${{ matrix.build_target }} --release
           if [ "${{ matrix.apk_build }}" == "true" ]; then
