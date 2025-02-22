@@ -16,24 +16,38 @@ jobs:
             output_path: build/linux/x64/release/bundle
             asset_name: chatmcp-linux-x64.tar.gz
             build_target: linux
+            apk_build: true
           - os: macos-latest
             output_path: build/macos/Build/Products/Release/chatmcp.app
             asset_name: chatmcp-macos-x64.dmg
             build_target: macos
+            apk_build: false
           - os: windows-latest
             output_path: build/windows/x64/Runner/Release
             asset_name: chatmcp-windows-x64.zip
             build_target: windows
+            apk_build: false
     runs-on: ${{ matrix.os }}
     
     steps:
       - uses: actions/checkout@v3
       
+      - name: Setup Java
+        if: matrix.apk_build
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+      
+      - name: Setup Android SDK
+        if: matrix.apk_build
+        uses: android-actions/setup-android@v3
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: '3.27.0'
+          flutter-version: '3.29.0'
       
       - name: Create empty .env file
         run: touch .env
@@ -48,7 +62,11 @@ jobs:
         run: flutter pub get
       
       - name: Build ${{ matrix.build_target }}
-        run: flutter build ${{ matrix.build_target }} --release
+        run: |
+          flutter build ${{ matrix.build_target }} --release
+          if [ "${{ matrix.apk_build }}" == "true" ]; then
+            flutter build apk --release
+          fi
       
       - name: Package Linux App
         if: matrix.os == 'ubuntu-latest'
@@ -77,11 +95,18 @@ jobs:
           Copy-Item -Path "windows/sqlite3.dll" -Destination "${{ matrix.output_path }}" -Force
           Compress-Archive -Path "${{ matrix.output_path }}/*" -DestinationPath "${{ matrix.asset_name }}" -Force
 
+      - name: Package Android APK
+        if: matrix.apk_build
+        run: |
+          cp build/app/outputs/flutter-apk/app-release.apk chatmcp-android.apk
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: chatmcp-${{ matrix.build_target }}
-          path: ${{ matrix.asset_name }}
+          name: ${{ matrix.apk_build && 'chatmcp-android' || matrix.build_target }}
+          path: |
+            ${{ matrix.asset_name }}
+            ${{ matrix.apk_build && 'chatmcp-android.apk' || '' }}
       
       - name: Create Release
         if: startsWith(github.ref, 'refs/tags/')
