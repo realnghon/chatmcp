@@ -7,7 +7,7 @@ import 'package:logging/logging.dart';
 import 'dart:io';
 import 'package:chatmcp/utils/process.dart';
 import 'package:chatmcp/utils/color.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:chatmcp/generated/app_localizations.dart';
 
 class McpServer extends StatefulWidget {
   const McpServer({super.key});

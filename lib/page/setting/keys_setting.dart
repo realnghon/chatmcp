@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../../provider/settings_provider.dart';
 import '../../provider/provider_manager.dart';
 import 'package:chatmcp/utils/color.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:chatmcp/generated/app_localizations.dart';
 
 class KeysSettings extends StatefulWidget {
   const KeysSettings({super.key});

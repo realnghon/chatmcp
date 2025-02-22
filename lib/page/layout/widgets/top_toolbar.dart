@@ -6,7 +6,7 @@ import 'package:chatmcp/utils/platform.dart';
 import 'package:chatmcp/utils/color.dart';
 import 'package:provider/provider.dart';
 import 'package:chatmcp/provider/chat_provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:chatmcp/generated/app_localizations.dart';
 
 // test page
 import 'package:chatmcp/widgets/markdown/markit_widget.dart';

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'keys_setting.dart';
 import 'mcp_server.dart';
 import 'general_setting.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:chatmcp/generated/app_localizations.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});

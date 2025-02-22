@@ -101,13 +101,13 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  generate: true
   uses-material-design: true
   assets:
     - .env
     - assets/mcp_server.json
     - assets/logo.png
     - assets/sandbox/
-  generate: true
 
 flutter_launcher_icons:
   android: "launcher_icon"

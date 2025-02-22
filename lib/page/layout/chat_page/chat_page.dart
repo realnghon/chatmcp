@@ -20,7 +20,7 @@ import 'chat_message_to_image.dart';
 import 'package:chatmcp/tool/tools.dart';
 import 'package:chatmcp/utils/event_bus.dart';
 import 'chat_code_preview.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:chatmcp/generated/app_localizations.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});

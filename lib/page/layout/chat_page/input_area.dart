@@ -4,7 +4,7 @@ import 'dart:io' show Platform;
 import 'package:chatmcp/utils/platform.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:chatmcp/widgets/upload_menu.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:chatmcp/generated/app_localizations.dart';
 
 class SubmitData {
   final String text;

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../provider/settings_provider.dart';
 import 'package:chatmcp/utils/color.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:chatmcp/generated/app_localizations.dart';
 
 class GeneralSettings extends StatefulWidget {
   const GeneralSettings({super.key});

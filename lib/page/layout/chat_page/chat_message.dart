@@ -11,7 +11,7 @@ import 'dart:io' as io;
 import 'package:chatmcp/utils/color.dart';
 import 'chat_message_action.dart';
 import 'package:chatmcp/tool/tavily.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:chatmcp/generated/app_localizations.dart';
 
 class ChatUIMessage extends StatelessWidget {
   final List<ChatMessage> messages;
