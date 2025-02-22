@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:chatmcp/provider/chat_provider.dart';
 import 'package:chatmcp/utils/platform.dart';
 import 'package:chatmcp/utils/color.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SidebarPanel extends StatelessWidget {
   final VoidCallback? onToggle;
@@ -43,7 +44,9 @@ class ChatHistoryList extends StatelessWidget {
     required this.chatProvider,
   });
 
-  Map<String, List<dynamic>> _groupChats(List<dynamic> chats) {
+  Map<String, List<dynamic>> _groupChats(
+      BuildContext context, List<dynamic> chats) {
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
@@ -51,28 +54,28 @@ class ChatHistoryList extends StatelessWidget {
     final previous30Days = today.subtract(const Duration(days: 30));
 
     return {
-      '今天': chats.where((chat) {
+      l10n.today: chats.where((chat) {
         final chatDate = DateTime(
             chat.updatedAt.year, chat.updatedAt.month, chat.updatedAt.day);
         return chatDate.isAtSameMomentAs(today);
       }).toList(),
-      '昨天': chats.where((chat) {
+      l10n.yesterday: chats.where((chat) {
         final chatDate = DateTime(
             chat.updatedAt.year, chat.updatedAt.month, chat.updatedAt.day);
         return chatDate.isAtSameMomentAs(yesterday);
       }).toList(),
-      '前 7 天': chats.where((chat) {
+      l10n.last7Days: chats.where((chat) {
         final chatDate = DateTime(
             chat.updatedAt.year, chat.updatedAt.month, chat.updatedAt.day);
         return chatDate.isBefore(yesterday) && chatDate.isAfter(previous7Days);
       }).toList(),
-      '前 30 天': chats.where((chat) {
+      l10n.last30Days: chats.where((chat) {
         final chatDate = DateTime(
             chat.updatedAt.year, chat.updatedAt.month, chat.updatedAt.day);
         return chatDate.isBefore(previous7Days) &&
             chatDate.isAfter(previous30Days);
       }).toList(),
-      '更早': chats.where((chat) {
+      l10n.earlier: chats.where((chat) {
         final chatDate = DateTime(
             chat.updatedAt.year, chat.updatedAt.month, chat.updatedAt.day);
         return chatDate.isBefore(previous30Days);
@@ -82,7 +85,7 @@ class ChatHistoryList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final groupedChats = _groupChats(chatProvider.chats);
+    final groupedChats = _groupChats(context, chatProvider.chats);
 
     return Container(
       padding: const EdgeInsets.only(top: 30, left: 4, right: 4, bottom: 40),
@@ -163,7 +166,7 @@ class ChatHistoryItem extends StatelessWidget {
           children: [
             Expanded(
               child: Text(
-                chat.title,
+                chat.title.replaceAll('\n', ' '),
                 style: const TextStyle(fontSize: 14),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -274,22 +277,23 @@ class SidebarToolbar extends StatelessWidget {
   }
 
   void _showDeleteConfirmDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('确认删除'),
-        content: const Text('确定要删除选中的对话吗？'),
+        title: Text(l10n.confirmDelete),
+        content: Text(l10n.confirmDeleteSelected),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () {
               chatProvider.deleteSelectedChats();
               Navigator.pop(context);
             },
-            child: const Text('确定'),
+            child: Text(l10n.ok),
           ),
         ],
       ),

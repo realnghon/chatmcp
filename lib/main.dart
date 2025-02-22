@@ -13,6 +13,8 @@ import 'package:chatmcp/provider/settings_provider.dart';
 import 'utils/color.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'dart:io';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
@@ -134,6 +136,17 @@ class MyApp extends StatelessWidget {
                 : null,
             body: LayoutPage(),
           ),
+          locale: Locale(settings.generalSetting.locale),
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('en'),
+            Locale('zh'),
+          ],
         );
       },
     );

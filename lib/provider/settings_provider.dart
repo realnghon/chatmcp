@@ -43,6 +43,7 @@ class GeneralSetting {
   bool showUserAvatar = false;
   bool enableArtifacts = true;
   String systemPrompt;
+  String locale;
 
   GeneralSetting({
     required this.theme,
@@ -50,6 +51,7 @@ class GeneralSetting {
     this.showUserAvatar = false,
     this.enableArtifacts = true,
     this.systemPrompt = 'You are a helpful assistant.',
+    this.locale = 'en',
   });
 
   Map<String, dynamic> toJson() {
@@ -59,6 +61,7 @@ class GeneralSetting {
       'showUserAvatar': showUserAvatar,
       'enableArtifacts': enableArtifacts,
       'systemPrompt': systemPrompt,
+      'locale': locale,
     };
   }
 
@@ -69,6 +72,7 @@ class GeneralSetting {
       showUserAvatar: json['showUserAvatar'] as bool? ?? true,
       enableArtifacts: json['enableArtifacts'] as bool? ?? false,
       systemPrompt: json['systemPrompt'] as String? ?? defaultSystemPrompt,
+      locale: json['locale'] as String? ?? 'en',
     );
   }
 }
@@ -188,6 +192,7 @@ class SettingsProvider extends ChangeNotifier {
     required bool showUserAvatar,
     required String systemPrompt,
     required bool enableArtifacts,
+    required String locale,
   }) async {
     final prefs = await SharedPreferences.getInstance();
     _generalSetting = GeneralSetting(
@@ -196,6 +201,7 @@ class SettingsProvider extends ChangeNotifier {
       showUserAvatar: showUserAvatar,
       systemPrompt: systemPrompt,
       enableArtifacts: enableArtifacts,
+      locale: locale,
     );
     await prefs.setString(
         'generalSettings', jsonEncode(_generalSetting.toJson()));

@@ -4,6 +4,7 @@ import 'dart:io' show Platform;
 import 'package:chatmcp/utils/platform.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:chatmcp/widgets/upload_menu.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SubmitData {
   final String text;
@@ -114,6 +115,7 @@ class _InputAreaState extends State<InputArea> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
@@ -193,9 +195,9 @@ class _InputAreaState extends State<InputArea> {
                     keyboardType: TextInputType.multiline,
                     style: const TextStyle(fontSize: 14.0),
                     scrollPhysics: const BouncingScrollPhysics(),
-                    decoration: const InputDecoration(
-                      hintText: 'Ask me anything...',
-                      hintStyle: TextStyle(fontSize: 14.0),
+                    decoration: InputDecoration(
+                      hintText: l10n.askMeAnything,
+                      hintStyle: const TextStyle(fontSize: 14.0),
                       border: OutlineInputBorder(),
                       contentPadding:
                           EdgeInsets.symmetric(horizontal: 14, vertical: 18),
@@ -231,7 +233,7 @@ class _InputAreaState extends State<InputArea> {
                                   icon: const Icon(Icons.file_present_outlined),
                                   onPressed:
                                       widget.disabled ? null : _pickFiles,
-                                  tooltip: 'Upload Files',
+                                  tooltip: l10n.uploadFiles,
                                 ),
                               ],
                             ],

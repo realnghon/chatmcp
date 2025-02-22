@@ -11,7 +11,7 @@ import 'dart:io' as io;
 import 'package:chatmcp/utils/color.dart';
 import 'chat_message_action.dart';
 import 'package:chatmcp/tool/tavily.dart';
-import 'package:chatmcp/tool/dalle.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ChatUIMessage extends StatelessWidget {
   final List<ChatMessage> messages;
@@ -133,6 +133,8 @@ class ChatMessageContent extends StatelessWidget {
                                     io.File(file.path!),
                                     fit: BoxFit.contain,
                                     errorBuilder: (context, error, stackTrace) {
+                                      final l10n =
+                                          AppLocalizations.of(context)!;
                                       return Container(
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(
@@ -156,6 +158,7 @@ class ChatMessageContent extends StatelessWidget {
                                               ),
                                               size: 32,
                                             ),
+                                            Text(l10n.brokenImage),
                                           ],
                                         ),
                                       );
@@ -196,6 +199,7 @@ class ChatMessageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return kIsDesktop
         ? _buildMessage(context)
         : GestureDetector(
@@ -207,15 +211,15 @@ class ChatMessageContent extends StatelessWidget {
                   children: [
                     ListTile(
                       leading: const Icon(Icons.copy_outlined),
-                      title: const Text('复制'),
+                      title: Text(l10n.copy),
                       onTap: () {
                         Clipboard.setData(ClipboardData(
                           text: message.content ?? '',
                         ));
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('已复制到剪贴板'),
+                          SnackBar(
+                            content: Text(l10n.copied),
                             duration: Duration(seconds: 2),
                           ),
                         );
@@ -224,7 +228,7 @@ class ChatMessageContent extends StatelessWidget {
                     if (message.role != MessageRole.user)
                       ListTile(
                         leading: const Icon(Icons.refresh),
-                        title: const Text('重试'),
+                        title: Text(l10n.retry),
                         onTap: () {
                           Navigator.pop(context);
                           onRetry(message);
@@ -280,12 +284,13 @@ class ToolCallWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       child: CollapsibleSection(
         initiallyExpanded: false,
         title: Text(
-          '${message.mcpServerName} call_${message.toolCalls![0]['function']['name']}',
+          l10n.toolCall(message.toolCalls![0]['function']['name']),
           style: TextStyle(
             fontSize: 12,
             color: AppColors.grey[600],
@@ -344,12 +349,13 @@ class ToolResultWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       child: CollapsibleSection(
         initiallyExpanded: false,
         title: Text(
-          '${message.mcpServerName} ${message.toolCallId!} result',
+          l10n.toolResult(message.toolCallId!.replaceFirst('call_', '')),
           style: TextStyle(
             fontSize: 12,
             color: AppColors.grey[600],

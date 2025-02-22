@@ -15,12 +15,12 @@ import 'package:chatmcp/dao/chat.dart';
 import 'package:uuid/uuid.dart';
 import 'chat_message_list.dart';
 import 'package:chatmcp/utils/color.dart';
-import 'package:chatmcp/widgets/widgets_to_image/widgets_to_image.dart';
 import 'package:chatmcp/widgets/widgets_to_image/utils.dart';
 import 'chat_message_to_image.dart';
 import 'package:chatmcp/tool/tools.dart';
 import 'package:chatmcp/utils/event_bus.dart';
 import 'chat_code_preview.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -285,12 +285,13 @@ class _ChatPageState extends State<ChatPage> {
   // UI 构建相关方法
   Widget _buildMessageList() {
     if (_messages.isEmpty) {
+      final l10n = AppLocalizations.of(context)!;
       return Expanded(
         child: Container(
           color: AppColors.transparent,
           child: Center(
             child: Text(
-              'How can I help you today?',
+              l10n.welcomeMessage,
               style: TextStyle(
                 fontSize: 18,
                 color: AppColors.grey,
@@ -418,7 +419,7 @@ class _ChatPageState extends State<ChatPage> {
           mcpServerName: clientName,
           toolCalls: [
             {
-              'id': 'call_$toolName',
+              'id': "call_$toolName",
               'type': 'function',
               'function': {
                 'name': toolName,

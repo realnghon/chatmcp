@@ -1,7 +1,9 @@
+import 'package:chatmcp/provider/provider_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../provider/settings_provider.dart';
 import 'package:chatmcp/utils/color.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class GeneralSettings extends StatefulWidget {
   const GeneralSettings({super.key});
@@ -12,7 +14,6 @@ class GeneralSettings extends StatefulWidget {
 
 class _GeneralSettingsState extends State<GeneralSettings> {
   final _formKey = GlobalKey<FormState>();
-  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +40,8 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                     children: [
                       // 主题设置卡片
                       _buildThemeCard(context),
+                      // 语言设置卡片
+                      _buildLocaleCard(context),
                       // 头像显示设置卡片
                       _buildAvatarCard(context),
                       // System Prompt 设置卡片
@@ -56,7 +59,8 @@ class _GeneralSettingsState extends State<GeneralSettings> {
     );
   }
 
-  Widget _buildFeatureCard(BuildContext context) {
+  Widget _buildLocaleCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Consumer<SettingsProvider>(
       builder: (context, settings, child) {
         return Card(
@@ -68,13 +72,79 @@ class _GeneralSettingsState extends State<GeneralSettings> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Row(
+                Row(
                   children: [
-                    Icon(Icons.extension, size: 20),
-                    SizedBox(width: 8),
+                    const Icon(Icons.language, size: 20),
+                    const SizedBox(width: 8),
                     Text(
-                      'Feature Settings',
-                      style: TextStyle(
+                      l10n.languageSettings,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                ListTile(
+                  title: Text(l10n.language),
+                  trailing: DropdownButton<String>(
+                    value: settings.generalSetting.locale,
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'en',
+                        child: Text('English'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'zh',
+                        child: Text('中文'),
+                      ),
+                    ],
+                    onChanged: (String? value) {
+                      if (value != null) {
+                        settings.updateGeneralSettings(
+                          theme: settings.generalSetting.theme,
+                          showAssistantAvatar:
+                              settings.generalSetting.showAssistantAvatar,
+                          showUserAvatar:
+                              settings.generalSetting.showUserAvatar,
+                          systemPrompt: settings.generalSetting.systemPrompt,
+                          enableArtifacts:
+                              settings.generalSetting.enableArtifacts,
+                          locale: value,
+                        );
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildFeatureCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Consumer<SettingsProvider>(
+      builder: (context, settings, child) {
+        return Card(
+          elevation: 2,
+          margin: const EdgeInsets.symmetric(vertical: 6),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.extension, size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      l10n.featureSettings,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -83,9 +153,8 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                 ),
                 const SizedBox(height: 16),
                 SwitchListTile(
-                  title: const Text('Enable Artifacts'),
-                  subtitle: const Text(
-                      'Enable the artifacts of the AI assistant in the conversation, will use more tokens'),
+                  title: Text(l10n.enableArtifacts),
+                  subtitle: Text(l10n.enableArtifactsDescription),
                   value: settings.generalSetting.enableArtifacts,
                   onChanged: (bool value) {
                     settings.updateGeneralSettings(
@@ -95,6 +164,8 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                       showUserAvatar: settings.generalSetting.showUserAvatar,
                       systemPrompt: settings.generalSetting.systemPrompt,
                       enableArtifacts: value,
+                      locale: ProviderManager
+                          .settingsProvider.generalSetting.locale,
                     );
                   },
                 ),
@@ -107,6 +178,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
   }
 
   Widget _buildThemeCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Consumer<SettingsProvider>(
       builder: (context, settings, child) {
         return Card(
@@ -118,13 +190,13 @@ class _GeneralSettingsState extends State<GeneralSettings> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Row(
+                Row(
                   children: [
-                    Icon(Icons.palette, size: 20),
-                    SizedBox(width: 8),
+                    const Icon(Icons.palette, size: 20),
+                    const SizedBox(width: 8),
                     Text(
-                      'Theme Settings',
-                      style: TextStyle(
+                      l10n.themeSettings,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -135,24 +207,24 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                 DropdownButtonFormField<String>(
                   value: settings.generalSetting.theme,
                   decoration: InputDecoration(
-                    labelText: 'Theme',
+                    // labelText: 'Theme',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                     prefixIcon: const Icon(Icons.color_lens),
                   ),
-                  items: const [
+                  items: [
                     DropdownMenuItem(
                       value: 'light',
-                      child: Text('Light Theme'),
+                      child: Text(l10n.lightTheme),
                     ),
                     DropdownMenuItem(
                       value: 'dark',
-                      child: Text('Dark Theme'),
+                      child: Text(l10n.darkTheme),
                     ),
                     DropdownMenuItem(
                       value: 'system',
-                      child: Text('Follow System'),
+                      child: Text(l10n.followSystem),
                     ),
                   ],
                   onChanged: (value) {
@@ -165,6 +237,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                         systemPrompt: settings.generalSetting.systemPrompt,
                         enableArtifacts:
                             settings.generalSetting.enableArtifacts,
+                        locale: settings.generalSetting.locale,
                       );
                     }
                   },
@@ -178,6 +251,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
   }
 
   Widget _buildAvatarCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Consumer<SettingsProvider>(
       builder: (context, settings, child) {
         return Card(
@@ -189,13 +263,13 @@ class _GeneralSettingsState extends State<GeneralSettings> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Row(
+                Row(
                   children: [
-                    Icon(Icons.face, size: 20),
-                    SizedBox(width: 8),
+                    const Icon(Icons.face, size: 20),
+                    const SizedBox(width: 8),
                     Text(
-                      'Show Avatar',
-                      style: TextStyle(
+                      l10n.showAvatar,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -204,9 +278,8 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                 ),
                 const SizedBox(height: 16),
                 SwitchListTile(
-                  title: const Text('Show Assistant Avatar'),
-                  subtitle: const Text(
-                      'Show the avatar of the AI assistant in the conversation'),
+                  title: Text(l10n.showAssistantAvatar),
+                  subtitle: Text(l10n.showAssistantAvatarDescription),
                   value: settings.generalSetting.showAssistantAvatar,
                   onChanged: (bool value) {
                     settings.updateGeneralSettings(
@@ -215,14 +288,14 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                       showUserAvatar: settings.generalSetting.showUserAvatar,
                       systemPrompt: settings.generalSetting.systemPrompt,
                       enableArtifacts: settings.generalSetting.enableArtifacts,
+                      locale: settings.generalSetting.locale,
                     );
                   },
                 ),
                 const Divider(),
                 SwitchListTile(
-                  title: const Text('Show User Avatar'),
-                  subtitle: const Text(
-                      'Show the avatar of the user in the conversation'),
+                  title: Text(l10n.showUserAvatar),
+                  subtitle: Text(l10n.showUserAvatarDescription),
                   value: settings.generalSetting.showUserAvatar,
                   onChanged: (bool value) {
                     settings.updateGeneralSettings(
@@ -232,6 +305,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                       showUserAvatar: value,
                       systemPrompt: settings.generalSetting.systemPrompt,
                       enableArtifacts: settings.generalSetting.enableArtifacts,
+                      locale: settings.generalSetting.locale,
                     );
                   },
                 ),
@@ -244,6 +318,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
   }
 
   Widget _buildSystemPromptCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Consumer<SettingsProvider>(
       builder: (context, settings, child) {
         return Card(
@@ -255,13 +330,13 @@ class _GeneralSettingsState extends State<GeneralSettings> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Row(
+                Row(
                   children: [
-                    Icon(Icons.psychology, size: 20),
-                    SizedBox(width: 8),
+                    const Icon(Icons.psychology, size: 20),
+                    const SizedBox(width: 8),
                     Text(
-                      'System Prompt',
-                      style: TextStyle(
+                      l10n.systemPrompt,
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
@@ -272,7 +347,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                 TextFormField(
                   initialValue: settings.generalSetting.systemPrompt,
                   decoration: InputDecoration(
-                    labelText: 'System Prompt',
+                    // labelText: 'System Prompt',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -287,13 +362,14 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                       showUserAvatar: settings.generalSetting.showUserAvatar,
                       systemPrompt: value,
                       enableArtifacts: settings.generalSetting.enableArtifacts,
+                      locale: settings.generalSetting.locale,
                     );
                   },
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Note: This is the system prompt for the conversation with the AI assistant, used to set the behavior and style of the assistant.',
-                  style: TextStyle(
+                Text(
+                  l10n.systemPromptDescription,
+                  style: const TextStyle(
                     fontSize: 12,
                     color: AppColors.grey,
                   ),

@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 import 'dart:io';
 import 'package:chatmcp/utils/process.dart';
 import 'package:chatmcp/utils/color.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class McpServer extends StatefulWidget {
   const McpServer({super.key});
@@ -18,7 +19,6 @@ class McpServer extends StatefulWidget {
 class _McpServerState extends State<McpServer> {
   final TextEditingController _searchController = TextEditingController();
   String _selectedTab = 'All';
-  final bool _isLoading = false;
 
   @override
   void dispose() {
@@ -28,6 +28,7 @@ class _McpServerState extends State<McpServer> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -53,7 +54,7 @@ class _McpServerState extends State<McpServer> {
                     ),
                     SizedBox(height: 16),
                     Text(
-                      '当前平台不支持 MCP Server',
+                      l10n.platformNotSupported,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -61,7 +62,7 @@ class _McpServerState extends State<McpServer> {
                     ),
                     SizedBox(height: 8),
                     Text(
-                      'MCP Server 仅支持桌面端（Windows、macOS、Linux）',
+                      l10n.mcpServerDesktopOnly,
                       style: TextStyle(
                         color: AppColors.getThemeTextColor(context),
                       ),
@@ -84,7 +85,7 @@ class _McpServerState extends State<McpServer> {
                     child: TextField(
                       controller: _searchController,
                       decoration: InputDecoration(
-                        hintText: 'Search server...',
+                        hintText: l10n.searchServer,
                         prefixIcon: Icon(
                           Icons.search,
                           color: AppColors.getThemeTextColor(context),
@@ -108,13 +109,13 @@ class _McpServerState extends State<McpServer> {
                   // 标签选择和操作按钮
                   Row(
                     children: [
-                      _buildFilterChip('All'),
+                      _buildFilterChip(l10n.all),
                       const SizedBox(width: 12),
-                      _buildFilterChip('Installed'),
+                      _buildFilterChip(l10n.installed),
                       const Spacer(),
                       _buildActionButton(
                         icon: Icons.add,
-                        tooltip: 'Add Server',
+                        tooltip: l10n.addServer,
                         onPressed: () {
                           final provider = Provider.of<McpServerProvider>(
                               context,
@@ -125,7 +126,7 @@ class _McpServerState extends State<McpServer> {
                       const SizedBox(width: 8),
                       _buildActionButton(
                         icon: Icons.refresh,
-                        tooltip: 'Refresh',
+                        tooltip: l10n.refresh,
                         onPressed: () => setState(() {}),
                       ),
                     ],
@@ -135,7 +136,7 @@ class _McpServerState extends State<McpServer> {
                   // 服务器列表
                   Expanded(
                     child: FutureBuilder<Map<String, dynamic>>(
-                      future: _selectedTab == 'All'
+                      future: _selectedTab == l10n.all
                           ? provider.loadMarketServers()
                           : provider.loadServers(),
                       builder: (context, snapshot) {
@@ -183,7 +184,7 @@ class _McpServerState extends State<McpServer> {
                                   ),
                                   const SizedBox(height: 16),
                                   Text(
-                                    'No server configurations found',
+                                    l10n.noServerConfigs,
                                     style: TextStyle(
                                       color:
                                           AppColors.getThemeTextColor(context),
@@ -229,6 +230,7 @@ class _McpServerState extends State<McpServer> {
     dynamic serverConfig,
     McpServerProvider provider,
   ) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
       elevation: 2,
@@ -263,14 +265,14 @@ class _McpServerState extends State<McpServer> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildInfoRow('Command', serverConfig['command'] ?? ''),
+                _buildInfoRow(l10n.command, serverConfig['command'] ?? ''),
                 const SizedBox(height: 8),
-                _buildInfoRow('Arguments',
+                _buildInfoRow(l10n.arguments,
                     (serverConfig['args'] as List?)?.join(' ') ?? ''),
                 if (serverConfig['env'] != null) ...[
                   const SizedBox(height: 8),
                   _buildInfoRow(
-                    'Environment Variables',
+                    l10n.environmentVariables,
                     (serverConfig['env'] as Map?)
                             ?.entries
                             .map((e) => '${e.key}=${e.value}')
@@ -299,14 +301,14 @@ class _McpServerState extends State<McpServer> {
                                 if (isInstalled) ...[
                                   _buildActionButton(
                                     icon: Icons.edit,
-                                    tooltip: 'Edit',
+                                    tooltip: l10n.edit,
                                     onPressed: () => _showEditDialog(
                                         context, serverName, provider, null),
                                   ),
                                   const SizedBox(width: 8),
                                   _buildActionButton(
                                     icon: Icons.delete,
-                                    tooltip: 'Delete',
+                                    tooltip: l10n.delete,
                                     color: AppColors.red,
                                     onPressed: () => _showDeleteConfirmDialog(
                                         context, serverName, provider),
@@ -314,7 +316,7 @@ class _McpServerState extends State<McpServer> {
                                 ] else
                                   ElevatedButton.icon(
                                     icon: const Icon(Icons.download),
-                                    label: const Text('Install'),
+                                    label: Text(l10n.install),
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor:
                                           AppColors.getThemeTextColor(context),
@@ -330,7 +332,10 @@ class _McpServerState extends State<McpServer> {
                                       if (!cmdExists) {
                                         showErrorDialog(
                                           context,
-                                          'Command "${serverConfig['command']}" does not exist, please install it first\n\nCurrent PATH:\n${Platform.environment['PATH']}',
+                                          l10n.commandNotExist(
+                                              serverConfig['command'],
+                                              Platform.environment['PATH'] ??
+                                                  ''),
                                         );
                                       } else {
                                         Logger.root.info(
@@ -350,14 +355,14 @@ class _McpServerState extends State<McpServer> {
                     if (_selectedTab == 'Installed') ...[
                       _buildActionButton(
                         icon: Icons.edit,
-                        tooltip: 'Edit',
+                        tooltip: l10n.edit,
                         onPressed: () => _showEditDialog(
                             context, serverName, provider, null),
                       ),
                       const SizedBox(width: 8),
                       _buildActionButton(
                         icon: Icons.delete,
-                        tooltip: 'Delete',
+                        tooltip: l10n.delete,
                         color: AppColors.red,
                         onPressed: () => _showDeleteConfirmDialog(
                             context, serverName, provider),
@@ -426,6 +431,10 @@ class _McpServerState extends State<McpServer> {
   }
 
   Widget _buildFilterChip(String label) {
+    final l10n = AppLocalizations.of(context)!;
+    if (_selectedTab == 'All') {
+      _selectedTab = l10n.all;
+    }
     final isSelected = _selectedTab == label;
     return FilterChip(
       label: Text(
@@ -500,6 +509,7 @@ class _McpServerState extends State<McpServer> {
     try {
       if (!context.mounted) return;
 
+      final l10n = AppLocalizations.of(context)!;
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (BuildContext dialogContext) => AlertDialog(
@@ -511,33 +521,32 @@ class _McpServerState extends State<McpServer> {
                 if (serverName.isEmpty)
                   TextField(
                     controller: serverNameController,
-                    decoration: const InputDecoration(
-                      labelText: 'Server Name',
+                    decoration: InputDecoration(
+                      labelText: l10n.serverName,
                     ),
                   ),
                 TextField(
                   controller: commandController,
-                  decoration: const InputDecoration(
-                    labelText: 'Command',
-                    hintText: 'For example: npx, uvx',
+                  decoration: InputDecoration(
+                    labelText: l10n.command,
+                    hintText: l10n.commandExample,
                   ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: argsController,
-                  decoration: const InputDecoration(
-                    labelText: 'Arguments',
-                    hintText:
-                        'Separate arguments with spaces, for example: -m mcp.server',
+                  decoration: InputDecoration(
+                    labelText: l10n.arguments,
+                    hintText: l10n.argumentsExample,
                   ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: envController,
                   maxLines: 4,
-                  decoration: const InputDecoration(
-                    labelText: 'Environment Variables',
-                    hintText: 'One per line, format: KEY=VALUE',
+                  decoration: InputDecoration(
+                    labelText: l10n.environmentVariables,
+                    hintText: l10n.envVarsFormat,
                     border: OutlineInputBorder(),
                   ),
                 ),
@@ -547,11 +556,11 @@ class _McpServerState extends State<McpServer> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             TextButton(
               onPressed: () => Navigator.pop(dialogContext, true),
-              child: const Text('Save'),
+              child: Text(l10n.save),
             ),
           ],
         ),
@@ -605,19 +614,20 @@ class _McpServerState extends State<McpServer> {
     String serverName,
     McpServerProvider provider,
   ) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirm Delete'),
-        content: Text('Are you sure you want to delete server "$serverName" ?'),
+        title: Text(l10n.confirmDelete),
+        content: Text(l10n.confirmDeleteServer(serverName)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -632,15 +642,16 @@ class _McpServerState extends State<McpServer> {
   }
 
   Future<void> showErrorDialog(BuildContext context, String message) async {
+    final l10n = AppLocalizations.of(context)!;
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Error'),
+        title: Text(l10n.error),
         content: Text(message),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            child: Text('OK'),
           ),
         ],
       ),

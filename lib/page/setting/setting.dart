@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'keys_setting.dart';
 import 'mcp_server.dart';
 import 'general_setting.dart';
-import 'package:chatmcp/utils/color.dart';
-import 'tools_setting.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -13,54 +12,43 @@ class SettingPage extends StatefulWidget {
 }
 
 class _SettingPageState extends State<SettingPage> {
-  int _selectedIndex = 0;
-
-  final List<SettingTab> _tabs = [
-    SettingTab(
-      title: 'General',
-      icon: Icons.settings,
-      content: const GeneralSettings(),
-    ),
-    SettingTab(
-      title: 'Providers',
-      icon: Icons.api,
-      content: const KeysSettings(),
-    ),
-    // SettingTab(
-    //   title: 'Tools',
-    //   icon: Icons.build,
-    //   content: const ToolsSettings(),
-    // ),
-    SettingTab(
-      title: 'MCP Server',
-      icon: Icons.storage,
-      content: const McpServer(),
-    ),
-  ];
+  List<SettingTab> _getTabs(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return [
+      SettingTab(
+          title: l10n.general,
+          icon: Icons.settings,
+          content: GeneralSettings()),
+      SettingTab(
+          title: l10n.providers, icon: Icons.api, content: KeysSettings()),
+      SettingTab(
+          title: l10n.mcpServer, icon: Icons.storage, content: McpServer()),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
+    final tabs = _getTabs(context);
+
     return DefaultTabController(
-      length: _tabs.length,
+      length: tabs.length,
       child: Scaffold(
         appBar: AppBar(
           toolbarHeight: 0,
           bottom: TabBar(
-            tabs: _tabs
+            tabs: tabs
                 .map((tab) => Tab(
                       icon: Icon(tab.icon),
                       text: tab.title,
                     ))
                 .toList(),
             onTap: (index) {
-              setState(() {
-                _selectedIndex = index;
-              });
+              setState(() {});
             },
           ),
         ),
         body: TabBarView(
-          children: _tabs.map((tab) => tab.content).toList(),
+          children: tabs.map((tab) => tab.content).toList(),
         ),
       ),
     );

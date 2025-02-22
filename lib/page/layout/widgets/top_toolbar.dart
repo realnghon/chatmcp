@@ -6,6 +6,7 @@ import 'package:chatmcp/utils/platform.dart';
 import 'package:chatmcp/utils/color.dart';
 import 'package:provider/provider.dart';
 import 'package:chatmcp/provider/chat_provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 // test page
 import 'package:chatmcp/widgets/markdown/markit_widget.dart';
@@ -38,6 +39,7 @@ class TopToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Consumer<ChatProvider>(
       builder: (context, provider, child) {
         return MouseRegion(
@@ -94,7 +96,7 @@ class TopToolbar extends StatelessWidget {
                             children: [
                               const Icon(Icons.arrow_outward),
                               const SizedBox(width: 8),
-                              const Text('分享'),
+                              Text(l10n.share),
                             ],
                           ),
                         ),
@@ -107,7 +109,7 @@ class TopToolbar extends StatelessWidget {
                           children: [
                             const Icon(Icons.tune),
                             const SizedBox(width: 8),
-                            const Text('模型配置'),
+                            Text(l10n.modelConfig),
                           ],
                         ),
                       ),
@@ -118,7 +120,7 @@ class TopToolbar extends StatelessWidget {
                             children: [
                               const Icon(Icons.bug_report),
                               const SizedBox(width: 8),
-                              const Text('调试'),
+                              Text(l10n.debug),
                             ],
                           ),
                         ),
@@ -133,7 +135,7 @@ class TopToolbar extends StatelessWidget {
                             MaterialPageRoute(
                               builder: (context) => Scaffold(
                                 appBar: AppBar(
-                                  title: const Text('web search 测试'),
+                                  title: Text(l10n.webSearchTest),
                                 ),
                                 body: BrowserView(
                                   url: 'rag embeddings',

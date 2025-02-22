@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../provider/settings_provider.dart';
 import '../../provider/provider_manager.dart';
 import 'package:chatmcp/utils/color.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class KeysSettings extends StatefulWidget {
   const KeysSettings({super.key});
@@ -128,6 +129,7 @@ class _KeysSettingsState extends State<KeysSettings> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -149,12 +151,12 @@ class _KeysSettingsState extends State<KeysSettings> {
                 Expanded(
                   child: ListView(
                     children: [
-                      Text('LLM Key',
+                      Text(l10n.llmKey,
                           style: TextStyle(
                               fontSize: 24, fontWeight: FontWeight.bold)),
                       ..._buildLlmApiSections(),
                       const SizedBox(height: 12),
-                      Text('Tool Key',
+                      Text(l10n.toolKey,
                           style: TextStyle(
                               fontSize: 24, fontWeight: FontWeight.bold)),
                       ..._buildToolsApiSections(),
@@ -185,8 +187,8 @@ class _KeysSettingsState extends State<KeysSettings> {
                                   AppColors.white),
                             ),
                           )
-                        : const Text(
-                            'Save Settings',
+                        : Text(
+                            l10n.saveSettings,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -287,6 +289,7 @@ class _ApiSectionState extends State<ApiSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       elevation: 2,
       margin: const EdgeInsets.symmetric(vertical: 6),
@@ -321,8 +324,8 @@ class _ApiSectionState extends State<ApiSection> {
                 controller: widget.keyController,
                 obscureText: !_isKeyVisible,
                 decoration: InputDecoration(
-                  labelText: 'API Key',
-                  hintText: 'Enter your ${widget.title} API Key',
+                  labelText: l10n.apiKey,
+                  hintText: l10n.enterApiKey(widget.title),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -342,7 +345,7 @@ class _ApiSectionState extends State<ApiSection> {
                 ),
                 validator: (value) {
                   if (value != null && value.isNotEmpty && value.length < 10) {
-                    return 'API Key must be at least 10 characters';
+                    return l10n.apiKeyValidation;
                   }
                   return null;
                 },
@@ -353,8 +356,8 @@ class _ApiSectionState extends State<ApiSection> {
               TextFormField(
                 controller: widget.endpointController,
                 decoration: InputDecoration(
-                  labelText: 'API Endpoint',
-                  hintText: 'Enter API endpoint URL',
+                  labelText: l10n.apiEndpoint,
+                  hintText: l10n.enterApiEndpoint,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
