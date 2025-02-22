@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'base_llm_client.dart';
 import 'model.dart';
 import 'package:logging/logging.dart';
-import 'package:ChatMcp/provider/provider_manager.dart';
-import 'package:ChatMcp/utils/file_content.dart';
+import 'package:chatmcp/provider/provider_manager.dart';
+import 'package:chatmcp/utils/file_content.dart';
 
 class ClaudeClient extends BaseLLMClient {
   final String apiKey;

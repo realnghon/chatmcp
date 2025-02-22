@@ -5,7 +5,7 @@ import '../mcp/mcp.dart';
 import 'package:logging/logging.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:dio/dio.dart';
-import 'package:ChatMcp/utils/platform.dart';
+import 'package:chatmcp/utils/platform.dart';
 import '../mcp/client/mcp_client_interface.dart';
 
 class McpServerProvider extends ChangeNotifier {

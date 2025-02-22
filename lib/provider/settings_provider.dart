@@ -46,8 +46,8 @@ class GeneralSetting {
 
   GeneralSetting({
     required this.theme,
-    this.showAssistantAvatar = true,
-    this.showUserAvatar = true,
+    this.showAssistantAvatar = false,
+    this.showUserAvatar = false,
     this.enableArtifacts = true,
     this.systemPrompt = 'You are a helpful assistant.',
   });

@@ -4,13 +4,13 @@ import 'package:provider/provider.dart';
 import './chat_page/chat_page.dart';
 import 'sidebar.dart';
 import './widgets/top_toolbar.dart';
-import 'package:ChatMcp/provider/provider_manager.dart';
-import 'package:ChatMcp/provider/chat_model_provider.dart';
-import 'package:ChatMcp/utils/platform.dart';
-import 'package:ChatMcp/utils/color.dart';
+import 'package:chatmcp/provider/provider_manager.dart';
+import 'package:chatmcp/provider/chat_model_provider.dart';
+import 'package:chatmcp/utils/platform.dart';
+import 'package:chatmcp/utils/color.dart';
 import 'package:keyboard_dismisser/keyboard_dismisser.dart';
 
-import 'package:ChatMcp/page/setting/setting.dart';
+import 'package:chatmcp/page/setting/setting.dart';
 
 class LayoutPage extends StatefulWidget {
   const LayoutPage({super.key});

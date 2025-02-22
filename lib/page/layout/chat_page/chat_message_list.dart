@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ChatMcp/llm/model.dart';
+import 'package:chatmcp/llm/model.dart';
 import 'package:flutter/rendering.dart';
 import 'chat_message.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';

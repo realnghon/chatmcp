@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../provider/settings_provider.dart';
 import '../../provider/provider_manager.dart';
-import 'package:ChatMcp/utils/color.dart';
+import 'package:chatmcp/utils/color.dart';
 
 class KeysSettings extends StatefulWidget {
   const KeysSettings({super.key});

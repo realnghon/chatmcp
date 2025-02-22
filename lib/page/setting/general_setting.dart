@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../provider/settings_provider.dart';
-import 'package:ChatMcp/utils/color.dart';
+import 'package:chatmcp/utils/color.dart';
 
 class GeneralSettings extends StatefulWidget {
   const GeneralSettings({super.key});

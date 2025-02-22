@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:ChatMcp/utils/platform.dart';
+import 'package:chatmcp/utils/platform.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
 import 'package:logging/logging.dart';

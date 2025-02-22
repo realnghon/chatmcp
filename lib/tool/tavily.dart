@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:ChatMcp/provider/provider_manager.dart';
-import 'package:ChatMcp/provider/settings_provider.dart';
+import 'package:chatmcp/provider/provider_manager.dart';
+import 'package:chatmcp/provider/settings_provider.dart';
 
 const String tavilySearchURL = 'https://api.tavily.com/search';
 

@@ -1,25 +1,25 @@
 import 'dart:typed_data';
 
-import 'package:ChatMcp/llm/prompt.dart';
-import 'package:ChatMcp/utils/platform.dart';
+import 'package:chatmcp/llm/prompt.dart';
+import 'package:chatmcp/utils/platform.dart';
 import 'package:flutter/material.dart';
-import 'package:ChatMcp/llm/model.dart';
-import 'package:ChatMcp/llm/llm_factory.dart';
-import 'package:ChatMcp/llm/base_llm_client.dart';
+import 'package:chatmcp/llm/model.dart';
+import 'package:chatmcp/llm/llm_factory.dart';
+import 'package:chatmcp/llm/base_llm_client.dart';
 import 'package:logging/logging.dart';
 import 'dart:convert';
 import 'input_area.dart';
-import 'package:ChatMcp/provider/provider_manager.dart';
-import 'package:ChatMcp/utils/file_content.dart';
-import 'package:ChatMcp/dao/chat.dart';
+import 'package:chatmcp/provider/provider_manager.dart';
+import 'package:chatmcp/utils/file_content.dart';
+import 'package:chatmcp/dao/chat.dart';
 import 'package:uuid/uuid.dart';
 import 'chat_message_list.dart';
-import 'package:ChatMcp/utils/color.dart';
-import 'package:ChatMcp/widgets/widgets_to_image/widgets_to_image.dart';
-import 'package:ChatMcp/widgets/widgets_to_image/utils.dart';
+import 'package:chatmcp/utils/color.dart';
+import 'package:chatmcp/widgets/widgets_to_image/widgets_to_image.dart';
+import 'package:chatmcp/widgets/widgets_to_image/utils.dart';
 import 'chat_message_to_image.dart';
-import 'package:ChatMcp/tool/tools.dart';
-import 'package:ChatMcp/utils/event_bus.dart';
+import 'package:chatmcp/tool/tools.dart';
+import 'package:chatmcp/utils/event_bus.dart';
 import 'chat_code_preview.dart';
 
 class ChatPage extends StatefulWidget {
@@ -673,6 +673,7 @@ class _ChatPageState extends State<ChatPage> {
         await _llmClient!.genTitle([_messages.first, _messages.last]);
     await ProviderManager.chatProvider
         .createChat(Chat(title: title), _handleParentMessageId(_messages));
+    Logger.root.info('create new chat: $title');
   }
 
   // messages parentMessageId 处理

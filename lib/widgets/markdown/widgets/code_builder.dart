@@ -7,7 +7,7 @@ import 'package:markdown/markdown.dart' as md;
 import 'highlight_view.dart';
 import 'mermaid_diagram_view.dart' show MermaidDiagramView;
 import 'html_view.dart';
-import 'package:ChatMcp/utils/color.dart';
+import 'package:chatmcp/utils/color.dart';
 
 // 添加 Mermaid 语法高亮主题
 final mermaidTheme = {

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../setting/setting.dart';
 import 'package:provider/provider.dart';
-import 'package:ChatMcp/provider/chat_provider.dart';
-import 'package:ChatMcp/utils/platform.dart';
-import 'package:ChatMcp/utils/color.dart';
+import 'package:chatmcp/provider/chat_provider.dart';
+import 'package:chatmcp/utils/platform.dart';
+import 'package:chatmcp/utils/color.dart';
 
 class SidebarPanel extends StatelessWidget {
   final VoidCallback? onToggle;

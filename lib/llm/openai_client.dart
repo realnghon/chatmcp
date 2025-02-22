@@ -3,7 +3,7 @@ import 'base_llm_client.dart';
 import 'dart:convert';
 import 'model.dart';
 import 'package:logging/logging.dart';
-import 'package:ChatMcp/utils/file_content.dart';
+import 'package:chatmcp/utils/file_content.dart';
 
 class OpenAIClient extends BaseLLMClient {
   final String apiKey;

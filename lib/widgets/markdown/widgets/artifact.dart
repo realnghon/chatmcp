@@ -1,8 +1,8 @@
-import 'package:ChatMcp/utils/color.dart';
+import 'package:chatmcp/utils/color.dart';
 import 'package:flutter/material.dart';
 import 'package:markdown_widget/markdown_widget.dart';
 import './think_builder.dart';
-import 'package:ChatMcp/utils/event_bus.dart';
+import 'package:chatmcp/utils/event_bus.dart';
 
 SpanNodeGeneratorWithTag artifactAntThinkingGenerator =
     SpanNodeGeneratorWithTag(

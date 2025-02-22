@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:ChatMcp/dao/chat.dart';
-import 'package:ChatMcp/dao/chat_message.dart';
+import 'package:chatmcp/dao/chat.dart';
+import 'package:chatmcp/dao/chat_message.dart';
 import 'package:logging/logging.dart';
-import 'package:ChatMcp/llm/model.dart' as llmModel;
+import 'package:chatmcp/llm/model.dart' as llmModel;
 
 class ChatProvider extends ChangeNotifier {
   static final ChatProvider _instance = ChatProvider._internal();

@@ -1,4 +1,4 @@
-import 'package:ChatMcp/dao/init_db.dart';
+import 'package:chatmcp/dao/init_db.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -9,7 +9,7 @@ import './provider/provider_manager.dart';
 import 'package:logging/logging.dart';
 import 'page/layout/sidebar.dart';
 import 'utils/platform.dart';
-import 'package:ChatMcp/provider/settings_provider.dart';
+import 'package:chatmcp/provider/settings_provider.dart';
 import 'utils/color.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'dart:io';

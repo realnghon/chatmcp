@@ -1,5 +1,5 @@
-export 'package:ChatMcp/tool/use.dart';
-import 'package:ChatMcp/provider/provider_manager.dart';
+export 'package:chatmcp/tool/use.dart';
+import 'package:chatmcp/provider/provider_manager.dart';
 
 Future<List<Map<String, dynamic>>> getTools() async {
   final tools = ProviderManager.settingsProvider.apiSettings;

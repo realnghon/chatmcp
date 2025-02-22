@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'keys_setting.dart';
 import 'mcp_server.dart';
 import 'general_setting.dart';
-import 'package:ChatMcp/utils/color.dart';
+import 'package:chatmcp/utils/color.dart';
 import 'tools_setting.dart';
 
 class SettingPage extends StatefulWidget {

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:ChatMcp/provider/provider_manager.dart';
-import 'package:ChatMcp/provider/chat_model_provider.dart';
-import 'package:ChatMcp/llm/model.dart';
-import 'package:ChatMcp/llm/llm_factory.dart';
+import 'package:chatmcp/provider/provider_manager.dart';
+import 'package:chatmcp/provider/chat_model_provider.dart';
+import 'package:chatmcp/llm/model.dart';
+import 'package:chatmcp/llm/llm_factory.dart';
 
 class ModelSelector extends StatelessWidget {
   const ModelSelector({super.key});

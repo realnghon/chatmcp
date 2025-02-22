@@ -1,11 +1,11 @@
-import 'package:ChatMcp/provider/provider_manager.dart';
-import 'package:ChatMcp/utils/platform.dart';
+import 'package:chatmcp/provider/provider_manager.dart';
+import 'package:chatmcp/utils/platform.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter/foundation.dart';
-import 'package:ChatMcp/utils/event_bus.dart';
-import 'package:ChatMcp/widgets/markdown/markit_widget.dart';
-import 'package:ChatMcp/utils/color.dart';
+import 'package:chatmcp/utils/event_bus.dart';
+import 'package:chatmcp/widgets/markdown/markit_widget.dart';
+import 'package:chatmcp/utils/color.dart';
 
 class ChatCodePreview extends StatefulWidget {
   final CodePreviewEvent codePreviewEvent;

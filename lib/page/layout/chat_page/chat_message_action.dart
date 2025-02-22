@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:ChatMcp/llm/model.dart';
+import 'package:chatmcp/llm/model.dart';
 import 'package:flutter/services.dart';
-import 'package:ChatMcp/utils/color.dart';
+import 'package:chatmcp/utils/color.dart';
 
 class MessageActions extends StatelessWidget {
   final List<ChatMessage> messages;

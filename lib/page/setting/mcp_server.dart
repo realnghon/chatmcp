@@ -5,8 +5,8 @@ import 'package:provider/provider.dart';
 import '../../provider/mcp_server_provider.dart';
 import 'package:logging/logging.dart';
 import 'dart:io';
-import 'package:ChatMcp/utils/process.dart';
-import 'package:ChatMcp/utils/color.dart';
+import 'package:chatmcp/utils/process.dart';
+import 'package:chatmcp/utils/color.dart';
 
 class McpServer extends StatefulWidget {
   const McpServer({super.key});

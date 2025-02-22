@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:ChatMcp/provider/provider_manager.dart';
+import 'package:chatmcp/provider/provider_manager.dart';
 import './model_selector.dart';
 import 'package:window_manager/window_manager.dart' as wm;
-import 'package:ChatMcp/utils/platform.dart';
-import 'package:ChatMcp/utils/color.dart';
+import 'package:chatmcp/utils/platform.dart';
+import 'package:chatmcp/utils/color.dart';
 import 'package:provider/provider.dart';
-import 'package:ChatMcp/provider/chat_provider.dart';
+import 'package:chatmcp/provider/chat_provider.dart';
 
 // test page
-import 'package:ChatMcp/widgets/markdown/markit_widget.dart';
-import 'package:ChatMcp/widgets/browser/browser.dart';
-import 'package:ChatMcp/utils/event_bus.dart';
-import 'package:ChatMcp/page/layout/widgets/chat_setting.dart';
+import 'package:chatmcp/widgets/markdown/markit_widget.dart';
+import 'package:chatmcp/widgets/browser/browser.dart';
+import 'package:chatmcp/utils/event_bus.dart';
+import 'package:chatmcp/page/layout/widgets/chat_setting.dart';
 
 class TopToolbar extends StatelessWidget {
   final bool hideSidebar;

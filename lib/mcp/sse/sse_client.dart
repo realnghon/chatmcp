@@ -1,4 +1,4 @@
-import 'package:ChatMcp/mcp/stdio/stdio_client.dart';
+import 'package:chatmcp/mcp/stdio/stdio_client.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../client/mcp_client_interface.dart';

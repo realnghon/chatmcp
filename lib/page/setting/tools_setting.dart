@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ChatMcp/widgets/tabs.dart';
+import 'package:chatmcp/widgets/tabs.dart';
 
 class ToolsSettings extends StatefulWidget {
   const ToolsSettings({super.key});

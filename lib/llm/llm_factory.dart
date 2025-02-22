@@ -3,7 +3,7 @@ import 'claude_client.dart';
 import 'deepseek_client.dart';
 import 'base_llm_client.dart';
 import 'ollama_client.dart';
-import 'package:ChatMcp/provider/provider_manager.dart';
+import 'package:chatmcp/provider/provider_manager.dart';
 import 'package:logging/logging.dart';
 import 'model.dart' as llmModel;
 

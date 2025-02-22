@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:ChatMcp/llm/model.dart' as llmModel;
+import 'package:chatmcp/llm/model.dart' as llmModel;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:ChatMcp/llm/llm_factory.dart';
+import 'package:chatmcp/llm/llm_factory.dart';
 import 'dart:convert';
 import 'package:logging/logging.dart';
 

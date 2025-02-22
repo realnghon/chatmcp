@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:ChatMcp/provider/settings_provider.dart';
+import 'package:chatmcp/provider/settings_provider.dart';
 
 class ChatSetting extends StatelessWidget {
   const ChatSetting({super.key});

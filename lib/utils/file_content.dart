@@ -1,7 +1,7 @@
 import 'dart:io' as io;
 import 'dart:convert';
 import 'package:mime/mime.dart';
-import "package:ChatMcp/llm/model.dart";
+import "package:chatmcp/llm/model.dart";
 import 'package:file_picker/file_picker.dart';
 
 File platformFileToFile(PlatformFile platformFile) {

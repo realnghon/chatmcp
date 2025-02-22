@@ -1,6 +1,6 @@
 import 'model.dart';
 import 'utils.dart';
-import 'package:ChatMcp/provider/provider_manager.dart';
+import 'package:chatmcp/provider/provider_manager.dart';
 import 'package:dio/dio.dart';
 import 'dart:convert';
 

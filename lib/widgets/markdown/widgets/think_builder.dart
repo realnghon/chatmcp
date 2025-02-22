@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:markdown/markdown.dart' as md;
 
 import 'package:markdown_widget/markdown_widget.dart';
-import 'package:ChatMcp/utils/color.dart';
+import 'package:chatmcp/utils/color.dart';
 import '../markit_widget.dart';
 
 // 属性匹配正则表达式

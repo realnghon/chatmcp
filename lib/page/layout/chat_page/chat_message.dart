@@ -1,17 +1,17 @@
-import 'package:ChatMcp/provider/settings_provider.dart';
-import 'package:ChatMcp/utils/platform.dart';
+import 'package:chatmcp/provider/settings_provider.dart';
+import 'package:chatmcp/utils/platform.dart';
 import 'package:flutter/material.dart';
-import 'package:ChatMcp/llm/model.dart';
+import 'package:chatmcp/llm/model.dart';
 import 'dart:convert';
-import 'package:ChatMcp/widgets/collapsible_section.dart';
-import 'package:ChatMcp/widgets/markdown/markit_widget.dart';
+import 'package:chatmcp/widgets/collapsible_section.dart';
+import 'package:chatmcp/widgets/markdown/markit_widget.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'dart:io' as io;
-import 'package:ChatMcp/utils/color.dart';
+import 'package:chatmcp/utils/color.dart';
 import 'chat_message_action.dart';
-import 'package:ChatMcp/tool/tavily.dart';
-import 'package:ChatMcp/tool/dalle.dart';
+import 'package:chatmcp/tool/tavily.dart';
+import 'package:chatmcp/tool/dalle.dart';
 
 class ChatUIMessage extends StatelessWidget {
   final List<ChatMessage> messages;

@@ -93,9 +93,9 @@ void initializeLogger() async {
             !frame.contains('main.dart') &&
             !frame.contains('dart:async') &&
             !frame.contains('dart:io') &&
-            frame.contains('package:ChatMcp/'),
+            frame.contains('package:chatmcp/'),
         orElse: () => frames.firstWhere(
-          (frame) => frame.contains('package:ChatMcp/'),
+          (frame) => frame.contains('package:chatmcp/'),
           orElse: () => frames[0],
         ),
       );

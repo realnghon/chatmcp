@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ChatMcp/utils/color.dart';
+import 'package:chatmcp/utils/color.dart';
 
 class CollapsibleSection extends StatefulWidget {
   final Widget title;

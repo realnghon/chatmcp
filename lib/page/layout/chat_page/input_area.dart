@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:io' show Platform;
-import 'package:ChatMcp/utils/platform.dart';
+import 'package:chatmcp/utils/platform.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:ChatMcp/widgets/upload_menu.dart';
+import 'package:chatmcp/widgets/upload_menu.dart';
 
 class SubmitData {
   final String text;

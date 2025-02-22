@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:markdown_widget/markdown_widget.dart';
 import 'package:markdown/markdown.dart' as md;
-import 'package:ChatMcp/widgets/markdown/markit_widget.dart';
+import 'package:chatmcp/widgets/markdown/markit_widget.dart';
 
 const _detailsTag = 'details';
 

@@ -2,16 +2,16 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'dart:io' as io;
-import 'package:ChatMcp/llm/model.dart';
+import 'package:chatmcp/llm/model.dart';
 import 'chat_message.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:ChatMcp/provider/provider_manager.dart';
+import 'package:chatmcp/provider/provider_manager.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:ChatMcp/utils/platform.dart';
+import 'package:chatmcp/utils/platform.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:logging/logging.dart';
-import 'package:ChatMcp/utils/color.dart';
+import 'package:chatmcp/utils/color.dart';
 
 class ListViewToImageScreen extends StatefulWidget {
   final List<ChatMessage> messages;

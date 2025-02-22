@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:ChatMcp/provider/provider_manager.dart';
+import 'package:chatmcp/provider/provider_manager.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'dart:convert';
-import 'package:ChatMcp/widgets/cache_image.dart';
+import 'package:chatmcp/widgets/cache_image.dart';
 
 class GenerationImageRequest {
   final String model;

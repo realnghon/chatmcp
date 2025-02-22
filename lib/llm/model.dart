@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'package:ChatMcp/provider/settings_provider.dart';
+import 'package:chatmcp/provider/settings_provider.dart';
 import 'package:uuid/uuid.dart';
-import 'package:ChatMcp/dao/chat_message.dart';
+import 'package:chatmcp/dao/chat_message.dart';
 
 // 消息角色枚举
 enum MessageRole {

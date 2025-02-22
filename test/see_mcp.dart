@@ -1,5 +1,5 @@
-import 'package:ChatMcp/mcp/models/server.dart';
-import 'package:ChatMcp/mcp/sse/sse_client.dart';
+import 'package:chatmcp/mcp/models/server.dart';
+import 'package:chatmcp/mcp/sse/sse_client.dart';
 import 'package:test/test.dart';
 
 void main() {
