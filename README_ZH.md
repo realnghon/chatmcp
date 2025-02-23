@@ -12,6 +12,12 @@
 
 桌面端：MacOS | Windows | Linux [release](https://github.com/daodao97/chatmcp/releases)
 
+  注意：在 Linux 系统上，您需要安装 libsqlite3-0 和 libsqlite3-dev，因为依赖包 https://pub.dev/packages/sqflite_common_ffi 需要这些库
+
+  ```bash
+  sudo apt-get install libsqlite3-0 libsqlite3-dev
+  ```
+
 iOS：[TestFlight](https://testflight.apple.com/join/dCXksFJV)
 
 Android：[release](https://github.com/daodao97/chatmcp/releases)
