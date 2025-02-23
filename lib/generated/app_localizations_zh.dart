@@ -289,4 +289,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String toolResult(Object name) {
     return '调用 $name 结果';
   }
+
+  @override
+  String get selectModel => '选择模型';
 }

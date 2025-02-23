@@ -26,18 +26,10 @@ class LLMFactory {
 }
 
 class LLMFactoryHelper {
-  static final chatModelKeywords = {
-    "gpt",
-    "claude",
-    "deepseek",
-    "llama",
-    "o1",
-    "o3",
-    "qwen",
-  };
+  static final nonChatModelKeywords = {"whisper", "tts", "dall-e", "embedding"};
 
   static bool isChatModel(llmModel.Model model) {
-    return chatModelKeywords.any((keyword) => model.name.contains(keyword));
+    return !nonChatModelKeywords.any((keyword) => model.name.contains(keyword));
   }
 
   static final Map<String, LLMProvider> providerMap = {

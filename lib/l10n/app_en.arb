@@ -87,5 +87,6 @@
     "retry": "Retry",
     "brokenImage": "Broken Image",
     "toolCall": "call {name}",
-    "toolResult": "call {name} result"
+    "toolResult": "call {name} result",
+    "selectModel": "Select Model"
 } 

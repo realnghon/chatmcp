@@ -4,6 +4,7 @@ import 'package:chatmcp/provider/provider_manager.dart';
 import 'package:chatmcp/provider/chat_model_provider.dart';
 import 'package:chatmcp/llm/model.dart';
 import 'package:chatmcp/llm/llm_factory.dart';
+import 'package:chatmcp/generated/app_localizations.dart';
 
 class ModelSelector extends StatelessWidget {
   const ModelSelector({super.key});
@@ -26,6 +27,7 @@ class ModelSelector extends StatelessWidget {
         return Container(
           constraints: const BoxConstraints(maxWidth: 250),
           child: PopupMenuButton<String>(
+            tooltip: AppLocalizations.of(context)?.selectModel,
             offset: const Offset(0, 8),
             position: PopupMenuPosition.under,
             constraints: BoxConstraints(

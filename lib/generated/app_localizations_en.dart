@@ -289,4 +289,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String toolResult(Object name) {
     return 'call $name result';
   }
+
+  @override
+  String get selectModel => 'Select Model';
 }

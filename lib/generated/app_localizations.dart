@@ -622,6 +622,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'call {name} result'**
   String toolResult(Object name);
+
+  /// No description provided for @selectModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Model'**
+  String get selectModel;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
