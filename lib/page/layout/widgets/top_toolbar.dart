@@ -37,9 +37,75 @@ class TopToolbar extends StatelessWidget {
     );
   }
 
+  Widget _buildMoreMenu(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return PopupMenuButton<String>(
+      icon: const Icon(Icons.more_vert),
+      itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+        if (ProviderManager.chatProvider.activeChat != null)
+          PopupMenuItem<String>(
+            value: 'share',
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.arrow_outward),
+                const SizedBox(width: 8),
+                Text(l10n.share),
+              ],
+            ),
+          ),
+        PopupMenuItem<String>(
+          value: 'config',
+          onTap: () => _onShowChatSetting(context),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.tune),
+              const SizedBox(width: 8),
+              Text(l10n.modelConfig),
+            ],
+          ),
+        ),
+        if (kIsDebug)
+          PopupMenuItem<String>(
+            value: 'debug',
+            child: Row(
+              children: [
+                const Icon(Icons.bug_report),
+                const SizedBox(width: 8),
+                Text(l10n.debug),
+              ],
+            ),
+          ),
+      ],
+      onSelected: (String value) {
+        switch (value) {
+          case 'share':
+            emit(ShareEvent(false));
+            break;
+          case 'debug':
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => Scaffold(
+                  appBar: AppBar(
+                    title: Text(l10n.webSearchTest),
+                  ),
+                  body: BrowserView(
+                    url: 'rag embeddings',
+                  ),
+                ),
+              ),
+            );
+            break;
+        }
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     return Consumer<ChatProvider>(
       builder: (context, provider, child) {
         return MouseRegion(
@@ -63,89 +129,46 @@ class TopToolbar extends StatelessWidget {
             },
             child: Container(
               padding: kIsDesktop
-                  ? EdgeInsets.fromLTRB(hideSidebar ? 70 : 0, 0, 16, 0)
+                  ? EdgeInsets.only(left: hideSidebar ? 70 : 0)
                   : null,
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  if (hideSidebar && kIsDesktop)
-                    IconButton(
-                      icon: Icon(
-                        Icons.menu,
-                        color: AppColors.grey[700],
-                      ),
-                      onPressed: onToggleSidebar,
-                    ),
-                  const ModelSelector(),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.add),
-                    onPressed: () {
-                      ProviderManager.chatProvider.clearActiveChat();
-                    },
-                  ),
-                  PopupMenuButton<String>(
-                    icon: const Icon(Icons.more_vert),
-                    itemBuilder: (BuildContext context) =>
-                        <PopupMenuEntry<String>>[
-                      if (ProviderManager.chatProvider.activeChat != null)
-                        PopupMenuItem<String>(
-                          value: 'share',
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.arrow_outward),
-                              const SizedBox(width: 8),
-                              Text(l10n.share),
-                            ],
-                          ),
-                        ),
-                      PopupMenuItem<String>(
-                        value: 'config',
-                        onTap: () => _onShowChatSetting(context),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.tune),
-                            const SizedBox(width: 8),
-                            Text(l10n.modelConfig),
-                          ],
-                        ),
-                      ),
-                      if (kIsDebug)
-                        PopupMenuItem<String>(
-                          value: 'debug',
-                          child: Row(
-                            children: [
-                              const Icon(Icons.bug_report),
-                              const SizedBox(width: 8),
-                              Text(l10n.debug),
-                            ],
-                          ),
-                        ),
-                    ],
-                    onSelected: (String value) {
-                      switch (value) {
-                        case 'share':
-                          emit(ShareEvent(false));
-                          break;
-                        case 'debug':
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => Scaffold(
-                                appBar: AppBar(
-                                  title: Text(l10n.webSearchTest),
-                                ),
-                                body: BrowserView(
-                                  url: 'rag embeddings',
-                                ),
-                              ),
+                  Flexible(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (hideSidebar && kIsDesktop)
+                          IconButton(
+                            icon: Icon(
+                              Icons.menu,
+                              color: AppColors.grey[700],
                             ),
-                          );
-                          break;
-                      }
-                    },
+                            onPressed: onToggleSidebar,
+                          ),
+                        Flexible(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(minWidth: 50),
+                            child: const ModelSelector(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.add),
+                        onPressed: () {
+                          ProviderManager.chatProvider.clearActiveChat();
+                        },
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 16),
+                        child: _buildMoreMenu(context),
+                      ),
+                    ],
                   ),
                 ],
               ),

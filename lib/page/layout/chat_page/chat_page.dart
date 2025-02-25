@@ -323,41 +323,6 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
-  Widget _buildErrorMessage() {
-    if (_errorMessage.isEmpty) return const SizedBox.shrink();
-
-    return Container(
-      padding: const EdgeInsets.all(8.0),
-      margin: const EdgeInsets.all(8.0),
-      constraints: const BoxConstraints(maxHeight: 400),
-      decoration: BoxDecoration(
-        color: AppColors.red.shade100,
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(Icons.error_outline, color: AppColors.red),
-          const SizedBox(width: 8.0),
-          Expanded(
-            child: SingleChildScrollView(
-              child: SelectableText(
-                _errorMessage,
-                style: const TextStyle(color: AppColors.red),
-              ),
-            ),
-          ),
-          IconButton(
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-            icon: const Icon(Icons.close, color: AppColors.red),
-            onPressed: () => setState(() => _errorMessage = ''),
-          ),
-        ],
-      ),
-    );
-  }
-
   // 消息处理相关方法
   void _handleTextChanged(String text) {
     setState(() {
@@ -373,10 +338,13 @@ class _ChatPageState extends State<ChatPage> {
 
     if (kIsDesktop) {
       final mcpServerProvider = ProviderManager.mcpServerProvider;
-      tools = await mcpServerProvider.getTools();
+      tools = {
+        ...tools,
+        ...await mcpServerProvider.getTools(),
+      };
     }
-    Logger.root
-        .info('tools:\n${const JsonEncoder.withIndent('  ').convert(tools)}');
+    Logger.root.info(
+        'all tools:\n${const JsonEncoder.withIndent('  ').convert(tools)}');
 
     if (tools.isEmpty) return;
 
@@ -515,10 +483,7 @@ class _ChatPageState extends State<ChatPage> {
     });
 
     try {
-      if (!ProviderManager.chatModelProvider.currentModel.name
-          .contains('deepseek')) {
-        await _handleToolCall(userMessage.content ?? '');
-      }
+      await _handleToolCall(userMessage.content ?? '');
       await _processLLMResponse();
       await _updateChat();
     } catch (e, stackTrace) {
@@ -540,10 +505,7 @@ class _ChatPageState extends State<ChatPage> {
     _addUserMessage(data.text, files);
 
     try {
-      if (!ProviderManager.chatModelProvider.currentModel.name
-          .contains('deepseek')) {
-        await _handleToolCall(data.text);
-      }
+      await _handleToolCall(data.text);
       await _processLLMResponse();
       await _updateChat();
     } catch (e, stackTrace) {
@@ -720,9 +682,36 @@ class _ChatPageState extends State<ChatPage> {
       _errorMessage = error.toString();
     });
 
-    print('error: $error');
-    print('stackTrace: $stackTrace');
     Logger.root.severe(error, stackTrace);
+
+    if (mounted) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Row(
+              children: [
+                const Icon(Icons.error_outline, color: AppColors.red),
+                const SizedBox(width: 8),
+                Text(AppLocalizations.of(context)!.error),
+              ],
+            ),
+            content: SingleChildScrollView(
+              child: SelectableText(
+                error.toString(),
+                style: const TextStyle(color: AppColors.red),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(AppLocalizations.of(context)!.close),
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 
   // 处理分享事件
@@ -765,7 +754,6 @@ class _ChatPageState extends State<ChatPage> {
       return Column(
         children: [
           _buildMessageList(),
-          _buildErrorMessage(),
           InputArea(
             disabled: _isLoading,
             isComposing: _isComposing,
@@ -784,7 +772,6 @@ class _ChatPageState extends State<ChatPage> {
           child: Column(
             children: [
               _buildMessageList(),
-              _buildErrorMessage(),
               InputArea(
                 disabled: _isLoading,
                 isComposing: _isComposing,

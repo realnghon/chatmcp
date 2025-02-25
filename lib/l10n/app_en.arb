@@ -88,5 +88,6 @@
     "brokenImage": "Broken Image",
     "toolCall": "call {name}",
     "toolResult": "call {name} result",
-    "selectModel": "Select Model"
+    "selectModel": "Select Model",
+    "close": "Close"
 } 

@@ -88,5 +88,6 @@
     "brokenImage": "图片损坏",
     "toolCall": "调用 {name}",
     "toolResult": "调用 {name} 结果",
-    "selectModel": "选择模型"
+    "selectModel": "选择模型",
+    "close": "关闭"
 } 

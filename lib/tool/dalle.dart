@@ -58,8 +58,12 @@ class GenerationImageData {
       b64Json: json['b64_json'],
       revisedPrompt: json['revised_prompt'] as String,
       size: json['size'] ?? '1024x1024',
-      width: json['width'] ?? 1024,
-      height: json['height'] ?? 1024,
+      width: (json['width'] ?? 1024) is String
+          ? int.parse(json['width'])
+          : (json['width'] ?? 1024),
+      height: (json['height'] ?? 1024) is String
+          ? int.parse(json['height'])
+          : (json['height'] ?? 1024),
     );
   }
 }

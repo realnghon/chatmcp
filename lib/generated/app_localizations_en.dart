@@ -292,4 +292,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get selectModel => 'Select Model';
+
+  @override
+  String get close => 'Close';
 }
