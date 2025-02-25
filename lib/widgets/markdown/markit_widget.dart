@@ -6,10 +6,11 @@ import './widgets/latex.dart';
 import './widgets/link.dart';
 import './widgets/code.dart';
 import './widgets/details.dart';
-import './widgets/think_builder.dart';
+import 'widgets/think.dart';
 import './widgets/artifact.dart';
 import './widgets/image.dart';
 import 'package:flutter_highlight/themes/github.dart';
+import './widgets/inline_code.dart';
 
 class MarkitTestPage extends StatelessWidget {
   const MarkitTestPage({super.key});
@@ -102,6 +103,7 @@ class Markit extends StatelessWidget {
             thinkGenerator,
             detailsGenerator,
             imageGenerator,
+            inlineCodeGenerator
           ],
           inlineSyntaxList: [
             ArtifactAntThinkingInlineSyntax(),

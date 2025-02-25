@@ -21,7 +21,7 @@ class CodeBlockNode extends ElementNode {
 
   @override
   InlineSpan build() {
-    // m.ExtensionSet.gitHubFlavored
+    // m.ExtensionSet
     String? language = preConfig.language;
     try {
       final firstChild = element.children?.firstOrNull;
