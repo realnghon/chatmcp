@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import '../../provider/settings_provider.dart';
 import '../../provider/provider_manager.dart';
-import 'package:chatmcp/utils/color.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class KeysSettings extends StatefulWidget {
   const KeysSettings({super.key});
@@ -20,28 +21,28 @@ class _KeysSettingsState extends State<KeysSettings> {
   final Map<String, ApiConfig> _llmApiConfigs = {
     'openai': ApiConfig(
       title: 'OpenAI',
-      iconPath: 'assets/openai_icon.png',
+      iconPath: 'assets/logo/chatgpt.svg',
       accentColor: const Color(0xFF10A37F),
       requiresKey: true,
       requiresEndpoint: true,
     ),
     'claude': ApiConfig(
       title: 'Claude',
-      iconPath: 'assets/claude_icon.png',
+      iconPath: 'assets/logo/claude.svg',
       accentColor: const Color(0xFF7C3AED),
       requiresKey: true,
       requiresEndpoint: true,
     ),
     'deepseek': ApiConfig(
       title: 'DeepSeek',
-      iconPath: 'assets/deepseek_icon.png',
+      iconPath: 'assets/logo/deepseek.svg',
       accentColor: const Color(0xFF1A73E8),
       requiresKey: true,
       requiresEndpoint: true,
     ),
     'ollama': ApiConfig(
       title: 'Ollama',
-      iconPath: 'assets/ollama_icon.png',
+      iconPath: 'assets/logo/ollama.svg',
       accentColor: const Color(0xFF1A73E8),
       requiresKey: false,
       requiresEndpoint: true,
@@ -52,7 +53,7 @@ class _KeysSettingsState extends State<KeysSettings> {
   final Map<String, ApiConfig> _toolsApiConfigs = {
     'tavily': ApiConfig(
       title: 'Tavily Search',
-      iconPath: 'assets/tavily_icon.png',
+      iconPath: '',
       accentColor: const Color(0xFF6366F1),
       requiresKey: true,
       requiresEndpoint: false,
@@ -131,19 +132,10 @@ class _KeysSettingsState extends State<KeysSettings> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Theme.of(context).colorScheme.surface,
-              Theme.of(context).colorScheme.surface.withOpacity(0.8),
-            ],
-          ),
-        ),
+      backgroundColor: Theme.of(context).colorScheme.background,
+      body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Form(
             key: _formKey,
             child: Column(
@@ -151,55 +143,74 @@ class _KeysSettingsState extends State<KeysSettings> {
                 Expanded(
                   child: ListView(
                     children: [
-                      Text(l10n.llmKey,
-                          style: TextStyle(
-                              fontSize: 24, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 20),
+                      _buildSectionTitle(
+                          context, l10n.llmKey, CupertinoIcons.cube_box),
                       ..._buildLlmApiSections(),
-                      const SizedBox(height: 12),
-                      Text(l10n.toolKey,
-                          style: TextStyle(
-                              fontSize: 24, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 20),
+                      _buildSectionTitle(
+                          context, l10n.toolKey, CupertinoIcons.wrench),
                       ..._buildToolsApiSections(),
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _saveSettings,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor,
-                      foregroundColor: AppColors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _saveSettings,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor:
+                            Theme.of(context).colorScheme.onPrimary,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
                       ),
-                      elevation: 2,
+                      child: _isLoading
+                          ? const CupertinoActivityIndicator()
+                          : Text(
+                              l10n.saveSettings,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                     ),
-                    child: _isLoading
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                  AppColors.white),
-                            ),
-                          )
-                        : Text(
-                            l10n.saveSettings,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
                   ),
                 ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(BuildContext context, String title, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: 18,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -291,57 +302,96 @@ class _ApiSectionState extends State<ApiSection> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Card(
-      elevation: 2,
+      elevation: 0,
       margin: const EdgeInsets.symmetric(vertical: 6),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: AppColors.grey.withAlpha(51)),
+      color: Theme.of(context).colorScheme.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: Theme.of(context).colorScheme.outline.withAlpha(51),
         ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(Icons.api, color: widget.accentColor, size: 18),
-                const SizedBox(width: 6),
+                if (widget.iconPath.isNotEmpty) ...[
+                  SvgPicture.asset(
+                    widget.iconPath,
+                    width: 18,
+                    height: 18,
+                  ),
+                  const SizedBox(width: 8),
+                ],
                 Text(
                   widget.title,
                   style: TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: widget.accentColor,
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ],
             ),
             if (widget.keyController != null) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: widget.keyController,
                 obscureText: !_isKeyVisible,
                 decoration: InputDecoration(
                   labelText: l10n.apiKey,
                   hintText: l10n.enterApiKey(widget.title),
+                  labelStyle: TextStyle(
+                    color:
+                        Theme.of(context).colorScheme.onSurface.withAlpha(102),
+                  ),
+                  hintStyle: TextStyle(
+                    color:
+                        Theme.of(context).colorScheme.onSurface.withAlpha(102),
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color:
+                          Theme.of(context).colorScheme.outline.withAlpha(51),
+                    ),
                   ),
-                  prefixIcon: Icon(Icons.key, color: widget.accentColor),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color:
+                          Theme.of(context).colorScheme.outline.withAlpha(51),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  prefixIcon: Icon(
+                    CupertinoIcons.lock,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _isKeyVisible ? Icons.visibility_off : Icons.visibility,
-                      color: widget.accentColor,
+                      _isKeyVisible
+                          ? CupertinoIcons.eye_slash
+                          : CupertinoIcons.eye,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                     onPressed: () =>
                         setState(() => _isKeyVisible = !_isKeyVisible),
                   ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: widget.accentColor, width: 2),
-                  ),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+                style: TextStyle(
+                  fontSize: 15,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
                 validator: (value) {
                   if (value != null && value.isNotEmpty && value.length < 10) {
@@ -352,20 +402,54 @@ class _ApiSectionState extends State<ApiSection> {
               ),
             ],
             if (widget.endpointController != null) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: widget.endpointController,
                 decoration: InputDecoration(
                   labelText: l10n.apiEndpoint,
                   hintText: l10n.enterApiEndpoint,
+                  labelStyle: TextStyle(
+                    color:
+                        Theme.of(context).colorScheme.onSurface.withAlpha(102),
+                  ),
+                  hintStyle: TextStyle(
+                    color:
+                        Theme.of(context).colorScheme.onSurface.withAlpha(102),
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .outline
+                          .withOpacity(0.2),
+                    ),
                   ),
-                  prefixIcon: Icon(Icons.link, color: widget.accentColor),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .outline
+                          .withOpacity(0.2),
+                    ),
+                  ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: widget.accentColor, width: 2),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                   ),
+                  prefixIcon: Icon(
+                    CupertinoIcons.link,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
+                style: TextStyle(
+                  fontSize: 15,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ],

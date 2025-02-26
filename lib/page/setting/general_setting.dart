@@ -1,5 +1,6 @@
 import 'package:chatmcp/provider/provider_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import '../../provider/settings_provider.dart';
 import 'package:chatmcp/utils/color.dart';
@@ -18,19 +19,10 @@ class _GeneralSettingsState extends State<GeneralSettings> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Theme.of(context).colorScheme.surface,
-              Theme.of(context).colorScheme.surface.withAlpha(200),
-            ],
-          ),
-        ),
+      backgroundColor: Theme.of(context).colorScheme.background,
+      body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Form(
             key: _formKey,
             child: Column(
@@ -38,16 +30,13 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                 Expanded(
                   child: ListView(
                     children: [
-                      // 主题设置卡片
+                      const SizedBox(height: 20),
                       _buildThemeCard(context),
-                      // 语言设置卡片
                       _buildLocaleCard(context),
-                      // 头像显示设置卡片
                       _buildAvatarCard(context),
-                      // System Prompt 设置卡片
                       _buildSystemPromptCard(context),
-                      // 特性设置卡片
                       _buildFeatureCard(context),
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ),
@@ -59,67 +48,93 @@ class _GeneralSettingsState extends State<GeneralSettings> {
     );
   }
 
+  Widget _buildSectionTitle(BuildContext context, String title, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: 18,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildLocaleCard(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Consumer<SettingsProvider>(
       builder: (context, settings, child) {
-        return Card(
-          elevation: 2,
-          margin: const EdgeInsets.symmetric(vertical: 6),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.language, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      l10n.languageSettings,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionTitle(
+                context, l10n.languageSettings, CupertinoIcons.globe),
+            Card(
+              elevation: 0,
+              color: Theme.of(context).colorScheme.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(
+                  color: Theme.of(context).colorScheme.outline.withAlpha(50),
                 ),
-                const SizedBox(height: 16),
-                ListTile(
-                  title: Text(l10n.language),
-                  trailing: DropdownButton<String>(
-                    value: settings.generalSetting.locale,
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'en',
-                        child: Text('English'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'zh',
-                        child: Text('中文'),
-                      ),
-                    ],
-                    onChanged: (String? value) {
-                      if (value != null) {
-                        settings.updateGeneralSettings(
-                          theme: settings.generalSetting.theme,
-                          showAssistantAvatar:
-                              settings.generalSetting.showAssistantAvatar,
-                          showUserAvatar:
-                              settings.generalSetting.showUserAvatar,
-                          systemPrompt: settings.generalSetting.systemPrompt,
-                          enableArtifacts:
-                              settings.generalSetting.enableArtifacts,
-                          locale: value,
-                        );
-                      }
-                    },
+              ),
+              child: ListTile(
+                title: Text(
+                  l10n.language,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
-              ],
+                trailing: DropdownButton<String>(
+                  value: settings.generalSetting.locale,
+                  underline: const SizedBox(),
+                  icon: Icon(
+                    CupertinoIcons.chevron_right,
+                    size: 16,
+                    color:
+                        Theme.of(context).colorScheme.onSurface.withAlpha(50),
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'en',
+                      child: Text('English'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'zh',
+                      child: Text('中文'),
+                    ),
+                  ],
+                  onChanged: (String? value) {
+                    if (value != null) {
+                      settings.updateGeneralSettings(
+                        theme: settings.generalSetting.theme,
+                        showAssistantAvatar:
+                            settings.generalSetting.showAssistantAvatar,
+                        showUserAvatar: settings.generalSetting.showUserAvatar,
+                        systemPrompt: settings.generalSetting.systemPrompt,
+                        enableArtifacts:
+                            settings.generalSetting.enableArtifacts,
+                        locale: value,
+                      );
+                    }
+                  },
+                ),
+              ),
             ),
-          ),
+          ],
         );
       },
     );
@@ -129,49 +144,51 @@ class _GeneralSettingsState extends State<GeneralSettings> {
     final l10n = AppLocalizations.of(context)!;
     return Consumer<SettingsProvider>(
       builder: (context, settings, child) {
-        return Card(
-          elevation: 2,
-          margin: const EdgeInsets.symmetric(vertical: 6),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.extension, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      l10n.featureSettings,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionTitle(context, l10n.featureSettings,
+                CupertinoIcons.square_stack_3d_up),
+            Card(
+              elevation: 0,
+              color: Theme.of(context).colorScheme.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(
+                  color: Theme.of(context).colorScheme.outline.withAlpha(50),
                 ),
-                const SizedBox(height: 16),
-                SwitchListTile(
-                  title: Text(l10n.enableArtifacts),
-                  subtitle: Text(l10n.enableArtifactsDescription),
-                  value: settings.generalSetting.enableArtifacts,
-                  onChanged: (bool value) {
-                    settings.updateGeneralSettings(
-                      theme: settings.generalSetting.theme,
-                      showAssistantAvatar:
-                          settings.generalSetting.showAssistantAvatar,
-                      showUserAvatar: settings.generalSetting.showUserAvatar,
-                      systemPrompt: settings.generalSetting.systemPrompt,
-                      enableArtifacts: value,
-                      locale: ProviderManager
-                          .settingsProvider.generalSetting.locale,
-                    );
-                  },
+              ),
+              child: SwitchListTile(
+                title: Text(
+                  l10n.enableArtifacts,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                 ),
-              ],
+                subtitle: Text(
+                  l10n.enableArtifactsDescription,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color:
+                        Theme.of(context).colorScheme.onSurface.withAlpha(60),
+                  ),
+                ),
+                value: settings.generalSetting.enableArtifacts,
+                onChanged: (bool value) {
+                  settings.updateGeneralSettings(
+                    theme: settings.generalSetting.theme,
+                    showAssistantAvatar:
+                        settings.generalSetting.showAssistantAvatar,
+                    showUserAvatar: settings.generalSetting.showUserAvatar,
+                    systemPrompt: settings.generalSetting.systemPrompt,
+                    enableArtifacts: value,
+                    locale: settings.generalSetting.locale,
+                  );
+                },
+              ),
             ),
-          ),
+          ],
         );
       },
     );
@@ -181,37 +198,34 @@ class _GeneralSettingsState extends State<GeneralSettings> {
     final l10n = AppLocalizations.of(context)!;
     return Consumer<SettingsProvider>(
       builder: (context, settings, child) {
-        return Card(
-          elevation: 2,
-          margin: const EdgeInsets.symmetric(vertical: 6),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.palette, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      l10n.themeSettings,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionTitle(
+                context, l10n.themeSettings, CupertinoIcons.paintbrush),
+            Card(
+              elevation: 0,
+              color: Theme.of(context).colorScheme.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(
+                  color: Theme.of(context).colorScheme.outline.withAlpha(50),
                 ),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
+              ),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: DropdownButtonFormField<String>(
                   value: settings.generalSetting.theme,
                   decoration: InputDecoration(
-                    // labelText: 'Theme',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    prefixIcon: const Icon(Icons.color_lens),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 8.0),
+                  ),
+                  icon: Icon(
+                    CupertinoIcons.chevron_right,
+                    size: 16,
+                    color:
+                        Theme.of(context).colorScheme.onSurface.withAlpha(50),
                   ),
                   items: [
                     DropdownMenuItem(
@@ -242,9 +256,9 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                     }
                   },
                 ),
-              ],
+              ),
             ),
-          ),
+          ],
         );
       },
     );
@@ -254,64 +268,95 @@ class _GeneralSettingsState extends State<GeneralSettings> {
     final l10n = AppLocalizations.of(context)!;
     return Consumer<SettingsProvider>(
       builder: (context, settings, child) {
-        return Card(
-          elevation: 2,
-          margin: const EdgeInsets.symmetric(vertical: 6),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.face, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      l10n.showAvatar,
-                      style: const TextStyle(
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionTitle(
+                context, l10n.showAvatar, CupertinoIcons.person_crop_circle),
+            Card(
+              elevation: 0,
+              color: Theme.of(context).colorScheme.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(
+                  color: Theme.of(context).colorScheme.outline.withAlpha(50),
+                ),
+              ),
+              child: Column(
+                children: [
+                  SwitchListTile(
+                    title: Text(
+                      l10n.showAssistantAvatar,
+                      style: TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                SwitchListTile(
-                  title: Text(l10n.showAssistantAvatar),
-                  subtitle: Text(l10n.showAssistantAvatarDescription),
-                  value: settings.generalSetting.showAssistantAvatar,
-                  onChanged: (bool value) {
-                    settings.updateGeneralSettings(
-                      theme: settings.generalSetting.theme,
-                      showAssistantAvatar: value,
-                      showUserAvatar: settings.generalSetting.showUserAvatar,
-                      systemPrompt: settings.generalSetting.systemPrompt,
-                      enableArtifacts: settings.generalSetting.enableArtifacts,
-                      locale: settings.generalSetting.locale,
-                    );
-                  },
-                ),
-                const Divider(),
-                SwitchListTile(
-                  title: Text(l10n.showUserAvatar),
-                  subtitle: Text(l10n.showUserAvatarDescription),
-                  value: settings.generalSetting.showUserAvatar,
-                  onChanged: (bool value) {
-                    settings.updateGeneralSettings(
-                      theme: settings.generalSetting.theme,
-                      showAssistantAvatar:
-                          settings.generalSetting.showAssistantAvatar,
-                      showUserAvatar: value,
-                      systemPrompt: settings.generalSetting.systemPrompt,
-                      enableArtifacts: settings.generalSetting.enableArtifacts,
-                      locale: settings.generalSetting.locale,
-                    );
-                  },
-                ),
-              ],
+                    subtitle: Text(
+                      l10n.showAssistantAvatarDescription,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withAlpha(60),
+                      ),
+                    ),
+                    value: settings.generalSetting.showAssistantAvatar,
+                    onChanged: (bool value) {
+                      settings.updateGeneralSettings(
+                        theme: settings.generalSetting.theme,
+                        showAssistantAvatar: value,
+                        showUserAvatar: settings.generalSetting.showUserAvatar,
+                        systemPrompt: settings.generalSetting.systemPrompt,
+                        enableArtifacts:
+                            settings.generalSetting.enableArtifacts,
+                        locale: settings.generalSetting.locale,
+                      );
+                    },
+                  ),
+                  Divider(
+                    height: 1,
+                    indent: 16,
+                    endIndent: 16,
+                    color: Theme.of(context).colorScheme.outline.withAlpha(50),
+                  ),
+                  SwitchListTile(
+                    title: Text(
+                      l10n.showUserAvatar,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                    subtitle: Text(
+                      l10n.showUserAvatarDescription,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withAlpha(60),
+                      ),
+                    ),
+                    value: settings.generalSetting.showUserAvatar,
+                    onChanged: (bool value) {
+                      settings.updateGeneralSettings(
+                        theme: settings.generalSetting.theme,
+                        showAssistantAvatar:
+                            settings.generalSetting.showAssistantAvatar,
+                        showUserAvatar: value,
+                        systemPrompt: settings.generalSetting.systemPrompt,
+                        enableArtifacts:
+                            settings.generalSetting.enableArtifacts,
+                        locale: settings.generalSetting.locale,
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
-          ),
+          ],
         );
       },
     );
@@ -321,62 +366,89 @@ class _GeneralSettingsState extends State<GeneralSettings> {
     final l10n = AppLocalizations.of(context)!;
     return Consumer<SettingsProvider>(
       builder: (context, settings, child) {
-        return Card(
-          elevation: 2,
-          margin: const EdgeInsets.symmetric(vertical: 6),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionTitle(
+                context, l10n.systemPrompt, CupertinoIcons.text_quote),
+            Card(
+              elevation: 0,
+              color: Theme.of(context).colorScheme.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(
+                  color: Theme.of(context).colorScheme.outline.withAlpha(50),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.psychology, size: 20),
-                    const SizedBox(width: 8),
+                    TextFormField(
+                      initialValue: settings.generalSetting.systemPrompt,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .outline
+                                .withAlpha(20),
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .outline
+                                .withAlpha(20),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.all(12),
+                      ),
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                      maxLines: 5,
+                      onChanged: (value) {
+                        settings.updateGeneralSettings(
+                          theme: settings.generalSetting.theme,
+                          showAssistantAvatar:
+                              settings.generalSetting.showAssistantAvatar,
+                          showUserAvatar:
+                              settings.generalSetting.showUserAvatar,
+                          systemPrompt: value,
+                          enableArtifacts:
+                              settings.generalSetting.enableArtifacts,
+                          locale: settings.generalSetting.locale,
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 8),
                     Text(
-                      l10n.systemPrompt,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                      l10n.systemPromptDescription,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withAlpha(60),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  initialValue: settings.generalSetting.systemPrompt,
-                  decoration: InputDecoration(
-                    // labelText: 'System Prompt',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    alignLabelWithHint: true,
-                  ),
-                  maxLines: 5,
-                  onChanged: (value) {
-                    settings.updateGeneralSettings(
-                      theme: settings.generalSetting.theme,
-                      showAssistantAvatar:
-                          settings.generalSetting.showAssistantAvatar,
-                      showUserAvatar: settings.generalSetting.showUserAvatar,
-                      systemPrompt: value,
-                      enableArtifacts: settings.generalSetting.enableArtifacts,
-                      locale: settings.generalSetting.locale,
-                    );
-                  },
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  l10n.systemPromptDescription,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: AppColors.grey,
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
+          ],
         );
       },
     );

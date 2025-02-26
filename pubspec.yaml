@@ -76,6 +76,7 @@ dependencies:
   event_bus: ^2.0.1
   permission_handler: ^11.3.0
   flutter_cache_manager: ^3.3.1
+  flutter_svg: ^2.0.17
 
 dependency_overrides:
   webview_flutter_wkwebview: 3.17.0
@@ -108,6 +109,7 @@ flutter:
     - assets/mcp_server.json
     - assets/logo.png
     - assets/sandbox/
+    - assets/logo/
 
 flutter_launcher_icons:
   android: "launcher_icon"

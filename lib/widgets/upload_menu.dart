@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 class UploadMenu extends StatelessWidget {
   final bool disabled;
@@ -39,7 +40,7 @@ class UploadMenu extends StatelessWidget {
         PopupMenuItem(
           child: Row(
             children: [
-              const Icon(Icons.image, size: 20),
+              const Icon(CupertinoIcons.photo, size: 20),
               const SizedBox(width: 8),
               Text('从图库选择'),
             ],
@@ -49,7 +50,7 @@ class UploadMenu extends StatelessWidget {
         PopupMenuItem(
           child: Row(
             children: [
-              const Icon(Icons.file_present, size: 20),
+              const Icon(CupertinoIcons.doc, size: 20),
               const SizedBox(width: 8),
               Text('选择文件'),
             ],
@@ -63,7 +64,7 @@ class UploadMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: const Icon(Icons.file_present_outlined),
+      icon: const Icon(CupertinoIcons.plus_app),
       onPressed: disabled ? null : () => _showUploadOptions(context),
       tooltip: '上传文件',
     );

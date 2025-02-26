@@ -25,16 +25,27 @@ class TopToolbar extends StatelessWidget {
   });
 
   void _onShowChatSetting(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width * 0.8,
-          height: MediaQuery.of(context).size.height * 0.8,
-          child: const ChatSetting(),
+    if (kIsMobile) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const SafeArea(
+            child: ChatSetting(),
+          ),
         ),
-      ),
-    );
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (context) => Dialog(
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width * 0.8,
+            height: MediaQuery.of(context).size.height * 0.8,
+            child: const ChatSetting(),
+          ),
+        ),
+      );
+    }
   }
 
   Widget _buildMoreMenu(BuildContext context) {
