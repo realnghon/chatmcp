@@ -7,7 +7,7 @@ import 'package:chatmcp/utils/color.dart';
 import 'package:provider/provider.dart';
 import 'package:chatmcp/provider/chat_provider.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
-
+import 'package:flutter/cupertino.dart';
 // test page
 import 'package:chatmcp/widgets/markdown/markit_widget.dart';
 import 'package:chatmcp/widgets/browser/browser.dart';
@@ -40,7 +40,7 @@ class TopToolbar extends StatelessWidget {
   Widget _buildMoreMenu(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return PopupMenuButton<String>(
-      icon: const Icon(Icons.more_vert),
+      icon: const Icon(CupertinoIcons.ellipsis_vertical),
       itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
         if (ProviderManager.chatProvider.activeChat != null)
           PopupMenuItem<String>(
@@ -49,7 +49,7 @@ class TopToolbar extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.arrow_outward),
+                const Icon(CupertinoIcons.share),
                 const SizedBox(width: 8),
                 Text(l10n.share),
               ],
@@ -62,7 +62,7 @@ class TopToolbar extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.tune),
+              const Icon(CupertinoIcons.slider_horizontal_3),
               const SizedBox(width: 8),
               Text(l10n.modelConfig),
             ],
@@ -73,7 +73,7 @@ class TopToolbar extends StatelessWidget {
             value: 'debug',
             child: Row(
               children: [
-                const Icon(Icons.bug_report),
+                const Icon(CupertinoIcons.ant),
                 const SizedBox(width: 8),
                 Text(l10n.debug),
               ],
@@ -141,7 +141,7 @@ class TopToolbar extends StatelessWidget {
                         if (hideSidebar && kIsDesktop)
                           IconButton(
                             icon: Icon(
-                              Icons.menu,
+                              CupertinoIcons.sidebar_right,
                               color: AppColors.grey[700],
                             ),
                             onPressed: onToggleSidebar,
@@ -159,7 +159,7 @@ class TopToolbar extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.add),
+                        icon: const Icon(CupertinoIcons.add),
                         onPressed: () {
                           ProviderManager.chatProvider.clearActiveChat();
                         },

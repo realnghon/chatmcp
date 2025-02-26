@@ -5,6 +5,7 @@ import 'package:chatmcp/utils/platform.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:chatmcp/widgets/upload_menu.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
+import 'package:flutter/cupertino.dart';
 
 class SubmitData {
   final String text;
@@ -145,7 +146,8 @@ class _InputAreaState extends State<InputArea> {
                           style: const TextStyle(fontSize: 12),
                           overflow: TextOverflow.ellipsis,
                         ),
-                        deleteIcon: const Icon(Icons.close, size: 16),
+                        deleteIcon:
+                            const Icon(CupertinoIcons.clear_circled, size: 16),
                         onDeleted: () => _removeFile(index),
                       ),
                     );
@@ -219,7 +221,7 @@ class _InputAreaState extends State<InputArea> {
                                           widget.onCancel!();
                                         }
                                       : null,
-                                  icon: const Icon(Icons.stop_circle_outlined))
+                                  icon: const Icon(CupertinoIcons.stop))
                             ]
                           : [
                               if (kIsMobile) ...[
@@ -230,7 +232,7 @@ class _InputAreaState extends State<InputArea> {
                                 ),
                               ] else ...[
                                 IconButton(
-                                  icon: const Icon(Icons.file_present_outlined),
+                                  icon: const Icon(CupertinoIcons.plus_app),
                                   onPressed:
                                       widget.disabled ? null : _pickFiles,
                                   tooltip: l10n.uploadFiles,

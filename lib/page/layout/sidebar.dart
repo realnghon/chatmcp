@@ -5,6 +5,7 @@ import 'package:chatmcp/provider/chat_provider.dart';
 import 'package:chatmcp/utils/platform.dart';
 import 'package:chatmcp/utils/color.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
+import 'package:flutter/cupertino.dart';
 
 class SidebarPanel extends StatelessWidget {
   final VoidCallback? onToggle;
@@ -23,7 +24,7 @@ class SidebarPanel extends StatelessWidget {
                 top: 0,
                 right: 4,
                 child: IconButton(
-                  icon: const Icon(Icons.menu),
+                  icon: const Icon(CupertinoIcons.sidebar_left),
                   onPressed: onToggle,
                 ),
               ),
@@ -220,14 +221,16 @@ class SidebarToolbar extends StatelessWidget {
 
   Widget _buildSettingsButton(BuildContext context) {
     return IconButton(
-      icon: const Icon(Icons.settings),
+      icon: const Icon(CupertinoIcons.settings),
       onPressed: () => _showSettingsDialog(context),
     );
   }
 
   Widget _buildSelectModeButton() {
     return IconButton(
-      icon: Icon(chatProvider.isSelectMode ? Icons.close : Icons.delete),
+      icon: Icon(chatProvider.isSelectMode
+          ? CupertinoIcons.clear
+          : CupertinoIcons.trash),
       onPressed: () {
         if (chatProvider.isSelectMode) {
           chatProvider.exitSelectMode();
@@ -240,7 +243,7 @@ class SidebarToolbar extends StatelessWidget {
 
   Widget _buildSelectAllButton() {
     return IconButton(
-      icon: const Icon(Icons.select_all),
+      icon: const Icon(CupertinoIcons.checkmark_square),
       onPressed: () => chatProvider.toggleSelectAll(),
     );
   }

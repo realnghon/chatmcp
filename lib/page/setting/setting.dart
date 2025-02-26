@@ -3,6 +3,7 @@ import 'keys_setting.dart';
 import 'mcp_server.dart';
 import 'general_setting.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
+import 'package:flutter/cupertino.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -17,12 +18,16 @@ class _SettingPageState extends State<SettingPage> {
     return [
       SettingTab(
           title: l10n.general,
-          icon: Icons.settings,
+          icon: CupertinoIcons.settings,
           content: GeneralSettings()),
       SettingTab(
-          title: l10n.providers, icon: Icons.api, content: KeysSettings()),
+          title: l10n.providers,
+          icon: CupertinoIcons.cube,
+          content: KeysSettings()),
       SettingTab(
-          title: l10n.mcpServer, icon: Icons.storage, content: McpServer()),
+          title: l10n.mcpServer,
+          icon: CupertinoIcons.cloud,
+          content: McpServer()),
     ];
   }
 
