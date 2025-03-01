@@ -1,10 +1,10 @@
-import 'package:chatmcp/provider/provider_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import '../../provider/settings_provider.dart';
-import 'package:chatmcp/utils/color.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
+
+import 'setting_switch.dart';
 
 class GeneralSettings extends StatefulWidget {
   const GeneralSettings({super.key});
@@ -119,16 +119,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                   ],
                   onChanged: (String? value) {
                     if (value != null) {
-                      settings.updateGeneralSettings(
-                        theme: settings.generalSetting.theme,
-                        showAssistantAvatar:
-                            settings.generalSetting.showAssistantAvatar,
-                        showUserAvatar: settings.generalSetting.showUserAvatar,
-                        systemPrompt: settings.generalSetting.systemPrompt,
-                        enableArtifacts:
-                            settings.generalSetting.enableArtifacts,
-                        locale: value,
-                      );
+                      settings.updateGeneralSettingsPartially(locale: value);
                     }
                   },
                 ),
@@ -158,34 +149,33 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                   color: Theme.of(context).colorScheme.outline.withAlpha(50),
                 ),
               ),
-              child: SwitchListTile(
-                title: Text(
-                  l10n.enableArtifacts,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Theme.of(context).colorScheme.onSurface,
+              child: Column(
+                children: [
+                  SettingSwitch(
+                    title: l10n.enableArtifacts,
+                    subtitle: l10n.enableArtifactsDescription,
+                    value: settings.generalSetting.enableArtifacts,
+                    onChanged: (bool value) {
+                      settings.updateGeneralSettingsPartially(
+                          enableArtifacts: value);
+                    },
                   ),
-                ),
-                subtitle: Text(
-                  l10n.enableArtifactsDescription,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color:
-                        Theme.of(context).colorScheme.onSurface.withAlpha(60),
+                  Divider(
+                    height: 1,
+                    indent: 16,
+                    endIndent: 16,
+                    color: Theme.of(context).colorScheme.outline.withAlpha(50),
                   ),
-                ),
-                value: settings.generalSetting.enableArtifacts,
-                onChanged: (bool value) {
-                  settings.updateGeneralSettings(
-                    theme: settings.generalSetting.theme,
-                    showAssistantAvatar:
-                        settings.generalSetting.showAssistantAvatar,
-                    showUserAvatar: settings.generalSetting.showUserAvatar,
-                    systemPrompt: settings.generalSetting.systemPrompt,
-                    enableArtifacts: value,
-                    locale: settings.generalSetting.locale,
-                  );
-                },
+                  SettingSwitch(
+                    title: l10n.enableToolUsage,
+                    subtitle: l10n.enableToolUsageDescription,
+                    value: settings.generalSetting.enableToolUsage,
+                    onChanged: (bool value) {
+                      settings.updateGeneralSettingsPartially(
+                          enableToolUsage: value);
+                    },
+                  ),
+                ],
               ),
             ),
           ],
@@ -243,15 +233,8 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                   ],
                   onChanged: (value) {
                     if (value != null) {
-                      settings.updateGeneralSettings(
+                      settings.updateGeneralSettingsPartially(
                         theme: value,
-                        showAssistantAvatar:
-                            settings.generalSetting.showAssistantAvatar,
-                        showUserAvatar: settings.generalSetting.showUserAvatar,
-                        systemPrompt: settings.generalSetting.systemPrompt,
-                        enableArtifacts:
-                            settings.generalSetting.enableArtifacts,
-                        locale: settings.generalSetting.locale,
                       );
                     }
                   },
@@ -284,35 +267,13 @@ class _GeneralSettingsState extends State<GeneralSettings> {
               ),
               child: Column(
                 children: [
-                  SwitchListTile(
-                    title: Text(
-                      l10n.showAssistantAvatar,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                    subtitle: Text(
-                      l10n.showAssistantAvatarDescription,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withAlpha(60),
-                      ),
-                    ),
+                  SettingSwitch(
+                    title: l10n.showAssistantAvatar,
+                    subtitle: l10n.showAssistantAvatarDescription,
                     value: settings.generalSetting.showAssistantAvatar,
                     onChanged: (bool value) {
-                      settings.updateGeneralSettings(
-                        theme: settings.generalSetting.theme,
-                        showAssistantAvatar: value,
-                        showUserAvatar: settings.generalSetting.showUserAvatar,
-                        systemPrompt: settings.generalSetting.systemPrompt,
-                        enableArtifacts:
-                            settings.generalSetting.enableArtifacts,
-                        locale: settings.generalSetting.locale,
-                      );
+                      settings.updateGeneralSettingsPartially(
+                          showAssistantAvatar: value);
                     },
                   ),
                   Divider(
@@ -321,36 +282,13 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                     endIndent: 16,
                     color: Theme.of(context).colorScheme.outline.withAlpha(50),
                   ),
-                  SwitchListTile(
-                    title: Text(
-                      l10n.showUserAvatar,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                    subtitle: Text(
-                      l10n.showUserAvatarDescription,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withAlpha(60),
-                      ),
-                    ),
+                  SettingSwitch(
+                    title: l10n.showUserAvatar,
+                    subtitle: l10n.showUserAvatarDescription,
                     value: settings.generalSetting.showUserAvatar,
                     onChanged: (bool value) {
-                      settings.updateGeneralSettings(
-                        theme: settings.generalSetting.theme,
-                        showAssistantAvatar:
-                            settings.generalSetting.showAssistantAvatar,
-                        showUserAvatar: value,
-                        systemPrompt: settings.generalSetting.systemPrompt,
-                        enableArtifacts:
-                            settings.generalSetting.enableArtifacts,
-                        locale: settings.generalSetting.locale,
-                      );
+                      settings.updateGeneralSettingsPartially(
+                          showUserAvatar: value);
                     },
                   ),
                 ],
@@ -420,16 +358,8 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                       ),
                       maxLines: 5,
                       onChanged: (value) {
-                        settings.updateGeneralSettings(
-                          theme: settings.generalSetting.theme,
-                          showAssistantAvatar:
-                              settings.generalSetting.showAssistantAvatar,
-                          showUserAvatar:
-                              settings.generalSetting.showUserAvatar,
+                        settings.updateGeneralSettingsPartially(
                           systemPrompt: value,
-                          enableArtifacts:
-                              settings.generalSetting.enableArtifacts,
-                          locale: settings.generalSetting.locale,
                         );
                       },
                     ),

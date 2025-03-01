@@ -13,6 +13,8 @@
     "featureSettings": "功能设置",
     "enableArtifacts": "启用人工制品",
     "enableArtifactsDescription": "在对话中启用 AI 助手的人工制品，这将使用更多的令牌",
+    "enableToolUsage": "启用工具使用",
+    "enableToolUsageDescription": "在对话中启用工具的使用，这将使用更多的令牌",
     "themeSettings": "主题设置",
     "lightTheme": "浅色主题",
     "darkTheme": "深色主题",
@@ -90,4 +92,4 @@
     "toolResult": "调用 {name} 结果",
     "selectModel": "选择模型",
     "close": "关闭"
-} 
+}

@@ -13,6 +13,8 @@
     "featureSettings": "Feature Settings",
     "enableArtifacts": "Enable Artifacts",
     "enableArtifactsDescription": "Enable the artifacts of the AI assistant in the conversation, will use more tokens",
+    "enableToolUsage": "Enable Tool Usage",
+    "enableToolUsageDescription": "Enable the usage of tools in the conversation, will use more tokens",
     "themeSettings": "Theme Settings",
     "lightTheme": "Light Theme",
     "darkTheme": "Dark Theme",
@@ -90,4 +92,4 @@
     "toolResult": "call {name} result",
     "selectModel": "Select Model",
     "close": "Close"
-} 
+}

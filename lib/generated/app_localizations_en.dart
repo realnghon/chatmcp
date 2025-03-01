@@ -1,5 +1,3 @@
-// ignore: unused_import
-import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -46,6 +44,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get enableArtifactsDescription => 'Enable the artifacts of the AI assistant in the conversation, will use more tokens';
+
+  @override
+  String get enableToolUsage => 'Enable Tool Usage';
+
+  @override
+  String get enableToolUsageDescription => 'Enable the usage of tools in the conversation, will use more tokens';
 
   @override
   String get themeSettings => 'Theme Settings';

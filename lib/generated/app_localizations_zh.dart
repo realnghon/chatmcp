@@ -1,5 +1,3 @@
-// ignore: unused_import
-import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -46,6 +44,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get enableArtifactsDescription => '在对话中启用 AI 助手的人工制品，这将使用更多的令牌';
+
+  @override
+  String get enableToolUsage => '启用工具使用';
+
+  @override
+  String get enableToolUsageDescription => '在对话中启用工具的使用，这将使用更多的令牌';
 
   @override
   String get themeSettings => '主题设置';
