@@ -40,37 +40,9 @@ class _MessageListState extends State<MessageList> {
   }
 
   Future _scrollToBottom({bool withDelay = true}) async {
-    if (withDelay) {
-      for (var delay in [50, 150, 300]) {
-        _delayScrollToBottom(delay);
-      }
-    } else {
-      if (_isScrolledToBottom()) {
-        return;
-      }
-      await _scrollToBottom1();
+    if (_isScrolledToBottom()) {
+      return;
     }
-    setState(() {
-      _stickToBottom = true;
-    });
-  }
-
-  void _delayScrollToBottom(int delay) {
-    Future.delayed(Duration(milliseconds: delay), () {
-      if (_isScrolledToBottom()) {
-        return;
-      }
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          endScroll,
-          duration: Duration(milliseconds: delay),
-          curve: Curves.easeInOutCubic,
-        );
-      }
-    });
-  }
-
-  Future _scrollToBottom1() async {
     if (_scrollController.hasClients) {
       await _scrollController.animateTo(
         _scrollController.position.minScrollExtent,
@@ -78,6 +50,9 @@ class _MessageListState extends State<MessageList> {
         curve: Curves.easeInOutCubic,
       );
     }
+    setState(() {
+      _stickToBottom = true;
+    });
   }
 
   @override
