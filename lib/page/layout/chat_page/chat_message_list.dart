@@ -24,13 +24,13 @@ class MessageList extends StatefulWidget {
 class _MessageListState extends State<MessageList> {
   final ScrollController _scrollController = ScrollController();
   bool _stickToBottom = true;
+  late double endScroll = _scrollController.position.minScrollExtent;
 
   bool _isScrolledToBottom({double threshold = 1.0}) {
     if (!_scrollController.hasClients) return false;
-    final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.offset;
     // 允许1像素的误差
-    return (maxScroll - currentScroll).abs() <= threshold;
+    return (endScroll - currentScroll).abs() <= threshold;
   }
 
   Future _scrollToBottom({bool withDelay = true}) async {
@@ -43,10 +43,10 @@ class _MessageListState extends State<MessageList> {
         return;
       }
       await _scrollToBottom1();
-      setState(() {
-        _stickToBottom = true;
-      });
     }
+    setState(() {
+      _stickToBottom = true;
+    });
   }
 
   void _delayScrollToBottom(int delay) {
@@ -56,7 +56,7 @@ class _MessageListState extends State<MessageList> {
       }
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
+          endScroll,
           duration: Duration(milliseconds: delay),
           curve: Curves.easeInOutCubic,
         );
@@ -67,8 +67,8 @@ class _MessageListState extends State<MessageList> {
   Future _scrollToBottom1() async {
     if (_scrollController.hasClients) {
       await _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 100),
+        _scrollController.position.minScrollExtent,
+        duration: const Duration(milliseconds: 800),
         curve: Curves.easeInOutCubic,
       );
     }
@@ -77,10 +77,21 @@ class _MessageListState extends State<MessageList> {
   @override
   void didUpdateWidget(MessageList oldWidget) {
     super.didUpdateWidget(oldWidget);
-    print('MessageList didUpdateWidget $_stickToBottom');
     if (_stickToBottom) {
       _scrollToBottom(withDelay: false);
     }
+    if (_userAddedMessage(oldWidget)) {
+      _scrollToBottom();
+    }
+  }
+
+  bool _userAddedMessage(MessageList oldWidget) {
+    var currentUserMessages =
+        widget.messages.where((msg) => msg.role == MessageRole.user).toList();
+    var oldUserMessages = oldWidget.messages
+        .where((msg) => msg.role == MessageRole.user)
+        .toList();
+    return currentUserMessages.length != oldUserMessages.length;
   }
 
   @override
@@ -90,7 +101,7 @@ class _MessageListState extends State<MessageList> {
     _scrollController.addListener(() {
       final direction = _scrollController.position.userScrollDirection;
 
-      if (direction == ScrollDirection.forward &&
+      if (direction == ScrollDirection.reverse &&
           _isScrolledToBottom(threshold: 100.0)) {
         setState(() {
           _stickToBottom = false;
@@ -147,6 +158,7 @@ class _MessageListState extends State<MessageList> {
         return Stack(
           children: [
             ListView.builder(
+              reverse: true,
               controller: _scrollController,
               padding: const EdgeInsets.all(8.0),
               itemCount: groupedMessages.length,
