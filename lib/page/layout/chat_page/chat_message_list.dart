@@ -1,8 +1,12 @@
+import 'package:chatmcp/utils/stream.dart';
 import 'package:flutter/material.dart';
 import 'package:chatmcp/llm/model.dart';
 import 'package:flutter/rendering.dart';
+import 'package:path/path.dart';
 import 'chat_message.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+
+import 'scroll_down_button.dart';
 
 class MessageList extends StatefulWidget {
   final List<ChatMessage> messages;
@@ -21,24 +25,22 @@ class MessageList extends StatefulWidget {
 
 class _MessageListState extends State<MessageList> {
   final ScrollController _scrollController = ScrollController();
-  bool _userScrolled = false;
+  late final Stream<ScrollDirection> _scrollDirectionChangedStream =
+      asStream<ScrollDirection>(_scrollController, () {
+    return _scrollController.position.userScrollDirection;
+  }).distinct();
 
-  void resetUserScrolled() {
-    setState(() {
-      _userScrolled = false;
-    });
-    _scrollToBottom();
-  }
+  bool _stickToBottom = true;
+  late final double endScroll = _scrollController.position.minScrollExtent;
 
-  bool _isScrolledToBottom() {
+  bool _isScrolledToBottom({double threshold = 1.0}) {
     if (!_scrollController.hasClients) return false;
-    final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.offset;
     // 允许1像素的误差
-    return (maxScroll - currentScroll).abs() <= 1.0;
+    return (endScroll - currentScroll).abs() <= threshold;
   }
 
-  void _scrollToBottom({bool withDelay = true}) {
+  Future _scrollToBottom({bool withDelay = true}) async {
     if (withDelay) {
       for (var delay in [50, 150, 300]) {
         _delayScrollToBottom(delay);
@@ -47,8 +49,11 @@ class _MessageListState extends State<MessageList> {
       if (_isScrolledToBottom()) {
         return;
       }
-      _scrollToBottom1();
+      await _scrollToBottom1();
     }
+    setState(() {
+      _stickToBottom = true;
+    });
   }
 
   void _delayScrollToBottom(int delay) {
@@ -58,7 +63,7 @@ class _MessageListState extends State<MessageList> {
       }
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
+          endScroll,
           duration: Duration(milliseconds: delay),
           curve: Curves.easeInOutCubic,
         );
@@ -66,11 +71,11 @@ class _MessageListState extends State<MessageList> {
     });
   }
 
-  void _scrollToBottom1() {
+  Future _scrollToBottom1() async {
     if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 100),
+      await _scrollController.animateTo(
+        _scrollController.position.minScrollExtent,
+        duration: const Duration(milliseconds: 800),
         curve: Curves.easeInOutCubic,
       );
     }
@@ -79,22 +84,44 @@ class _MessageListState extends State<MessageList> {
   @override
   void didUpdateWidget(MessageList oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _scrollToBottom(withDelay: false);
-    if (widget.messages.length != oldWidget.messages.length) {
-      resetUserScrolled();
+    if (_stickToBottom) {
+      _scrollToBottom(withDelay: false);
     }
+    if (_userAddedMessage(oldWidget)) {
+      _scrollToBottom();
+    }
+  }
+
+  bool _userAddedMessage(MessageList oldWidget) {
+    var currentUserMessages =
+        widget.messages.where((msg) => msg.role == MessageRole.user).toList();
+    var oldUserMessages = oldWidget.messages
+        .where((msg) => msg.role == MessageRole.user)
+        .toList();
+    return currentUserMessages.length != oldUserMessages.length;
   }
 
   @override
   void initState() {
     super.initState();
-    // 添加滚动监听器
+
     _scrollController.addListener(() {
-      if (_scrollController.position.userScrollDirection !=
-          ScrollDirection.idle) {
-        _userScrolled = true;
+      final direction = _scrollController.position.userScrollDirection;
+      if (direction != ScrollDirection.idle && _isScrolledToBottom()) {
+        setState(() {
+          _stickToBottom = true;
+        });
       }
     });
+
+    _scrollDirectionChangedStream.listen((direction) {
+      if (direction == ScrollDirection.reverse) {
+        setState(() {
+          _stickToBottom = false;
+        });
+      }
+    });
+
     _scrollToBottom();
   }
 
@@ -116,7 +143,7 @@ class _MessageListState extends State<MessageList> {
         List<List<ChatMessage>> groupedMessages = [];
         List<ChatMessage> currentGroup = [];
 
-        for (var msg in widget.messages) {
+        for (var msg in widget.messages.reversed) {
           if (msg.role == MessageRole.user) {
             if (currentGroup.isNotEmpty) {
               groupedMessages.add(currentGroup);
@@ -134,20 +161,39 @@ class _MessageListState extends State<MessageList> {
           groupedMessages.add(currentGroup);
         }
 
-        return ListView.builder(
-          controller: _scrollController,
-          padding: const EdgeInsets.all(8.0),
-          itemCount: groupedMessages.length,
-          // physics: const ClampingScrollPhysics(), // 禁用弹性效果
-          itemBuilder: (context, index) {
-            final group = groupedMessages[index];
+        return Stack(
+          children: [
+            ListView.builder(
+              reverse: true,
+              controller: _scrollController,
+              padding: const EdgeInsets.all(8.0),
+              itemCount: groupedMessages.length,
+              // physics: const ClampingScrollPhysics(), // 禁用弹性效果
+              itemBuilder: (context, index) {
+                final group = groupedMessages[index];
 
-            return ChatUIMessage(
-              messages: group,
-              onRetry: widget.onRetry,
-              onSwitch: widget.onSwitch,
-            );
-          },
+                return ChatUIMessage(
+                  messages: group,
+                  onRetry: widget.onRetry,
+                  onSwitch: widget.onSwitch,
+                );
+              },
+            ),
+            if (_isScrolledToBottom() == false)
+              Positioned(
+                bottom: 10,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: ScrollDownButton(
+                    onPressed: () {
+                      _stickToBottom = true;
+                      _scrollToBottom(withDelay: false);
+                    },
+                  ),
+                ),
+              ),
+          ],
         );
       },
     );
