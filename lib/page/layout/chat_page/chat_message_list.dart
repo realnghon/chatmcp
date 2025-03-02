@@ -1,6 +1,8 @@
+import 'package:chatmcp/utils/stream.dart';
 import 'package:flutter/material.dart';
 import 'package:chatmcp/llm/model.dart';
 import 'package:flutter/rendering.dart';
+import 'package:path/path.dart';
 import 'chat_message.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 
@@ -23,8 +25,13 @@ class MessageList extends StatefulWidget {
 
 class _MessageListState extends State<MessageList> {
   final ScrollController _scrollController = ScrollController();
+  late final Stream<ScrollDirection> _scrollDirectionChangedStream =
+      asStream<ScrollDirection>(_scrollController, () {
+    return _scrollController.position.userScrollDirection;
+  }).distinct();
+
   bool _stickToBottom = true;
-  late double endScroll = _scrollController.position.minScrollExtent;
+  late final double endScroll = _scrollController.position.minScrollExtent;
 
   bool _isScrolledToBottom({double threshold = 1.0}) {
     if (!_scrollController.hasClients) return false;
@@ -97,25 +104,24 @@ class _MessageListState extends State<MessageList> {
   @override
   void initState() {
     super.initState();
-    // 添加滚动监听器
+
     _scrollController.addListener(() {
       final direction = _scrollController.position.userScrollDirection;
+      if (direction != ScrollDirection.idle && _isScrolledToBottom()) {
+        setState(() {
+          _stickToBottom = true;
+        });
+      }
+    });
 
-      if (direction == ScrollDirection.reverse &&
-          _isScrolledToBottom(threshold: 100.0)) {
+    _scrollDirectionChangedStream.listen((direction) {
+      if (direction == ScrollDirection.reverse) {
         setState(() {
           _stickToBottom = false;
         });
       }
-
-      if (direction != ScrollDirection.idle) {
-        if (_isScrolledToBottom()) {
-          setState(() {
-            _stickToBottom = true;
-          });
-        }
-      }
     });
+
     _scrollToBottom();
   }
 
