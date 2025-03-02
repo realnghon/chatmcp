@@ -173,6 +173,18 @@ abstract class AppLocalizations {
   /// **'Enable the artifacts of the AI assistant in the conversation, will use more tokens'**
   String get enableArtifactsDescription;
 
+  /// No description provided for @enableToolUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Tool Usage'**
+  String get enableToolUsage;
+
+  /// No description provided for @enableToolUsageDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable the usage of tools in the conversation, will use more tokens'**
+  String get enableToolUsageDescription;
+
   /// No description provided for @themeSettings.
   ///
   /// In en, this message translates to:

@@ -483,7 +483,9 @@ class _ChatPageState extends State<ChatPage> {
     });
 
     try {
-      await _handleToolCall(userMessage.content ?? '');
+      if (ProviderManager.settingsProvider.generalSetting.enableToolUsage) {
+        await _handleToolCall(userMessage.content ?? '');
+      }
       await _processLLMResponse();
       await _updateChat();
     } catch (e, stackTrace) {
@@ -505,7 +507,9 @@ class _ChatPageState extends State<ChatPage> {
     _addUserMessage(data.text, files);
 
     try {
-      await _handleToolCall(data.text);
+      if (ProviderManager.settingsProvider.generalSetting.enableToolUsage) {
+        await _handleToolCall(data.text);
+      }
       await _processLLMResponse();
       await _updateChat();
     } catch (e, stackTrace) {
