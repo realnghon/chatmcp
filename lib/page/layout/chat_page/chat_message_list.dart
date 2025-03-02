@@ -2,7 +2,6 @@ import 'package:chatmcp/utils/stream.dart';
 import 'package:flutter/material.dart';
 import 'package:chatmcp/llm/model.dart';
 import 'package:flutter/rendering.dart';
-import 'package:path/path.dart';
 import 'chat_message.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 
@@ -34,7 +33,7 @@ class _MessageListState extends State<MessageList> {
   late final double endScroll = _scrollController.position.minScrollExtent;
 
   bool _isScrolledToBottom({double threshold = 1.0}) {
-    if (!_scrollController.hasClients) return false;
+    if (!_scrollController.hasClients) return true;
     final currentScroll = _scrollController.offset;
     // 允许1像素的误差
     return (endScroll - currentScroll).abs() <= threshold;
@@ -153,7 +152,7 @@ class _MessageListState extends State<MessageList> {
             groupedMessages.add(currentGroup);
             currentGroup = [];
           } else {
-            currentGroup.add(msg);
+            currentGroup.insert(0, msg);
           }
         }
 
@@ -179,7 +178,7 @@ class _MessageListState extends State<MessageList> {
                 );
               },
             ),
-            if (_isScrolledToBottom() == false)
+            if (!_isScrolledToBottom())
               Positioned(
                 bottom: 10,
                 left: 0,
