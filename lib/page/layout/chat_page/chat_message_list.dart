@@ -137,7 +137,7 @@ class _MessageListState extends State<MessageList> {
         List<List<ChatMessage>> groupedMessages = [];
         List<ChatMessage> currentGroup = [];
 
-        for (var msg in widget.messages) {
+        for (var msg in widget.messages.reversed) {
           if (msg.role == MessageRole.user) {
             if (currentGroup.isNotEmpty) {
               groupedMessages.add(currentGroup);
