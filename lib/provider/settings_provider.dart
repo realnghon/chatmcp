@@ -41,6 +41,7 @@ class GeneralSetting {
   String theme;
   bool showAssistantAvatar = false;
   bool showUserAvatar = false;
+  bool enableToolUsage = true;
   bool enableArtifacts = true;
   String systemPrompt;
   String locale;
@@ -49,6 +50,7 @@ class GeneralSetting {
     required this.theme,
     this.showAssistantAvatar = false,
     this.showUserAvatar = false,
+    this.enableToolUsage = true,
     this.enableArtifacts = true,
     this.systemPrompt = 'You are a helpful assistant.',
     this.locale = 'en',
@@ -60,6 +62,7 @@ class GeneralSetting {
       'showAssistantAvatar': showAssistantAvatar,
       'showUserAvatar': showUserAvatar,
       'enableArtifacts': enableArtifacts,
+      'enableToolUsage': enableToolUsage,
       'systemPrompt': systemPrompt,
       'locale': locale,
     };
@@ -70,6 +73,7 @@ class GeneralSetting {
       theme: json['theme'] as String? ?? 'light',
       showAssistantAvatar: json['showAssistantAvatar'] as bool? ?? true,
       showUserAvatar: json['showUserAvatar'] as bool? ?? true,
+      enableToolUsage: json['enableToolUsage'] as bool? ?? true,
       enableArtifacts: json['enableArtifacts'] as bool? ?? false,
       systemPrompt: json['systemPrompt'] as String? ?? defaultSystemPrompt,
       locale: json['locale'] as String? ?? 'en',
@@ -186,9 +190,35 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> updateGeneralSettingsPartially({
+    String? theme,
+    bool? showAssistantAvatar,
+    bool? enableToolUsage,
+    bool? showUserAvatar,
+    String? systemPrompt,
+    bool? enableArtifacts,
+    String? locale,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    _generalSetting = GeneralSetting(
+      theme: theme ?? _generalSetting.theme,
+      showAssistantAvatar:
+          showAssistantAvatar ?? _generalSetting.showAssistantAvatar,
+      showUserAvatar: showUserAvatar ?? _generalSetting.showUserAvatar,
+      enableToolUsage: enableToolUsage ?? _generalSetting.enableToolUsage,
+      systemPrompt: systemPrompt ?? _generalSetting.systemPrompt,
+      enableArtifacts: enableArtifacts ?? _generalSetting.enableArtifacts,
+      locale: locale ?? _generalSetting.locale,
+    );
+    await prefs.setString(
+        'generalSettings', jsonEncode(_generalSetting.toJson()));
+    notifyListeners();
+  }
+
   Future<void> updateGeneralSettings({
     required String theme,
     required bool showAssistantAvatar,
+    required bool enableToolUsage,
     required bool showUserAvatar,
     required String systemPrompt,
     required bool enableArtifacts,
@@ -199,6 +229,7 @@ class SettingsProvider extends ChangeNotifier {
       theme: theme,
       showAssistantAvatar: showAssistantAvatar,
       showUserAvatar: showUserAvatar,
+      enableToolUsage: enableToolUsage,
       systemPrompt: systemPrompt,
       enableArtifacts: enableArtifacts,
       locale: locale,
