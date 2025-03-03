@@ -105,7 +105,6 @@ flutter:
   generate: true
   uses-material-design: true
   assets:
-    - .env
     - assets/mcp_server.json
     - assets/logo.png
     - assets/sandbox/
