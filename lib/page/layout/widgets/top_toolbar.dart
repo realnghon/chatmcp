@@ -103,9 +103,7 @@ class TopToolbar extends StatelessWidget {
                   appBar: AppBar(
                     title: Text(l10n.webSearchTest),
                   ),
-                  body: BrowserView(
-                    url: 'rag embeddings',
-                  ),
+                  body: const MarkitTestPage(),
                 ),
               ),
             );

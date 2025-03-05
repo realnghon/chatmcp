@@ -66,7 +66,7 @@ class ThinkBlockSyntax extends md.BlockSyntax {
   ThinkBlockSyntax({String? tag}) : tag = tag ?? defaultTagName;
 
   @protected
-  RegExp get startPattern => RegExp(r'^<' + tag + r'\s*([^>]*)>$');
+  RegExp get startPattern => RegExp(r'^<' + tag + r'\s*([^>]*)>');
 
   @protected
   RegExp get endPattern => RegExp(r'^</' + tag + r'\s*([^>]*)>$');

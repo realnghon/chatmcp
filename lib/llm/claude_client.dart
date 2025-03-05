@@ -263,7 +263,7 @@ $conversationText""",
         .toList();
 
     final body = {
-      'model': ProviderManager.chatModelProvider.currentModel,
+      'model': ProviderManager.chatModelProvider.currentModel.name,
       'messages': [
         {
           'role': 'user',

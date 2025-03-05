@@ -27,9 +27,7 @@ class OllamaClient extends BaseLLMClient {
       final response = await _dio.get("$baseUrl/api/tags");
       final data = response.data;
       final modelsList = data['models'] as List;
-      return modelsList
-          .map((model) => (model['name'] as String).split(':').first)
-          .toList();
+      return modelsList.map((model) => (model['name'] as String)).toList();
     } catch (e, trace) {
       Logger.root.severe('获取模型列表失败: $e, trace: $trace');
       return [];
