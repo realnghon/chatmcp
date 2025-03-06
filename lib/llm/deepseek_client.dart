@@ -167,7 +167,7 @@ class DeepSeekClient extends BaseLLMClient {
                   reasoningContentStart = true;
                   yield LLMResponse(
                     content:
-                        '<think start-time="${DateTime.now().toIso8601String()}">$reasoningContent',
+                        '\n<think start-time="${DateTime.now().toIso8601String()}">\n$reasoningContent',
                     toolCalls: toolCalls,
                   );
                 } else {
@@ -185,7 +185,7 @@ class DeepSeekClient extends BaseLLMClient {
                     reasoningContentEnd = true;
                     yield LLMResponse(
                       content:
-                          '</think end-time="${DateTime.now().toIso8601String()}">$content',
+                          '\n</think end-time="${DateTime.now().toIso8601String()}">\n$content',
                       toolCalls: toolCalls,
                     );
                   } else {
