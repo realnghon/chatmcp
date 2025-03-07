@@ -12,7 +12,7 @@ class TagInlineSyntax extends md.InlineSyntax {
       : super(_getPattern(tag), caseSensitive: caseSensitive);
 
   static String _getPattern(String tag) =>
-      r'<' + tag + r'\s*([^>]*)>([^<]*)(?:</' + tag + r'\s*([^>]*)>)?';
+      r'<' + tag + r'\s*([^>]*)>\s*([^<]*)(?:</' + tag + r'\s*([^>]*)>\s*)?';
 
   Map<String, String> _parseAttributes(String attributeString) {
     final attributes = <String, String>{};
@@ -59,10 +59,10 @@ class TagBlockSyntax extends md.BlockSyntax {
   TagBlockSyntax({required this.tag});
 
   @protected
-  RegExp get startPattern => RegExp(r'^<' + tag + r'\s*([^>]*)>$');
+  RegExp get startPattern => RegExp(r'^<' + tag + r'\s*([^>]*)>\s*$');
 
   @protected
-  RegExp get endPattern => RegExp(r'^</' + tag + r'\s*([^>]*)>$');
+  RegExp get endPattern => RegExp(r'^</' + tag + r'\s*([^>]*)>\s*$');
 
   @override
   RegExp get pattern => startPattern;
