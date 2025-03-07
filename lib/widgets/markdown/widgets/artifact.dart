@@ -4,6 +4,8 @@ import 'package:markdown_widget/markdown_widget.dart';
 import 'think.dart';
 import 'package:chatmcp/utils/event_bus.dart';
 
+import 'tag.dart';
+
 SpanNodeGeneratorWithTag artifactAntThinkingGenerator =
     SpanNodeGeneratorWithTag(
         tag: _artifactAntThinkingTag,
@@ -12,12 +14,12 @@ SpanNodeGeneratorWithTag artifactAntThinkingGenerator =
 
 const _artifactAntThinkingTag = 'antThinking';
 
-class ArtifactAntThinkingInlineSyntax extends ThinkInlineSyntax {
+class ArtifactAntThinkingInlineSyntax extends TagInlineSyntax {
   static const tagName = _artifactAntThinkingTag;
   ArtifactAntThinkingInlineSyntax() : super(tag: tagName, caseSensitive: false);
 }
 
-class ArtifactAntThinkingBlockSyntax extends ThinkBlockSyntax {
+class ArtifactAntThinkingBlockSyntax extends TagBlockSyntax {
   static const tagName = _artifactAntThinkingTag;
   ArtifactAntThinkingBlockSyntax() : super(tag: tagName);
 }
@@ -52,12 +54,12 @@ SpanNodeGeneratorWithTag artifactAntArtifactGenerator =
 
 const _artifactAntArtifactTag = 'antArtifact';
 
-class ArtifactAntArtifactInlineSyntax extends ThinkInlineSyntax {
+class ArtifactAntArtifactInlineSyntax extends TagInlineSyntax {
   static const tagName = _artifactAntArtifactTag;
   ArtifactAntArtifactInlineSyntax() : super(tag: tagName, caseSensitive: false);
 }
 
-class ArtifactAntArtifactBlockSyntax extends ThinkBlockSyntax {
+class ArtifactAntArtifactBlockSyntax extends TagBlockSyntax {
   static const tagName = _artifactAntArtifactTag;
   ArtifactAntArtifactBlockSyntax() : super(tag: tagName);
 }

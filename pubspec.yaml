@@ -78,9 +78,6 @@ dependencies:
   flutter_cache_manager: ^3.3.1
   flutter_svg: ^2.0.17
 
-dependency_overrides:
-  webview_flutter_wkwebview: 3.17.0
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
