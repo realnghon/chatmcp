@@ -330,9 +330,14 @@ class ToolResultWidget extends StatelessWidget {
   Widget _buildFactory(BuildContext context) {
     switch (message.toolCallId) {
       case 'call_web_search':
-        return TavilySearchResultWidget(
-            response: TavilySearchResponse.fromJson(
-                json.decode(message.content ?? '')));
+        try {
+          return TavilySearchResultWidget(
+              response: TavilySearchResponse.fromJson(
+                  json.decode(message.content ?? '')));
+        } catch (e) {
+          // JSON解析失败，回退到文本显示
+          return Markit(data: message.content ?? '');
+        }
       case 'call_generate_image':
         try {
           final jsonData = json.decode(message.content ?? '');

@@ -5,7 +5,11 @@ Future<List<Map<String, dynamic>>> getTools() async {
   final tools = ProviderManager.settingsProvider.apiSettings;
   return _localTools
       .where((tool) {
-        if (tool['name'] == 'web_search' && !tools.containsKey('tavily')) {
+        if (tool['name'] == 'web_search' &&
+            (!tools.containsKey('tavily') ||
+                tools['tavily'] == null ||
+                tools['tavily']?.apiKey == null ||
+                tools['tavily']?.apiKey.isEmpty == true)) {
           return false;
         }
         // if (tool['name'] == 'generate_image') {
