@@ -13,6 +13,8 @@ final bool kIsDebug = (() {
 
 final bool kIsLinux = Platform.isLinux;
 
+final bool kIsWindows = Platform.isWindows;
+
 final bool kIsDesktop =
     Platform.isMacOS || Platform.isWindows || Platform.isLinux;
 

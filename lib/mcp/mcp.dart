@@ -19,11 +19,9 @@ Future<McpClient> initializeMcpServer(
     mcpClient = StdioClient(serverConfig: serverConfig);
   }
 
-  // 初始化客户端
-  await mcpClient.initialize();
-
-  // 发送初始化消息
   try {
+    // 初始化客户端
+    await mcpClient.initialize();
     // 等待10秒
     await Future.delayed(const Duration(seconds: 10));
     final initResponse = await mcpClient.sendInitialize();
@@ -33,7 +31,6 @@ Future<McpClient> initializeMcpServer(
     Logger.root.info('工具列表响应: $toolListResponse');
   } catch (e, stackTrace) {
     Logger.root.severe('初始化消息发送失败: $e\n堆栈跟踪:\n$stackTrace');
-    rethrow;
   }
 
   return mcpClient;
