@@ -36,39 +36,6 @@ class _McpServerState extends State<McpServer> {
       body: SafeArea(
         child: Consumer<McpServerProvider>(
           builder: (context, provider, child) {
-            if (!provider.isSupported) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      CupertinoIcons.exclamationmark_triangle,
-                      size: 64,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      l10n.platformNotSupported,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      l10n.mcpServerDesktopOnly,
-                      style: TextStyle(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withAlpha(153),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }
-
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
@@ -765,6 +732,13 @@ class _McpServerState extends State<McpServer> {
             ),
             TextButton(
               onPressed: () {
+                // 移动端验证command必须以http开头
+                if ((Platform.isIOS || Platform.isAndroid) &&
+                    !commandController.text.trim().startsWith('http')) {
+                  showErrorDialog(
+                      dialogContext, 'Mobile only supports mcp sse servers');
+                  return;
+                }
                 Navigator.pop(dialogContext, true);
               },
               style: TextButton.styleFrom(
@@ -866,6 +840,7 @@ class _McpServerState extends State<McpServer> {
       config['mcpServers'].remove(serverName);
       await provider.saveServers(config);
       await provider.loadMarketServers();
+      provider.removeClient(serverName);
       setState(() {
         _refreshCounter++;
       });

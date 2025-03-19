@@ -9,6 +9,7 @@ import 'package:chatmcp/provider/chat_provider.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:chatmcp/page/layout/widgets/mcp_tools.dart';
+import 'package:chatmcp/provider/mcp_server_provider.dart';
 // test page
 import 'package:chatmcp/widgets/markdown/markit_widget.dart';
 import 'package:chatmcp/widgets/browser/browser.dart';
@@ -118,78 +119,95 @@ class TopToolbar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<ChatProvider>(
       builder: (context, provider, child) {
-        return MouseRegion(
-          cursor: SystemMouseCursors.click,
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onDoubleTap: () async {
-              debugPrint('double tap');
-              if (kIsDesktop) {
-                try {
-                  bool isMaximized = await wm.windowManager.isMaximized();
-                  if (isMaximized) {
-                    await wm.windowManager.unmaximize();
-                  } else {
-                    await wm.windowManager.maximize();
+        return Consumer<McpServerProvider>(
+          builder: (context, mcpProvider, child) {
+            return MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onDoubleTap: () async {
+                  debugPrint('double tap');
+                  if (kIsDesktop) {
+                    try {
+                      bool isMaximized = await wm.windowManager.isMaximized();
+                      if (isMaximized) {
+                        await wm.windowManager.unmaximize();
+                      } else {
+                        await wm.windowManager.maximize();
+                      }
+                    } catch (e) {
+                      debugPrint('窗口操作失败: $e');
+                    }
                   }
-                } catch (e) {
-                  debugPrint('窗口操作失败: $e');
-                }
-              }
-            },
-            child: Container(
-              padding: kIsDesktop
-                  ? EdgeInsets.only(left: hideSidebar ? 70 : 0)
-                  : null,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Flexible(
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (hideSidebar && kIsDesktop)
-                          IconButton(
-                            icon: Icon(
-                              CupertinoIcons.sidebar_right,
-                              color: AppColors.grey[700],
-                            ),
-                            onPressed: onToggleSidebar,
-                          ),
-                        Flexible(
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(minWidth: 50),
-                            child: Row(
-                              children: [
-                                const ModelSelector(),
-                                const SizedBox(width: 8),
-                                const McpTools(),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
+                },
+                child: Container(
+                  padding: kIsDesktop
+                      ? EdgeInsets.only(left: hideSidebar ? 70 : 0)
+                      : null,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      IconButton(
-                        icon: const Icon(CupertinoIcons.add),
-                        onPressed: () {
-                          ProviderManager.chatProvider.clearActiveChat();
-                        },
+                      Flexible(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (hideSidebar && kIsDesktop)
+                              IconButton(
+                                icon: Icon(
+                                  CupertinoIcons.sidebar_right,
+                                  color: AppColors.grey[700],
+                                ),
+                                onPressed: onToggleSidebar,
+                              ),
+                            Flexible(
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(minWidth: 50),
+                                child: Row(
+                                  children: [
+                                    if (kIsMobile)
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.menu,
+                                        ),
+                                        onPressed: () {
+                                          // open drawer
+                                          Scaffold.of(context).openDrawer();
+                                        },
+                                      ),
+                                    const ModelSelector(),
+                                    if (mcpProvider.clients.isNotEmpty) ...[
+                                      const SizedBox(width: 2),
+                                      const McpTools(),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(right: 16),
-                        child: _buildMoreMenu(context),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (ProviderManager.chatProvider.activeChat != null)
+                            IconButton(
+                              icon: const Icon(CupertinoIcons.add),
+                              onPressed: () {
+                                ProviderManager.chatProvider.clearActiveChat();
+                              },
+                            ),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 0),
+                            child: _buildMoreMenu(context),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );

@@ -89,6 +89,11 @@ class McpServerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void removeClient(String key) {
+    _servers.remove(key);
+    notifyListeners();
+  }
+
   McpClient? getClient(String key) {
     return _servers[key];
   }
@@ -110,11 +115,6 @@ class McpServerProvider extends ChangeNotifier {
   }
 
   Future<void> init() async {
-    if (!isSupported) {
-      Logger.root.info('当前平台不支持 MCP Server');
-      return;
-    }
-
     try {
       // 先确保配置文件存在
       await _initConfigFile();
@@ -203,7 +203,27 @@ class McpServerProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         Logger.root.info('加载市场服务器成功: ${response.data}');
         final Map<String, dynamic> jsonData = json.decode(response.data);
-        return jsonData;
+
+        final Map<String, dynamic> servers =
+            jsonData['mcpServers'] as Map<String, dynamic>;
+
+        var sseServers = <String, dynamic>{};
+
+        // 针对移动端，只保留 command 以 http 开头的服务器
+        if (Platform.isIOS || Platform.isAndroid) {
+          for (var server in servers.entries) {
+            if (server.value['command'] != null &&
+                server.value['command'].toString().startsWith('http')) {
+              sseServers[server.key] = server.value;
+            }
+          }
+        } else {
+          sseServers = servers;
+        }
+
+        return {
+          'mcpServers': sseServers,
+        };
       }
       throw Exception('加载市场服务器失败: ${response.statusCode}');
     } catch (e, stackTrace) {
