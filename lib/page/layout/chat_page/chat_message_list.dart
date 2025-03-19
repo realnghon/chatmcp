@@ -153,20 +153,20 @@ class _MessageListState extends State<MessageList> {
                 );
               },
             ),
-            if (!_isScrolledToBottom())
-              Positioned(
-                bottom: 10,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: ScrollDownButton(
-                    onPressed: () {
-                      _stickToBottom = true;
-                      _scrollToBottom(withDelay: false);
-                    },
-                  ),
-                ),
-              ),
+            // if (!_isScrolledToBottom())
+            //   Positioned(
+            //     bottom: 10,
+            //     left: 0,
+            //     right: 0,
+            //     child: Center(
+            //       child: ScrollDownButton(
+            //         onPressed: () {
+            //           _stickToBottom = true;
+            //           _scrollToBottom(withDelay: false);
+            //         },
+            //       ),
+            //     ),
+            //   ),
           ],
         );
       },

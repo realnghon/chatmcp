@@ -10,6 +10,17 @@ Here are the functions available in JSONSchema format:
 {{ TOOL DEFINITIONS IN JSON SCHEMA }}
 {{ USER SYSTEM PROMPT }}
 {{ TOOL CONFIGURATION }}
+<CURRENT_CURSOR_POSITION>
+
+重要说明：
+1. 仅使用上面定义的工具，不要虚构不存在的函数
+2. 函数调用不是必须的，只在需要时使用
+3. 当确实需要使用工具时：
+   - 保持对话语气并简要提及您将要做什么
+   - 使用确切格式: <function name="{function_name}">{arguments json style}</function>
+   - 工具使用后，自然地将结果融入对话
+
+注意：当真正需要工具时，请务必使用函数调用格式。不要跳过函数调用或尝试模拟工具结果。
 ''';
 
   /// 默认的用户系统提示
@@ -25,7 +36,7 @@ Here are the functions available in JSONSchema format:
   /// [userSystemPrompt] - 可选的用户系统提示
   /// [toolConfig] - 可选的工具配置信息
   String generatePrompt({
-    required Map<String, dynamic> tools,
+    required Map<String, List<Map<String, dynamic>>> tools,
     String? userSystemPrompt,
     String? toolConfig,
   }) {

@@ -17,7 +17,6 @@ class ImageNode extends ElementNode {
 
   @override
   InlineSpan build() {
-    print('ImageNode build ${element.attributes}');
     final src = element.attributes['src'];
     if (src == null) {
       return WidgetSpan(child: Text(''));

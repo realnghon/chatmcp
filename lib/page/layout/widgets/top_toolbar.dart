@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:chatmcp/provider/chat_provider.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:chatmcp/page/layout/widgets/mcp_tools.dart';
 // test page
 import 'package:chatmcp/widgets/markdown/markit_widget.dart';
 import 'package:chatmcp/widgets/browser/browser.dart';
@@ -158,7 +159,13 @@ class TopToolbar extends StatelessWidget {
                         Flexible(
                           child: ConstrainedBox(
                             constraints: const BoxConstraints(minWidth: 50),
-                            child: const ModelSelector(),
+                            child: Row(
+                              children: [
+                                const ModelSelector(),
+                                const SizedBox(width: 8),
+                                const McpTools(),
+                              ],
+                            ),
                           ),
                         ),
                       ],

@@ -49,17 +49,6 @@ class _KeysSettingsState extends State<KeysSettings> {
     ),
   };
 
-  // 定义Tools API配置
-  final Map<String, ApiConfig> _toolsApiConfigs = {
-    'tavily': ApiConfig(
-      title: 'Tavily Search',
-      iconPath: '',
-      accentColor: const Color(0xFF6366F1),
-      requiresKey: true,
-      requiresEndpoint: false,
-    ),
-  };
-
   // 使用Map统一管理控制器
   final Map<String, ApiControllers> _controllers = {};
 
@@ -73,14 +62,6 @@ class _KeysSettingsState extends State<KeysSettings> {
   void _initializeControllers() {
     // 初始化 LLM API 控制器
     for (var entry in _llmApiConfigs.entries) {
-      _controllers[entry.key] = ApiControllers(
-        keyController: entry.value.requiresKey ? TextEditingController() : null,
-        endpointController:
-            entry.value.requiresEndpoint ? TextEditingController() : null,
-      );
-    }
-    // 初始化 Tools API 控制器
-    for (var entry in _toolsApiConfigs.entries) {
       _controllers[entry.key] = ApiControllers(
         keyController: entry.value.requiresKey ? TextEditingController() : null,
         endpointController:
@@ -113,19 +94,6 @@ class _KeysSettingsState extends State<KeysSettings> {
         }
       }
     }
-
-    for (var entry in _toolsApiConfigs.entries) {
-      final apiSettings = settings.apiSettings[entry.key];
-      if (apiSettings != null) {
-        final controller = _controllers[entry.key]!;
-        if (controller.keyController != null) {
-          controller.keyController!.text = apiSettings.apiKey;
-        }
-        if (controller.endpointController != null) {
-          controller.endpointController!.text = apiSettings.apiEndpoint;
-        }
-      }
-    }
   }
 
   @override
@@ -147,10 +115,6 @@ class _KeysSettingsState extends State<KeysSettings> {
                       _buildSectionTitle(
                           context, l10n.llmKey, CupertinoIcons.cube_box),
                       ..._buildLlmApiSections(),
-                      const SizedBox(height: 20),
-                      _buildSectionTitle(
-                          context, l10n.toolKey, CupertinoIcons.wrench),
-                      ..._buildToolsApiSections(),
                       const SizedBox(height: 20),
                     ],
                   ),
@@ -227,18 +191,6 @@ class _KeysSettingsState extends State<KeysSettings> {
         .toList();
   }
 
-  List<Widget> _buildToolsApiSections() {
-    return _toolsApiConfigs.entries
-        .map((entry) => ApiSection(
-              title: entry.value.title,
-              iconPath: entry.value.iconPath,
-              keyController: _controllers[entry.key]?.keyController,
-              endpointController: _controllers[entry.key]?.endpointController,
-              accentColor: entry.value.accentColor,
-            ))
-        .toList();
-  }
-
   Future<void> _saveSettings() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
@@ -249,15 +201,6 @@ class _KeysSettingsState extends State<KeysSettings> {
 
         // 保存 LLM API 设置
         for (var entry in _llmApiConfigs.entries) {
-          final controller = _controllers[entry.key]!;
-          apiSettings[entry.key] = KeysSetting(
-            apiKey: controller.keyController?.text ?? '',
-            apiEndpoint: controller.endpointController?.text ?? '',
-          );
-        }
-
-        // 保存 Tools API 设置
-        for (var entry in _toolsApiConfigs.entries) {
           final controller = _controllers[entry.key]!;
           apiSettings[entry.key] = KeysSetting(
             apiKey: controller.keyController?.text ?? '',

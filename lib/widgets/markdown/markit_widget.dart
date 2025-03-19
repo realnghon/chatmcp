@@ -11,6 +11,8 @@ import './widgets/artifact.dart';
 import './widgets/image.dart';
 import 'package:flutter_highlight/themes/github.dart';
 import './widgets/inline_code.dart';
+import './widgets/function.dart';
+import './widgets/function_result.dart';
 
 class MarkitTestPage extends StatelessWidget {
   const MarkitTestPage({super.key});
@@ -103,7 +105,9 @@ class Markit extends StatelessWidget {
             thinkGenerator,
             detailsGenerator,
             imageGenerator,
-            inlineCodeGenerator
+            inlineCodeGenerator,
+            functionResultGenerator,
+            functionGenerator,
           ],
           inlineSyntaxList: [
             ArtifactAntThinkingInlineSyntax(),
@@ -112,6 +116,8 @@ class Markit extends StatelessWidget {
             LinkSyntax(),
             LatexSyntax(),
             ThinkInlineSyntax(),
+            FunctionInlineSyntax(),
+            FunctionResultInlineSyntax(),
           ],
           blockSyntaxList: [
             DetailsBlockSyntax(),
@@ -119,6 +125,8 @@ class Markit extends StatelessWidget {
             ThinkBlockSyntax(),
             ArtifactAntThinkingBlockSyntax(),
             ArtifactAntArtifactBlockSyntax(),
+            FunctionBlockSyntax(),
+            FunctionResultBlockSyntax(),
           ],
         ),
       ),

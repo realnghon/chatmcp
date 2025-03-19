@@ -17,7 +17,6 @@ import 'chat_message_list.dart';
 import 'package:chatmcp/utils/color.dart';
 import 'package:chatmcp/widgets/widgets_to_image/utils.dart';
 import 'chat_message_to_image.dart';
-import 'package:chatmcp/tool/tools.dart';
 import 'package:chatmcp/utils/event_bus.dart';
 import 'chat_code_preview.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
@@ -38,7 +37,6 @@ class _ChatPageState extends State<ChatPage> {
   BaseLLMClient? _llmClient;
   String _currentResponse = '';
   bool _isLoading = false; // 是否正在加载
-  String _errorMessage = ''; // 错误信息
   String _parentMessageId = ''; // 父消息ID
   bool _isCancelled = false; // 是否取消
 
@@ -82,6 +80,71 @@ class _ChatPageState extends State<ChatPage> {
     _initializeLLMClient();
     _addListeners();
     _initializeHistoryMessages();
+    on<RunFunctionEvent>(_onRunFunction);
+  }
+
+  RunFunctionEvent? _runFunctionEvent;
+  bool _isRunningFunction = false;
+  bool _userApproved = false;
+  bool _userRejected = false;
+
+  Future<void> _onRunFunction(RunFunctionEvent event) async {
+    setState(() {
+      _userApproved = false;
+      _userRejected = false;
+      _runFunctionEvent = event;
+    });
+
+    // 显示授权对话框
+    // if (mounted) {
+    //   await _showFunctionApprovalDialog(event);
+    // }
+  }
+
+  Future<bool> _showFunctionApprovalDialog(RunFunctionEvent event) async {
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('函数调用授权'),
+              content: SingleChildScrollView(
+                child: ListBody(
+                  children: <Widget>[
+                    Text('是否允许执行以下函数:'),
+                    SizedBox(height: 8),
+                    Text('${event.name}',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    SizedBox(height: 8),
+                    Text('参数: ${event.arguments}'),
+                  ],
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('拒绝'),
+                  onPressed: () {
+                    setState(() {
+                      _userRejected = true;
+                      _runFunctionEvent = null;
+                    });
+                    Navigator.of(context).pop(false);
+                  },
+                ),
+                TextButton(
+                  child: Text('允许'),
+                  onPressed: () {
+                    setState(() {
+                      _userApproved = true;
+                    });
+                    Navigator.of(context).pop(true);
+                  },
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
   }
 
   void _addListeners() {
@@ -330,44 +393,8 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
-  // 工具调用
-  Future<void> _handleToolCall(String text) async {
-    var tools = {
-      "local": await getTools(),
-    };
-
-    if (kIsDesktop) {
-      final mcpServerProvider = ProviderManager.mcpServerProvider;
-      tools = {
-        ...tools,
-        ...await mcpServerProvider.getTools(),
-      };
-    }
-    Logger.root.info(
-        'all tools:\n${const JsonEncoder.withIndent('  ').convert(tools)}');
-
-    if (tools.isEmpty) return;
-
-    final toolCall = await _llmClient!.checkToolCall(text, tools);
-    if (!toolCall['need_tool_call']) return;
-
-    await _processMcpToolCall(toolCall, tools);
-  }
-
-  Future<void> _processMcpToolCall(
-      Map<String, dynamic> toolCall, Map<String, dynamic> tools) async {
-    final toolName = toolCall['tool_calls'][0]['name'];
-    final toolArguments =
-        toolCall['tool_calls'][0]['arguments'] as Map<String, dynamic>;
-
-    String? clientName = _findClientName(tools, toolName);
-    if (clientName == null) return;
-
-    _addToolCallMessage(clientName, toolName, toolArguments);
-    await _sendToolCallAndProcessResponse(clientName, toolName, toolArguments);
-  }
-
-  String? _findClientName(Map<String, dynamic> tools, String toolName) {
+  String? _findClientName(
+      Map<String, List<Map<String, dynamic>>> tools, String toolName) {
     for (var entry in tools.entries) {
       final clientTools = entry.value;
       if (clientTools.any((tool) => tool['name'] == toolName)) {
@@ -377,57 +404,23 @@ class _ChatPageState extends State<ChatPage> {
     return null;
   }
 
-  void _addToolCallMessage(
-      String clientName, String toolName, Map<String, dynamic> toolArguments) {
-    setState(() {
-      _messages.add(ChatMessage(
-          content: null,
-          role: MessageRole.assistant,
-          parentMessageId: _parentMessageId,
-          mcpServerName: clientName,
-          toolCalls: [
-            {
-              'id': "call_$toolName",
-              'type': 'function',
-              'function': {
-                'name': toolName,
-                'arguments': jsonEncode(toolArguments)
-              }
-            }
-          ]));
-    });
-  }
-
-  Future<dynamic> _processLocalToolCall(
+  Future<void> _sendToolCallAndProcessResponse(
       String toolName, Map<String, dynamic> toolArguments) async {
-    return await useTool(toolName, toolArguments);
-  }
-
-  Future<void> _sendToolCallAndProcessResponse(String clientName,
-      String toolName, Map<String, dynamic> toolArguments) async {
-    if (clientName == "local") {
-      final response = await _processLocalToolCall(toolName, toolArguments);
-
-      setState(() {
-        print(
-            'response: $response, type: ${response.runtimeType}, ${response.toString()}');
-        _currentResponse = response.toString();
-        if (_currentResponse.isNotEmpty) {
-          _messages.add(ChatMessage(
-            content: _currentResponse,
-            role: MessageRole.tool,
-            mcpServerName: clientName,
-            name: toolName,
-            toolCallId: 'call_$toolName',
-            parentMessageId: _parentMessageId,
-          ));
-        }
-      });
-      return;
-    }
+    final clientName =
+        _findClientName(ProviderManager.mcpServerProvider.tools, toolName);
+    if (clientName == null) return;
 
     final mcpClient = ProviderManager.mcpServerProvider.getClient(clientName);
     if (mcpClient == null) return;
+
+    final parentMsgIndex = _messages.length - 1;
+    if (parentMsgIndex != -1) {
+      _messages[parentMsgIndex] = _messages[parentMsgIndex].copyWith(
+        content: _messages[parentMsgIndex].content?.replaceAll(
+            "<function name=\"$toolName\">",
+            "<function name=\"$toolName\" done=\"true\">"),
+      );
+    }
 
     final response = await mcpClient.sendToolCall(
       name: toolName,
@@ -438,11 +431,10 @@ class _ChatPageState extends State<ChatPage> {
       _currentResponse = response.result['content'].toString();
       if (_currentResponse.isNotEmpty) {
         _messages.add(ChatMessage(
-          content: _currentResponse,
-          role: MessageRole.tool,
-          mcpServerName: clientName,
+          content:
+              '<call_function_result name="$toolName">\n$_currentResponse\n</call_function_result>',
+          role: MessageRole.assistant,
           name: toolName,
-          toolCallId: 'call_$toolName',
           parentMessageId: _parentMessageId,
         ));
       }
@@ -483,9 +475,6 @@ class _ChatPageState extends State<ChatPage> {
     });
 
     try {
-      if (ProviderManager.settingsProvider.generalSetting.enableToolUsage) {
-        await _handleToolCall(userMessage.content ?? '');
-      }
       await _processLLMResponse();
       await _updateChat();
     } catch (e, stackTrace) {
@@ -497,6 +486,33 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
+  bool _checkNeedToolCall() {
+    if (_runFunctionEvent != null) return true;
+
+    final lastMessage = _messages.last;
+    if (lastMessage.role == MessageRole.user) return true;
+
+    final content = lastMessage.content ?? '';
+    if (content.isEmpty) return false;
+
+    // 使用正则表达式检查是否包含 <function name=*>*</function> 格式的标签
+    final RegExp functionTagRegex = RegExp(
+        '<function\\s+name=["\']([^"\']*)["\']>(.*?)</function>',
+        dotAll: true);
+    final match = functionTagRegex.firstMatch(content);
+
+    if (match == null) return false;
+
+    final toolName = match.group(1);
+    final toolArguments = match.group(2);
+
+    if (toolName == null || toolArguments == null) return false;
+
+    _onRunFunction(RunFunctionEvent(toolName, toolArguments));
+
+    return true;
+  }
+
   // 消息提交处理
   Future<void> _handleSubmitted(SubmitData data) async {
     setState(() {
@@ -504,13 +520,53 @@ class _ChatPageState extends State<ChatPage> {
     });
     final files = data.files.map((file) => platformFileToFile(file)).toList();
 
-    _addUserMessage(data.text, files);
+    if (data.text.isNotEmpty) {
+      _addUserMessage(data.text, files);
+    }
 
     try {
-      if (ProviderManager.settingsProvider.generalSetting.enableToolUsage) {
-        await _handleToolCall(data.text);
+      while (_checkNeedToolCall()) {
+        // if (_isRunningFunction) {
+        //   await Future.delayed(const Duration(microseconds: 100));
+        //   continue;
+        // }
+
+        if (_runFunctionEvent != null) {
+          // 等待用户授权
+          final event = _runFunctionEvent!;
+          final approved = await _showFunctionApprovalDialog(event);
+
+          if (approved) {
+            setState(() {
+              _isRunningFunction = true;
+              _userApproved = false;
+            });
+
+            Logger.root.info('run function: ${event.name} ${event.arguments}');
+            final toolName = event.name;
+            final toolArguments = jsonDecode(event.arguments);
+            await _sendToolCallAndProcessResponse(toolName, toolArguments);
+            setState(() {
+              _isRunningFunction = false;
+            });
+            _runFunctionEvent = null;
+          } else {
+            // 用户拒绝了函数调用
+            setState(() {
+              _userRejected = false;
+              _runFunctionEvent = null;
+            });
+            _messages.add(ChatMessage(
+              content: '拒绝函数调用',
+              role: MessageRole.user,
+              parentMessageId: _parentMessageId,
+            ));
+            break;
+          }
+        }
+
+        await _processLLMResponse();
       }
-      await _processLLMResponse();
       await _updateChat();
     } catch (e, stackTrace) {
       _handleError(e, stackTrace);
@@ -539,12 +595,14 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
-  String _getSystemPrompt() {
-    final systemPrompt =
-        ProviderManager.settingsProvider.generalSetting.systemPrompt;
-    if (ProviderManager.settingsProvider.generalSetting.enableArtifacts) {
-      return "$systemPrompt\n\n$artifactPrompt";
-    }
+  Future<String> _getSystemPrompt() async {
+    final tools = ProviderManager.mcpServerProvider.tools;
+
+    final promptGenerator = SystemPromptGenerator();
+    final systemPrompt = promptGenerator.generatePrompt(tools: tools);
+
+    Logger.root.info('systemPrompt: $systemPrompt');
+
     return systemPrompt;
   }
 
@@ -558,8 +616,8 @@ class _ChatPageState extends State<ChatPage> {
       model: ProviderManager.chatModelProvider.currentModel.name,
       messages: [
         ChatMessage(
-          content: _getSystemPrompt(),
-          role: MessageRole.system,
+          content: await _getSystemPrompt(),
+          role: MessageRole.assistant,
         ),
         ...messageList,
       ],
@@ -682,10 +740,6 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _handleError(dynamic error, StackTrace stackTrace) {
-    setState(() {
-      _errorMessage = error.toString();
-    });
-
     Logger.root.severe(error, stackTrace);
 
     if (mounted) {
@@ -776,6 +830,11 @@ class _ChatPageState extends State<ChatPage> {
           child: Column(
             children: [
               _buildMessageList(),
+              // loading icon
+              if (_isRunningFunction)
+                const Center(
+                  child: CircularProgressIndicator(),
+                ),
               InputArea(
                 disabled: _isLoading,
                 isComposing: _isComposing,

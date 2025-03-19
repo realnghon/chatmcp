@@ -1,3 +1,4 @@
+import 'package:chatmcp/utils/platform.dart';
 import 'package:logging/logging.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
@@ -39,8 +40,7 @@ class FileLogger {
 
   static Future<void> initLogFile() async {
     try {
-      final appDir =
-          await getApplicationSupportDirectory(); // macos is ~/Library/Application Support
+      final Directory appDir = await getAppDir('ChatMcp');
       final logDir = Directory(path.join(appDir.path, 'logs'));
 
       // 确保日志目录存在

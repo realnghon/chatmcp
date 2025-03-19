@@ -9,6 +9,12 @@ import 'package:chatmcp/utils/platform.dart';
 import '../mcp/client/mcp_client_interface.dart';
 
 class McpServerProvider extends ChangeNotifier {
+  static final McpServerProvider _instance = McpServerProvider._internal();
+  factory McpServerProvider() => _instance;
+  McpServerProvider._internal() {
+    init();
+  }
+
   static const _configFileName = 'mcp_server.json';
 
   Map<String, McpClient> _servers = {};
@@ -63,7 +69,6 @@ class McpServerProvider extends ChangeNotifier {
       final file = File(await _configFilePath);
       final prettyContents =
           const JsonEncoder.withIndent('  ').convert(servers);
-      Logger.root.info('保存的配置文件内容:\n$prettyContents');
       await file.writeAsString(prettyContents);
       // 保存后重新初始化客户端
       await _reinitializeClients();
@@ -74,7 +79,7 @@ class McpServerProvider extends ChangeNotifier {
 
   // 重新初始化客户端
   Future<void> _reinitializeClients() async {
-    _servers.clear();
+    // _servers.clear();
     await init();
     notifyListeners();
   }
@@ -88,24 +93,20 @@ class McpServerProvider extends ChangeNotifier {
     return _servers[key];
   }
 
-  Future<Map<String, List<Map<String, dynamic>>>> getTools() async {
-    Map<String, List<Map<String, dynamic>>> result = {};
+  final Map<String, List<Map<String, dynamic>>> _tools = {};
+  Map<String, List<Map<String, dynamic>>> get tools {
+    return _tools;
+  }
 
-    for (var entry in _servers.entries) {
-      final clientName = entry.key;
-      final client = entry.value;
-      Logger.root.info('getTools: $clientName ${client.runtimeType}');
-      final response = await client.sendToolList();
-      final tools = (response.toJson()['result']['tools'] as List<dynamic>)
-          .cast<Map<String, dynamic>>();
-      result[clientName] = tools;
-    }
+  bool loadingServerTools = false;
 
-    if (result.isEmpty) {
-      result = {};
-    }
-
-    return result;
+  Future<List<Map<String, dynamic>>> getServerTools(
+      String serverName, McpClient client) async {
+    final tools = <Map<String, dynamic>>[];
+    final response = await client.sendToolList();
+    final toolsList = response.toJson()['result']['tools'] as List<dynamic>;
+    tools.addAll(toolsList.cast<Map<String, dynamic>>());
+    return tools;
   }
 
   Future<void> init() async {
@@ -124,13 +125,21 @@ class McpServerProvider extends ChangeNotifier {
       // 添加配置文件内容日志
       final configFile = File(configFilePath);
       final configContent = await configFile.readAsString();
-      Logger.root.info('配置文件内容: $configContent');
+      Logger.root.info('mcp_server config: $configContent');
 
-      _servers = await initializeAllMcpServers(configFilePath);
+      final ignoreServers = <String>[];
+      for (var entry in clients.entries) {
+        ignoreServers.add(entry.key);
+      }
+
+      Logger.root.info('mcp_server ignoreServers: $ignoreServers');
+
+      _servers = await initializeAllMcpServers(configFilePath, ignoreServers);
       Logger.root.info('mcp_server count: ${_servers.length}');
       for (var entry in _servers.entries) {
         addClient(entry.key, entry.value);
       }
+
       notifyListeners();
     } catch (e, stackTrace) {
       Logger.root.severe('初始化 MCP 服务器失败: $e, stackTrace: $stackTrace');
@@ -141,6 +150,47 @@ class McpServerProvider extends ChangeNotifier {
         Logger.root.severe('配置文件解析错误，当前配置内容: $content');
       }
     }
+  }
+
+  Future<Map<String, McpClient>> initializeAllMcpServers(
+      String configPath, List<String> ignoreServers) async {
+    final file = File(configPath);
+    final contents = await file.readAsString();
+
+    final Map<String, dynamic> config =
+        json.decode(contents) as Map<String, dynamic>? ?? {};
+
+    final mcpServers = config['mcpServers'] as Map<String, dynamic>;
+
+    final Map<String, McpClient> clients = {};
+
+    for (var entry in mcpServers.entries) {
+      if (ignoreServers.contains(entry.key)) {
+        continue;
+      }
+
+      final serverName = entry.key;
+      final serverConfig = entry.value as Map<String, dynamic>;
+
+      try {
+        // 创建异步任务并添加到列表
+        final client = await initializeMcpServer(serverConfig);
+        if (client != null) {
+          clients[serverName] = client;
+          loadingServerTools = true;
+          notifyListeners();
+          final tools = await getServerTools(serverName, client);
+          _tools[serverName] = tools;
+          loadingServerTools = false;
+          notifyListeners();
+        }
+      } catch (e, stackTrace) {
+        Logger.root
+            .severe('初始化 MCP 服务器失败: $serverName, $e, stackTrace: $stackTrace');
+      }
+    }
+
+    return clients;
   }
 
   String mcpServerMarket =

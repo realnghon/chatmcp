@@ -160,12 +160,13 @@ class ChatMessage {
   ChatMessage copyWith({
     String? messageId,
     String? parentMessageId,
+    String? content,
   }) {
     return ChatMessage(
       messageId: messageId ?? this.messageId,
       parentMessageId: parentMessageId ?? this.parentMessageId,
       role: role,
-      content: content,
+      content: content ?? this.content,
       name: name,
       mcpServerName: mcpServerName,
       toolCallId: toolCallId,

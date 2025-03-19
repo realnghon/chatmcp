@@ -10,7 +10,6 @@ import 'package:provider/provider.dart';
 import 'dart:io' as io;
 import 'package:chatmcp/utils/color.dart';
 import 'chat_message_action.dart';
-import 'package:chatmcp/tool/tavily.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
 
 class ChatUIMessage extends StatelessWidget {
@@ -330,14 +329,8 @@ class ToolResultWidget extends StatelessWidget {
   Widget _buildFactory(BuildContext context) {
     switch (message.toolCallId) {
       case 'call_web_search':
-        try {
-          return TavilySearchResultWidget(
-              response: TavilySearchResponse.fromJson(
-                  json.decode(message.content ?? '')));
-        } catch (e) {
-          // JSON解析失败，回退到文本显示
-          return Markit(data: message.content ?? '');
-        }
+        // JSON解析失败，回退到文本显示
+        return Markit(data: message.content ?? '');
       case 'call_generate_image':
         try {
           final jsonData = json.decode(message.content ?? '');

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chatmcp/provider/provider_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
@@ -7,7 +8,6 @@ import '../../provider/mcp_server_provider.dart';
 import 'package:logging/logging.dart';
 import 'dart:io';
 import 'package:chatmcp/utils/process.dart';
-import 'package:chatmcp/utils/color.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
 
 class McpServer extends StatefulWidget {
@@ -20,6 +20,7 @@ class McpServer extends StatefulWidget {
 class _McpServerState extends State<McpServer> {
   final TextEditingController _searchController = TextEditingController();
   String _selectedTab = 'All';
+  int _refreshCounter = 0;
 
   @override
   void dispose() {
@@ -119,9 +120,7 @@ class _McpServerState extends State<McpServer> {
                         icon: CupertinoIcons.add,
                         tooltip: l10n.addServer,
                         onPressed: () {
-                          final provider = Provider.of<McpServerProvider>(
-                              context,
-                              listen: false);
+                          final provider = ProviderManager.mcpServerProvider;
                           _showEditDialog(context, '', provider, null);
                         },
                       ),
@@ -138,9 +137,10 @@ class _McpServerState extends State<McpServer> {
                   // 服务器列表
                   Expanded(
                     child: FutureBuilder<Map<String, dynamic>>(
-                      future: _selectedTab == l10n.all
+                      future: (_selectedTab == l10n.all
                           ? provider.loadMarketServers()
-                          : provider.loadServers(),
+                          : provider.loadServers()),
+                      key: ValueKey('server_list_$_refreshCounter'),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
@@ -234,6 +234,16 @@ class _McpServerState extends State<McpServer> {
     );
   }
 
+  bool isActive(String serverName) {
+    final provider = ProviderManager.mcpServerProvider.clients;
+    for (var client in provider.entries) {
+      if (client.key == serverName) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   Widget _buildServerCard(
     BuildContext context,
     String serverName,
@@ -241,6 +251,9 @@ class _McpServerState extends State<McpServer> {
     McpServerProvider provider,
   ) {
     final l10n = AppLocalizations.of(context)!;
+
+    bool serverActive = isActive(serverName);
+
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
       elevation: 0,
@@ -264,7 +277,9 @@ class _McpServerState extends State<McpServer> {
           side: BorderSide.none,
         ),
         leading: Icon(
-          CupertinoIcons.desktopcomputer,
+          serverActive
+              ? CupertinoIcons.checkmark
+              : CupertinoIcons.desktopcomputer,
           color: Theme.of(context).colorScheme.primary,
         ),
         childrenPadding: const EdgeInsets.all(16),
@@ -804,8 +819,14 @@ class _McpServerState extends State<McpServer> {
           'env': env,
         };
 
+        if (mounted) {
+          setState(() {
+            _refreshCounter++;
+          });
+        }
+
+        // 在保存后同时更新本地和市场服务器列表
         await provider.saveServers(config);
-        setState(() {});
       }
     } finally {
       // 确保控制器被释放
@@ -844,7 +865,10 @@ class _McpServerState extends State<McpServer> {
       final config = await provider.loadServers();
       config['mcpServers'].remove(serverName);
       await provider.saveServers(config);
-      setState(() {});
+      await provider.loadMarketServers();
+      setState(() {
+        _refreshCounter++;
+      });
     }
   }
 

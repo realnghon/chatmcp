@@ -21,6 +21,20 @@ class ShareEvent {
   const ShareEvent(this.share);
 }
 
+class RunFunctionEvent {
+  final String name;
+  final String arguments;
+
+  const RunFunctionEvent(this.name, this.arguments);
+}
+
+class ToolCallResultEvent {
+  final String toolName;
+  final String result;
+
+  const ToolCallResultEvent(this.toolName, this.result);
+}
+
 /// The global [EventBus] object.
 EventBus eventBus = EventBus();
 
