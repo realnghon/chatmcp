@@ -10,15 +10,24 @@ Here are the functions available in JSONSchema format:
 {{ TOOL DEFINITIONS IN JSON SCHEMA }}
 {{ USER SYSTEM PROMPT }}
 {{ TOOL CONFIGURATION }}
-<CURRENT_CURSOR_POSITION>
 
 重要说明：
 1. 仅使用上面定义的工具，不要虚构不存在的函数
-2. 函数调用不是必须的，只在需要时使用
+2. 函数调用不是必须的，只在需要时使用, 每次只能使用一个工具
 3. 当确实需要使用工具时：
    - 保持对话语气并简要提及您将要做什么
-   - 使用确切格式: <function name="{function_name}">{arguments json style}</function>
    - 工具使用后，自然地将结果融入对话
+5. 工具调用格式
+  - function 标签, 有且仅有 name 属性
+  - function_name: 工具名称, 必须使用驼峰命名
+  - arguments: 工具参数, 必须使用合法的JSON格式
+  - 工具调用格式样例, 不要添加 done 属性, 必须是 xml 格式
+    <function name="function_name">
+    {
+      "argument1": "value1",
+      "argument2": "value2"
+    }
+    </function>
 
 注意：当真正需要工具时，请务必使用函数调用格式。不要跳过函数调用或尝试模拟工具结果。
 ''';
@@ -36,7 +45,7 @@ Here are the functions available in JSONSchema format:
   /// [userSystemPrompt] - 可选的用户系统提示
   /// [toolConfig] - 可选的工具配置信息
   String generatePrompt({
-    required Map<String, List<Map<String, dynamic>>> tools,
+    required List<Map<String, dynamic>> tools,
     String? userSystemPrompt,
     String? toolConfig,
   }) {
@@ -63,10 +72,9 @@ Here are the functions available in JSONSchema format:
   /// 返回一个简洁的、面向行动的系统提示
   String generateSystemPrompt(List<Map<String, dynamic>> tools) {
     final promptGenerator = SystemPromptGenerator();
-    final toolsJson = {'tools': tools};
 
     // 生成基础工具提示
-    var systemPrompt = promptGenerator.generatePrompt(tools: toolsJson);
+    var systemPrompt = promptGenerator.generatePrompt(tools: tools);
 
     // 添加简洁的工具使用指南
     systemPrompt += '''

@@ -20,6 +20,7 @@ import 'chat_message_to_image.dart';
 import 'package:chatmcp/utils/event_bus.dart';
 import 'chat_code_preview.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
+import 'package:jsonc/jsonc.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -99,6 +100,10 @@ class _ChatPageState extends State<ChatPage> {
     // if (mounted) {
     //   await _showFunctionApprovalDialog(event);
     // }
+
+    if (!_isLoading) {
+      _handleSubmitted(SubmitData("", []));
+    }
   }
 
   Future<bool> _showFunctionApprovalDialog(RunFunctionEvent event) async {
@@ -122,7 +127,7 @@ class _ChatPageState extends State<ChatPage> {
               ),
               actions: <Widget>[
                 TextButton(
-                  child: Text('拒绝'),
+                  child: Text('取消'),
                   onPressed: () {
                     setState(() {
                       _userRejected = true;
@@ -319,6 +324,10 @@ class _ChatPageState extends State<ChatPage> {
         _messages = [];
         _chat = null;
         _parentMessageId = '';
+        _runFunctionEvent = null;
+        _isRunningFunction = false;
+        _userApproved = false;
+        _userRejected = false;
       });
       return;
     }
@@ -341,6 +350,10 @@ class _ChatPageState extends State<ChatPage> {
         _messages = messages;
         _chat = activeChat;
         _parentMessageId = parentId;
+        _runFunctionEvent = null;
+        _isRunningFunction = false;
+        _userApproved = false;
+        _userRejected = false;
       });
     }
   }
@@ -413,15 +426,6 @@ class _ChatPageState extends State<ChatPage> {
     final mcpClient = ProviderManager.mcpServerProvider.getClient(clientName);
     if (mcpClient == null) return;
 
-    final parentMsgIndex = _messages.length - 1;
-    if (parentMsgIndex != -1) {
-      _messages[parentMsgIndex] = _messages[parentMsgIndex].copyWith(
-        content: _messages[parentMsgIndex].content?.replaceAll(
-            "<function name=\"$toolName\">",
-            "<function name=\"$toolName\" done=\"true\">"),
-      );
-    }
-
     final response = await mcpClient.sendToolCall(
       name: toolName,
       arguments: toolArguments,
@@ -430,13 +434,25 @@ class _ChatPageState extends State<ChatPage> {
     setState(() {
       _currentResponse = response.result['content'].toString();
       if (_currentResponse.isNotEmpty) {
+        _parentMessageId = _messages.last.messageId;
+        final msgId = Uuid().v4();
         _messages.add(ChatMessage(
+          messageId: msgId,
           content:
               '<call_function_result name="$toolName">\n$_currentResponse\n</call_function_result>',
           role: MessageRole.assistant,
           name: toolName,
           parentMessageId: _parentMessageId,
         ));
+        _parentMessageId = msgId;
+        final parentMsgIndex = _messages.length - 2;
+        if (parentMsgIndex != -1) {
+          _messages[parentMsgIndex] = _messages[parentMsgIndex].copyWith(
+            content: _messages[parentMsgIndex].content?.replaceAll(
+                "<function name=\"$toolName\">",
+                "<function name=\"$toolName\" done=\"true\">"),
+          );
+        }
       }
     });
   }
@@ -497,7 +513,7 @@ class _ChatPageState extends State<ChatPage> {
 
     // 使用正则表达式检查是否包含 <function name=*>*</function> 格式的标签
     final RegExp functionTagRegex = RegExp(
-        '<function\\s+name=["\']([^"\']*)["\']>(.*?)</function>',
+        '<function\\s+name=["\']([^"\']*)["\']\\s*>(.*?)</function>',
         dotAll: true);
     final match = functionTagRegex.firstMatch(content);
 
@@ -544,7 +560,7 @@ class _ChatPageState extends State<ChatPage> {
 
             Logger.root.info('run function: ${event.name} ${event.arguments}');
             final toolName = event.name;
-            final toolArguments = jsonDecode(event.arguments);
+            final toolArguments = jsonc.decode(event.arguments);
             await _sendToolCallAndProcessResponse(toolName, toolArguments);
             setState(() {
               _isRunningFunction = false;
@@ -556,12 +572,14 @@ class _ChatPageState extends State<ChatPage> {
               _userRejected = false;
               _runFunctionEvent = null;
             });
+            final msgId = Uuid().v4();
             _messages.add(ChatMessage(
-              content: '拒绝函数调用',
-              role: MessageRole.user,
+              messageId: msgId,
+              content: '用户取消了工具调用',
+              role: MessageRole.assistant,
               parentMessageId: _parentMessageId,
             ));
-            break;
+            _parentMessageId = msgId;
           }
         }
 
@@ -596,10 +614,14 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<String> _getSystemPrompt() async {
-    final tools = ProviderManager.mcpServerProvider.tools;
-
     final promptGenerator = SystemPromptGenerator();
-    final systemPrompt = promptGenerator.generatePrompt(tools: tools);
+
+    var tools = <Map<String, dynamic>>[];
+    for (var entry in ProviderManager.mcpServerProvider.tools.entries) {
+      tools.addAll(entry.value);
+    }
+
+    final systemPrompt = promptGenerator.generateSystemPrompt(tools);
 
     Logger.root.info('systemPrompt: $systemPrompt');
 
@@ -617,9 +639,11 @@ class _ChatPageState extends State<ChatPage> {
       messages: [
         ChatMessage(
           content: await _getSystemPrompt(),
-          role: MessageRole.assistant,
+          role: MessageRole.system,
         ),
-        ...messageList,
+        ...messageList.map((m) => m.copyWith(
+              content: m.content?.replaceAll("done=\"true\"", ""),
+            )),
       ],
       modelSetting: modelSetting,
     ));
