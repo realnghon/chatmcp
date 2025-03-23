@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:math' show min;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:html2md/html2md.dart' as html2md;
+import 'package:chatmcp/generated/app_localizations.dart';
 
 class SearchResult {
   final String title;
@@ -59,16 +60,17 @@ class BrowserViewState extends State<BrowserView> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: ElevatedButton(
-          onPressed: () {
-            browser.openUrlRequest(
-                urlRequest: URLRequest(
-                    url: WebUri('http://google.com/search?q=${widget.url}')),
-                settings: settings);
-            print('打开浏览器');
-          },
-          child: const Text("Open InAppBrowser")),
+    var t = AppLocalizations.of(context)!;
+    return IconButton(
+      icon: const Icon(Icons.open_in_browser),
+      tooltip: t.openBrowser,
+      onPressed: () {
+        browser.openUrlRequest(
+            urlRequest: URLRequest(
+                url: WebUri('http://google.com/search?q=${widget.url}')),
+            settings: settings);
+        print(t.openingBrowser);
+      },
     );
   }
 }

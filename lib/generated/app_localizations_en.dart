@@ -1,5 +1,3 @@
-// ignore: unused_import
-import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -301,4 +299,66 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get close => 'Close';
+
+  @override
+  String get selectFromGallery => 'Select from Gallery';
+
+  @override
+  String get selectFile => 'Select File';
+
+  @override
+  String get uploadFile => 'Upload File';
+
+  @override
+  String get openBrowser => 'Open Browser';
+
+  @override
+  String get codeCopiedToClipboard => 'Code copied to clipboard';
+
+  @override
+  String get thinking => 'Thinking';
+
+  @override
+  String get thinkingEnd => 'Thinking End';
+
+  @override
+  String get tool => 'Tool';
+
+  @override
+  String get userCancelledToolCall => 'User cancelled tool call';
+
+  @override
+  String get code => 'Code';
+
+  @override
+  String get preview => 'Preview';
+
+  @override
+  String get loadContentFailed => 'Failed to load content, please retry';
+
+  @override
+  String get openingBrowser => 'Opening browser';
+
+  @override
+  String get functionCallAuth => 'Function Call Authorization';
+
+  @override
+  String get allowFunctionExecution => 'Do you want to allow the following function to execute:';
+
+  @override
+  String parameters(Object params) {
+    return 'Parameters: $params';
+  }
+
+  @override
+  String get allow => 'Allow';
+
+  @override
+  String get loadDiagramFailed => 'Failed to load diagram, please retry';
+
+  @override
+  String get copiedToClipboard => 'Copied to clipboard';
+
+  @override
+  String get chinese => 'Chinese';
 }

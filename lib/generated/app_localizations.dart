@@ -646,6 +646,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Close'**
   String get close;
+
+  /// No description provided for @selectFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Select from Gallery'**
+  String get selectFromGallery;
+
+  /// No description provided for @selectFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Select File'**
+  String get selectFile;
+
+  /// No description provided for @uploadFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload File'**
+  String get uploadFile;
+
+  /// No description provided for @openBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Browser'**
+  String get openBrowser;
+
+  /// No description provided for @codeCopiedToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Code copied to clipboard'**
+  String get codeCopiedToClipboard;
+
+  /// No description provided for @thinking.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking'**
+  String get thinking;
+
+  /// No description provided for @thinkingEnd.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking End'**
+  String get thinkingEnd;
+
+  /// No description provided for @tool.
+  ///
+  /// In en, this message translates to:
+  /// **'Tool'**
+  String get tool;
+
+  /// No description provided for @userCancelledToolCall.
+  ///
+  /// In en, this message translates to:
+  /// **'User cancelled tool call'**
+  String get userCancelledToolCall;
+
+  /// No description provided for @code.
+  ///
+  /// In en, this message translates to:
+  /// **'Code'**
+  String get code;
+
+  /// No description provided for @preview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get preview;
+
+  /// No description provided for @loadContentFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load content, please retry'**
+  String get loadContentFailed;
+
+  /// No description provided for @openingBrowser.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening browser'**
+  String get openingBrowser;
+
+  /// No description provided for @functionCallAuth.
+  ///
+  /// In en, this message translates to:
+  /// **'Function Call Authorization'**
+  String get functionCallAuth;
+
+  /// No description provided for @allowFunctionExecution.
+  ///
+  /// In en, this message translates to:
+  /// **'Do you want to allow the following function to execute:'**
+  String get allowFunctionExecution;
+
+  /// No description provided for @parameters.
+  ///
+  /// In en, this message translates to:
+  /// **'Parameters: {params}'**
+  String parameters(Object params);
+
+  /// No description provided for @allow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get allow;
+
+  /// No description provided for @loadDiagramFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load diagram, please retry'**
+  String get loadDiagramFailed;
+
+  /// No description provided for @copiedToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to clipboard'**
+  String get copiedToClipboard;
+
+  /// No description provided for @chinese.
+  ///
+  /// In en, this message translates to:
+  /// **'Chinese'**
+  String get chinese;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

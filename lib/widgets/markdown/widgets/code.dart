@@ -3,6 +3,7 @@ import 'package:markdown_widget/markdown_widget.dart';
 import 'package:markdown/markdown.dart' as m;
 import 'package:chatmcp/utils/color.dart';
 import 'package:flutter/services.dart';
+import 'package:chatmcp/generated/app_localizations.dart';
 
 import 'mermaid_diagram_view.dart' show MermaidDiagramView;
 import 'html_view.dart';
@@ -129,19 +130,30 @@ class _CodeBlockState extends State<_CodeBlock>
     return null;
   }
 
-  Future<void> _copyToClipboard() async {
-    await Clipboard.setData(ClipboardData(text: widget.code));
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('代码已复制到剪贴板'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }
+  @override
+  Widget build(BuildContext context) {
+    var t = AppLocalizations.of(context)!;
+    super.build(context);
+    return Container(
+      width: double.infinity,
+      decoration: widget.preConfig.decoration,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          buildToolBar(t),
+          // if (_isSupportPreview)
+          //   Offstage(
+          //     offstage: !_isPreviewVisible,
+          //     child: previewWidget!,
+          //   ),
+          if (_isSupportPreview && _isPreviewVisible) previewWidget!,
+          if (!_isPreviewVisible) ...buildCodeBlockList(),
+        ],
+      ),
+    );
   }
 
-  Widget buildToolBar() {
+  Widget buildToolBar(AppLocalizations t) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -168,24 +180,17 @@ class _CodeBlockState extends State<_CodeBlock>
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              TextButton(
-                style: TextButton.styleFrom(
-                  minimumSize: Size.zero,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  backgroundColor: AppColors.getThemeColor(context,
-                      lightColor: AppColors.grey[100],
-                      darkColor: AppColors.grey[900]),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-                onPressed: _copyToClipboard,
-                child: const Text(
-                  'copy',
-                  style: TextStyle(fontSize: 9, height: 1),
-                ),
+              IconButton(
+                icon: const Icon(Icons.copy),
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: widget.code));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(t.codeCopiedToClipboard),
+                      duration: const Duration(seconds: 2),
+                    ),
+                  );
+                },
               ),
               const SizedBox(width: 4),
               if (_isSupportPreview)
@@ -237,28 +242,6 @@ class _CodeBlockState extends State<_CodeBlock>
             richTextBuilder: widget.visitor.richTextBuilder,
           ));
     });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    return Container(
-      width: double.infinity,
-      decoration: widget.preConfig.decoration,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          buildToolBar(),
-          // if (_isSupportPreview)
-          //   Offstage(
-          //     offstage: !_isPreviewVisible,
-          //     child: previewWidget!,
-          //   ),
-          if (_isSupportPreview && _isPreviewVisible) previewWidget!,
-          if (!_isPreviewVisible) ...buildCodeBlockList(),
-        ],
-      ),
-    );
   }
 }
 
