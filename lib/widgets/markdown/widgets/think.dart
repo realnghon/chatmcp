@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:chatmcp/generated/app_localizations.dart';
 
 import 'package:markdown_widget/markdown_widget.dart';
 import 'package:chatmcp/utils/color.dart';
@@ -51,6 +52,7 @@ class _ThinkWidgetState extends State<ThinkWidget> {
 
   @override
   Widget build(BuildContext context) {
+    var t = AppLocalizations.of(context)!;
     String startTime = widget.attributes['start-time'] ?? '';
     String endTime = widget.attributes['end-time'] ?? '';
 

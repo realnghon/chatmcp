@@ -1,5 +1,3 @@
-// ignore: unused_import
-import 'package:intl/intl.dart' as intl;
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -301,4 +299,66 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get close => '关闭';
+
+  @override
+  String get selectFromGallery => '从图库选择';
+
+  @override
+  String get selectFile => '选择文件';
+
+  @override
+  String get uploadFile => '上传文件';
+
+  @override
+  String get openBrowser => '打开浏览器';
+
+  @override
+  String get codeCopiedToClipboard => '代码已复制到剪贴板';
+
+  @override
+  String get thinking => '思考中';
+
+  @override
+  String get thinkingEnd => '思考结束';
+
+  @override
+  String get tool => '工具';
+
+  @override
+  String get userCancelledToolCall => '用户取消了工具调用';
+
+  @override
+  String get code => '代码';
+
+  @override
+  String get preview => '预览';
+
+  @override
+  String get loadContentFailed => '加载内容失败，请重试';
+
+  @override
+  String get openingBrowser => 'Opening browser';
+
+  @override
+  String get functionCallAuth => '函数调用授权';
+
+  @override
+  String get allowFunctionExecution => '是否允许执行以下函数:';
+
+  @override
+  String parameters(Object params) {
+    return '参数: $params';
+  }
+
+  @override
+  String get allow => '允许';
+
+  @override
+  String get loadDiagramFailed => '加载图表失败，请重试';
+
+  @override
+  String get copiedToClipboard => '已复制到剪贴板';
+
+  @override
+  String get chinese => '中文';
 }

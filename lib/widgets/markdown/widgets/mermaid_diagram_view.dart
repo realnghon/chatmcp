@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter/foundation.dart';
+import 'package:chatmcp/generated/app_localizations.dart';
 
 // todo: fix this error
 
@@ -139,6 +140,7 @@ class _MermaidDiagramViewState extends State<MermaidDiagramView> {
 
   @override
   Widget build(BuildContext context) {
+    var t = AppLocalizations.of(context)!;
     if (_hasError) {
       return const SizedBox(
         height: 100,

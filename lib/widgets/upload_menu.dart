@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:chatmcp/generated/app_localizations.dart';
 
 class UploadMenu extends StatelessWidget {
   final bool disabled;
@@ -14,6 +15,7 @@ class UploadMenu extends StatelessWidget {
   });
 
   void _showUploadOptions(BuildContext context) {
+    var t = AppLocalizations.of(context)!;
     final RenderBox button = context.findRenderObject() as RenderBox;
     final RenderBox overlay =
         Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
@@ -42,7 +44,7 @@ class UploadMenu extends StatelessWidget {
             children: [
               const Icon(CupertinoIcons.photo, size: 20),
               const SizedBox(width: 8),
-              Text('从图库选择'),
+              Text(t.selectFromGallery),
             ],
           ),
           onTap: () => Future(() => onPickImages()),
@@ -52,7 +54,7 @@ class UploadMenu extends StatelessWidget {
             children: [
               const Icon(CupertinoIcons.doc, size: 20),
               const SizedBox(width: 8),
-              Text('选择文件'),
+              Text(t.selectFile),
             ],
           ),
           onTap: () => Future(() => onPickFiles()),
@@ -63,10 +65,11 @@ class UploadMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var t = AppLocalizations.of(context)!;
     return IconButton(
-      icon: const Icon(CupertinoIcons.plus_app),
+      icon: const Icon(Icons.attach_file),
       onPressed: disabled ? null : () => _showUploadOptions(context),
-      tooltip: '上传文件',
+      tooltip: t.uploadFile,
     );
   }
 }

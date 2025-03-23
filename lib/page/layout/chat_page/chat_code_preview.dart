@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:chatmcp/utils/event_bus.dart';
 import 'package:chatmcp/widgets/markdown/markit_widget.dart';
 import 'package:chatmcp/utils/color.dart';
+import 'package:chatmcp/generated/app_localizations.dart';
 
 class ChatCodePreview extends StatefulWidget {
   final CodePreviewEvent codePreviewEvent;
@@ -58,6 +59,7 @@ class _ChatCodePreviewState extends State<ChatCodePreview> {
   }
 
   Widget _buildToolBar() {
+    var t = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -116,7 +118,7 @@ class _ChatCodePreviewState extends State<ChatCodePreview> {
                   });
                 },
                 child: Text(
-                  '代码',
+                  t.code,
                   style: TextStyle(
                     fontSize: 9,
                     height: 1,
@@ -151,7 +153,7 @@ class _ChatCodePreviewState extends State<ChatCodePreview> {
                     });
                   },
                   child: Text(
-                    '预览',
+                    t.preview,
                     style: TextStyle(
                       fontSize: 9,
                       height: 1,
@@ -184,8 +186,9 @@ class _ChatCodePreviewState extends State<ChatCodePreview> {
 
   @override
   Widget build(BuildContext context) {
+    var t = AppLocalizations.of(context)!;
     if (_hasError) {
-      return const Center(child: Text('加载内容失败，请重试'));
+      return Center(child: Text(t.loadContentFailed));
     }
 
     String language = widget.codePreviewEvent.attributes['type'] ?? '';

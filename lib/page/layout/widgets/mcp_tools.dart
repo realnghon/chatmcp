@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:chatmcp/provider/mcp_server_provider.dart';
+import 'package:chatmcp/generated/app_localizations.dart';
 
 class McpTools extends StatelessWidget {
   const McpTools({super.key});
@@ -84,10 +85,11 @@ class McpTools extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var t = AppLocalizations.of(context)!;
     return Consumer<McpServerProvider>(
       builder: (context, mcpServerProvider, child) {
         return PopupMenuButton<void>(
-          tooltip: '工具',
+          tooltip: t.tool,
           offset: const Offset(0, 8),
           position: PopupMenuPosition.under,
           constraints: BoxConstraints(

@@ -107,49 +107,47 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<bool> _showFunctionApprovalDialog(RunFunctionEvent event) async {
+    var t = AppLocalizations.of(context)!;
     return await showDialog<bool>(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('函数调用授权'),
-              content: SingleChildScrollView(
-                child: ListBody(
-                  children: <Widget>[
-                    Text('是否允许执行以下函数:'),
-                    SizedBox(height: 8),
-                    Text('${event.name}',
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                    SizedBox(height: 8),
-                    Text('参数: ${event.arguments}'),
-                  ],
-                ),
-              ),
-              actions: <Widget>[
-                TextButton(
-                  child: Text('取消'),
-                  onPressed: () {
-                    setState(() {
-                      _userRejected = true;
-                      _runFunctionEvent = null;
-                    });
-                    Navigator.of(context).pop(false);
-                  },
-                ),
-                TextButton(
-                  child: Text('允许'),
-                  onPressed: () {
-                    setState(() {
-                      _userApproved = true;
-                    });
-                    Navigator.of(context).pop(true);
-                  },
-                ),
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(t.functionCallAuth),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(t.allowFunctionExecution),
+                SizedBox(height: 8),
+                Text(event.name),
+                SizedBox(height: 8),
               ],
-            );
-          },
-        ) ??
-        false;
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(t.cancel),
+              onPressed: () {
+                setState(() {
+                  _userRejected = true;
+                  _runFunctionEvent = null;
+                });
+                Navigator.of(context).pop(false);
+              },
+            ),
+            TextButton(
+              child: Text(t.allow),
+              onPressed: () {
+                setState(() {
+                  _userApproved = true;
+                });
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    ) ?? false;
   }
 
   void _addListeners() {
@@ -558,7 +556,6 @@ class _ChatPageState extends State<ChatPage> {
               _userApproved = false;
             });
 
-            Logger.root.info('run function: ${event.name} ${event.arguments}');
             final toolName = event.name;
             final toolArguments = jsonc.decode(event.arguments);
             await _sendToolCallAndProcessResponse(toolName, toolArguments);
