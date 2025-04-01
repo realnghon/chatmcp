@@ -90,7 +90,14 @@ $conversationText""",
         data: bodyStr,
       );
 
-      var jsonData = response.data;
+      var jsonData;
+      if (response.data is ResponseBody) {
+        final responseBody = response.data as ResponseBody;
+        final responseStr = await utf8.decodeStream(responseBody.stream);
+        jsonData = jsonDecode(responseStr);
+      } else {
+        jsonData = response.data;
+      }
       Logger.root.fine('Response data: ${jsonEncode(jsonData)}');
       final message = jsonData['message'];
 
