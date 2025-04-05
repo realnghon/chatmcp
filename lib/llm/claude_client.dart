@@ -130,8 +130,6 @@ class ClaudeClient extends BaseLLMClient {
       );
 
       String buffer = '';
-      String currentContent = '';
-      List<ToolCall>? currentToolCalls;
 
       await for (final chunk in response.data.stream) {
         final decodedChunk = utf8.decode(chunk);
@@ -159,11 +157,10 @@ class ClaudeClient extends BaseLLMClient {
               case 'content_block_delta':
                 final delta = event['delta'];
                 if (delta['type'] == 'text_delta') {
-                  currentContent += delta['text'];
                   yield LLMResponse(content: delta['text']);
                 } else if (delta['type'] == 'input_json_delta') {
                   // Handle tool use delta
-                  final partialJson = delta['partial_json'];
+                  // final partialJson = delta['partial_json'];
                   // You may want to accumulate the JSON and parse it when complete
                 }
                 break;
@@ -280,7 +277,7 @@ $conversationText""",
         data: jsonEncode(body),
       );
 
-      var jsonData;
+      dynamic jsonData;
       if (response.data is ResponseBody) {
         final responseBody = response.data as ResponseBody;
         final responseStr = await utf8.decodeStream(responseBody.stream);
@@ -343,7 +340,7 @@ $conversationText""",
   @override
   Future<List<String>> models() async {
     if (apiKey.isEmpty) {
-      Logger.root.info('Claude API 密钥未设置，跳过模型列表获取');
+      Logger.root.info('Claude API key not set, skipping model list retrieval');
       return [];
     }
 
@@ -359,8 +356,8 @@ $conversationText""",
 
       return models;
     } catch (e, trace) {
-      Logger.root.severe('获取模型列表失败: $e, trace: $trace');
-      // 返回预定义的模型列表作为后备
+      Logger.root.severe('Failed to get model list: $e, trace: $trace');
+      // Return predefined model list as fallback
       return [];
     }
   }
@@ -371,7 +368,7 @@ List<Map<String, dynamic>> chatMessageToClaudeMessage(
   return messages.map((message) {
     final List<Map<String, dynamic>> contentParts = [];
 
-    // 添加文件内容（如果有）
+    // Add file content (if any)
     if (message.files != null) {
       for (final file in message.files!) {
         if (isImageFile(file.fileType)) {
@@ -393,7 +390,7 @@ List<Map<String, dynamic>> chatMessageToClaudeMessage(
       }
     }
 
-    // 添加文本内容
+    // Add text content
     if (message.content != null) {
       contentParts.add({
         'type': 'text',

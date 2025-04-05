@@ -2,7 +2,7 @@ List<Map<String, dynamic>> convertToOpenAITools(
     Map<String, List<Map<String, dynamic>>> toolsByClient) {
   List<Map<String, dynamic>> allTools = [];
 
-  // 合并所有客户端的工具列表
+  // Merge tool lists from all clients
   for (var tools in toolsByClient.values) {
     final openAITools = tools
         .map((tool) => {

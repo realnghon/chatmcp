@@ -25,12 +25,12 @@ void main() async {
   initializeLogger();
 
   if (!kIsWeb) {
-    // 移动端不支持
+    // Not supported on mobile
     // if (!kIsDesktop) {
     //   await InAppWebViewController.setWebContentsDebuggingEnabled(true);
     // }
 
-    // 获取一个可用的端口
+    // Get an available port
     final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
     final port = server.port;
     await server.close();
@@ -94,7 +94,7 @@ void main() async {
       ),
     );
   } catch (e, stackTrace) {
-    Logger.root.severe('Main 错误: $e\n堆栈跟踪:\n$stackTrace');
+    Logger.root.severe('Main error: $e\nStack trace:\n$stackTrace');
   }
 }
 

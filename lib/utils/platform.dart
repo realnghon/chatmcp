@@ -35,13 +35,13 @@ Future<Directory> getAppDir(String appName) async {
       appDir = Directory(
           join(Platform.environment['HOME']!, '.local', 'share', appName));
     }
-    // 确保目录存在
+    // Ensure the directory exists
     if (!appDir.existsSync()) {
       appDir.createSync(recursive: true);
     }
     return appDir;
   } else {
-    // 移动端使用 getApplicationDocumentsDirectory
+    // Use getApplicationDocumentsDirectory for mobile platforms
     return await getApplicationDocumentsDirectory();
   }
 }

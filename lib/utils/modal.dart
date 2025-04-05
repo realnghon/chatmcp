@@ -3,12 +3,13 @@ import 'package:flutter/material.dart';
 void showModalBottom(BuildContext context, Widget child) {
   showModalBottomSheet(
     context: context,
-    isScrollControlled: true, // 允许弹窗内容超过半屏高度
+    isScrollControlled:
+        true, // Allows the modal content to exceed half the screen height
     builder: (BuildContext context) {
       return DraggableScrollableSheet(
-        initialChildSize: 0.6, // 初始高度为屏幕的60%
-        minChildSize: 0.3, // 最小高度为屏幕的30%
-        maxChildSize: 0.9, // 最大高度为屏幕的90%
+        initialChildSize: 0.6, // Initial height is 60% of the screen
+        minChildSize: 0.3, // Minimum height is 30% of the screen
+        maxChildSize: 0.9, // Maximum height is 90% of the screen
         expand: false,
         builder: (context, scrollController) {
           return child;

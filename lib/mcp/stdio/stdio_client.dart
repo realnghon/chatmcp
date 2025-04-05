@@ -17,10 +17,10 @@ class StdioClient implements McpClient {
   final List<Function(String)> stdErrCallback;
   final List<Function(String)> stdOutCallback;
 
-  // 添加 StreamController
+  // Add StreamController
   final _processStateController = StreamController<ProcessState>.broadcast();
 
-  // 提供公开的 Stream
+  // Provide public Stream
   Stream<ProcessState> get processStateStream => _processStateController.stream;
 
   StdioClient({
@@ -38,8 +38,8 @@ class StdioClient implements McpClient {
 
   Future<void> _setupProcess() async {
     try {
-      Logger.root
-          .info('启动进程: ${serverConfig.command} ${serverConfig.args.join(" ")}');
+      Logger.root.info(
+          'Starting process: ${serverConfig.command} ${serverConfig.args.join(" ")}');
 
       _processStateController.add(const ProcessState.starting());
 
@@ -49,9 +49,9 @@ class StdioClient implements McpClient {
         serverConfig.env,
       );
 
-      Logger.root.info('进程启动状态：PID=${process.pid}');
+      Logger.root.info('Process startup status: PID=${process.pid}');
 
-      // 使用 utf8 解码器
+      // Use utf8 decoder
       final stdoutStream = process.stdout
           .transform(utf8.decoder)
           .transform(const LineSplitter());
@@ -66,44 +66,44 @@ class StdioClient implements McpClient {
             final message = JSONRPCMessage.fromJson(data);
             _handleMessage(message);
           } catch (e, stack) {
-            Logger.root.severe('解析服务器输出失败: $e\n$stack');
+            Logger.root.severe('Failed to parse server output: $e\n$stack');
           }
         },
         onError: (error) {
-          Logger.root.severe('stdout 错误: $error');
+          Logger.root.severe('stdout error: $error');
           for (final callback in stdErrCallback) {
             callback(error.toString());
           }
         },
         onDone: () {
-          Logger.root.info('stdout 流已关闭');
+          Logger.root.info('stdout stream closed');
         },
       );
 
       process.stderr.transform(utf8.decoder).listen(
         (String text) {
-          Logger.root.warning('服务器错误输出: $text');
+          Logger.root.warning('Server error output: $text');
           for (final callback in stdErrCallback) {
             callback(text);
           }
         },
         onError: (error) {
-          Logger.root.severe('stderr 错误: $error');
+          Logger.root.severe('stderr error: $error');
           for (final callback in stdErrCallback) {
             callback(error.toString());
           }
         },
       );
 
-      // 监听进程退出
+      // Listen for process exit
       process.exitCode.then((code) {
-        Logger.root.info('进程退出，退出码: $code');
+        Logger.root.info('Process exited with code: $code');
         _processStateController.add(ProcessState.exited(code));
       });
 
       _processStateController.add(const ProcessState.running());
     } catch (e, stack) {
-      Logger.root.severe('启动进程失败: $e\n$stack');
+      Logger.root.severe('Failed to start process: $e\n$stack');
       _processStateController.add(ProcessState.error(e, stack));
       rethrow;
     }
@@ -115,25 +115,28 @@ class StdioClient implements McpClient {
         final String jsonStr = utf8.decode(data);
         process.stdin.writeln(utf8.decode(data));
         await process.stdin.flush();
-        Logger.root.info('写入数据: $jsonStr');
+        Logger.root.info('Data written: $jsonStr');
       });
     } catch (e) {
-      Logger.root.severe('写入数据失败: $e');
+      Logger.root.severe('Failed to write data: $e');
       rethrow;
     }
   }
 
-  // 添加初始化方法
+  // Add initialize method
+  @override
   Future<void> initialize() async {
     await _setupProcess();
   }
 
-  // 修改 dispose 方法
+  // Modify dispose method
+  @override
   Future<void> dispose() async {
     await _processStateController.close();
     process.kill();
   }
 
+  @override
   Future<JSONRPCMessage> sendMessage(JSONRPCMessage message) async {
     if (message.id == null) {
       throw ArgumentError('Message must have an id');
@@ -157,8 +160,9 @@ class StdioClient implements McpClient {
     }
   }
 
+  @override
   Future<JSONRPCMessage> sendInitialize() async {
-    // 第一步：发送初始化请求
+    // Step 1: Send initialization request
     final initMessage =
         JSONRPCMessage(id: 'init-1', method: 'initialize', params: {
       'protocolVersion': '2024-11-05',
@@ -170,28 +174,29 @@ class StdioClient implements McpClient {
     });
 
     final initResponse = await sendMessage(initMessage);
-    Logger.root.info('初始化请求响应: $initResponse');
+    Logger.root.info('Initialization request response: $initResponse');
 
-    // 第二步：发送初始化完成通知（不需要等待响应）
-    final notifyMessage = JSONRPCMessage(
-        method: 'notifications/initialized', // 移除 notifications/ 前缀
-        params: {} // 添加空的参数对象
-        );
+    // Step 2: Send initialization complete notification (no response needed)
+    final notifyMessage =
+        JSONRPCMessage(method: 'notifications/initialized', params: {});
 
     await write(utf8.encode(jsonEncode(notifyMessage.toJson())));
     return initResponse;
   }
 
+  @override
   Future<JSONRPCMessage> sendPing() async {
     final message = JSONRPCMessage(id: 'ping-1', method: 'ping');
     return sendMessage(message);
   }
 
+  @override
   Future<JSONRPCMessage> sendToolList() async {
     final message = JSONRPCMessage(id: 'tool-list-1', method: 'tools/list');
     return sendMessage(message);
   }
 
+  @override
   Future<JSONRPCMessage> sendToolCall({
     required String name,
     required Map<String, dynamic> arguments,
@@ -211,7 +216,7 @@ class StdioClient implements McpClient {
   }
 }
 
-// 添加进程状态枚举
+// Add process state enum
 enum ProcessStateType {
   starting,
   running,
@@ -219,7 +224,7 @@ enum ProcessStateType {
   exited,
 }
 
-// 添加进程状态类
+// Add process state class
 class ProcessState {
   final ProcessStateType type;
   final dynamic error;

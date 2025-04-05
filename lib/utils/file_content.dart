@@ -1,5 +1,6 @@
 import 'dart:io' as io;
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:mime/mime.dart';
 import "package:chatmcp/llm/model.dart";
 import 'package:file_picker/file_picker.dart';
@@ -26,7 +27,7 @@ File platformFileToFile(PlatformFile platformFile) {
     );
   }
 
-  print('fileType: $fileType');
+  debugPrint('fileType: $fileType');
 
   // 判断是否为文本类型文件
   bool isTextFile = fileType.startsWith('text/') ||

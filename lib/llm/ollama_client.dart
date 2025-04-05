@@ -29,7 +29,7 @@ class OllamaClient extends BaseLLMClient {
       final modelsList = data['models'] as List;
       return modelsList.map((model) => (model['name'] as String)).toList();
     } catch (e, trace) {
-      Logger.root.severe('获取模型列表失败: $e, trace: $trace');
+      Logger.root.severe('Failed to get model list: $e, trace: $trace');
       return [];
     }
   }
@@ -43,10 +43,11 @@ class OllamaClient extends BaseLLMClient {
 
     final prompt = ChatMessage(
       role: MessageRole.user,
-      content: """你是一个对话标题生成器。请为以下对话生成一个简洁的标题（最多20个字符）。
-标题应该总结主要话题。只返回标题，不要添加任何解释或额外的标点符号。
+      content:
+          """You are a conversation title generator. Please generate a concise title (maximum 20 characters) for the following conversation.
+The title should summarize the main topic. Only return the title without any explanation or extra punctuation.
 
-对话内容:
+Conversation:
 $conversationText""",
     );
 
@@ -57,7 +58,7 @@ $conversationText""",
       ));
       return response.content?.trim() ?? "New Chat";
     } catch (e) {
-      Logger.root.warning('生成标题失败: $e');
+      Logger.root.warning('Failed to generate title: $e');
       return "New Chat";
     }
   }
@@ -94,7 +95,7 @@ $conversationText""",
       Logger.root.fine('Response data: ${jsonEncode(jsonData)}');
       final message = jsonData['message'];
 
-      // 解析工具调用
+      // Parse tool calls
       final toolCalls = message['tool_calls']
           ?.map<ToolCall>((t) => ToolCall(
                 id: t['id'] ?? '',
@@ -162,7 +163,7 @@ $conversationText""",
               final message = json['message'];
               if (message == null) continue;
 
-              // 解析工具调用
+              // Parse tool calls
               final toolCalls = message['tool_calls']
                   ?.map<ToolCall>((t) => ToolCall(
                         id: t['id'] ?? '',
@@ -175,7 +176,7 @@ $conversationText""",
                       ))
                   ?.toList();
 
-              // 只有当 content 不为空或有工具调用时才yield
+              // Only yield when content is not empty or there are tool calls
               final content = message['content'];
               if (content?.isNotEmpty == true || toolCalls != null) {
                 yield LLMResponse(
@@ -184,7 +185,7 @@ $conversationText""",
                 );
               }
             } catch (e) {
-              Logger.root.severe('Failed to parse chunk: $jsonStr $e');
+              Logger.root.severe('Failed to parse stream chunk: $jsonStr $e');
               continue;
             }
           }

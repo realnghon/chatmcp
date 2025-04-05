@@ -17,7 +17,7 @@ class _KeysSettingsState extends State<KeysSettings> {
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
-  // 定义LLM API配置
+  // Define LLM API configuration
   final Map<String, ApiConfig> _llmApiConfigs = {
     'openai': ApiConfig(
       title: 'OpenAI',
@@ -49,7 +49,7 @@ class _KeysSettingsState extends State<KeysSettings> {
     ),
   };
 
-  // 使用Map统一管理控制器
+  // Use Map to manage controllers uniformly
   final Map<String, ApiControllers> _controllers = {};
 
   @override
@@ -60,7 +60,7 @@ class _KeysSettingsState extends State<KeysSettings> {
   }
 
   void _initializeControllers() {
-    // 初始化 LLM API 控制器
+    // Initialize LLM API controllers
     for (var entry in _llmApiConfigs.entries) {
       _controllers[entry.key] = ApiControllers(
         keyController: entry.value.requiresKey ? TextEditingController() : null,
@@ -199,7 +199,7 @@ class _KeysSettingsState extends State<KeysSettings> {
         final settings = ProviderManager.settingsProvider;
         final Map<String, KeysSetting> apiSettings = {};
 
-        // 保存 LLM API 设置
+        // Save LLM API settings
         for (var entry in _llmApiConfigs.entries) {
           final controller = _controllers[entry.key]!;
           apiSettings[entry.key] = KeysSetting(
@@ -403,7 +403,7 @@ class _ApiSectionState extends State<ApiSection> {
   }
 }
 
-// 新增的辅助类
+// New helper class
 class ApiConfig {
   final String title;
   final String iconPath;

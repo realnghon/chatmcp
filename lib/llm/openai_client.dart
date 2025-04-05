@@ -55,8 +55,8 @@ class OpenAIClient extends BaseLLMClient {
         data: bodyStr,
       );
 
-      // 处理 ResponseBody 类型的响应
-      var jsonData;
+      // Handle ResponseBody type response
+      dynamic jsonData;
       if (response.data is ResponseBody) {
         final responseBody = response.data as ResponseBody;
         final responseStr = await utf8.decodeStream(responseBody.stream);
@@ -67,7 +67,7 @@ class OpenAIClient extends BaseLLMClient {
 
       final message = jsonData['choices'][0]['message'];
 
-      // 解析工具调用
+      // Parse tool calls
       final toolCalls = message['tool_calls']
           ?.map<ToolCall>((t) => ToolCall(
                 id: t['id'],
@@ -107,7 +107,7 @@ class OpenAIClient extends BaseLLMClient {
       }
     }
 
-    print("openai stream body: ${jsonEncode(body)}");
+    Logger.root.fine("debug log:openai stream body: ${jsonEncode(body)}");
 
     try {
       _dio.options.responseType = ResponseType.stream;
@@ -121,7 +121,7 @@ class OpenAIClient extends BaseLLMClient {
         final decodedChunk = utf8.decode(chunk);
         buffer += decodedChunk;
 
-        // 处理可能的多行数据
+        // Handle possible multiline data
         while (buffer.contains('\n')) {
           final index = buffer.indexOf('\n');
           final line = buffer.substring(0, index).trim();
@@ -134,7 +134,7 @@ class OpenAIClient extends BaseLLMClient {
             try {
               final json = jsonDecode(jsonStr);
 
-              // 检查 choices 数组是否为空
+              // Check if choices array is empty
               if (json['choices'] == null || json['choices'].isEmpty) {
                 continue;
               }
@@ -142,7 +142,7 @@ class OpenAIClient extends BaseLLMClient {
               final delta = json['choices'][0]['delta'];
               if (delta == null) continue;
 
-              // 解析工具调用
+              // Parse tool calls
               final toolCalls = delta['tool_calls']
                   ?.map<ToolCall>((t) => ToolCall(
                         id: t['id'] ?? '',
@@ -154,7 +154,7 @@ class OpenAIClient extends BaseLLMClient {
                       ))
                   ?.toList();
 
-              // 只在有内容或工具调用时才yield响应
+              // Only yield response when there is content or tool calls
               if (delta['content'] != null || toolCalls != null) {
                 yield LLMResponse(
                   content: delta['content'],
@@ -206,7 +206,7 @@ $conversationText""",
   @override
   Future<List<String>> models() async {
     if (apiKey.isEmpty) {
-      Logger.root.info('OpenAI API 密钥未设置，跳过模型列表获取');
+      Logger.root.info('OpenAI API key not set, skipping model list fetch');
       return [];
     }
 
@@ -220,8 +220,8 @@ $conversationText""",
 
       return models;
     } catch (e, trace) {
-      Logger.root.severe('获取模型列表失败: $e, trace: $trace');
-      // 返回预定义的模型列表作为后备
+      Logger.root.severe('Failed to get model list: $e, trace: $trace');
+      // Return predefined model list as fallback
       return [];
     }
   }
@@ -234,11 +234,11 @@ List<Map<String, dynamic>> chatMessageToOpenAIMessage(
       'role': message.role.value,
     };
 
-    // 如果同时有文本内容和文件，需要使用数组格式
+    // If there is both text content and files, use array format
     if (message.content != null || message.files != null) {
       final List<Map<String, dynamic>> contentParts = [];
 
-      // 添加文件内容
+      // Add file content
       if (message.files != null) {
         for (final file in message.files!) {
           if (isImageFile(file.fileType)) {
@@ -258,7 +258,7 @@ List<Map<String, dynamic>> chatMessageToOpenAIMessage(
         }
       }
 
-      // 添加文本内容
+      // Add text content
       if (message.content != null) {
         contentParts.add({
           'type': 'text',
@@ -266,7 +266,7 @@ List<Map<String, dynamic>> chatMessageToOpenAIMessage(
         });
       }
 
-      // 如果只有一个文本内容且没有文件，使用简单字符串格式
+      // If there is only one text content and no files, use simple string format
       if (contentParts.length == 1 && message.files == null) {
         json['content'] = message.content;
       } else {
@@ -274,7 +274,7 @@ List<Map<String, dynamic>> chatMessageToOpenAIMessage(
       }
     }
 
-    // 添加工具调用相关字段
+    // Add tool call related fields
     if (message.role == MessageRole.tool &&
         message.name != null &&
         message.toolCallId != null) {

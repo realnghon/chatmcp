@@ -9,7 +9,7 @@ class AppColors {
   static const MaterialColor blue = Colors.blue;
   static const Color transparent = Colors.transparent;
 
-  /// 根据主题返回对应的颜色
+  /// Returns the corresponding color based on the theme
   static Color getThemeColor(BuildContext context,
       {Color? lightColor, Color? darkColor}) {
     final brightness = Theme.of(context).brightness;
@@ -18,7 +18,7 @@ class AppColors {
         : (darkColor ?? white);
   }
 
-  /// 获取主题相关的背景色
+  /// Gets the background color related to the theme
   static Color getThemeBackgroundColor(BuildContext context) {
     return getThemeColor(
       context,
@@ -27,7 +27,7 @@ class AppColors {
     );
   }
 
-  /// 获取主题相关的文本颜色
+  /// Gets the text color related to the theme
   static Color getThemeTextColor(BuildContext context) {
     return getThemeColor(
       context,

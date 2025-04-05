@@ -8,11 +8,11 @@ abstract class BaseDao<T> {
 
   Future<Database> get database => DatabaseHelper.instance.database;
 
-  // 需要子类实现的方法，用于转换数据
+  // Methods to be implemented by subclasses for data conversion
   Map<String, dynamic> toJson(T entity);
   T fromJson(Map<String, dynamic> json);
 
-  // 通用CRUD操作
+  // Generic CRUD operations
   Future<int> insert(T entity) async {
     final db = await database;
     return db.insert(
