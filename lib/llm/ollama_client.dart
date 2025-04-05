@@ -87,13 +87,20 @@ $conversationText""",
 
     try {
       final response = await _dio.post(
-        "$baseUrl/api/chat",
+        "$baseUrl/v1/chat/completions",
         data: bodyStr,
       );
 
-      var jsonData = response.data;
+      var jsonData;
+      if (response.data is ResponseBody) {
+        final responseBody = response.data as ResponseBody;
+        final responseStr = await utf8.decodeStream(responseBody.stream);
+        jsonData = jsonDecode(responseStr);
+      } else {
+        jsonData = response.data;
+      }
       Logger.root.fine('Response data: ${jsonEncode(jsonData)}');
-      final message = jsonData['message'];
+      final message = jsonData['choices'][0]['message'];
 
       // Parse tool calls
       final toolCalls = message['tool_calls']
@@ -112,7 +119,7 @@ $conversationText""",
         toolCalls: toolCalls,
       );
     } catch (e) {
-      throw await handleError(e, 'Ollama', '$baseUrl/api/chat', bodyStr);
+      throw await handleError(e, 'Ollama', '$baseUrl/v1/chat/completions', bodyStr);
     }
   }
 
@@ -140,7 +147,7 @@ $conversationText""",
     try {
       _dio.options.responseType = ResponseType.stream;
       final response = await _dio.post(
-        "$baseUrl/api/chat",
+        "$baseUrl/v1/chat/completions",
         data: jsonEncode(body),
       );
 
@@ -160,11 +167,17 @@ $conversationText""",
 
             try {
               final json = jsonDecode(jsonStr);
-              final message = json['message'];
-              if (message == null) continue;
+
+              // 检查 choices 数组是否为空
+              if (json['choices'] == null || json['choices'].isEmpty) {
+                continue;
+              }
+
+              final delta = json['choices'][0]['delta'];
+              if (delta == null) continue;
 
               // Parse tool calls
-              final toolCalls = message['tool_calls']
+              final toolCalls = delta['tool_calls']
                   ?.map<ToolCall>((t) => ToolCall(
                         id: t['id'] ?? '',
                         type: 'function',
@@ -177,10 +190,9 @@ $conversationText""",
                   ?.toList();
 
               // Only yield when content is not empty or there are tool calls
-              final content = message['content'];
-              if (content?.isNotEmpty == true || toolCalls != null) {
+              if (delta['content'] != null || toolCalls != null) {
                 yield LLMResponse(
-                  content: content ?? '',
+                  content: delta['content'],
                   toolCalls: toolCalls,
                 );
               }
@@ -193,7 +205,7 @@ $conversationText""",
       }
     } catch (e) {
       throw await handleError(
-          e, 'Ollama', '$baseUrl/api/chat', jsonEncode(body));
+          e, 'Ollama', "$baseUrl/v1/chat/completions", jsonEncode(body));
     }
   }
 }

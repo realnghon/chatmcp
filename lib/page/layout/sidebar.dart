@@ -249,11 +249,12 @@ class SidebarToolbar extends StatelessWidget {
   }
 
   Widget _buildDeleteButton(BuildContext context) {
+    var t = AppLocalizations.of(context)!;
     return ElevatedButton(
       onPressed: chatProvider.selectedChats.isNotEmpty
           ? () => _showDeleteConfirmDialog(context)
           : null,
-      child: const Text('删除'),
+      child: Text(t.delete),
     );
   }
 

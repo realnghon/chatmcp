@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter/foundation.dart';
+import 'package:chatmcp/generated/app_localizations.dart';
 
 class HtmlView extends StatefulWidget {
   final String html;
@@ -56,6 +57,7 @@ class _HtmlViewState extends State<HtmlView> {
 
   @override
   Widget build(BuildContext context) {
+    var t = AppLocalizations.of(context)!;
     if (_hasError) {
       return const SizedBox(
         height: 100,

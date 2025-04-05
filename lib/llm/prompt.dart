@@ -10,15 +10,24 @@ Here are the functions available in JSONSchema format:
 {{ TOOL DEFINITIONS IN JSON SCHEMA }}
 {{ USER SYSTEM PROMPT }}
 {{ TOOL CONFIGURATION }}
-<CURRENT_CURSOR_POSITION>
 
-Important Instructions:
-1. Only use the tools defined above, do not make up non-existent functions
-2. Function calls are not mandatory, only use when needed
-3. When tools are actually needed:
-   - Maintain conversational tone and briefly mention what you're going to do
-   - Use exact format: <function name="{function_name}">{arguments json style}</function>
-   - After using tools, naturally incorporate results into the conversation
+Important Notes:
+1. Only use the tools defined above, do not invent non-existent functions
+2. Function calls are not required, only use them when needed, and only use one tool at a time
+3. When you do need to use a tool:
+- Keep the tone of conversation and briefly mention what you are going to do
+- After using the tool, naturally integrate the results into the conversation
+5. Tool call format
+- function tag, with and only name attribute
+- function_name: tool name, must use camel case
+- arguments: tool parameters, must use valid JSON format
+- Tool call format example, do not add done attribute, must be in xml format
+<function name="function_name">
+{
+"argument1": "value1",
+"argument2": "value2"
+}
+</function>
 
 Note: When tools are truly needed, please make sure to use the function call format. Do not skip function calls or try to simulate tool results.
 ''';
@@ -36,7 +45,7 @@ Note: When tools are truly needed, please make sure to use the function call for
   /// [userSystemPrompt] - Optional user system prompt
   /// [toolConfig] - Optional tool configuration information
   String generatePrompt({
-    required Map<String, List<Map<String, dynamic>>> tools,
+    required List<Map<String, dynamic>> tools,
     String? userSystemPrompt,
     String? toolConfig,
   }) {
@@ -63,10 +72,9 @@ Note: When tools are truly needed, please make sure to use the function call for
   /// Returns a concise, action-oriented system prompt
   String generateSystemPrompt(List<Map<String, dynamic>> tools) {
     final promptGenerator = SystemPromptGenerator();
-    final toolsJson = {'tools': tools};
 
     // Generate basic tool prompt
-    var systemPrompt = promptGenerator.generatePrompt(tools: toolsJson);
+    var systemPrompt = promptGenerator.generatePrompt(tools: tools);
 
     // Add concise tool usage guidelines
     systemPrompt += '''

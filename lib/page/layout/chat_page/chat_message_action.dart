@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:chatmcp/llm/model.dart';
 import 'package:flutter/services.dart';
 import 'package:chatmcp/utils/color.dart';
+import 'package:chatmcp/generated/app_localizations.dart';
 
 class MessageActions extends StatelessWidget {
   final List<ChatMessage> messages;
@@ -17,6 +18,7 @@ class MessageActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var t = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.only(left: 8, top: 4),
       child: Row(
@@ -35,9 +37,9 @@ class MessageActions extends StatelessWidget {
                 text: messages.last.content ?? '',
               ));
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('已复制到剪贴板'),
-                  duration: Duration(seconds: 2),
+                SnackBar(
+                  content: Text(t.copiedToClipboard),
+                  duration: const Duration(seconds: 2),
                 ),
               );
             },

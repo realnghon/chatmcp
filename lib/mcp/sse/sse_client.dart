@@ -20,6 +20,13 @@ class SSEClient implements McpClient {
   final _writeLock = Lock();
   String? _messageEndpoint;
 
+  bool _isConnecting = false;
+  bool _disposed = false;
+  int _reconnectAttempts = 0;
+  static const int _maxReconnectAttempts = 5;
+  static const Duration _initialReconnectDelay = Duration(seconds: 1);
+  Timer? _reconnectTimer;
+
   SSEClient({required ServerConfig serverConfig})
       : _serverConfig = serverConfig;
 
@@ -35,6 +42,14 @@ class SSEClient implements McpClient {
 
   @override
   Future<void> initialize() async {
+    _reconnectAttempts = 0;
+    await _connect();
+  }
+
+  Future<void> _connect() async {
+    if (_isConnecting || _disposed) return;
+
+    _isConnecting = true;
     try {
       Logger.root.info('Starting SSE connection: ${serverConfig.command}');
       _processStateController.add(const ProcessState.starting());
@@ -50,6 +65,8 @@ class SSEClient implements McpClient {
       if (response.statusCode != 200) {
         throw Exception('SSE connection failed: ${response.statusCode}');
       }
+
+      _reconnectAttempts = 0;
 
       _sseSubscription = response
           .transform(utf8.decoder)
@@ -85,21 +102,46 @@ class SSEClient implements McpClient {
           Logger.root.severe('SSE connection error: $error');
           _processStateController
               .add(ProcessState.error(error, StackTrace.current));
+          _scheduleReconnect();
         },
         onDone: () {
           Logger.root.info('SSE connection closed');
           _processStateController.add(const ProcessState.exited(0));
+          _scheduleReconnect();
         },
       );
     } catch (e, stack) {
       Logger.root.severe('SSE connection failed: $e\n$stack');
       _processStateController.add(ProcessState.error(e, stack));
-      rethrow;
+      _scheduleReconnect();
+    } finally {
+      _isConnecting = false;
     }
+  }
+
+  void _scheduleReconnect() {
+    if (_disposed || _isConnecting || _reconnectTimer != null) return;
+
+    _reconnectAttempts++;
+    if (_reconnectAttempts > _maxReconnectAttempts) {
+      Logger.root.severe('达到最大重连尝试次数 ($_maxReconnectAttempts)，停止重连');
+      return;
+    }
+
+    final delay = _initialReconnectDelay * (1 << (_reconnectAttempts - 1));
+    Logger.root.info('计划在 ${delay.inSeconds} 秒后进行第 $_reconnectAttempts 次重连尝试');
+
+    _reconnectTimer = Timer(delay, () {
+      _reconnectTimer = null;
+      _connect();
+    });
   }
 
   @override
   Future<void> dispose() async {
+    _disposed = true;
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
     await _sseSubscription?.cancel();
     await _processStateController.close();
   }
