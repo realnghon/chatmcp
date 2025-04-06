@@ -55,8 +55,8 @@ class DeepSeekClient extends BaseLLMClient {
         data: bodyStr,
       );
 
-      // 处理 ResponseBody 类型的响应
-      var jsonData;
+      // Handle ResponseBody type response
+      dynamic jsonData;
       if (response.data is ResponseBody) {
         final responseBody = response.data as ResponseBody;
         final responseStr = await utf8.decodeStream(responseBody.stream);
@@ -67,7 +67,7 @@ class DeepSeekClient extends BaseLLMClient {
 
       final message = jsonData['choices'][0]['message'];
 
-      // 解析工具调用
+      // Parse tool calls
       final toolCalls = message['tool_calls']
           ?.map<ToolCall>((t) => ToolCall(
                 id: t['id'],
@@ -123,7 +123,7 @@ class DeepSeekClient extends BaseLLMClient {
         final decodedChunk = utf8.decode(chunk);
         buffer += decodedChunk;
 
-        // 处理可能的多行数据
+        // Handle potential multi-line data
         while (buffer.contains('\n')) {
           final index = buffer.indexOf('\n');
           final line = buffer.substring(0, index).trim();
@@ -136,7 +136,7 @@ class DeepSeekClient extends BaseLLMClient {
             try {
               final json = jsonDecode(jsonStr);
 
-              // 检查 choices 数组是否为空
+              // Check if choices array is empty
               if (json['choices'] == null ||
                   json['choices'].isEmpty ||
                   json['choices'].length < 1) {
@@ -146,7 +146,7 @@ class DeepSeekClient extends BaseLLMClient {
               final delta = json['choices'][0]['delta'];
               if (delta == null) continue;
 
-              // 解析工具调用
+              // Parse tool calls
               final toolCalls = delta['tool_calls']
                   ?.map<ToolCall>((t) => ToolCall(
                         id: t['id'] ?? '',
@@ -196,7 +196,7 @@ class DeepSeekClient extends BaseLLMClient {
                   }
                 }
               } else {
-                // 只在有内容或工具调用时才yield响应
+                // Only yield response when there is content or tool calls
                 if (delta != null && delta['content'] != null) {
                   String content =
                       delta != null ? (delta['content'] ?? '') : '';
@@ -268,7 +268,7 @@ $conversationText""",
   @override
   Future<List<String>> models() async {
     if (apiKey.isEmpty) {
-      Logger.root.info('DeepSeek API 密钥未设置，跳过模型列表获取');
+      Logger.root.info('DeepSeek API key not set, skipping model list retrieval');
       return [];
     }
 
@@ -284,8 +284,8 @@ $conversationText""",
 
       return models;
     } catch (e, trace) {
-      Logger.root.severe('获取模型列表失败: $e, trace: $trace');
-      // 返回预定义的模型列表作为后备
+      Logger.root.severe('Failed to get model list: $e, trace: $trace');
+      // Return a predefined list of models as a fallback
       return [];
     }
   }

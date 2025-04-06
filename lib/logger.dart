@@ -1,11 +1,10 @@
 import 'package:chatmcp/utils/platform.dart';
 import 'package:logging/logging.dart';
 import 'dart:io';
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:flutter/widgets.dart';
 
-// 定义颜色代码
+// Define color codes
 const ansiReset = '\x1B[0m';
 const ansiRed = '\x1B[31m';
 const ansiGreen = '\x1B[32m';
@@ -14,7 +13,7 @@ const ansiBlue = '\x1B[34m';
 const ansiMagenta = '\x1B[35m';
 const ansiGray = '\x1B[37m';
 
-// 获取日志级别对应的颜色
+// Get color for log level
 String getLevelColor(Level level) {
   switch (level.name) {
     case 'SEVERE':
@@ -43,20 +42,20 @@ class FileLogger {
       final Directory appDir = await getAppDir('ChatMcp');
       final logDir = Directory(path.join(appDir.path, 'logs'));
 
-      // 确保日志目录存在
+      // Ensure log directory exists
       if (!await logDir.exists()) {
         await logDir.create(recursive: true);
       }
 
-      // 使用日期作为日志文件名
+      // Use date as log filename
       final now = DateTime.now();
       final fileName = 'app_${now.year}-${now.month}-${now.day}.log';
       _logFile = File(path.join(logDir.path, fileName));
 
-      // 以追加模式打开文件
+      // Open file in append mode
       _logSink = _logFile?.openWrite(mode: FileMode.append);
     } catch (e) {
-      print('初始化日志文件失败: $e');
+      debugPrint('Failed to initialize log file: $e');
     }
   }
 
@@ -71,20 +70,20 @@ class FileLogger {
 }
 
 void initializeLogger() async {
-  // 初始化文件日志
+  // Initialize file logger
   await FileLogger.initLogFile();
 
   Logger.root.level = Level.ALL;
   Logger.root.onRecord.listen((record) {
-    // 获取调用位置信息
+    // Get caller location info
     String? caller;
 
-    // 使用 StackTrace.current 来确保总是有堆栈信息
+    // Use StackTrace.current to ensure stack trace is always available
     final stackTrace = record.stackTrace ?? StackTrace.current;
     final frames = stackTrace.toString().split('\n');
 
     if (frames.length > 1) {
-      // 解析第一个符合条件的堆栈帧
+      // Parse the first matching stack frame
       final callerFrame = frames.firstWhere(
         (frame) =>
             !frame.contains('log.dart') &&
@@ -100,7 +99,7 @@ void initializeLogger() async {
         ),
       );
 
-      // 提取文件名和行号
+      // Extract filename and line number
       final match = RegExp(r'\((.+?):(\d+)(?::\d+)\)').firstMatch(callerFrame);
       if (match != null) {
         final file = match.group(1);
@@ -121,13 +120,13 @@ void initializeLogger() async {
     final logMessage =
         '${record.level.name}: ${caller ?? 'unknown'}: ${record.message}';
 
-    // 在开发模式下打印彩色日志到控制台
+    // In development mode, print colored logs to console
     assert(() {
-      print('$levelColor$logMessage$ansiReset');
+      debugPrint('$levelColor$logMessage$ansiReset');
       return true;
     }());
 
-    // 在 release 模式下写入文件
+    // In release mode, write to file
     FileLogger.writeToFile(logMessage);
   });
 }

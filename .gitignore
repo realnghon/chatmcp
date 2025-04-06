@@ -54,3 +54,10 @@ devtools_options.yaml
 *.deb
 *.rpm
 dist/*
+
+# FVM Version Cache
+.fvm/
+.fvmrc
+
+# VSCode related
+.vscode/

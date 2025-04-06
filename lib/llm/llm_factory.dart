@@ -5,7 +5,7 @@ import 'base_llm_client.dart';
 import 'ollama_client.dart';
 import 'package:chatmcp/provider/provider_manager.dart';
 import 'package:logging/logging.dart';
-import 'model.dart' as llmModel;
+import 'model.dart' as llm_model;
 
 enum LLMProvider { openAI, claude, ollama, deepSeek }
 
@@ -28,7 +28,7 @@ class LLMFactory {
 class LLMFactoryHelper {
   static final nonChatModelKeywords = {"whisper", "tts", "dall-e", "embedding"};
 
-  static bool isChatModel(llmModel.Model model) {
+  static bool isChatModel(llm_model.Model model) {
     return !nonChatModelKeywords.any((keyword) => model.name.contains(keyword));
   }
 
@@ -39,7 +39,7 @@ class LLMFactoryHelper {
     "ollama": LLMProvider.ollama,
   };
 
-  static BaseLLMClient createFromModel(llmModel.Model currentModel) {
+  static BaseLLMClient createFromModel(llm_model.Model currentModel) {
     final setting =
         ProviderManager.settingsProvider.apiSettings[currentModel.provider];
 
@@ -58,8 +58,8 @@ class LLMFactoryHelper {
         baseUrl: baseUrl);
   }
 
-  static Future<List<llmModel.Model>> getAvailableModels() async {
-    List<llmModel.Model> models = [];
+  static Future<List<llm_model.Model>> getAvailableModels() async {
+    List<llm_model.Model> models = [];
     for (var provider in LLMFactoryHelper.providerMap.entries) {
       final apiKey =
           ProviderManager.settingsProvider.apiSettings[provider.key]?.apiKey ??
@@ -74,7 +74,7 @@ class LLMFactoryHelper {
       final client =
           LLMFactory.create(provider.value, apiKey: apiKey, baseUrl: baseUrl);
       models.addAll((await client.models()).map((model) =>
-          llmModel.Model(name: model, label: model, provider: provider.key)));
+          llm_model.Model(name: model, label: model, provider: provider.key)));
     }
 
     return models;

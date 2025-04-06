@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 class SystemPromptGenerator {
-  /// 默认的提示模板
+  /// Default prompt template
   final String template = '''
 In this environment you have access to a set of tools you can use to answer the user's question.
 {{ FORMATTING INSTRUCTIONS }}
@@ -11,52 +11,52 @@ Here are the functions available in JSONSchema format:
 {{ USER SYSTEM PROMPT }}
 {{ TOOL CONFIGURATION }}
 
-重要说明：
-1. 仅使用上面定义的工具，不要虚构不存在的函数
-2. 函数调用不是必须的，只在需要时使用, 每次只能使用一个工具
-3. 当确实需要使用工具时：
-   - 保持对话语气并简要提及您将要做什么
-   - 工具使用后，自然地将结果融入对话
-5. 工具调用格式
-  - function 标签, 有且仅有 name 属性
-  - function_name: 工具名称, 必须使用驼峰命名
-  - arguments: 工具参数, 必须使用合法的JSON格式
-  - 工具调用格式样例, 不要添加 done 属性, 必须是 xml 格式
-    <function name="function_name">
-    {
-      "argument1": "value1",
-      "argument2": "value2"
-    }
-    </function>
+Important Notes:
+1. Only use the tools defined above, do not invent non-existent functions
+2. Function calls are not required, only use them when needed, and only use one tool at a time
+3. When you do need to use a tool:
+- Keep the tone of conversation and briefly mention what you are going to do
+- After using the tool, naturally integrate the results into the conversation
+5. Tool call format
+- function tag, with and only name attribute
+- function_name: tool name, must use camel case
+- arguments: tool parameters, must use valid JSON format
+- Tool call format example, do not add done attribute, must be in xml format
+<function name="function_name">
+{
+"argument1": "value1",
+"argument2": "value2"
+}
+</function>
 
-注意：当真正需要工具时，请务必使用函数调用格式。不要跳过函数调用或尝试模拟工具结果。
+Note: When tools are truly needed, please make sure to use the function call format. Do not skip function calls or try to simulate tool results.
 ''';
 
-  /// 默认的用户系统提示
+  /// Default user system prompt
   final String defaultUserSystemPrompt =
       'You are an intelligent assistant capable of using tools to solve user queries effectively.';
 
-  /// 默认的工具配置
+  /// Default tool configuration
   final String defaultToolConfig = 'No additional configuration is required.';
 
-  /// 生成系统提示
+  /// Generate system prompt
   ///
-  /// [tools] - 工具定义的JSON
-  /// [userSystemPrompt] - 可选的用户系统提示
-  /// [toolConfig] - 可选的工具配置信息
+  /// [tools] - JSON tool definitions
+  /// [userSystemPrompt] - Optional user system prompt
+  /// [toolConfig] - Optional tool configuration information
   String generatePrompt({
     required List<Map<String, dynamic>> tools,
     String? userSystemPrompt,
     String? toolConfig,
   }) {
-    // 使用提供的值或默认值
+    // Use provided values or defaults
     final finalUserPrompt = userSystemPrompt ?? defaultUserSystemPrompt;
     final finalToolConfig = toolConfig ?? defaultToolConfig;
 
-    // 将工具JSON转换为格式化的字符串
+    // Convert tools JSON to formatted string
     final toolsJsonSchema = const JsonEncoder.withIndent('  ').convert(tools);
 
-    // 替换模板中的占位符
+    // Replace placeholders in template
     var prompt = template
         .replaceAll('{{ TOOL DEFINITIONS IN JSON SCHEMA }}', toolsJsonSchema)
         .replaceAll('{{ FORMATTING INSTRUCTIONS }}', '')
@@ -66,17 +66,17 @@ Here are the functions available in JSONSchema format:
     return prompt;
   }
 
-  /// 生成系统提示
+  /// Generate system prompt
   ///
-  /// [tools] - 可用工具列表
-  /// 返回一个简洁的、面向行动的系统提示
+  /// [tools] - List of available tools
+  /// Returns a concise, action-oriented system prompt
   String generateSystemPrompt(List<Map<String, dynamic>> tools) {
     final promptGenerator = SystemPromptGenerator();
 
-    // 生成基础工具提示
+    // Generate basic tool prompt
     var systemPrompt = promptGenerator.generatePrompt(tools: tools);
 
-    // 添加简洁的工具使用指南
+    // Add concise tool usage guidelines
     systemPrompt += '''
 
 **GENERAL GUIDELINES:**
@@ -344,9 +344,7 @@ This example demonstrates the assistant's preference to update existing artifact
             print("Enter 'q' to quit the program.")
 
             while True:
-                user_input = input("
-
-Enter a number (or 'q' to quit): ")
+                user_input = input("Enter a number (or 'q' to quit): ")
 
                 if user_input == 'q':
                     print("Thank you for using the Factorial Calculator. Goodbye!")

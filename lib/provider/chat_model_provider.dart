@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:chatmcp/llm/model.dart' as llmModel;
+import 'package:chatmcp/llm/model.dart' as llm_model;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:chatmcp/llm/llm_factory.dart';
 import 'dart:convert';
@@ -14,12 +14,12 @@ class ChatModelProvider extends ChangeNotifier {
 
   Future<void> loadAvailableModels() async {
     final models = await LLMFactoryHelper.getAvailableModels();
-    Logger.root.info('getAvailableModels: $models');
+    Logger.root.info('Available models loaded: $models');
 
-    _availableModels.clear(); // 先清空列表
+    _availableModels.clear(); // Clear the list first
     _availableModels.addAll(models.toList());
 
-    // 确保当前选择的模型在可用列表中，并且列表不为空
+    // Ensure the current model is in the available list and the list is not empty
     if (_availableModels.isEmpty) {
       notifyListeners();
       return;
@@ -33,22 +33,22 @@ class ChatModelProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  final List<llmModel.Model> _availableModels = [];
+  final List<llm_model.Model> _availableModels = [];
 
-  List<llmModel.Model> get availableModels => _availableModels;
+  List<llm_model.Model> get availableModels => _availableModels;
 
-  List<llmModel.Model> getModels() {
+  List<llm_model.Model> getModels() {
     return _availableModels;
   }
 
-  // 获取当前选中的模型
+  // Get the currently selected model
   static const String _modelKey = 'current_model';
-  llmModel.Model _currentModel = llmModel.Model(
+  llm_model.Model _currentModel = llm_model.Model(
       name: "gpt-4o-mini", label: "GPT-4o-mini", provider: "openai");
 
-  llmModel.Model get currentModel => _currentModel;
+  llm_model.Model get currentModel => _currentModel;
 
-  set currentModel(llmModel.Model model) {
+  set currentModel(llm_model.Model model) {
     _currentModel = model;
     _saveSavedModel();
     notifyListeners();
@@ -58,7 +58,7 @@ class ChatModelProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     final modelName = prefs.getString(_modelKey) ?? "";
     if (modelName.isNotEmpty) {
-      _currentModel = llmModel.Model.fromJson(jsonDecode(modelName));
+      _currentModel = llm_model.Model.fromJson(jsonDecode(modelName));
     }
     notifyListeners();
   }

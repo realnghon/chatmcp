@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:chatmcp/dao/chat.dart';
 import 'package:chatmcp/dao/chat_message.dart';
 import 'package:logging/logging.dart';
-import 'package:chatmcp/llm/model.dart' as llmModel;
+import 'package:chatmcp/llm/model.dart' as llm_model;
 
 class ChatProvider extends ChangeNotifier {
   static final ChatProvider _instance = ChatProvider._internal();
@@ -31,7 +31,7 @@ class ChatProvider extends ChangeNotifier {
   }
 
   Future<void> createChat(
-      Chat chat, List<llmModel.ChatMessage> messages) async {
+      Chat chat, List<llm_model.ChatMessage> messages) async {
     final chatDao = ChatDao();
     final id = await chatDao.insert(chat);
     await loadChats();
@@ -66,10 +66,10 @@ class ChatProvider extends ChangeNotifier {
   }
 
   Future<void> addChatMessage(
-      int chatId, List<llmModel.ChatMessage> messages) async {
+      int chatId, List<llm_model.ChatMessage> messages) async {
     final chatMessageDao = ChatMessageDao();
     for (var message in messages) {
-      if (message.role == llmModel.MessageRole.error) {
+      if (message.role == llm_model.MessageRole.error) {
         continue;
       }
       final chatMessages = await chatMessageDao
@@ -130,17 +130,17 @@ class ChatProvider extends ChangeNotifier {
   Future<void> deleteSelectedChats() async {
     final chatDao = ChatDao();
 
-    // 从数据库中删除选中的聊天记录
+    // Delete selected chats from database
     for (var chatId in selectedChats) {
       if (chatId != null) {
         await chatDao.delete(chatId.toString());
       }
     }
 
-    // 重新加载聊天列表
+    // Reload chat list
     await loadChats();
 
-    // 如果当前活动的聊天被删除，需要更新activeChat
+    // Update activeChat if current active chat was deleted
     if (selectedChats.contains(activeChat?.id)) {
       if (_chats.isNotEmpty) {
         await setActiveChat(_chats.first);
@@ -149,7 +149,7 @@ class ChatProvider extends ChangeNotifier {
       }
     }
 
-    // 退出选择模式
+    // Exit select mode
     exitSelectMode();
   }
 }

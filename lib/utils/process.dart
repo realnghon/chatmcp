@@ -33,18 +33,18 @@ Future<String> getDefaultPath([String? additionalPath]) async {
   final String pathSeparator = Platform.isWindows ? ';' : ':';
   final String systemPath = Platform.environment['PATH'] ?? '';
 
-  // 合并默认路径、系统PATH和额外路径
+  // Combine default paths, system PATH, and additional paths
   final List<String> allPaths = [
     ...defaultPaths,
     ...systemPath.split(pathSeparator),
   ];
 
-  // 如果提供了额外的路径，添加到列表中
+  // If additional paths are provided, add them to the list
   if (additionalPath != null && additionalPath.isNotEmpty) {
     allPaths.addAll(additionalPath.split(pathSeparator));
   }
 
-  // 移除空路径并去重
+  // Remove empty paths and deduplicate
   return allPaths.where((path) => path.isNotEmpty).toSet().join(pathSeparator);
 }
 
@@ -75,19 +75,19 @@ Future<Map<String, String>> _loadShellEnv() async {
   }
 
   try {
-    // 获取用户的默认 shell
+    // Get the user's default shell
     final String shell = Platform.environment['SHELL'] ?? '/bin/bash';
     final String homeDir = Platform.environment['HOME'] ?? '';
     final String user = Platform.environment['USER'] ?? '';
 
-    // 创建一个临时脚本来加载环境变量
+    // Create a temporary script to load environment variables
     final tempDir = await Directory.systemTemp.createTemp('env_loader');
     final scriptFile = File('${tempDir.path}/load_env.sh');
 
-    // 写入环境加载脚本
+    // Write the environment loading script
     await scriptFile.writeAsString('''
 #!$shell
-# 设置基本环境
+# Set basic environment
 export HOME="$homeDir"
 export USER="$user"
 export SHELL="$shell"
@@ -95,12 +95,12 @@ export TERM="xterm-256color"
 export LANG="en_US.UTF-8"
 export ENV_PREPARED=1
 
-# 加载系统级配置
+# Load system-level configuration
 if [ -f /etc/profile ]; then
   . /etc/profile
 fi
 
-# 根据不同的 shell 加载配置
+# Load configuration based on the shell type
 if [[ "$shell" == *"/bash" ]]; then
   # Bash shell
   if [ -f "\$HOME/.bash_profile" ]; then
@@ -119,7 +119,7 @@ elif [[ "$shell" == *"/zsh" ]]; then
     . "\$HOME/.zshrc"
   fi
   
-  # 尝试加载常见的 Python 版本管理器
+  # Attempt to load common Python version managers
   # pyenv
   if [ -d "\$HOME/.pyenv" ]; then
     export PYENV_ROOT="\$HOME/.pyenv"
@@ -137,16 +137,16 @@ elif [[ "$shell" == *"/zsh" ]]; then
   done
 fi
 
-# 输出所有环境变量
+# Output all environment variables
 env
 ''');
 
-    // 设置脚本权限
+    // Set script permissions
     await Process.run('chmod', ['+x', scriptFile.path]);
 
-    // 执行脚本获取环境变量
+    // Execute the script to get environment variables
     final result = await Process.run(shell, [
-      '-l', // 以登录模式执行，确保加载所有配置文件
+      '-l', // Run in login mode to ensure all configuration files are loaded
       scriptFile.path
     ], environment: {
       'HOME': homeDir,
@@ -157,7 +157,7 @@ env
           '/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin',
     });
 
-    // 清理临时文件
+    // Clean up temporary files
     await tempDir.delete(recursive: true);
 
     if (result.exitCode != 0) {
@@ -165,7 +165,7 @@ env
       return {};
     }
 
-    // 解析环境变量
+    // Parse environment variables
     final Map<String, String> env = {};
     final lines = result.stdout.toString().split('\n');
     for (final line in lines) {
@@ -187,7 +187,7 @@ env
 }
 
 Future<Map<String, String>> getDefaultEnv() async {
-  // 如果已经加载过环境变量，直接返回缓存
+  // If the environment variables are already loaded, return the cached version
   if (_cachedEnv != null) {
     return Map.of(_cachedEnv!);
   }
@@ -196,7 +196,7 @@ Future<Map<String, String>> getDefaultEnv() async {
     env['PYTHONIOENCODING'] = 'utf-8';
     env['PYTHONLEGACYWINDOWSSTDIO'] = 'utf-8';
   } else if (Platform.isMacOS || Platform.isLinux) {
-    // 标记环境变量已准备
+    // Mark environment variables as prepared
     env['ENV_PREPARED'] = '1';
 
     final Map<String, String> shellEnv = await _loadShellEnv();
@@ -210,7 +210,7 @@ Future<Map<String, String>> getDefaultEnv() async {
       env['PATH'] = defaultPath;
     }
 
-    // 合并其他环境变量
+    // Merge other environment variables
     shellEnv.forEach((key, value) {
       if (key != 'PATH' && !env.containsKey(key)) {
         env[key] = value;
@@ -219,7 +219,7 @@ Future<Map<String, String>> getDefaultEnv() async {
   }
   Logger.root.info('Default environment: $env');
 
-  // 缓存环境变量
+  // Cache the environment variables
   _cachedEnv = Map.of(env);
 
   return env;
@@ -231,19 +231,19 @@ Future<Process> startProcess(
   Map<String, String> environment,
 ) async {
   final Map<String, String> env = await getDefaultEnv();
-  env.addAll(environment); // Add user provided environment variables
+  env.addAll(environment); // Add user-provided environment variables
 
   return Process.start(
     command,
     args,
     environment: env,
     includeParentEnvironment: true,
-    // Windows need it to run properly, no idea why. Keep other platforms as default value (false).
+    // Windows needs this to run properly; keep other platforms as default (false).
     runInShell: Platform.isWindows,
   );
 }
 
-/// 清除环境变量缓存，强制下次获取时重新加载
+/// Clear the environment variable cache to force reloading next time
 void clearEnvironmentCache() {
   _cachedEnv = null;
   Logger.root.info('Environment cache cleared, will reload next time');

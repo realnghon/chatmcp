@@ -21,32 +21,32 @@ class McpServerProvider extends ChangeNotifier {
 
   Map<String, McpClient> get clients => _servers;
 
-  // 判断当前平台是否支持 MCP Server
+  // Check if current platform supports MCP Server
   bool get isSupported {
     return !Platform.isIOS && !Platform.isAndroid;
   }
 
-  // 获取配置文件路径
+  // Get configuration file path
   Future<String> get _configFilePath async {
     final directory = await getAppDir('ChatMcp');
     return '${directory.path}/$_configFileName';
   }
 
-  // 检查并创建初始配置文件
+  // Check and create initial configuration file
   Future<void> _initConfigFile() async {
     final file = File(await _configFilePath);
 
     if (!await file.exists()) {
-      // 从 assets 加载默认配置
+      // Load default configuration from assets
       final defaultConfig =
           await rootBundle.loadString('assets/mcp_server.json');
-      // 写入默认配置到配置文件
+      // Write default configuration to file
       await file.writeAsString(defaultConfig);
-      Logger.root.info('已从 assets 初始化默认配置文件');
+      Logger.root.info('Default configuration file initialized from assets');
     }
   }
 
-  // 读取服务器配置
+  // Read server configuration
   Future<Map<String, dynamic>> loadServers() async {
     try {
       await _initConfigFile();
@@ -58,26 +58,28 @@ class McpServerProvider extends ChangeNotifier {
       }
       return data;
     } catch (e, stackTrace) {
-      Logger.root.severe('读取配置文件失败: $e, stackTrace: $stackTrace');
+      Logger.root.severe(
+          'Failed to read configuration file: $e, stackTrace: $stackTrace');
       return {'mcpServers': <String, dynamic>{}};
     }
   }
 
-  // 保存服务器配置
+  // Save server configuration
   Future<void> saveServers(Map<String, dynamic> servers) async {
     try {
       final file = File(await _configFilePath);
       final prettyContents =
           const JsonEncoder.withIndent('  ').convert(servers);
       await file.writeAsString(prettyContents);
-      // 保存后重新初始化客户端
+      // Reinitialize clients after saving
       await _reinitializeClients();
     } catch (e, stackTrace) {
-      Logger.root.severe('保存配置文件失败: $e, stackTrace: $stackTrace');
+      Logger.root.severe(
+          'Failed to save configuration file: $e, stackTrace: $stackTrace');
     }
   }
 
-  // 重新初始化客户端
+  // Reinitialize clients
   Future<void> _reinitializeClients() async {
     // _servers.clear();
     await init();
@@ -116,13 +118,13 @@ class McpServerProvider extends ChangeNotifier {
 
   Future<void> init() async {
     try {
-      // 先确保配置文件存在
+      // Ensure configuration file exists
       await _initConfigFile();
 
       final configFilePath = await _configFilePath;
       Logger.root.info('mcp_server path: $configFilePath');
 
-      // 添加配置文件内容日志
+      // Add configuration file content log
       final configFile = File(configFilePath);
       final configContent = await configFile.readAsString();
       Logger.root.info('mcp_server config: $configContent');
@@ -142,12 +144,14 @@ class McpServerProvider extends ChangeNotifier {
 
       notifyListeners();
     } catch (e, stackTrace) {
-      Logger.root.severe('初始化 MCP 服务器失败: $e, stackTrace: $stackTrace');
-      // 打印更详细的错误信息
+      Logger.root.severe(
+          'Failed to initialize MCP servers: $e, stackTrace: $stackTrace');
+      // Print more detailed error information
       if (e is TypeError) {
         final configFile = File(await _configFilePath);
         final content = await configFile.readAsString();
-        Logger.root.severe('配置文件解析错误，当前配置内容: $content');
+        Logger.root.severe(
+            'Configuration file parsing error, current content: $content');
       }
     }
   }
@@ -173,7 +177,7 @@ class McpServerProvider extends ChangeNotifier {
       final serverConfig = entry.value as Map<String, dynamic>;
 
       try {
-        // 创建异步任务并添加到列表
+        // Create async task and add to list
         final client = await initializeMcpServer(serverConfig);
         if (client != null) {
           clients[serverName] = client;
@@ -185,8 +189,8 @@ class McpServerProvider extends ChangeNotifier {
           notifyListeners();
         }
       } catch (e, stackTrace) {
-        Logger.root
-            .severe('初始化 MCP 服务器失败: $serverName, $e, stackTrace: $stackTrace');
+        Logger.root.severe(
+            'Failed to initialize MCP server: $serverName, $e, stackTrace: $stackTrace');
       }
     }
 
@@ -201,7 +205,8 @@ class McpServerProvider extends ChangeNotifier {
       final dio = Dio();
       final response = await dio.get(mcpServerMarket);
       if (response.statusCode == 200) {
-        Logger.root.info('加载市场服务器成功: ${response.data}');
+        Logger.root
+            .info('Successfully loaded market servers: ${response.data}');
         final Map<String, dynamic> jsonData = json.decode(response.data);
 
         final Map<String, dynamic> servers =
@@ -209,7 +214,7 @@ class McpServerProvider extends ChangeNotifier {
 
         var sseServers = <String, dynamic>{};
 
-        // 针对移动端，只保留 command 以 http 开头的服务器
+        // For mobile platforms, only keep servers with commands starting with http
         if (Platform.isIOS || Platform.isAndroid) {
           for (var server in servers.entries) {
             if (server.value['command'] != null &&
@@ -225,10 +230,11 @@ class McpServerProvider extends ChangeNotifier {
           'mcpServers': sseServers,
         };
       }
-      throw Exception('加载市场服务器失败: ${response.statusCode}');
+      throw Exception('Failed to load market servers: ${response.statusCode}');
     } catch (e, stackTrace) {
-      Logger.root.severe('加载市场服务器失败: $e, stackTrace: $stackTrace');
-      throw Exception('加载市场服务器失败: $e');
+      Logger.root
+          .severe('Failed to load market servers: $e, stackTrace: $stackTrace');
+      throw Exception('Failed to load market servers: $e');
     }
   }
 }

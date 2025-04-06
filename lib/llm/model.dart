@@ -3,7 +3,7 @@ import 'package:chatmcp/provider/settings_provider.dart';
 import 'package:uuid/uuid.dart';
 import 'package:chatmcp/dao/chat_message.dart';
 
-// 消息角色枚举
+// Message role enumeration
 enum MessageRole {
   system,
   user,
@@ -52,7 +52,7 @@ class File {
   }
 }
 
-// 消息结构体
+// Message structure
 class ChatMessage {
   final String messageId;
   final String parentMessageId;
@@ -124,7 +124,7 @@ class ChatMessage {
 
   factory ChatMessage.fromJson(
       String messageId, String parentMessageId, Map<String, dynamic> json) {
-    // 处理 toolCalls 的类型转换
+    // Handle type conversion for toolCalls
     List<Map<String, dynamic>>? toolCalls;
     if (json['tool_calls'] != null) {
       toolCalls = (json['tool_calls'] as List)
@@ -176,7 +176,7 @@ class ChatMessage {
   }
 }
 
-// 添加工具调用的数据结构
+// Add tool call data structure
 class ToolCall {
   final String id;
   final String type;
@@ -209,7 +209,7 @@ class FunctionCall {
         'arguments': arguments,
       };
 
-  // 解析参数为 Map
+  // Parse arguments to Map
   Map<String, dynamic> get parsedArguments =>
       json.decode(arguments) as Map<String, dynamic>;
 }

@@ -19,7 +19,7 @@ class ProviderManager {
     ChangeNotifierProvider<ChatModelProvider>(
       create: (_) => ChatModelProvider(),
     ),
-    // 在这里添加其他 Provider
+    // Add other Providers here
   ];
 
   static SettingsProvider? _settingsProvider;
