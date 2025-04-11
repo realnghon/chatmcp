@@ -111,20 +111,18 @@ class _FunctionWidgetState extends State<FunctionWidget> {
                         widget.attributes['name'] ?? '', widget.textContent));
                   },
                 ),
-              IconButton(
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                icon: Icon(
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _isExpanded = !_isExpanded;
+                  });
+                },
+                child: Icon(
                   _isExpanded ? Icons.expand_less : Icons.expand_more,
                   color: AppColors.getThemeColor(context,
                       lightColor: AppColors.grey[600],
                       darkColor: AppColors.grey[300]),
                 ),
-                onPressed: () {
-                  setState(() {
-                    _isExpanded = !_isExpanded;
-                  });
-                },
               ),
             ],
           ),
