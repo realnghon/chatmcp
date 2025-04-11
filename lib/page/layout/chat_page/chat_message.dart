@@ -110,7 +110,9 @@ class ChatMessageContent extends StatelessWidget {
               children: message.files!
                   .map((file) => Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 6),
+                          horizontal: 6,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.getThemeColor(
                             context,
@@ -253,16 +255,22 @@ class MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 4),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 10,
+        bottom: 10,
+      ),
       decoration: BoxDecoration(
+        // 根据主题设置不同的背景色
         color: message.role == MessageRole.user
             ? AppColors.getThemeColor(context,
-                lightColor: AppColors.grey[200], darkColor: AppColors.grey[800])
+                lightColor: AppColors.grey[100], darkColor: AppColors.grey[800])
             : AppColors.getThemeColor(context,
-                lightColor: AppColors.grey[300],
-                darkColor: AppColors.grey[900]),
-        borderRadius: BorderRadius.circular(16),
+                lightColor: AppColors.grey[100],
+                darkColor: AppColors.grey[800]),
+        borderRadius: BorderRadius.circular(11),
       ),
       child: message.content != null
           ? message.role == MessageRole.user

@@ -1,3 +1,4 @@
+import 'package:chatmcp/components/widgets/base.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
@@ -31,7 +32,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                 Expanded(
                   child: ListView(
                     children: [
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 10),
                       _buildThemeCard(context),
                       _buildLocaleCard(context),
                       _buildAvatarCard(context),
@@ -56,14 +57,14 @@ class _GeneralSettingsState extends State<GeneralSettings> {
         children: [
           Icon(
             icon,
-            size: 18,
+            size: 14,
             color: Theme.of(context).colorScheme.primary,
           ),
           const SizedBox(width: 8),
           Text(
             title,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 12,
               fontWeight: FontWeight.w600,
               color: Theme.of(context).colorScheme.primary,
             ),
@@ -92,13 +93,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                 ),
               ),
               child: ListTile(
-                title: Text(
-                  l10n.language,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
+                title: CText(text: l10n.language),
                 trailing: DropdownButton<String>(
                   value: settings.generalSetting.locale,
                   underline: const SizedBox(),
@@ -111,11 +106,11 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                   items: const [
                     DropdownMenuItem(
                       value: 'en',
-                      child: Text('English'),
+                      child: CText(text: 'English'),
                     ),
                     DropdownMenuItem(
                       value: 'zh',
-                      child: Text('中文'),
+                      child: CText(text: '中文'),
                     ),
                   ],
                   onChanged: (String? value) {
@@ -156,6 +151,8 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                     title: l10n.enableArtifacts,
                     subtitle: l10n.enableArtifactsDescription,
                     value: settings.generalSetting.enableArtifacts,
+                    titleFontSize: 14,
+                    subtitleFontSize: 12,
                     onChanged: (bool value) {
                       settings.updateGeneralSettingsPartially(
                           enableArtifacts: value);
@@ -171,6 +168,8 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                     title: l10n.enableToolUsage,
                     subtitle: l10n.enableToolUsageDescription,
                     value: settings.generalSetting.enableToolUsage,
+                    titleFontSize: 14,
+                    subtitleFontSize: 12,
                     onChanged: (bool value) {
                       settings.updateGeneralSettingsPartially(
                           enableToolUsage: value);
@@ -198,19 +197,19 @@ class _GeneralSettingsState extends State<GeneralSettings> {
               elevation: 0,
               color: Theme.of(context).colorScheme.surface,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(11),
                 side: BorderSide(
                   color: Theme.of(context).colorScheme.outline.withAlpha(50),
                 ),
               ),
               child: Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    const EdgeInsets.symmetric(horizontal: 12.0, vertical: 1.0),
                 child: DropdownButtonFormField<String>(
                   value: settings.generalSetting.theme,
                   decoration: InputDecoration(
                     border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(vertical: 8.0),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 2.0),
                   ),
                   icon: Icon(
                     CupertinoIcons.chevron_right,
@@ -221,15 +220,15 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                   items: [
                     DropdownMenuItem(
                       value: 'light',
-                      child: Text(l10n.lightTheme),
+                      child: CText(text: l10n.lightTheme),
                     ),
                     DropdownMenuItem(
                       value: 'dark',
-                      child: Text(l10n.darkTheme),
+                      child: CText(text: l10n.darkTheme),
                     ),
                     DropdownMenuItem(
                       value: 'system',
-                      child: Text(l10n.followSystem),
+                      child: CText(text: l10n.followSystem),
                     ),
                   ],
                   onChanged: (value) {
@@ -272,6 +271,8 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                     title: l10n.showAssistantAvatar,
                     subtitle: l10n.showAssistantAvatarDescription,
                     value: settings.generalSetting.showAssistantAvatar,
+                    titleFontSize: 14,
+                    subtitleFontSize: 12,
                     onChanged: (bool value) {
                       settings.updateGeneralSettingsPartially(
                           showAssistantAvatar: value);
@@ -287,6 +288,8 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                     title: l10n.showUserAvatar,
                     subtitle: l10n.showUserAvatarDescription,
                     value: settings.generalSetting.showUserAvatar,
+                    titleFontSize: 14,
+                    subtitleFontSize: 12,
                     onChanged: (bool value) {
                       settings.updateGeneralSettingsPartially(
                           showUserAvatar: value);

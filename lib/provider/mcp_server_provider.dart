@@ -56,6 +56,10 @@ class McpServerProvider extends ChangeNotifier {
       if (data['mcpServers'] == null) {
         data['mcpServers'] = <String, dynamic>{};
       }
+      // 遍历data['mcpServers']，直接设置installed为true，
+      for (var server in data['mcpServers'].entries) {
+        server.value['installed'] = true;
+      }
       return data;
     } catch (e, stackTrace) {
       Logger.root.severe(
@@ -224,6 +228,17 @@ class McpServerProvider extends ChangeNotifier {
           }
         } else {
           sseServers = servers;
+        }
+
+        // 获取本地已安装的mcp服务器
+        final localInstalledServers = await loadServers();
+        //遍历sseServers，如果本地已安装的mcp服务器中存在，则将sseServers中的该服务器设置为已安装
+        for (var server in sseServers.entries) {
+          if (localInstalledServers['mcpServers'][server.key] != null) {
+            server.value['installed'] = true;
+          } else {
+            server.value['installed'] = false;
+          }
         }
 
         return {

@@ -140,7 +140,7 @@ class _MessageListState extends State<MessageList> {
             ListView.builder(
               reverse: true,
               controller: _scrollController,
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(16.0),
               itemCount: groupedMessages.length,
               // physics: const ClampingScrollPhysics(), // 禁用弹性效果
               itemBuilder: (context, index) {

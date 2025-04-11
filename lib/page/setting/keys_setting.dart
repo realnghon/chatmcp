@@ -1,3 +1,4 @@
+import 'package:chatmcp/components/widgets/base.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
@@ -137,13 +138,7 @@ class _KeysSettingsState extends State<KeysSettings> {
                       ),
                       child: _isLoading
                           ? const CupertinoActivityIndicator()
-                          : Text(
-                              l10n.saveSettings,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
+                          : CText(text: l10n.saveSettings),
                     ),
                   ),
                 ),
@@ -162,17 +157,14 @@ class _KeysSettingsState extends State<KeysSettings> {
         children: [
           Icon(
             icon,
-            size: 18,
+            size: 16,
             color: Theme.of(context).colorScheme.primary,
           ),
           const SizedBox(width: 8),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.primary,
-            ),
+          CText(
+            text: title,
+            size: 14,
+            fontWeight: FontWeight.bold,
           ),
         ],
       ),
@@ -317,6 +309,7 @@ class _ApiSectionState extends State<ApiSection> {
                   ),
                   prefixIcon: Icon(
                     CupertinoIcons.lock,
+                    size: 18,
                     color: Theme.of(context).colorScheme.primary,
                   ),
                   suffixIcon: IconButton(
@@ -324,6 +317,7 @@ class _ApiSectionState extends State<ApiSection> {
                       _isKeyVisible
                           ? CupertinoIcons.eye_slash
                           : CupertinoIcons.eye,
+                      size: 18,
                       color: Theme.of(context).colorScheme.primary,
                     ),
                     onPressed: () =>
@@ -385,6 +379,7 @@ class _ApiSectionState extends State<ApiSection> {
                   ),
                   prefixIcon: Icon(
                     CupertinoIcons.link,
+                    size: 18,
                     color: Theme.of(context).colorScheme.primary,
                   ),
                   contentPadding:

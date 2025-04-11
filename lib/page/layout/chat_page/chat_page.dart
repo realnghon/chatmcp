@@ -109,45 +109,46 @@ class _ChatPageState extends State<ChatPage> {
   Future<bool> _showFunctionApprovalDialog(RunFunctionEvent event) async {
     var t = AppLocalizations.of(context)!;
     return await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(t.functionCallAuth),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text(t.allowFunctionExecution),
-                SizedBox(height: 8),
-                Text(event.name),
-                SizedBox(height: 8),
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text(t.functionCallAuth),
+              content: SingleChildScrollView(
+                child: ListBody(
+                  children: <Widget>[
+                    Text(t.allowFunctionExecution),
+                    SizedBox(height: 8),
+                    Text(event.name),
+                    SizedBox(height: 8),
+                  ],
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: Text(t.cancel),
+                  onPressed: () {
+                    setState(() {
+                      _userRejected = true;
+                      _runFunctionEvent = null;
+                    });
+                    Navigator.of(context).pop(false);
+                  },
+                ),
+                TextButton(
+                  child: Text(t.allow),
+                  onPressed: () {
+                    setState(() {
+                      _userApproved = true;
+                    });
+                    Navigator.of(context).pop(true);
+                  },
+                ),
               ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text(t.cancel),
-              onPressed: () {
-                setState(() {
-                  _userRejected = true;
-                  _runFunctionEvent = null;
-                });
-                Navigator.of(context).pop(false);
-              },
-            ),
-            TextButton(
-              child: Text(t.allow),
-              onPressed: () {
-                setState(() {
-                  _userApproved = true;
-                });
-                Navigator.of(context).pop(true);
-              },
-            ),
-          ],
-        );
-      },
-    ) ?? false;
+            );
+          },
+        ) ??
+        false;
   }
 
   void _addListeners() {
@@ -957,8 +958,6 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _buildBody(),
-    );
+    return _buildBody();
   }
 }

@@ -82,10 +82,10 @@ class _ThinkWidgetState extends State<ThinkWidget> {
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       decoration: BoxDecoration(
         color: AppColors.getThemeColor(context,
-            lightColor: AppColors.grey[100], darkColor: AppColors.grey[900]),
+            lightColor: AppColors.grey[50], darkColor: AppColors.grey[700]),
         border: Border.all(
             color: AppColors.getThemeColor(context,
-                lightColor: AppColors.grey[300],
+                lightColor: AppColors.grey[200],
                 darkColor: AppColors.grey[700])),
         borderRadius: BorderRadius.circular(8.0),
       ),

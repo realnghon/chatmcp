@@ -6,6 +6,7 @@ import 'package:chatmcp/utils/platform.dart';
 import 'package:chatmcp/utils/color.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:chatmcp/components/widgets/base.dart';
 
 class SidebarPanel extends StatelessWidget {
   final VoidCallback? onToggle;
@@ -22,8 +23,9 @@ class SidebarPanel extends StatelessWidget {
             if (kIsDesktop) ...[
               Positioned(
                 top: 0,
-                right: 4,
+                right: 0,
                 child: IconButton(
+                  iconSize: 18,
                   icon: const Icon(CupertinoIcons.sidebar_left),
                   onPressed: onToggle,
                 ),
@@ -89,7 +91,7 @@ class ChatHistoryList extends StatelessWidget {
     final groupedChats = _groupChats(context, chatProvider.chats);
 
     return Container(
-      padding: const EdgeInsets.only(top: 30, left: 4, right: 4, bottom: 40),
+      padding: const EdgeInsets.only(top: 30, left: 12, right: 12, bottom: 40),
       child: ListView.builder(
         itemCount: groupedChats.entries.length,
         itemBuilder: (context, index) {
@@ -103,20 +105,19 @@ class ChatHistoryList extends StatelessWidget {
             children: [
               Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                child: Text(
-                  entry.key,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.getThemeTextColor(context).withAlpha(128),
-                    fontWeight: FontWeight.w500,
-                  ),
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                child: CText(
+                  text: entry.key,
+                  size: 10,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-              ...entry.value.map((chat) => ChatHistoryItem(
-                    chat: chat,
-                    chatProvider: chatProvider,
-                  )),
+              ...entry.value.map(
+                (chat) => ChatHistoryItem(
+                  chat: chat,
+                  chatProvider: chatProvider,
+                ),
+              ),
             ],
           );
         },
@@ -140,17 +141,17 @@ class ChatHistoryItem extends StatelessWidget {
     final isActive = chat.id == chatProvider.activeChat?.id;
 
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 1),
+      margin: const EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
         color: isActive
             ? AppColors.getThemeColor(context,
                 lightColor: AppColors.grey[300], darkColor: AppColors.grey[700])
             : null,
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(7),
       ),
       child: ListTile(
         dense: true,
-        visualDensity: const VisualDensity(vertical: -4),
+        visualDensity: VisualDensity(vertical: -4),
         leading: chatProvider.isSelectMode
             ? Checkbox(
                 value: chatProvider.selectedChats.contains(chat.id),
@@ -166,9 +167,9 @@ class ChatHistoryItem extends StatelessWidget {
         title: Row(
           children: [
             Expanded(
-              child: Text(
-                chat.title.replaceAll('\n', ' '),
-                style: const TextStyle(fontSize: 14),
+              child: CText(
+                text: chat.title.replaceAll('\n', ' '),
+                size: 12,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -199,7 +200,7 @@ class SidebarToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      bottom: 0,
+      bottom: 6,
       left: 0,
       right: 0,
       child: Container(
@@ -221,6 +222,7 @@ class SidebarToolbar extends StatelessWidget {
 
   Widget _buildSettingsButton(BuildContext context) {
     return IconButton(
+      iconSize: 18,
       icon: const Icon(CupertinoIcons.settings),
       onPressed: () => _showSettingsDialog(context),
     );
@@ -228,6 +230,7 @@ class SidebarToolbar extends StatelessWidget {
 
   Widget _buildSelectModeButton() {
     return IconButton(
+      iconSize: 18,
       icon: Icon(chatProvider.isSelectMode
           ? CupertinoIcons.clear
           : CupertinoIcons.trash),
@@ -243,6 +246,7 @@ class SidebarToolbar extends StatelessWidget {
 
   Widget _buildSelectAllButton() {
     return IconButton(
+      iconSize: 18,
       icon: const Icon(CupertinoIcons.checkmark_square),
       onPressed: () => chatProvider.toggleSelectAll(),
     );
@@ -254,7 +258,12 @@ class SidebarToolbar extends StatelessWidget {
       onPressed: chatProvider.selectedChats.isNotEmpty
           ? () => _showDeleteConfirmDialog(context)
           : null,
-      child: Text(t.delete),
+      child: CText(
+        text: t.delete,
+        size: 12,
+        color: chatProvider.selectedChats.isNotEmpty ? Colors.red : null,
+        fontWeight: FontWeight.w500,
+      ),
     );
   }
 

@@ -1,3 +1,4 @@
+import 'package:chatmcp/utils/color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:io' show Platform;
@@ -119,7 +120,7 @@ class _InputAreaState extends State<InputArea> {
     final l10n = AppLocalizations.of(context)!;
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: Colors.transparent,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -200,7 +201,9 @@ class _InputAreaState extends State<InputArea> {
                     decoration: InputDecoration(
                       hintText: l10n.askMeAnything,
                       hintStyle: const TextStyle(fontSize: 14.0),
-                      border: OutlineInputBorder(),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(11),
+                      ),
                       contentPadding:
                           EdgeInsets.symmetric(horizontal: 14, vertical: 18),
                       isDense: true,

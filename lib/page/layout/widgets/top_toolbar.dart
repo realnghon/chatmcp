@@ -1,3 +1,4 @@
+import 'package:chatmcp/components/widgets/base.dart';
 import 'package:flutter/material.dart';
 import 'package:chatmcp/provider/provider_manager.dart';
 import './model_selector.dart';
@@ -53,6 +54,7 @@ class TopToolbar extends StatelessWidget {
   Widget _buildMoreMenu(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return PopupMenuButton<String>(
+      iconSize: 18,
       icon: const Icon(CupertinoIcons.ellipsis_vertical),
       itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
         if (ProviderManager.chatProvider.activeChat != null)
@@ -75,9 +77,9 @@ class TopToolbar extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(CupertinoIcons.slider_horizontal_3),
+              const Icon(CupertinoIcons.slider_horizontal_3, size: 18),
               const SizedBox(width: 8),
-              Text(l10n.modelConfig),
+              CText(text: l10n.modelConfig),
             ],
           ),
         ),
@@ -86,9 +88,9 @@ class TopToolbar extends StatelessWidget {
             value: 'debug',
             child: Row(
               children: [
-                const Icon(CupertinoIcons.ant),
+                const Icon(CupertinoIcons.ant, size: 18),
                 const SizedBox(width: 8),
-                Text(l10n.debug),
+                CText(text: l10n.debug),
               ],
             ),
           ),
@@ -141,8 +143,17 @@ class TopToolbar extends StatelessWidget {
                   }
                 },
                 child: Container(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: AppColors.getThemeColor(context,
+                            lightColor: AppColors.grey[200],
+                            darkColor: AppColors.grey[800]),
+                      ),
+                    ),
+                  ),
                   padding: kIsDesktop
-                      ? EdgeInsets.only(left: hideSidebar ? 70 : 0)
+                      ? EdgeInsets.only(left: hideSidebar ? 70 : 0, top: 2)
                       : null,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -153,6 +164,7 @@ class TopToolbar extends StatelessWidget {
                           children: [
                             if (hideSidebar && kIsDesktop)
                               IconButton(
+                                iconSize: 18,
                                 icon: Icon(
                                   CupertinoIcons.sidebar_right,
                                   color: AppColors.grey[700],
@@ -166,6 +178,7 @@ class TopToolbar extends StatelessWidget {
                                   children: [
                                     if (kIsMobile)
                                       IconButton(
+                                        iconSize: 18,
                                         icon: const Icon(
                                           Icons.menu,
                                         ),
@@ -174,6 +187,7 @@ class TopToolbar extends StatelessWidget {
                                           Scaffold.of(context).openDrawer();
                                         },
                                       ),
+                                    Gap(size: 4),
                                     const ModelSelector(),
                                     if (mcpProvider.clients.isNotEmpty) ...[
                                       const SizedBox(width: 2),
@@ -191,15 +205,13 @@ class TopToolbar extends StatelessWidget {
                         children: [
                           if (ProviderManager.chatProvider.activeChat != null)
                             IconButton(
+                              iconSize: 18,
                               icon: const Icon(CupertinoIcons.add),
                               onPressed: () {
                                 ProviderManager.chatProvider.clearActiveChat();
                               },
                             ),
-                          Padding(
-                            padding: const EdgeInsets.only(right: 0),
-                            child: _buildMoreMenu(context),
-                          ),
+                          _buildMoreMenu(context),
                         ],
                       ),
                     ],

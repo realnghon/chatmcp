@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chatmcp/components/widgets/base.dart';
 import 'package:chatmcp/provider/provider_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -183,6 +184,7 @@ class _McpServerState extends State<McpServer> {
                                 serverName,
                                 serverConfig,
                                 provider,
+                                serverConfig['installed'] ?? false,
                               );
                             },
                           );
@@ -216,6 +218,7 @@ class _McpServerState extends State<McpServer> {
     String serverName,
     dynamic serverConfig,
     McpServerProvider provider,
+    bool installed,
   ) {
     final l10n = AppLocalizations.of(context)!;
 
@@ -236,7 +239,7 @@ class _McpServerState extends State<McpServer> {
           serverName,
           style: TextStyle(
             fontWeight: FontWeight.w600,
-            fontSize: 16,
+            fontSize: 12,
             color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
@@ -273,78 +276,7 @@ class _McpServerState extends State<McpServer> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  if (_selectedTab == 'All')
-                    FutureBuilder<Map<String, dynamic>>(
-                      future: provider.loadServers(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          final installedServers = snapshot.data?['mcpServers']
-                                  as Map<String, dynamic>? ??
-                              {};
-                          final isInstalled =
-                              installedServers.containsKey(serverName);
-
-                          return Row(
-                            children: [
-                              if (isInstalled) ...[
-                                _buildActionButton(
-                                  icon: CupertinoIcons.pencil,
-                                  tooltip: l10n.edit,
-                                  onPressed: () => _showEditDialog(
-                                      context, serverName, provider, null),
-                                ),
-                                const SizedBox(width: 8),
-                                _buildActionButton(
-                                  icon: CupertinoIcons.delete,
-                                  tooltip: l10n.delete,
-                                  color: Theme.of(context).colorScheme.error,
-                                  onPressed: () => _showDeleteConfirmDialog(
-                                      context, serverName, provider),
-                                ),
-                              ] else
-                                ElevatedButton.icon(
-                                  icon: Icon(
-                                    CupertinoIcons.cloud_download,
-                                    color:
-                                        Theme.of(context).colorScheme.onPrimary,
-                                  ),
-                                  label: Text(l10n.install),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                        Theme.of(context).colorScheme.primary,
-                                    foregroundColor:
-                                        Theme.of(context).colorScheme.onPrimary,
-                                    elevation: 0,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  onPressed: () async {
-                                    final cmdExists = await isCommandAvailable(
-                                        serverConfig['command']);
-                                    if (!cmdExists) {
-                                      showErrorDialog(
-                                        context,
-                                        l10n.commandNotExist(
-                                            serverConfig['command'],
-                                            Platform.environment['PATH'] ?? ''),
-                                      );
-                                    } else {
-                                      Logger.root.info(
-                                        'Install server configuration: $serverName ${serverConfig['command']} ${serverConfig['args']}',
-                                      );
-                                      await _showEditDialog(context, serverName,
-                                          provider, serverConfig);
-                                    }
-                                  },
-                                ),
-                            ],
-                          );
-                        }
-                        return const SizedBox.shrink();
-                      },
-                    ),
-                  if (_selectedTab == 'Installed') ...[
+                  if (installed) ...[
                     _buildActionButton(
                       icon: CupertinoIcons.pencil,
                       tooltip: l10n.edit,
@@ -358,6 +290,40 @@ class _McpServerState extends State<McpServer> {
                       color: Theme.of(context).colorScheme.error,
                       onPressed: () => _showDeleteConfirmDialog(
                           context, serverName, provider),
+                    ),
+                  ] else ...[
+                    ElevatedButton.icon(
+                      icon: Icon(
+                        CupertinoIcons.cloud_download,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
+                      label: Text(l10n.install),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor:
+                            Theme.of(context).colorScheme.onPrimary,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onPressed: () async {
+                        final cmdExists =
+                            await isCommandAvailable(serverConfig['command']);
+                        if (!cmdExists) {
+                          showErrorDialog(
+                            context,
+                            l10n.commandNotExist(serverConfig['command'],
+                                Platform.environment['PATH'] ?? ''),
+                          );
+                        } else {
+                          Logger.root.info(
+                            'Install server configuration: $serverName ${serverConfig['command']} ${serverConfig['args']}',
+                          );
+                          await _showEditDialog(
+                              context, serverName, provider, serverConfig);
+                        }
+                      },
                     ),
                   ],
                 ],

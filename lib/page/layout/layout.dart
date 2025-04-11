@@ -73,33 +73,37 @@ class _LayoutPageState extends State<LayoutPage> {
   }
 
   Widget _buildLayout() {
-    return SafeArea(
-      child: Row(
-        children: [
-          if (kIsDesktop && !hideSidebar)
-            Container(
-              width: 250,
-              color: AppColors.getThemeColor(context,
-                  lightColor: AppColors.grey[200],
-                  darkColor: AppColors.grey[800]),
-              child: SidebarPanel(
-                onToggle: _toggleSidebar,
+    return Scaffold(
+      backgroundColor: AppColors.getThemeColor(context,
+          lightColor: Colors.white, darkColor: Colors.white30),
+      body: SafeArea(
+        child: Row(
+          children: [
+            if (kIsDesktop && !hideSidebar)
+              Container(
+                width: 250,
+                color: AppColors.getThemeColor(context,
+                    lightColor: AppColors.grey[200],
+                    darkColor: AppColors.grey[800]),
+                child: SidebarPanel(
+                  onToggle: _toggleSidebar,
+                ),
+              ),
+            Expanded(
+              child: Column(
+                children: [
+                  TopToolbar(
+                    hideSidebar: hideSidebar,
+                    onToggleSidebar: _toggleSidebar,
+                  ),
+                  Expanded(
+                    child: ChatPage(),
+                  ),
+                ],
               ),
             ),
-          Expanded(
-            child: Column(
-              children: [
-                TopToolbar(
-                  hideSidebar: hideSidebar,
-                  onToggleSidebar: _toggleSidebar,
-                ),
-                Expanded(
-                  child: ChatPage(),
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
