@@ -158,7 +158,8 @@ class _CodeBlockState extends State<_CodeBlock>
 
   Widget buildToolBar(AppLocalizations t) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      height: 30,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
       decoration: BoxDecoration(
         color: AppColors.getThemeColor(context,
             lightColor: AppColors.grey[300], darkColor: AppColors.grey[900]),
@@ -172,10 +173,10 @@ class _CodeBlockState extends State<_CodeBlock>
             widget.language.isEmpty ? 'text' : widget.language,
             style: TextStyle(
               color: AppColors.getThemeColor(context,
-                  lightColor: AppColors.grey[600],
+                  lightColor: AppColors.grey[700],
                   darkColor: AppColors.grey[300]),
               fontSize: 12,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.bold,
             ),
           ),
           const Spacer(),
@@ -183,9 +184,9 @@ class _CodeBlockState extends State<_CodeBlock>
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              IconButton(
-                icon: const Icon(Icons.copy, size: 16),
-                onPressed: () {
+              GestureDetector(
+                child: const Icon(Icons.copy, size: 14),
+                onTap: () {
                   Clipboard.setData(ClipboardData(text: widget.code));
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -195,19 +196,19 @@ class _CodeBlockState extends State<_CodeBlock>
                   );
                 },
               ),
-              const SizedBox(width: 4),
-              if (_isSupportPreview)
+              if (_isSupportPreview) ...[
+                Gap(size: 8),
                 TextButton(
                   style: TextButton.styleFrom(
-                    minimumSize: Size.zero,
+                    minimumSize: Size(20, 20),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     backgroundColor: AppColors.getThemeColor(context,
                         lightColor: AppColors.grey[100],
                         darkColor: AppColors.grey[900]),
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(11),
                     ),
                   ),
                   onPressed: () {
@@ -220,6 +221,7 @@ class _CodeBlockState extends State<_CodeBlock>
                     style: const TextStyle(fontSize: 9, height: 1),
                   ),
                 ),
+              ]
             ],
           ),
         ],

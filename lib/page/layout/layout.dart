@@ -76,6 +76,22 @@ class _LayoutPageState extends State<LayoutPage> {
     return Scaffold(
       backgroundColor: AppColors.getThemeColor(context,
           lightColor: Colors.white, darkColor: Colors.white30),
+      drawer: kIsMobile
+          ? Builder(
+              builder: (BuildContext context) => Theme(
+                data: Theme.of(context),
+                child: Container(
+                  width: 250,
+                  color: AppColors.getThemeBackgroundColor(context),
+                  child: SafeArea(
+                    child: SidebarPanel(
+                      onToggle: () {},
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : null,
       body: SafeArea(
         child: Row(
           children: [

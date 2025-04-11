@@ -118,25 +118,7 @@ class MyApp extends StatelessWidget {
             brightness: Brightness.dark,
           ),
           themeMode: _getThemeMode(settings.generalSetting.theme),
-          home: Scaffold(
-            drawer: kIsMobile
-                ? Builder(
-                    builder: (BuildContext context) => Theme(
-                      data: Theme.of(context),
-                      child: Container(
-                        width: 250,
-                        color: AppColors.getThemeBackgroundColor(context),
-                        child: SafeArea(
-                          child: SidebarPanel(
-                            onToggle: () {},
-                          ),
-                        ),
-                      ),
-                    ),
-                  )
-                : null,
-            body: LayoutPage(),
-          ),
+          home: LayoutPage(),
           locale: Locale(settings.generalSetting.locale),
           localizationsDelegates: const [
             AppLocalizations.delegate,

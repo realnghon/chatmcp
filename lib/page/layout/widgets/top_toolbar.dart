@@ -64,9 +64,9 @@ class TopToolbar extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(CupertinoIcons.share),
+                const Icon(CupertinoIcons.share, size: 18),
                 const SizedBox(width: 8),
-                Text(l10n.share),
+                CText(text: l10n.share),
               ],
             ),
           ),
@@ -184,6 +184,7 @@ class TopToolbar extends StatelessWidget {
                                         ),
                                         onPressed: () {
                                           // open drawer
+                                          print('open drawer');
                                           Scaffold.of(context).openDrawer();
                                         },
                                       ),
