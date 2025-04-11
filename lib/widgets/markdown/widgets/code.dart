@@ -1,3 +1,4 @@
+import 'package:chatmcp/components/widgets/base.dart';
 import 'package:flutter/material.dart';
 import 'package:markdown_widget/markdown_widget.dart';
 import 'package:markdown/markdown.dart' as m;
@@ -147,7 +148,9 @@ class _CodeBlockState extends State<_CodeBlock>
           //     child: previewWidget!,
           //   ),
           if (_isSupportPreview && _isPreviewVisible) previewWidget!,
+          Gap(size: 20),
           if (!_isPreviewVisible) ...buildCodeBlockList(),
+          Gap(size: 20),
         ],
       ),
     );
@@ -158,7 +161,7 @@ class _CodeBlockState extends State<_CodeBlock>
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: AppColors.getThemeColor(context,
-            lightColor: AppColors.grey[100], darkColor: AppColors.grey[900]),
+            lightColor: AppColors.grey[300], darkColor: AppColors.grey[900]),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
       ),
       child: Row(
@@ -171,7 +174,7 @@ class _CodeBlockState extends State<_CodeBlock>
               color: AppColors.getThemeColor(context,
                   lightColor: AppColors.grey[600],
                   darkColor: AppColors.grey[300]),
-              fontSize: 10,
+              fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -181,7 +184,7 @@ class _CodeBlockState extends State<_CodeBlock>
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               IconButton(
-                icon: const Icon(Icons.copy),
+                icon: const Icon(Icons.copy, size: 16),
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: widget.code));
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -227,7 +230,7 @@ class _CodeBlockState extends State<_CodeBlock>
   List<Widget> buildCodeBlockList() {
     return List.generate(widget.splitContents.length, (index) {
       final currentContent = widget.splitContents[index];
-      return Padding(
+      return Container(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: ProxyRichText(
             TextSpan(

@@ -82,7 +82,7 @@ class _ThinkWidgetState extends State<ThinkWidget> {
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       decoration: BoxDecoration(
         color: AppColors.getThemeColor(context,
-            lightColor: AppColors.grey[50], darkColor: AppColors.grey[700]),
+            lightColor: AppColors.grey[300], darkColor: AppColors.grey[700]),
         border: Border.all(
             color: AppColors.getThemeColor(context,
                 lightColor: AppColors.grey[200],
@@ -95,16 +95,22 @@ class _ThinkWidgetState extends State<ThinkWidget> {
         children: [
           Row(
             children: [
-              Icon(Icons.lightbulb_outline,
-                  color: AppColors.getThemeColor(context,
-                      lightColor: Colors.orange, darkColor: Colors.orange)),
+              Icon(
+                Icons.lightbulb_outline,
+                size: 18,
+                color: AppColors.getThemeColor(context,
+                    lightColor: Colors.orange, darkColor: Colors.orange),
+              ),
               const SizedBox(width: 8),
               Expanded(
-                child: Text("$prefix$durationTips",
-                    style: TextStyle(
-                        color: AppColors.getThemeColor(context,
-                            lightColor: AppColors.grey[500],
-                            darkColor: AppColors.grey[300]))),
+                child: Text(
+                  "$prefix$durationTips",
+                  style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.getThemeColor(context,
+                          lightColor: AppColors.grey[500],
+                          darkColor: AppColors.grey[300])),
+                ),
               ),
               if (!widget.isClosed)
                 SizedBox(
