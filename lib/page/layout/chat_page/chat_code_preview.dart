@@ -63,8 +63,7 @@ class _ChatCodePreviewState extends State<ChatCodePreview> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.getThemeColor(context,
-            lightColor: AppColors.grey[100], darkColor: AppColors.grey[900]),
+        color: AppColors.getToolbarBackgroundColor(context),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
       ),
       child: Row(
@@ -100,12 +99,8 @@ class _ChatCodePreviewState extends State<ChatCodePreview> {
                   minimumSize: Size.zero,
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   backgroundColor: _showCode
-                      ? AppColors.getThemeColor(context,
-                          lightColor: AppColors.blue[300],
-                          darkColor: AppColors.blue[300])
-                      : AppColors.getThemeColor(context,
-                          lightColor: AppColors.blue[100],
-                          darkColor: AppColors.blue[100]),
+                      ? AppColors.getCodeTabActiveColor(context)
+                      : AppColors.getCodeTabInactiveColor(context),
                   padding:
                       const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                   shape: RoundedRectangleBorder(
@@ -124,7 +119,7 @@ class _ChatCodePreviewState extends State<ChatCodePreview> {
                     height: 1,
                     color: _showCode
                         ? Theme.of(context).primaryColor
-                        : AppColors.grey[600],
+                        : AppColors.getInactiveTextColor(context),
                   ),
                 ),
               ),
@@ -134,13 +129,7 @@ class _ChatCodePreviewState extends State<ChatCodePreview> {
                   style: TextButton.styleFrom(
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    backgroundColor: !_showCode
-                        ? AppColors.getThemeColor(context,
-                            lightColor: AppColors.blue[300],
-                            darkColor: AppColors.blue[100])
-                        : AppColors.getThemeColor(context,
-                            lightColor: AppColors.grey[300],
-                            darkColor: AppColors.grey[100]),
+                    backgroundColor: AppColors.getTextButtonColor(context),
                     padding:
                         const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                     shape: RoundedRectangleBorder(
@@ -159,7 +148,7 @@ class _ChatCodePreviewState extends State<ChatCodePreview> {
                       height: 1,
                       color: !_showCode
                           ? Theme.of(context).primaryColor
-                          : AppColors.grey[600],
+                          : AppColors.getInactiveTextColor(context),
                     ),
                   ),
                 ),
@@ -172,9 +161,7 @@ class _ChatCodePreviewState extends State<ChatCodePreview> {
                 ? 'text'
                 : widget.codePreviewEvent.attributes['type']!,
             style: TextStyle(
-              color: AppColors.getThemeColor(context,
-                  lightColor: AppColors.grey[600],
-                  darkColor: AppColors.grey[300]),
+              color: AppColors.getCodeLanguageTextColor(context),
               fontSize: 10,
               fontWeight: FontWeight.w500,
             ),
@@ -221,9 +208,7 @@ class _ChatCodePreviewState extends State<ChatCodePreview> {
       return Container(
         decoration: BoxDecoration(
           border: Border.all(
-            color: AppColors.getThemeColor(context,
-                lightColor: AppColors.grey[200],
-                darkColor: AppColors.grey[800]),
+            color: AppColors.getCodePreviewBorderColor(context),
           ),
           borderRadius: BorderRadius.circular(8),
         ),
@@ -246,8 +231,7 @@ ${widget.codePreviewEvent.textContent}
     return Container(
       decoration: BoxDecoration(
         border: Border.all(
-          color: AppColors.getThemeColor(context,
-              lightColor: AppColors.grey[200], darkColor: AppColors.grey[800]),
+          color: AppColors.getCodePreviewBorderColor(context),
         ),
         borderRadius: BorderRadius.circular(8),
       ),

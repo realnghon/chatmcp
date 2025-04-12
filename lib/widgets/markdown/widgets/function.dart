@@ -56,12 +56,8 @@ class _FunctionWidgetState extends State<FunctionWidget> {
       padding: const EdgeInsets.all(16.0),
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       decoration: BoxDecoration(
-        color: AppColors.getThemeColor(context,
-            lightColor: AppColors.grey[100], darkColor: AppColors.grey[900]),
-        border: Border.all(
-            color: AppColors.getThemeColor(context,
-                lightColor: AppColors.grey[300],
-                darkColor: AppColors.grey[700])),
+        color: AppColors.getFunctionBackgroundColor(context),
+        border: Border.all(color: AppColors.getFunctionBorderColor(context)),
         borderRadius: BorderRadius.circular(8.0),
       ),
       child: Column(
@@ -71,8 +67,7 @@ class _FunctionWidgetState extends State<FunctionWidget> {
           Row(
             children: [
               Icon(Icons.build_outlined,
-                  color: AppColors.getThemeColor(context,
-                      lightColor: Colors.orange, darkColor: Colors.orange)),
+                  color: AppColors.getFunctionIconColor(context)),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -80,17 +75,14 @@ class _FunctionWidgetState extends State<FunctionWidget> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                        color: AppColors.getThemeColor(context,
-                            lightColor: AppColors.grey[500],
-                            darkColor: AppColors.grey[300]))),
+                        color: AppColors.getFunctionTextColor(context))),
               ),
               if (!widget.isClosed)
                 SizedBox(
                   width: 12,
                   height: 12,
                   child: CircularProgressIndicator(
-                    color: AppColors.getThemeColor(context,
-                        lightColor: Colors.orange, darkColor: Colors.orange),
+                    color: AppColors.getProgressIndicatorColor(context),
                     strokeWidth: 1.5,
                   ),
                 )
@@ -102,8 +94,7 @@ class _FunctionWidgetState extends State<FunctionWidget> {
                   constraints: const BoxConstraints(),
                   icon: Icon(
                     Icons.play_arrow,
-                    color: AppColors.getThemeColor(context,
-                        lightColor: Colors.green, darkColor: Colors.green[300]),
+                    color: AppColors.getPlayButtonColor(context),
                   ),
                   onPressed: () {
                     // 这里添加执行函数的逻辑
@@ -119,9 +110,7 @@ class _FunctionWidgetState extends State<FunctionWidget> {
                 },
                 child: Icon(
                   _isExpanded ? Icons.expand_less : Icons.expand_more,
-                  color: AppColors.getThemeColor(context,
-                      lightColor: AppColors.grey[600],
-                      darkColor: AppColors.grey[300]),
+                  color: AppColors.getExpandIconColor(context),
                 ),
               ),
             ],

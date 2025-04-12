@@ -93,11 +93,9 @@ class ArtifactAntArtifactWidget extends StatelessWidget {
         width: 300,
         height: 40,
         decoration: BoxDecoration(
-          color: AppColors.getThemeColor(context,
-              lightColor: Colors.grey[50], darkColor: Colors.grey[800]),
+          color: AppColors.getArtifactBackgroundColor(context),
           border: Border.all(
-            color: AppColors.getThemeColor(context,
-                lightColor: Colors.grey[300], darkColor: Colors.grey[700]),
+            color: AppColors.getArtifactBorderColor(context),
             width: 1.0,
           ),
           borderRadius: BorderRadius.circular(8.0),
@@ -123,8 +121,7 @@ class ArtifactAntArtifactWidget extends StatelessWidget {
                 width: 12,
                 height: 12,
                 child: CircularProgressIndicator(
-                  color: AppColors.getThemeColor(context,
-                      lightColor: Colors.orange, darkColor: Colors.orange),
+                  color: AppColors.getProgressIndicatorColor(context),
                   strokeWidth: 1.5,
                 ),
               )

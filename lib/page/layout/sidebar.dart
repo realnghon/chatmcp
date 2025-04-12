@@ -144,8 +144,7 @@ class ChatHistoryItem extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
         color: isActive
-            ? AppColors.getThemeColor(context,
-                lightColor: AppColors.grey[300], darkColor: AppColors.grey[700])
+            ? AppColors.getSidebarActiveConversationColor(context)
             : null,
         borderRadius: BorderRadius.circular(7),
       ),

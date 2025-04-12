@@ -114,11 +114,8 @@ class ChatMessageContent extends StatelessWidget {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.getThemeColor(
-                            context,
-                            lightColor: AppColors.grey[200],
-                            darkColor: AppColors.grey[800],
-                          ),
+                          color: AppColors.getFileAttachmentBackgroundColor(
+                              context),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: file.fileType.startsWith('image')
@@ -139,11 +136,9 @@ class ChatMessageContent extends StatelessWidget {
                                       return Container(
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(
-                                          color: AppColors.getThemeColor(
-                                            context,
-                                            lightColor: AppColors.grey[200],
-                                            darkColor: AppColors.grey[800],
-                                          ),
+                                          color: AppColors
+                                              .getFileAttachmentBackgroundColor(
+                                                  context),
                                           borderRadius:
                                               BorderRadius.circular(8),
                                         ),
@@ -152,11 +147,9 @@ class ChatMessageContent extends StatelessWidget {
                                           children: [
                                             Icon(
                                               Icons.broken_image,
-                                              color: AppColors.getThemeColor(
-                                                context,
-                                                lightColor: AppColors.grey[600],
-                                                darkColor: AppColors.grey[400],
-                                              ),
+                                              color: AppColors
+                                                  .getImageErrorIconColor(
+                                                      context),
                                               size: 32,
                                             ),
                                             Text(l10n.brokenImage),
@@ -263,13 +256,8 @@ class MessageBubble extends StatelessWidget {
         bottom: 10,
       ),
       decoration: BoxDecoration(
-        // 根据主题设置不同的背景色
-        color: message.role == MessageRole.user
-            ? AppColors.getThemeColor(context,
-                lightColor: AppColors.grey[100], darkColor: AppColors.grey[800])
-            : AppColors.getThemeColor(context,
-                lightColor: AppColors.grey[100],
-                darkColor: AppColors.grey[800]),
+        color: AppColors.getMessageBubbleBackgroundColor(
+            context, message.role == MessageRole.user),
         borderRadius: BorderRadius.circular(11),
       ),
       child: message.content != null
@@ -300,7 +288,7 @@ class ToolCallWidget extends StatelessWidget {
           l10n.toolCall(message.toolCalls![0]['function']['name']),
           style: TextStyle(
             fontSize: 12,
-            color: AppColors.grey[600],
+            color: AppColors.getToolCallTextColor(),
             fontStyle: FontStyle.italic,
           ),
         ),
@@ -364,7 +352,7 @@ class ToolResultWidget extends StatelessWidget {
           l10n.toolResult(message.toolCallId!.replaceFirst('call_', '')),
           style: TextStyle(
             fontSize: 12,
-            color: AppColors.grey[600],
+            color: AppColors.getToolCallTextColor(),
             fontStyle: FontStyle.italic,
           ),
         ),
@@ -385,10 +373,10 @@ class ChatAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CircleAvatar(
-      backgroundColor: AppColors.grey,
+      backgroundColor: AppColors.getChatAvatarBackgroundColor(),
       child: Icon(
         isUser ? Icons.person : Icons.android,
-        color: AppColors.white,
+        color: AppColors.getChatAvatarIconColor(),
       ),
     );
   }

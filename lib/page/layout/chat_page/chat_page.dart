@@ -369,7 +369,7 @@ class _ChatPageState extends State<ChatPage> {
               l10n.welcomeMessage,
               style: TextStyle(
                 fontSize: 18,
-                color: AppColors.grey,
+                color: AppColors.getWelcomeMessageColor(),
               ),
             ),
           ),
@@ -771,7 +771,7 @@ class _ChatPageState extends State<ChatPage> {
           return AlertDialog(
             title: Row(
               children: [
-                const Icon(Icons.error_outline, color: AppColors.red),
+                Icon(Icons.error_outline, color: AppColors.getErrorIconColor()),
                 const SizedBox(width: 8),
                 Text(AppLocalizations.of(context)!.error),
               ],
@@ -779,7 +779,7 @@ class _ChatPageState extends State<ChatPage> {
             content: SingleChildScrollView(
               child: SelectableText(
                 error.toString(),
-                style: const TextStyle(color: AppColors.red),
+                style: TextStyle(color: AppColors.getErrorTextColor()),
               ),
             ),
             actions: [
@@ -920,7 +920,7 @@ class _ChatPageState extends State<ChatPage> {
                       height: 4,
                       margin: const EdgeInsets.symmetric(vertical: 16),
                       decoration: BoxDecoration(
-                        color: AppColors.grey.withOpacity(0.3),
+                        color: AppColors.getBottomSheetHandleColor(context),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),

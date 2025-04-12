@@ -45,6 +45,7 @@ class InputArea extends StatefulWidget {
 class _InputAreaState extends State<InputArea> {
   List<PlatformFile> _selectedFiles = [];
   final TextEditingController textController = TextEditingController();
+  bool _isImeComposing = false;
 
   Future<void> _pickFiles() async {
     try {
@@ -167,6 +168,11 @@ class _InputAreaState extends State<InputArea> {
                       if (HardwareKeyboard.instance.isShiftPressed) {
                         return KeyEventResult.ignored;
                       }
+
+                      if (_isImeComposing) {
+                        return KeyEventResult.ignored;
+                      }
+
                       if (widget.isComposing &&
                           textController.text.trim().isNotEmpty) {
                         widget.onSubmitted(
@@ -183,6 +189,15 @@ class _InputAreaState extends State<InputArea> {
                     onChanged: widget.onTextChanged,
                     maxLines: 5,
                     minLines: 1,
+                    onAppPrivateCommand: (value, map) {
+                      debugPrint('onAppPrivateCommand: $value');
+                    },
+                    buildCounter: (context,
+                        {required currentLength,
+                        required isFocused,
+                        maxLength}) {
+                      return null;
+                    },
                     textInputAction: Platform.isAndroid || Platform.isIOS
                         ? TextInputAction.send
                         : TextInputAction.newline,
@@ -195,6 +210,12 @@ class _InputAreaState extends State<InputArea> {
                             }
                           }
                         : null,
+                    inputFormatters: [
+                      TextInputFormatter.withFunction((oldValue, newValue) {
+                        _isImeComposing = newValue.composing != TextRange.empty;
+                        return newValue;
+                      }),
+                    ],
                     keyboardType: TextInputType.multiline,
                     style: const TextStyle(fontSize: 14.0),
                     scrollPhysics: const BouncingScrollPhysics(),

@@ -36,9 +36,7 @@ class CText extends StatelessWidget {
       text,
       style: TextStyle(
         fontSize: size ?? 12,
-        color: color ??
-            AppColors.getThemeColor(context,
-                lightColor: Colors.black87, darkColor: Colors.white),
+        color: color ?? AppColors.getThemeTextColor(context),
         fontWeight: fontWeight,
         overflow: overflow ?? TextOverflow.ellipsis,
       ),

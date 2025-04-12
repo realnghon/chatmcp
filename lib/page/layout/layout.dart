@@ -74,8 +74,7 @@ class _LayoutPageState extends State<LayoutPage> {
 
   Widget _buildLayout() {
     return Scaffold(
-      backgroundColor: AppColors.getThemeColor(context,
-          lightColor: Colors.white, darkColor: Colors.white30),
+      backgroundColor: AppColors.getLayoutBackgroundColor(context),
       drawer: kIsMobile
           ? Builder(
               builder: (BuildContext context) => Theme(
@@ -98,9 +97,7 @@ class _LayoutPageState extends State<LayoutPage> {
             if (kIsDesktop && !hideSidebar)
               Container(
                 width: 250,
-                color: AppColors.getThemeColor(context,
-                    lightColor: AppColors.grey[200],
-                    darkColor: AppColors.grey[800]),
+                color: AppColors.getSidebarBackgroundColor(context),
                 child: SidebarPanel(
                   onToggle: _toggleSidebar,
                 ),

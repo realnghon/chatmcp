@@ -81,12 +81,8 @@ class _ThinkWidgetState extends State<ThinkWidget> {
       padding: const EdgeInsets.all(16.0),
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       decoration: BoxDecoration(
-        color: AppColors.getThemeColor(context,
-            lightColor: AppColors.grey[300], darkColor: AppColors.grey[700]),
-        border: Border.all(
-            color: AppColors.getThemeColor(context,
-                lightColor: AppColors.grey[200],
-                darkColor: AppColors.grey[700])),
+        color: AppColors.getThinkBackgroundColor(context),
+        border: Border.all(color: AppColors.getThinkBorderColor(context)),
         borderRadius: BorderRadius.circular(8.0),
       ),
       child: Column(
@@ -98,8 +94,7 @@ class _ThinkWidgetState extends State<ThinkWidget> {
               Icon(
                 Icons.lightbulb_outline,
                 size: 18,
-                color: AppColors.getThemeColor(context,
-                    lightColor: Colors.orange, darkColor: Colors.orange),
+                color: AppColors.getThinkIconColor(context),
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -107,9 +102,7 @@ class _ThinkWidgetState extends State<ThinkWidget> {
                   "$prefix$durationTips",
                   style: TextStyle(
                       fontSize: 14,
-                      color: AppColors.getThemeColor(context,
-                          lightColor: AppColors.grey[500],
-                          darkColor: AppColors.grey[300])),
+                      color: AppColors.getThinkTextColor(context)),
                 ),
               ),
               if (!widget.isClosed)
@@ -117,8 +110,7 @@ class _ThinkWidgetState extends State<ThinkWidget> {
                   width: 12,
                   height: 12,
                   child: CircularProgressIndicator(
-                    color: AppColors.getThemeColor(context,
-                        lightColor: Colors.orange, darkColor: Colors.orange),
+                    color: AppColors.getProgressIndicatorColor(context),
                     strokeWidth: 1.5,
                   ),
                 )
@@ -131,9 +123,7 @@ class _ThinkWidgetState extends State<ThinkWidget> {
                   },
                   child: Icon(
                     _isExpanded ? Icons.expand_less : Icons.expand_more,
-                    color: AppColors.getThemeColor(context,
-                        lightColor: AppColors.grey[600],
-                        darkColor: AppColors.grey[300]),
+                    color: AppColors.getExpandIconColor(context),
                   ),
                 ),
             ],

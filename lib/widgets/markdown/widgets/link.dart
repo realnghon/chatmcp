@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:markdown_widget/markdown_widget.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:chatmcp/utils/color.dart';
 
 SpanNodeGeneratorWithTag linkGenerator = SpanNodeGeneratorWithTag(
     tag: _linkTag,
@@ -25,7 +26,7 @@ class MyLinkNode extends SpanNode {
     return TextSpan(
       text: content,
       style: TextStyle(
-        color: Colors.blue,
+        color: AppColors.getLinkColor(),
         decoration: TextDecoration.none,
       ),
       recognizer: TapGestureRecognizer()

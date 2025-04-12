@@ -146,9 +146,7 @@ class TopToolbar extends StatelessWidget {
                   decoration: BoxDecoration(
                     border: Border(
                       bottom: BorderSide(
-                        color: AppColors.getThemeColor(context,
-                            lightColor: AppColors.grey[200],
-                            darkColor: AppColors.grey[800]),
+                        color: AppColors.getToolbarBottomBorderColor(context),
                       ),
                     ),
                   ),
@@ -167,7 +165,7 @@ class TopToolbar extends StatelessWidget {
                                 iconSize: 18,
                                 icon: Icon(
                                   CupertinoIcons.sidebar_right,
-                                  color: AppColors.grey[700],
+                                  color: AppColors.getSidebarToggleIconColor(),
                                 ),
                                 onPressed: onToggleSidebar,
                               ),

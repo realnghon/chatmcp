@@ -161,8 +161,7 @@ class _CodeBlockState extends State<_CodeBlock>
       height: 30,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
       decoration: BoxDecoration(
-        color: AppColors.getThemeColor(context,
-            lightColor: AppColors.grey[300], darkColor: AppColors.grey[900]),
+        color: AppColors.getCodeBlockToolbarBackgroundColor(context),
         borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
       ),
       child: Row(
@@ -172,9 +171,7 @@ class _CodeBlockState extends State<_CodeBlock>
           Text(
             widget.language.isEmpty ? 'text' : widget.language,
             style: TextStyle(
-              color: AppColors.getThemeColor(context,
-                  lightColor: AppColors.grey[700],
-                  darkColor: AppColors.grey[300]),
+              color: AppColors.getCodeBlockLanguageTextColor(context),
               fontSize: 12,
               fontWeight: FontWeight.bold,
             ),
@@ -202,9 +199,8 @@ class _CodeBlockState extends State<_CodeBlock>
                   style: TextButton.styleFrom(
                     minimumSize: Size(20, 20),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    backgroundColor: AppColors.getThemeColor(context,
-                        lightColor: AppColors.grey[100],
-                        darkColor: AppColors.grey[900]),
+                    backgroundColor:
+                        AppColors.getCodePreviewButtonBackgroundColor(context),
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
                     shape: RoundedRectangleBorder(

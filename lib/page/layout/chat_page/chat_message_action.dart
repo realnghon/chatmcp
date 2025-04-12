@@ -82,7 +82,8 @@ class MessageActions extends StatelessWidget {
           icon: Icon(
             Icons.arrow_back_ios,
             size: 12,
-            color: index == 1 ? AppColors.grey[400] : null,
+            color:
+                index == 1 ? AppColors.getMessageBranchDisabledColor() : null,
           ),
           onPressed: index == 1
               ? null
@@ -96,7 +97,7 @@ class MessageActions extends StatelessWidget {
             '$index/$length',
             style: TextStyle(
               fontSize: 12,
-              color: AppColors.grey[600],
+              color: AppColors.getMessageBranchIndicatorTextColor(),
             ),
           ),
         ),
@@ -110,7 +111,9 @@ class MessageActions extends StatelessWidget {
           icon: Icon(
             Icons.arrow_forward_ios,
             size: 12,
-            color: index == length ? AppColors.grey[400] : null,
+            color: index == length
+                ? AppColors.getMessageBranchDisabledColor()
+                : null,
           ),
           onPressed: index == length
               ? null

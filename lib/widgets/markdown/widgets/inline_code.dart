@@ -33,8 +33,8 @@ class InlineCodeNode extends SpanNode {
             textContent,
             style: TextStyle(
               fontFamily: 'monospace',
-              fontSize: config.p.textStyle?.fontSize,
-              color: config.p.textStyle?.color ??
+              fontSize: config.p.textStyle.fontSize,
+              color: config.p.textStyle.color ??
                   AppColors.getThemeTextColor(context),
             ),
           ),
