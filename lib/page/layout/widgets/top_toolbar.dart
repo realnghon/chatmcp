@@ -188,10 +188,8 @@ class TopToolbar extends StatelessWidget {
                                       ),
                                     Gap(size: 4),
                                     const ModelSelector(),
-                                    if (mcpProvider.clients.isNotEmpty) ...[
-                                      const SizedBox(width: 2),
-                                      const McpTools(),
-                                    ],
+                                    Gap(size: 4),
+                                    const McpTools(),
                                   ],
                                 ),
                               ),

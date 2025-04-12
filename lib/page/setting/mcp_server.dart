@@ -20,8 +20,9 @@ class McpServer extends StatefulWidget {
 
 class _McpServerState extends State<McpServer> {
   final TextEditingController _searchController = TextEditingController();
-  String _selectedTab = 'All';
+  String _selectedTab = 'Installed';
   int _refreshCounter = 0;
+  final Map<String, bool> _serverLoading = {};
 
   @override
   void dispose() {
@@ -33,7 +34,6 @@ class _McpServerState extends State<McpServer> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
       body: SafeArea(
         child: Consumer<McpServerProvider>(
           builder: (context, provider, child) {
@@ -221,7 +221,6 @@ class _McpServerState extends State<McpServer> {
     bool installed,
   ) {
     final l10n = AppLocalizations.of(context)!;
-
     bool serverActive = isActive(serverName);
 
     return Card(
@@ -234,128 +233,107 @@ class _McpServerState extends State<McpServer> {
           color: Theme.of(context).colorScheme.outline.withAlpha(26),
         ),
       ),
-      child: ExpansionTile(
-        title: Text(
-          serverName,
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 12,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-        shape: const RoundedRectangleBorder(
-          side: BorderSide.none,
-        ),
-        leading: Icon(
-          serverActive
-              ? CupertinoIcons.checkmark
-              : CupertinoIcons.desktopcomputer,
-          color: Theme.of(context).colorScheme.primary,
-        ),
-        childrenPadding: const EdgeInsets.all(16),
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildInfoRow(l10n.command, serverConfig['command'] ?? ''),
-              const SizedBox(height: 8),
-              _buildInfoRow(l10n.arguments,
-                  (serverConfig['args'] as List?)?.join(' ') ?? ''),
-              if (serverConfig['env'] != null) ...[
-                const SizedBox(height: 8),
-                _buildInfoRow(
-                  l10n.environmentVariables,
-                  (serverConfig['env'] as Map?)
-                          ?.entries
-                          .map((e) => '${e.key}=${e.value}')
-                          .join('\n') ??
-                      '',
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            Icon(
+              serverActive
+                  ? CupertinoIcons.checkmark
+                  : CupertinoIcons.desktopcomputer,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                serverName,
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
-              ],
-              const SizedBox(height: 16),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  if (installed) ...[
-                    _buildActionButton(
-                      icon: CupertinoIcons.pencil,
-                      tooltip: l10n.edit,
-                      onPressed: () =>
-                          _showEditDialog(context, serverName, provider, null),
-                    ),
-                    const SizedBox(width: 8),
-                    _buildActionButton(
-                      icon: CupertinoIcons.delete,
-                      tooltip: l10n.delete,
-                      color: Theme.of(context).colorScheme.error,
-                      onPressed: () => _showDeleteConfirmDialog(
-                          context, serverName, provider),
-                    ),
-                  ] else ...[
-                    ElevatedButton.icon(
-                      icon: Icon(
-                        CupertinoIcons.cloud_download,
-                        color: Theme.of(context).colorScheme.onPrimary,
-                      ),
-                      label: Text(l10n.install),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor:
-                            Theme.of(context).colorScheme.onPrimary,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      onPressed: () async {
-                        final cmdExists =
-                            await isCommandAvailable(serverConfig['command']);
-                        if (!cmdExists) {
-                          showErrorDialog(
-                            context,
-                            l10n.commandNotExist(serverConfig['command'],
-                                Platform.environment['PATH'] ?? ''),
-                          );
-                        } else {
-                          Logger.root.info(
-                            'Install server configuration: $serverName ${serverConfig['command']} ${serverConfig['args']}',
-                          );
-                          await _showEditDialog(
-                              context, serverName, provider, serverConfig);
-                        }
-                      },
-                    ),
-                  ],
-                ],
+              ),
+            ),
+            if (installed) ...[
+              _buildActionButton(
+                icon: provider.mcpServerIsRunning(serverName)
+                    ? CupertinoIcons.stop
+                    : CupertinoIcons.play,
+                tooltip: provider.mcpServerIsRunning(serverName)
+                    ? l10n.edit
+                    : l10n.edit,
+                onPressed: () async {
+                  if (provider.mcpServerIsRunning(serverName)) {
+                    await provider.stopMcpServer(serverName);
+                  } else {
+                    setState(() {
+                      _serverLoading[serverName] = true;
+                    });
+                    try {
+                      await provider.startMcpServer(serverName);
+                    } finally {
+                      if (mounted) {
+                        setState(() {
+                          _serverLoading[serverName] = false;
+                        });
+                      }
+                    }
+                  }
+                },
+                isLoading: _serverLoading[serverName] == true,
+              ),
+              const Gap(size: 10),
+              _buildActionButton(
+                icon: CupertinoIcons.pencil,
+                tooltip: l10n.edit,
+                onPressed: () =>
+                    _showEditDialog(context, serverName, provider, null),
+              ),
+              const Gap(size: 10),
+              _buildActionButton(
+                icon: CupertinoIcons.delete,
+                tooltip: l10n.delete,
+                color: Theme.of(context).colorScheme.error,
+                onPressed: () =>
+                    _showDeleteConfirmDialog(context, serverName, provider),
+              ),
+            ] else ...[
+              ElevatedButton.icon(
+                icon: Icon(
+                  CupertinoIcons.cloud_download,
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
+                label: Text(l10n.install),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: () async {
+                  final cmdExists =
+                      await isCommandAvailable(serverConfig['command']);
+                  if (!cmdExists) {
+                    showErrorDialog(
+                      context,
+                      l10n.commandNotExist(serverConfig['command'],
+                          Platform.environment['PATH'] ?? ''),
+                    );
+                  } else {
+                    Logger.root.info(
+                      'Install server configuration: $serverName ${serverConfig['command']} ${serverConfig['args']}',
+                    );
+                    await _showEditDialog(
+                        context, serverName, provider, serverConfig);
+                  }
+                },
               ),
             ],
-          ),
-        ],
+          ],
+        ),
       ),
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 13,
-            color: Theme.of(context).colorScheme.onSurface.withAlpha(153),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 15,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-      ],
     );
   }
 
@@ -364,6 +342,7 @@ class _McpServerState extends State<McpServer> {
     required String tooltip,
     required VoidCallback onPressed,
     Color? color,
+    bool isLoading = false,
   }) {
     return Tooltip(
       message: tooltip,
@@ -371,7 +350,7 @@ class _McpServerState extends State<McpServer> {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(8),
-          onTap: onPressed,
+          onTap: isLoading ? null : onPressed,
           child: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
@@ -381,11 +360,20 @@ class _McpServerState extends State<McpServer> {
                     Theme.of(context).colorScheme.primary.withAlpha(51),
               ),
             ),
-            child: Icon(
-              icon,
-              size: 18,
-              color: color ?? Theme.of(context).colorScheme.primary,
-            ),
+            child: isLoading
+                ? SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: color ?? Theme.of(context).colorScheme.primary,
+                    ),
+                  )
+                : Icon(
+                    icon,
+                    size: 18,
+                    color: color ?? Theme.of(context).colorScheme.primary,
+                  ),
           ),
         ),
       ),
@@ -447,60 +435,101 @@ class _McpServerState extends State<McpServer> {
           'env': <String, String>{},
         };
 
-    final serverNameController = TextEditingController(text: serverName);
-    final commandController = TextEditingController(
-      text: serverConfig['command']?.toString() ?? '',
-    );
-    final argsController = TextEditingController(
-      text: (serverConfig['args'] as List<dynamic>?)
-              ?.map((e) => e.toString())
-              .join(' ') ??
-          '',
-    );
-    final envController = TextEditingController(
-      text: (serverConfig['env'] as Map<String, dynamic>?)
-              ?.entries
-              .map((e) => '${e.key}=${e.value}')
-              .join('\n') ??
-          '',
-    );
+    String resultServerName = serverName;
+    String resultCommand = serverConfig['command']?.toString() ?? '';
+    String resultArgs = (serverConfig['args'] as List<dynamic>?)
+            ?.map((e) => e.toString())
+            .join(' ') ??
+        '';
+    String resultEnv = (serverConfig['env'] as Map<String, dynamic>?)
+            ?.entries
+            .map((e) => '${e.key}=${e.value}')
+            .join('\n') ??
+        '';
 
-    String? resultServerName;
-    String? resultCommand;
-    String? resultArgs;
-    String? resultEnv;
+    final serverNameController = TextEditingController(text: resultServerName);
+    final commandController = TextEditingController(text: resultCommand);
+    final argsController = TextEditingController(text: resultArgs);
+    final envController = TextEditingController(text: resultEnv);
 
     try {
       if (!context.mounted) {
-        serverNameController.dispose();
-        commandController.dispose();
-        argsController.dispose();
-        envController.dispose();
         return;
       }
 
       final l10n = AppLocalizations.of(context)!;
       final confirmed = await showDialog<bool>(
         context: context,
-        barrierDismissible: false, // 防止点击外部关闭对话框
-        builder: (BuildContext dialogContext) => AlertDialog(
-          title: Text(
-            'MCP Server - $serverName',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
+        barrierDismissible: false,
+        builder: (BuildContext dialogContext) {
+          return AlertDialog(
+            title: Text(
+              'MCP Server - $serverName',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (serverName.isEmpty)
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (serverName.isEmpty)
+                    TextField(
+                      controller: serverNameController,
+                      onChanged: (value) => resultServerName = value,
+                      decoration: InputDecoration(
+                        labelText: l10n.serverName,
+                        hintStyle: TextStyle(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withAlpha(102),
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .outline
+                                .withAlpha(51),
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .outline
+                                .withAlpha(51),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                        prefixIcon: Icon(
+                          CupertinoIcons.command,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: 20,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                      ),
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                  if (serverName.isEmpty) const SizedBox(height: 16),
                   TextField(
-                    controller: serverNameController,
-                    onChanged: (value) => resultServerName = value,
+                    controller: commandController,
+                    onChanged: (value) => resultCommand = value,
                     decoration: InputDecoration(
-                      labelText: l10n.serverName,
+                      labelText: l10n.command,
+                      hintText: l10n.commandExample,
                       hintStyle: TextStyle(
                         color: Theme.of(context)
                             .colorScheme
@@ -544,191 +573,152 @@ class _McpServerState extends State<McpServer> {
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
-                if (serverName.isEmpty) const SizedBox(height: 16),
-                TextField(
-                  controller: commandController,
-                  onChanged: (value) => resultCommand = value,
-                  decoration: InputDecoration(
-                    labelText: l10n.command,
-                    hintText: l10n.commandExample,
-                    hintStyle: TextStyle(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withAlpha(102),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(
-                        color:
-                            Theme.of(context).colorScheme.outline.withAlpha(51),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: argsController,
+                    onChanged: (value) => resultArgs = value,
+                    decoration: InputDecoration(
+                      labelText: l10n.arguments,
+                      hintText: l10n.argumentsExample,
+                      hintStyle: TextStyle(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withAlpha(102),
                       ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(
-                        color:
-                            Theme.of(context).colorScheme.outline.withAlpha(51),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .outline
+                              .withAlpha(51),
+                        ),
                       ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .outline
+                              .withAlpha(51),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                      prefixIcon: Icon(
+                        CupertinoIcons.command,
                         color: Theme.of(context).colorScheme.primary,
+                        size: 20,
                       ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
                     ),
-                    prefixIcon: Icon(
-                      CupertinoIcons.command,
-                      color: Theme.of(context).colorScheme.primary,
-                      size: 20,
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
                   ),
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: argsController,
-                  onChanged: (value) => resultArgs = value,
-                  decoration: InputDecoration(
-                    labelText: l10n.arguments,
-                    hintText: l10n.argumentsExample,
-                    hintStyle: TextStyle(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withAlpha(102),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(
-                        color:
-                            Theme.of(context).colorScheme.outline.withAlpha(51),
+                  const SizedBox(height: 16),
+                  TextField(
+                    controller: envController,
+                    onChanged: (value) => resultEnv = value,
+                    maxLines: 4,
+                    decoration: InputDecoration(
+                      labelText: l10n.environmentVariables,
+                      hintText: l10n.envVarsFormat,
+                      hintStyle: TextStyle(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withAlpha(102),
                       ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(
-                        color:
-                            Theme.of(context).colorScheme.outline.withAlpha(51),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .outline
+                              .withAlpha(51),
+                        ),
                       ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .outline
+                              .withAlpha(51),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                      prefixIcon: Icon(
+                        CupertinoIcons.command,
                         color: Theme.of(context).colorScheme.primary,
+                        size: 20,
                       ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
                     ),
-                    prefixIcon: Icon(
-                      CupertinoIcons.command,
-                      color: Theme.of(context).colorScheme.primary,
-                      size: 20,
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
                   ),
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: envController,
-                  onChanged: (value) => resultEnv = value,
-                  maxLines: 4,
-                  decoration: InputDecoration(
-                    labelText: l10n.environmentVariables,
-                    hintText: l10n.envVarsFormat,
-                    hintStyle: TextStyle(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withAlpha(102),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(
-                        color:
-                            Theme.of(context).colorScheme.outline.withAlpha(51),
-                      ),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(
-                        color:
-                            Theme.of(context).colorScheme.outline.withAlpha(51),
-                      ),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
-                    ),
-                    prefixIcon: Icon(
-                      CupertinoIcons.command,
-                      color: Theme.of(context).colorScheme.primary,
-                      size: 20,
-                    ),
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
-                  ),
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext, false);
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: Theme.of(context).colorScheme.primary,
-              ),
-              child: Text(l10n.cancel),
-            ),
-            TextButton(
-              onPressed: () {
-                // 移动端验证command必须以http开头
-                if ((Platform.isIOS || Platform.isAndroid) &&
-                    !commandController.text.trim().startsWith('http')) {
-                  showErrorDialog(
-                      dialogContext, 'Mobile only supports mcp sse servers');
-                  return;
-                }
-                Navigator.pop(dialogContext, true);
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: Theme.of(context).colorScheme.primary,
-                backgroundColor:
-                    Theme.of(context).colorScheme.primary.withAlpha(31),
-              ),
-              child: Text(
-                l10n.save,
-                style: const TextStyle(fontWeight: FontWeight.w600),
+                ],
               ),
             ),
-          ],
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          backgroundColor: Theme.of(context).colorScheme.surface,
-        ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(dialogContext, false);
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.primary,
+                ),
+                child: Text(l10n.cancel),
+              ),
+              TextButton(
+                onPressed: () {
+                  if ((Platform.isIOS || Platform.isAndroid) &&
+                      !commandController.text.trim().startsWith('http')) {
+                    showErrorDialog(
+                        dialogContext, 'Mobile only supports mcp sse servers');
+                    return;
+                  }
+                  Navigator.pop(dialogContext, true);
+                },
+                style: TextButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.primary,
+                  backgroundColor:
+                      Theme.of(context).colorScheme.primary.withAlpha(31),
+                ),
+                child: Text(
+                  l10n.save,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            backgroundColor: Theme.of(context).colorScheme.surface,
+          );
+        },
       );
 
       if (confirmed == true && context.mounted) {
-        // 解析环境变量
         final env = Map<String, String>.fromEntries(
-          (resultEnv ?? envController.text)
+          resultEnv
               .split('\n')
               .where((line) => line.trim().isNotEmpty)
               .map((line) {
@@ -743,19 +733,16 @@ class _McpServerState extends State<McpServer> {
           }),
         );
 
-        // 更新服务器配置
         if (config['mcpServers'] == null) {
           config['mcpServers'] = <String, dynamic>{};
         }
 
-        final saveServerName = serverName.isEmpty
-            ? (resultServerName ?? serverNameController.text).trim()
-            : serverName;
+        final saveServerName =
+            serverName.isEmpty ? resultServerName.trim() : serverName;
 
         config['mcpServers'][saveServerName] = {
-          'command': (resultCommand ?? commandController.text).trim(),
-          'args':
-              (resultArgs ?? argsController.text).trim().split(RegExp(r'\s+')),
+          'command': resultCommand.trim(),
+          'args': resultArgs.trim().split(RegExp(r'\s+')),
           'env': env,
         };
 
@@ -765,11 +752,9 @@ class _McpServerState extends State<McpServer> {
           });
         }
 
-        // 在保存后同时更新本地和市场服务器列表
         await provider.saveServers(config);
       }
     } finally {
-      // 确保控制器被释放
       serverNameController.dispose();
       commandController.dispose();
       argsController.dispose();

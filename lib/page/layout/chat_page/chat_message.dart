@@ -184,9 +184,11 @@ class ChatMessageContent extends StatelessWidget {
             message.content != null)
           MessageBubble(message: message),
         if (message.toolCalls != null && message.toolCalls!.isNotEmpty)
-          ToolCallWidget(message: message),
+          // ToolCallWidget(message: message),
+          MessageBubble(message: message),
         if (message.role == MessageRole.tool && message.toolCallId != null)
-          ToolResultWidget(message: message),
+          // ToolResultWidget(message: message),
+          MessageBubble(message: message),
       ],
     );
   }

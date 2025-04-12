@@ -1,6 +1,5 @@
 import 'model.dart';
 import 'utils.dart';
-import 'package:chatmcp/provider/provider_manager.dart';
 import 'package:dio/dio.dart';
 import 'dart:convert';
 
@@ -10,7 +9,8 @@ abstract class BaseLLMClient {
   Stream<LLMResponse> chatStreamCompletion(CompletionRequest request);
 
   Future<Map<String, dynamic>> checkToolCall(
-    String content,
+    String model,
+    CompletionRequest request,
     Map<String, List<Map<String, dynamic>>> toolsResponse,
   ) async {
     final openaiTools = convertToOpenAITools(toolsResponse);
@@ -18,8 +18,8 @@ abstract class BaseLLMClient {
     try {
       final response = await chatCompletion(
         CompletionRequest(
-          model: ProviderManager.chatModelProvider.currentModel.name,
-          messages: [ChatMessage(role: MessageRole.user, content: content)],
+          model: model,
+          messages: request.messages,
           tools: openaiTools,
         ),
       );

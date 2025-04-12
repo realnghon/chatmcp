@@ -23,7 +23,7 @@ class ShareEvent {
 
 class RunFunctionEvent {
   final String name;
-  final String arguments;
+  final Map<String, dynamic> arguments;
 
   const RunFunctionEvent(this.name, this.arguments);
 }

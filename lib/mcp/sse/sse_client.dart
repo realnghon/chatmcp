@@ -80,10 +80,11 @@ class SSEClient implements McpClient {
           if (line.startsWith('data: ')) {
             final data = line.substring(6);
             if (_messageEndpoint == null) {
-              final baseUrl =
-                  Uri.parse(serverConfig.command).replace(path: '').toString();
-              _messageEndpoint =
-                  data.startsWith("http") ? data : baseUrl + data;
+              final uri = Uri.parse(serverConfig.command);
+              final baseUrl = uri.origin;
+              _messageEndpoint = data.startsWith("http")
+                  ? data
+                  : baseUrl + (data.startsWith("/") ? data : "/$data");
               Logger.root.info('Received message endpoint: $_messageEndpoint');
               _processStateController.add(const ProcessState.running());
             } else {
@@ -144,6 +145,7 @@ class SSEClient implements McpClient {
     _reconnectTimer = null;
     await _sseSubscription?.cancel();
     await _processStateController.close();
+    _messageEndpoint = null;
   }
 
   Future<void> _sendHttpPost(Map<String, dynamic> data) async {

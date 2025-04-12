@@ -109,6 +109,21 @@ class McpServerProvider extends ChangeNotifier {
     return _tools;
   }
 
+  // 存储工具类别的启用状态
+  final Map<String, bool> _toolCategoryEnabled = {};
+  Map<String, bool> get toolCategoryEnabled => _toolCategoryEnabled;
+
+  // 切换工具类别的启用状态
+  void toggleToolCategory(String category, bool enabled) {
+    _toolCategoryEnabled[category] = enabled;
+    notifyListeners();
+  }
+
+  // 获取工具类别的启用状态，默认为启用
+  bool isToolCategoryEnabled(String category) {
+    return _toolCategoryEnabled[category] ?? false;
+  }
+
   bool loadingServerTools = false;
 
   Future<List<Map<String, dynamic>>> getServerTools(
@@ -140,11 +155,11 @@ class McpServerProvider extends ChangeNotifier {
 
       Logger.root.info('mcp_server ignoreServers: $ignoreServers');
 
-      _servers = await initializeAllMcpServers(configFilePath, ignoreServers);
-      Logger.root.info('mcp_server count: ${_servers.length}');
-      for (var entry in _servers.entries) {
-        addClient(entry.key, entry.value);
-      }
+      // _servers = await initializeAllMcpServers(configFilePath, ignoreServers);
+      // Logger.root.info('mcp_server count: ${_servers.length}');
+      // for (var entry in _servers.entries) {
+      //   addClient(entry.key, entry.value);
+      // }
 
       notifyListeners();
     } catch (e, stackTrace) {
@@ -158,6 +173,48 @@ class McpServerProvider extends ChangeNotifier {
             'Configuration file parsing error, current content: $content');
       }
     }
+  }
+
+  Future<int> get mcpServerCount async {
+    final allServerConfig = await loadServers();
+    final serverConfig = allServerConfig['mcpServers'] as Map<String, dynamic>;
+    return serverConfig.length;
+  }
+
+  Future<List<String>> get mcpServers async {
+    final allServerConfig = await loadServers();
+    final serverConfig = allServerConfig['mcpServers'] as Map<String, dynamic>;
+    return serverConfig.keys.toList();
+  }
+
+  bool mcpServerIsRunning(String serverName) {
+    final client = clients[serverName];
+    return client != null;
+  }
+
+  Future<void> stopMcpServer(String serverName) async {
+    final client = clients[serverName];
+    if (client != null) {
+      await client.dispose();
+      clients.remove(serverName);
+      notifyListeners();
+    }
+  }
+
+  Future<McpClient?> startMcpServer(String serverName) async {
+    final allServerConfig = await loadServers();
+    final serverConfig = allServerConfig['mcpServers'][serverName];
+    final client = await initializeMcpServer(serverConfig);
+    if (client != null) {
+      clients[serverName] = client;
+      loadingServerTools = true;
+      notifyListeners();
+      final tools = await getServerTools(serverName, client);
+      _tools[serverName] = tools;
+      loadingServerTools = false;
+      notifyListeners();
+    }
+    return client;
   }
 
   Future<Map<String, McpClient>> initializeAllMcpServers(

@@ -7,7 +7,6 @@ import 'package:chatmcp/llm/model.dart';
 import 'package:chatmcp/llm/llm_factory.dart';
 import 'package:chatmcp/llm/base_llm_client.dart';
 import 'package:logging/logging.dart';
-import 'dart:convert';
 import 'input_area.dart';
 import 'package:chatmcp/provider/provider_manager.dart';
 import 'package:chatmcp/utils/file_content.dart';
@@ -501,7 +500,57 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
-  bool _checkNeedToolCall() {
+  Future<bool> _checkNeedToolCallFunction() async {
+    if (_runFunctionEvent != null) return true;
+
+    final lastMessage = _messages.last;
+
+    final content = lastMessage.content ?? '';
+    if (content.isEmpty) return false;
+
+    final messages = _messages
+        .where((m) =>
+            m.content != null &&
+            !m.content!.startsWith('<function') &&
+            !m.content!.startsWith('<call_function_result'))
+        .toList();
+
+    Logger.root.info('check need tool call: $messages');
+
+    final result = await _llmClient!.checkToolCall(
+      ProviderManager.chatModelProvider.currentModel.name,
+      CompletionRequest(
+        model: ProviderManager.chatModelProvider.currentModel.name,
+        messages: [
+          ..._prepareMessageList(),
+        ],
+      ),
+      ProviderManager.mcpServerProvider.tools,
+    );
+    final needToolCall = result['need_tool_call'] ?? false;
+
+    if (!needToolCall) {
+      return false;
+    }
+
+    _runFunctionEvent = RunFunctionEvent(
+      result['tool_calls'][0]['name'],
+      result['tool_calls'][0]['arguments'],
+    );
+
+    _messages.add(ChatMessage(
+      content:
+          "<function name=\"${_runFunctionEvent!.name}\">\n${jsonc.encode(_runFunctionEvent!.arguments)}\n</function>",
+      role: MessageRole.assistant,
+      parentMessageId: _parentMessageId,
+    ));
+
+    _onRunFunction(_runFunctionEvent!);
+
+    return needToolCall;
+  }
+
+  Future<bool> _checkNeedToolCallXml() async {
     if (_runFunctionEvent != null) return true;
 
     final lastMessage = _messages.last;
@@ -523,9 +572,15 @@ class _ChatPageState extends State<ChatPage> {
 
     if (toolName == null || toolArguments == null) return false;
 
-    _onRunFunction(RunFunctionEvent(toolName, toolArguments));
+    final toolArgumentsMap = jsonc.decode(toolArguments);
+
+    _onRunFunction(RunFunctionEvent(toolName, toolArgumentsMap));
 
     return true;
+  }
+
+  Future<bool> _checkNeedToolCall() async {
+    return await _checkNeedToolCallXml();
   }
 
   // 消息提交处理
@@ -540,7 +595,7 @@ class _ChatPageState extends State<ChatPage> {
     }
 
     try {
-      while (_checkNeedToolCall()) {
+      while (await _checkNeedToolCall()) {
         // if (_isRunningFunction) {
         //   await Future.delayed(const Duration(microseconds: 100));
         //   continue;
@@ -558,8 +613,7 @@ class _ChatPageState extends State<ChatPage> {
             });
 
             final toolName = event.name;
-            final toolArguments = jsonc.decode(event.arguments);
-            await _sendToolCallAndProcessResponse(toolName, toolArguments);
+            await _sendToolCallAndProcessResponse(toolName, event.arguments);
             setState(() {
               _isRunningFunction = false;
             });
@@ -616,7 +670,13 @@ class _ChatPageState extends State<ChatPage> {
 
     var tools = <Map<String, dynamic>>[];
     for (var entry in ProviderManager.mcpServerProvider.tools.entries) {
-      tools.addAll(entry.value);
+      if (ProviderManager.serverStateProvider.isEnabled(entry.key)) {
+        tools.addAll(entry.value);
+      }
+    }
+
+    if (tools.isEmpty) {
+      return ProviderManager.settingsProvider.generalSetting.systemPrompt;
     }
 
     final systemPrompt = promptGenerator.generateSystemPrompt(tools);
@@ -628,7 +688,7 @@ class _ChatPageState extends State<ChatPage> {
 
   Future<void> _processLLMResponse() async {
     final List<ChatMessage> messageList = _prepareMessageList();
-    Logger.root.info('start process llm response');
+    Logger.root.info('start process llm response: $messageList');
 
     final modelSetting = ProviderManager.settingsProvider.modelSetting;
 

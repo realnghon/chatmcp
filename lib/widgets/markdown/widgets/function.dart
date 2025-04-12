@@ -98,8 +98,7 @@ class _FunctionWidgetState extends State<FunctionWidget> {
                   ),
                   onPressed: () {
                     // 这里添加执行函数的逻辑
-                    emit(RunFunctionEvent(
-                        widget.attributes['name'] ?? '', widget.textContent));
+                    emit(RunFunctionEvent(widget.attributes['name'] ?? '', {}));
                   },
                 ),
               GestureDetector(

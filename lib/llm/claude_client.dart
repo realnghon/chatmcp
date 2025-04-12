@@ -225,7 +225,8 @@ $conversationText""",
 
   @override
   Future<Map<String, dynamic>> checkToolCall(
-    String content,
+    String model,
+    CompletionRequest request,
     Map<String, List<Map<String, dynamic>>> toolsResponse,
   ) async {
     // Convert tools to Claude's format
@@ -261,12 +262,7 @@ $conversationText""",
 
     final body = {
       'model': ProviderManager.chatModelProvider.currentModel.name,
-      'messages': [
-        {
-          'role': 'user',
-          'content': content,
-        }
-      ],
+      'messages': request.messages,
       'tools': tools,
       'max_tokens': 4096,
     };
