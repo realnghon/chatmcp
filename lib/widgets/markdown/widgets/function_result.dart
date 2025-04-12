@@ -78,7 +78,8 @@ class _FunctionResultWidgetState extends State<FunctionResultWidget> {
         children: [
           Row(
             children: [
-              Icon(toolIcon, color: AppColors.getFunctionIconColor(context)),
+              Icon(toolIcon,
+                  size: 16, color: AppColors.getFunctionIconColor(context)),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(

@@ -67,7 +67,7 @@ class _FunctionWidgetState extends State<FunctionWidget> {
           Row(
             children: [
               Icon(Icons.build_outlined,
-                  color: AppColors.getFunctionIconColor(context)),
+                  size: 16, color: AppColors.getFunctionIconColor(context)),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(

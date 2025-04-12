@@ -376,6 +376,15 @@ class _ChatPageState extends State<ChatPage> {
       );
     }
 
+    final parentMsgIndex = _messages.length - 2;
+    if (parentMsgIndex != -1) {
+      _messages[parentMsgIndex] = _messages[parentMsgIndex].copyWith(
+        content: _messages[parentMsgIndex]
+            .content
+            ?.replaceAll("<function ", "<function done=\"true\""),
+      );
+    }
+
     return Expanded(
       child: MessageList(
         messages: _isLoading
@@ -443,14 +452,6 @@ class _ChatPageState extends State<ChatPage> {
           parentMessageId: _parentMessageId,
         ));
         _parentMessageId = msgId;
-        final parentMsgIndex = _messages.length - 2;
-        if (parentMsgIndex != -1) {
-          _messages[parentMsgIndex] = _messages[parentMsgIndex].copyWith(
-            content: _messages[parentMsgIndex].content?.replaceAll(
-                "<function name=\"$toolName\">",
-                "<function name=\"$toolName\" done=\"true\">"),
-          );
-        }
       }
     });
   }
@@ -889,57 +890,6 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
-  Widget _buildBody() {
-    if (mobile) {
-      return Column(
-        children: [
-          _buildMessageList(),
-          InputArea(
-            disabled: _isLoading,
-            isComposing: _isComposing,
-            onTextChanged: _handleTextChanged,
-            onSubmitted: _handleSubmitted,
-            onCancel: _handleCancel,
-          ),
-        ],
-      );
-    }
-
-    return Row(
-      children: [
-        Expanded(
-          flex: 1,
-          child: Column(
-            children: [
-              _buildMessageList(),
-              // loading icon
-              if (_isRunningFunction)
-                const Center(
-                  child: CircularProgressIndicator(),
-                ),
-              InputArea(
-                disabled: _isLoading,
-                isComposing: _isComposing,
-                onTextChanged: _handleTextChanged,
-                onSubmitted: _handleSubmitted,
-                onCancel: _handleCancel,
-              ),
-            ],
-          ),
-        ),
-        if (!mobile && _showCodePreview)
-          Expanded(
-            flex: 1,
-            child: _codePreviewEvent != null
-                ? ChatCodePreview(
-                    codePreviewEvent: _codePreviewEvent!,
-                  )
-                : const SizedBox.shrink(),
-          ),
-      ],
-    );
-  }
-
   CodePreviewEvent? _codePreviewEvent;
 
   void _onArtifactEvent(CodePreviewEvent event) {
@@ -1018,6 +968,53 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    return _buildBody();
+    if (mobile) {
+      return Column(
+        children: [
+          _buildMessageList(),
+          InputArea(
+            disabled: _isLoading,
+            isComposing: _isComposing,
+            onTextChanged: _handleTextChanged,
+            onSubmitted: _handleSubmitted,
+            onCancel: _handleCancel,
+          ),
+        ],
+      );
+    }
+
+    return Row(
+      children: [
+        Expanded(
+          flex: 1,
+          child: Column(
+            children: [
+              _buildMessageList(),
+              // loading icon
+              if (_isRunningFunction)
+                const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              InputArea(
+                disabled: _isLoading,
+                isComposing: _isComposing,
+                onTextChanged: _handleTextChanged,
+                onSubmitted: _handleSubmitted,
+                onCancel: _handleCancel,
+              ),
+            ],
+          ),
+        ),
+        if (!mobile && _showCodePreview)
+          Expanded(
+            flex: 1,
+            child: _codePreviewEvent != null
+                ? ChatCodePreview(
+                    codePreviewEvent: _codePreviewEvent!,
+                  )
+                : const SizedBox.shrink(),
+          ),
+      ],
+    );
   }
 }
