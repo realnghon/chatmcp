@@ -698,7 +698,7 @@ abstract class AppLocalizations {
   /// No description provided for @userCancelledToolCall.
   ///
   /// In en, this message translates to:
-  /// **'User cancelled tool call'**
+  /// **'Function execution failed'**
   String get userCancelledToolCall;
 
   /// No description provided for @code.
@@ -766,6 +766,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Chinese'**
   String get chinese;
+
+  /// No description provided for @functionRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Running function...'**
+  String get functionRunning;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

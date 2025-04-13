@@ -110,5 +110,7 @@
     "loadContentFailed": "加载内容失败，请重试",
     "loadDiagramFailed": "加载图表失败，请重试",
     "copiedToClipboard": "已复制到剪贴板",
-    "chinese": "中文"
+    "chinese": "中文",
+    "functionRunning": "正在执行功能...",
+    "userCancelledToolCall": "功能执行失败"
 }

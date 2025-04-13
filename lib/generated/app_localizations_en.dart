@@ -327,7 +327,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tool => 'Tool';
 
   @override
-  String get userCancelledToolCall => 'User cancelled tool call';
+  String get userCancelledToolCall => 'Function execution failed';
 
   @override
   String get code => 'Code';
@@ -363,4 +363,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chinese => 'Chinese';
+
+  @override
+  String get functionRunning => 'Running function...';
 }

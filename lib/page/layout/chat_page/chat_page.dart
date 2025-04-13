@@ -825,6 +825,16 @@ class _ChatPageState extends State<ChatPage> {
   void _handleError(dynamic error, StackTrace stackTrace) {
     Logger.root.severe(error, stackTrace);
 
+    // 重置所有相关状态
+    setState(() {
+      _isRunningFunction = false;
+      _runFunctionEvent = null;
+      _userApproved = false;
+      _userRejected = false;
+      _isLoading = false;
+      _isCancelled = false;
+    });
+
     if (mounted) {
       showDialog(
         context: context,
@@ -838,9 +848,23 @@ class _ChatPageState extends State<ChatPage> {
               ],
             ),
             content: SingleChildScrollView(
-              child: SelectableText(
-                error.toString(),
-                style: TextStyle(color: AppColors.getErrorTextColor()),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    AppLocalizations.of(context)!.userCancelledToolCall,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.getErrorTextColor(),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  SelectableText(
+                    error.toString(),
+                    style: TextStyle(color: AppColors.getErrorTextColor()),
+                  ),
+                ],
               ),
             ),
             actions: [
@@ -992,8 +1016,35 @@ class _ChatPageState extends State<ChatPage> {
               _buildMessageList(),
               // loading icon
               if (_isRunningFunction)
-                const Center(
-                  child: CircularProgressIndicator(),
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Theme.of(context).primaryColor,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        AppLocalizations.of(context)!.functionRunning,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.color
+                              ?.withOpacity(0.7),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               InputArea(
                 disabled: _isLoading,

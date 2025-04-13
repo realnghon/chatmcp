@@ -327,7 +327,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tool => '工具';
 
   @override
-  String get userCancelledToolCall => '用户取消了工具调用';
+  String get userCancelledToolCall => '功能执行失败';
 
   @override
   String get code => '代码';
@@ -363,4 +363,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get chinese => '中文';
+
+  @override
+  String get functionRunning => '正在执行功能...';
 }
