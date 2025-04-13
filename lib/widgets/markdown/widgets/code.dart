@@ -44,7 +44,8 @@ class CodeBlockNode extends ElementNode {
       return WidgetSpan(child: codeBuilder.call(content, language ?? ''));
     }
 
-    final isClosed = element.attributes['isClosed'] == 'true';
+    bool isClosed = element.attributes['isClosed'] == 'true';
+
     final widget = Container(
       width: double.infinity,
       child: _CodeBlock(
@@ -109,9 +110,10 @@ class _CodeBlockState extends State<_CodeBlock>
 
     setState(() {
       _isSupportPreview = supportPreview;
-      // if (supportPreview && widget.isClosed) {
-      //   _isPreviewVisible = true;
-      // }
+      if (supportPreview && widget.isClosed) {
+        _isPreviewVisible = true;
+        print('widget.isClosed: ${widget.isClosed}');
+      }
     });
   }
 

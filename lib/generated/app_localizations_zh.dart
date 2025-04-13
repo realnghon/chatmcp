@@ -366,4 +366,21 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get functionRunning => '正在执行工具...';
+
+  @override
+  String get thinkingProcess => '思考中';
+
+  @override
+  String get thinkingProcessWithDuration => '思考中, 用时';
+
+  @override
+  String get thinkingEndWithDuration => '思考结束, 用时';
+
+  @override
+  String get thinkingEndComplete => '思考结束';
+
+  @override
+  String seconds(Object seconds) {
+    return '$seconds秒';
+  }
 }

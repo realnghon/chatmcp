@@ -366,4 +366,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get functionRunning => 'Running Tool...';
+
+  @override
+  String get thinkingProcess => 'Thinking';
+
+  @override
+  String get thinkingProcessWithDuration => 'Thinking, time used';
+
+  @override
+  String get thinkingEndWithDuration => 'Thinking finished, time used';
+
+  @override
+  String get thinkingEndComplete => 'Thinking finished';
+
+  @override
+  String seconds(Object seconds) {
+    return '${seconds}s';
+  }
 }

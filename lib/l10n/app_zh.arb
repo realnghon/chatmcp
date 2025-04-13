@@ -112,5 +112,10 @@
     "copiedToClipboard": "已复制到剪贴板",
     "chinese": "中文",
     "functionRunning": "正在执行工具...",
-    "userCancelledToolCall": "工具执行失败"
+    "userCancelledToolCall": "工具执行失败",
+    "thinkingProcess": "思考中",
+    "thinkingProcessWithDuration": "思考中, 用时",
+    "thinkingEndWithDuration": "思考结束, 用时",
+    "thinkingEndComplete": "思考结束",
+    "seconds": "{seconds}秒"
 }

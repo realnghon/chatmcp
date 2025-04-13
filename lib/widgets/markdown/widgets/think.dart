@@ -57,24 +57,24 @@ class _ThinkWidgetState extends State<ThinkWidget> {
     String startTime = widget.attributes['start-time'] ?? '';
     String endTime = widget.attributes['end-time'] ?? '';
 
-    String prefix = '思考中';
+    String prefix = t.thinkingProcess;
     String durationTips = '';
     if (startTime.isNotEmpty) {
       if (endTime.isEmpty) {
         endTime = DateTime.now().toIso8601String();
-        prefix = '思考中, 用时';
+        prefix = t.thinkingProcessWithDuration;
       } else {
-        prefix = '思考结束, 用时';
+        prefix = t.thinkingEndWithDuration;
       }
       Duration duration =
           DateTime.parse(endTime).difference(DateTime.parse(startTime));
-      durationTips = '${duration.inSeconds}s';
+      durationTips = t.seconds(duration.inSeconds);
     }
 
     if (widget.isClosed) {
-      prefix = '思考结束1';
+      prefix = t.thinkingEndComplete;
       if (durationTips.isNotEmpty) {
-        prefix += ', 用时';
+        prefix += ', ';
       }
     }
 
@@ -118,7 +118,7 @@ class _ThinkWidgetState extends State<ThinkWidget> {
         decoration: BoxDecoration(
           border: Border(
             left: BorderSide(
-              color: AppColors.getThinkIconColor(context).withOpacity(0.5),
+              color: AppColors.getThinkIconColor(context).withAlpha(128),
               width: 3,
             ),
           ),

@@ -113,5 +113,10 @@
     "copiedToClipboard": "Copied to clipboard",
     "chinese": "Chinese",
     "functionRunning": "Running Tool...",
-    "userCancelledToolCall": "Tool execution failed"
+    "userCancelledToolCall": "Tool execution failed",
+    "thinkingProcess": "Thinking",
+    "thinkingProcessWithDuration": "Thinking, time used",
+    "thinkingEndWithDuration": "Thinking finished, time used",
+    "thinkingEndComplete": "Thinking finished",
+    "seconds": "{seconds}s"
 }

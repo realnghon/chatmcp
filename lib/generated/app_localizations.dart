@@ -772,6 +772,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Running Tool...'**
   String get functionRunning;
+
+  /// No description provided for @thinkingProcess.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking'**
+  String get thinkingProcess;
+
+  /// No description provided for @thinkingProcessWithDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking, time used'**
+  String get thinkingProcessWithDuration;
+
+  /// No description provided for @thinkingEndWithDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking finished, time used'**
+  String get thinkingEndWithDuration;
+
+  /// No description provided for @thinkingEndComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Thinking finished'**
+  String get thinkingEndComplete;
+
+  /// No description provided for @seconds.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds}s'**
+  String seconds(Object seconds);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
