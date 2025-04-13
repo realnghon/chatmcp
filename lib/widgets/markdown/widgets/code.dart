@@ -116,7 +116,6 @@ class _CodeBlockState extends State<_CodeBlock>
   }
 
   Widget? _buildPreviewWidget() {
-    print('widget.language: ${widget.language}');
     if (widget.language == 'mermaid') {
       return MermaidDiagramView(
         key: ValueKey(widget.code), // 使用基于内容的Key

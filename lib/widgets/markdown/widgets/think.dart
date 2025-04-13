@@ -5,6 +5,7 @@ import 'package:markdown_widget/markdown_widget.dart';
 import 'package:chatmcp/utils/color.dart';
 import '../markit_widget.dart';
 import 'tag.dart';
+import 'package:chatmcp/widgets/expandable_widget.dart';
 
 class ThinkInlineSyntax extends TagInlineSyntax {
   ThinkInlineSyntax() : super(tag: "think");
@@ -71,66 +72,61 @@ class _ThinkWidgetState extends State<ThinkWidget> {
     }
 
     if (widget.isClosed) {
-      prefix = '思考结束';
+      prefix = '思考结束1';
       if (durationTips.isNotEmpty) {
         prefix += ', 用时';
       }
     }
 
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      decoration: BoxDecoration(
-        color: AppColors.getThinkBackgroundColor(context),
-        border: Border.all(color: AppColors.getThinkBorderColor(context)),
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return ExpandableWidget(
+      backgroundColor: AppColors.getFunctionBackgroundColor(context),
+      initiallyExpanded: true,
+      onExpandChanged: () {
+        setState(() {
+          _isExpanded = !_isExpanded;
+        });
+      },
+      header: ExpandableRow(
+        isExpanded: _isExpanded,
         children: [
-          Row(
-            children: [
-              Icon(
-                Icons.lightbulb_outline,
-                size: 18,
-                color: AppColors.getThinkIconColor(context),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  "$prefix$durationTips",
-                  style: TextStyle(
-                      fontSize: 14,
-                      color: AppColors.getThinkTextColor(context)),
-                ),
-              ),
-              if (!widget.isClosed)
-                SizedBox(
-                  width: 12,
-                  height: 12,
-                  child: CircularProgressIndicator(
-                    color: AppColors.getProgressIndicatorColor(context),
-                    strokeWidth: 1.5,
-                  ),
-                )
-              else
-                GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _isExpanded = !_isExpanded;
-                    });
-                  },
-                  child: Icon(
-                    _isExpanded ? Icons.expand_less : Icons.expand_more,
-                    color: AppColors.getExpandIconColor(context),
-                  ),
-                ),
-            ],
+          Icon(
+            Icons.lightbulb_outline,
+            size: 14,
+            color: AppColors.getThinkIconColor(context),
           ),
-          if (_isExpanded) Markit(data: widget.textContent),
+          const SizedBox(width: 4),
+          Expanded(
+            child: Text(
+              "$prefix$durationTips",
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: AppColors.getThinkTextColor(context)),
+            ),
+          ),
+          if (!widget.isClosed)
+            SizedBox(
+              width: 12,
+              height: 12,
+              child: CircularProgressIndicator(
+                color: AppColors.getProgressIndicatorColor(context),
+                strokeWidth: 1.5,
+              ),
+            ),
         ],
       ),
+      expandedContent: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            left: BorderSide(
+              color: AppColors.getThinkIconColor(context).withOpacity(0.5),
+              width: 3,
+            ),
+          ),
+        ),
+        padding: const EdgeInsets.only(left: 12),
+        child: Markit(data: widget.textContent),
+      ),
+      contentPadding: const EdgeInsets.only(left: 5),
     );
   }
 }

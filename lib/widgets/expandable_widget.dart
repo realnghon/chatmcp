@@ -36,6 +36,7 @@ class ExpandableWidget extends StatefulWidget {
   final EdgeInsetsGeometry margin;
   final bool initiallyExpanded;
   final VoidCallback? onExpandChanged;
+  final EdgeInsetsGeometry contentPadding;
 
   const ExpandableWidget({
     super.key,
@@ -46,6 +47,7 @@ class ExpandableWidget extends StatefulWidget {
     this.margin = const EdgeInsets.symmetric(vertical: 4.0),
     this.initiallyExpanded = false,
     this.onExpandChanged,
+    this.contentPadding = const EdgeInsets.all(8.0),
   });
 
   @override
@@ -76,29 +78,36 @@ class _ExpandableWidgetState extends State<ExpandableWidget> {
         color: widget.backgroundColor ?? Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(widget.borderRadius),
       ),
-      child: GestureDetector(
-        onTap: _toggleExpanded,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            widget.header,
-            if (_isExpanded)
-              DefaultTextStyle(
-                style: DefaultTextStyle.of(context).style.copyWith(
-                      color: Theme.of(context)
-                          .textTheme
-                          .bodyMedium
-                          ?.color
-                          ?.withAlpha(179),
-                    ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: widget.expandedContent,
-                ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: _toggleExpanded,
+              borderRadius: BorderRadius.circular(widget.borderRadius),
+              hoverColor: Theme.of(context).hoverColor,
+              splashColor: Theme.of(context).splashColor,
+              mouseCursor: SystemMouseCursors.click,
+              child: widget.header,
+            ),
+          ),
+          if (_isExpanded)
+            DefaultTextStyle(
+              style: DefaultTextStyle.of(context).style.copyWith(
+                    color: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.color
+                        ?.withAlpha(179),
+                  ),
+              child: Padding(
+                padding: widget.contentPadding,
+                child: widget.expandedContent,
               ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }
