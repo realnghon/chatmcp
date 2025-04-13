@@ -14,6 +14,9 @@ class ServerStateProvider extends ChangeNotifier {
   // 正在启动的服务器
   final Map<String, bool> _startingStates = {};
 
+  // 获取已启用的服务器数量
+  int get enabledCount => _enabledStates.values.where((value) => value).length;
+
   // 获取服务器启用状态
   bool isEnabled(String serverName) => _enabledStates[serverName] ?? false;
 

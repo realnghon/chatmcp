@@ -1,4 +1,4 @@
-import 'package:chatmcp/utils/color.dart';
+import 'package:chatmcp/page/layout/widgets/mcp_tools.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:io' show Platform;
@@ -124,12 +124,13 @@ class _InputAreaState extends State<InputArea> {
         color: Colors.transparent,
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
+          const McpTools(),
           if (_selectedFiles.isNotEmpty)
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+              padding: const EdgeInsets.only(left: 8.0, top: 4.0, bottom: 4.0),
               constraints: const BoxConstraints(maxHeight: 60),
               width: double.infinity,
               child: SingleChildScrollView(

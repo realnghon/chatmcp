@@ -5,6 +5,7 @@ import 'package:chatmcp/provider/mcp_server_provider.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
 import 'package:chatmcp/provider/serve_state_provider.dart';
 import 'package:flutter_switch/flutter_switch.dart';
+import 'package:flutter_popup/flutter_popup.dart';
 
 class McpTools extends StatefulWidget {
   const McpTools({super.key});
@@ -42,13 +43,11 @@ class _McpToolsState extends State<McpTools> {
       final provider = Provider.of<McpServerProvider>(context, listen: false);
       final servers = await provider.mcpServers;
 
-      // 更新服务器列表
       setState(() {
         _cachedServers = servers;
         _isLoading = false;
       });
 
-      // 同步服务器状态
       _stateProvider.syncFromProvider(provider, servers);
     } catch (e) {
       setState(() {
@@ -88,51 +87,58 @@ class _McpToolsState extends State<McpTools> {
 
   @override
   Widget build(BuildContext context) {
-    var t = AppLocalizations.of(context)!;
     return Consumer<McpServerProvider>(
       builder: (context, mcpServerProvider, child) {
-        // 监听变化并同步状态
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (_cachedServers != null) {
             _stateProvider.syncFromProvider(mcpServerProvider, _cachedServers!);
           }
         });
 
-        return PopupMenuButton<void>(
-          tooltip: t.tool,
-          offset: const Offset(0, 8),
-          position: PopupMenuPosition.under,
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.8,
-            maxWidth: 400,
+        return CustomPopup(
+          showArrow: true,
+          arrowColor: Theme.of(context).popupMenuTheme.color ?? Colors.white,
+          backgroundColor:
+              Theme.of(context).popupMenuTheme.color ?? Colors.white,
+          barrierColor: Colors.transparent,
+          content: Container(
+            constraints: BoxConstraints(
+              maxWidth: 400,
+              maxHeight: MediaQuery.of(context).size.height * 0.4,
+            ),
+            child: _isLoading
+                ? const Center(
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  )
+                : _error != null
+                    ? Center(
+                        child: Text(_error!,
+                            style: Theme.of(context).textTheme.bodyMedium),
+                      )
+                    : _cachedServers == null || _cachedServers!.isEmpty
+                        ? Center(
+                            child: Text('没有可用的服务器',
+                                style: Theme.of(context).textTheme.bodyMedium),
+                          )
+                        : SingleChildScrollView(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: _buildMenuItems(context),
+                            ),
+                          ),
           ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          onOpened: () {
-            // 每次打开菜单时刷新服务器列表
-            _loadServers();
-          },
-          itemBuilder: (context) {
-            // 使用服务器列表构建菜单项
-            return _buildMenuItems(context);
-          },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // 使用 FutureBuilder 处理异步的 mcpServerCount
-                FutureBuilder<int>(
-                  future: mcpServerProvider.mcpServerCount,
-                  builder: (context, snapshot) {
-                    String countText = '...';
-                    if (snapshot.hasData) {
-                      countText = snapshot.data.toString();
-                    } else if (snapshot.hasError) {
-                      countText = 'Error';
-                    }
-                    return Text('Servers: $countText');
+                Consumer<ServerStateProvider>(
+                  builder: (context, stateProvider, _) {
+                    return Text('MCP: ${stateProvider.enabledCount}');
                   },
                 ),
                 const SizedBox(width: 4),
@@ -151,16 +157,16 @@ class _McpToolsState extends State<McpTools> {
     );
   }
 
-  List<PopupMenuEntry<void>> _buildMenuItems(BuildContext context) {
+  List<Widget> _buildMenuItems(BuildContext context) {
     final McpServerProvider provider =
         Provider.of<McpServerProvider>(context, listen: false);
-    final List<PopupMenuEntry<void>> menuItems = [];
+    final List<Widget> menuItems = [];
 
     // 处理加载状态
     if (_isLoading) {
       return [
-        const PopupMenuItem<void>(
-          enabled: false,
+        const SizedBox(
+          height: 40,
           child: Center(
             child: SizedBox(
               width: 20,
@@ -175,10 +181,12 @@ class _McpToolsState extends State<McpTools> {
     // 处理错误状态
     if (_error != null) {
       return [
-        PopupMenuItem<void>(
-          enabled: false,
-          child: Text('加载出错: $_error',
-              style: Theme.of(context).textTheme.bodyMedium),
+        SizedBox(
+          height: 40,
+          child: Center(
+            child: Text('加载出错: $_error',
+                style: Theme.of(context).textTheme.bodyMedium),
+          ),
         )
       ];
     }
@@ -186,10 +194,12 @@ class _McpToolsState extends State<McpTools> {
     // 处理无数据状态
     if (_cachedServers == null || _cachedServers!.isEmpty) {
       return [
-        PopupMenuItem<void>(
-          enabled: false,
-          child:
-              Text('没有可用的服务器', style: Theme.of(context).textTheme.bodyMedium),
+        SizedBox(
+          height: 40,
+          child: Center(
+            child:
+                Text('没有可用的服务器', style: Theme.of(context).textTheme.bodyMedium),
+          ),
         )
       ];
     }
@@ -198,13 +208,14 @@ class _McpToolsState extends State<McpTools> {
     for (String serverName in _cachedServers!) {
       // 添加分隔线
       if (menuItems.isNotEmpty) {
-        menuItems.add(const PopupMenuDivider());
+        menuItems.add(const Divider(height: 1));
       }
 
-      // 使用自定义菜单项
+      // 使用普通的 Container 替代 CustomPopupMenuWidget
       menuItems.add(
-        CustomPopupMenuWidget(
+        Container(
           height: 40,
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: ChangeNotifierProvider.value(
             value: _stateProvider,
             child: Consumer<ServerStateProvider>(
@@ -220,9 +231,8 @@ class _McpToolsState extends State<McpTools> {
 
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center, // 确保垂直居中
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // 服务器名称和工具数量
                     Row(
                       children: [
                         Text(serverName),
@@ -237,7 +247,7 @@ class _McpToolsState extends State<McpTools> {
                             ),
                             child: Text(
                               '$toolCount',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 12,
                                 color: Colors.green,
                                 fontWeight: FontWeight.bold,
@@ -246,8 +256,6 @@ class _McpToolsState extends State<McpTools> {
                           ),
                       ],
                     ),
-
-                    // 直接使用 FlutterSwitch
                     FlutterSwitch(
                       width: 55.0,
                       height: 25.0,
@@ -297,35 +305,5 @@ class _McpToolsState extends State<McpTools> {
     }
 
     return menuItems;
-  }
-}
-
-// 自定义菜单项组件
-class CustomPopupMenuWidget extends PopupMenuEntry<void> {
-  final Widget child;
-  final double height;
-
-  const CustomPopupMenuWidget({
-    Key? key,
-    required this.child,
-    this.height = kMinInteractiveDimension,
-  }) : super(key: key);
-
-  @override
-  State<CustomPopupMenuWidget> createState() => _CustomPopupMenuWidgetState();
-
-  @override
-  bool represents(void value) => false;
-}
-
-class _CustomPopupMenuWidgetState extends State<CustomPopupMenuWidget> {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: widget.height,
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      alignment: AlignmentDirectional.centerStart,
-      child: widget.child,
-    );
   }
 }

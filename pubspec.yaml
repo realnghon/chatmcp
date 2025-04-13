@@ -79,6 +79,7 @@ dependencies:
   flutter_svg: ^2.0.17
   jsonc: ^0.0.3
   flutter_switch: ^0.3.2
+  flutter_popup: ^3.3.4
 
 dev_dependencies:
   flutter_test:
