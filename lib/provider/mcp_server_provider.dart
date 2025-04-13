@@ -46,6 +46,13 @@ class McpServerProvider extends ChangeNotifier {
     }
   }
 
+  // get installed servers count
+  Future<int> get installedServersCount async {
+    final allServerConfig = await loadServers();
+    final serverConfig = allServerConfig['mcpServers'] as Map<String, dynamic>;
+    return serverConfig.length;
+  }
+
   // Read server configuration
   Future<Map<String, dynamic>> loadServers() async {
     try {
