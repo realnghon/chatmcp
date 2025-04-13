@@ -327,7 +327,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tool => 'Tool';
 
   @override
-  String get userCancelledToolCall => 'Function execution failed';
+  String get userCancelledToolCall => 'Tool execution failed';
 
   @override
   String get code => 'Code';
@@ -342,10 +342,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get openingBrowser => 'Opening browser';
 
   @override
-  String get functionCallAuth => 'Function Call Authorization';
+  String get functionCallAuth => 'Tool Call Authorization';
 
   @override
-  String get allowFunctionExecution => 'Do you want to allow the following function to execute:';
+  String get allowFunctionExecution => 'Do you want to allow the following tool to execute:';
 
   @override
   String parameters(Object params) {
@@ -365,5 +365,5 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chinese => 'Chinese';
 
   @override
-  String get functionRunning => 'Running function...';
+  String get functionRunning => 'Running Tool...';
 }

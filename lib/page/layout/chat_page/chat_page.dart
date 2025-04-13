@@ -7,6 +7,7 @@ import 'package:chatmcp/llm/model.dart';
 import 'package:chatmcp/llm/llm_factory.dart';
 import 'package:chatmcp/llm/base_llm_client.dart';
 import 'package:logging/logging.dart';
+import 'package:file_picker/file_picker.dart';
 import 'input_area.dart';
 import 'package:chatmcp/provider/provider_manager.dart';
 import 'package:chatmcp/utils/file_content.dart';
@@ -376,13 +377,16 @@ class _ChatPageState extends State<ChatPage> {
       );
     }
 
-    final parentMsgIndex = _messages.length - 2;
-    if (parentMsgIndex != -1) {
-      _messages[parentMsgIndex] = _messages[parentMsgIndex].copyWith(
-        content: _messages[parentMsgIndex]
-            .content
-            ?.replaceAll("<function ", "<function done=\"true\""),
-      );
+    final parentMsgIndex = _messages.length - 1;
+    for (var i = 0; i < parentMsgIndex; i++) {
+      if (_messages[i].content?.contains('<function') == true &&
+          _messages[i].content?.contains('<function done="true"') == false) {
+        _messages[i] = _messages[i].copyWith(
+          content: _messages[i]
+              .content
+              ?.replaceAll("<function ", "<function done=\"true\" "),
+        );
+      }
     }
 
     return Expanded(
@@ -476,29 +480,24 @@ class _ChatPageState extends State<ChatPage> {
     final userMessage = _findUserMessage(message);
     if (userMessage == null) return;
 
-    // 找到从开始到 userMessage 的所有消息
     final messageIndex = _messages.indexOf(userMessage);
     if (messageIndex == -1) return;
 
     final previousMessages = _messages.sublist(0, messageIndex + 1);
 
-    // 移除从 userMessage 之后的所有消息
     setState(() {
       _messages = previousMessages;
       _parentMessageId = userMessage.messageId;
       _isLoading = true;
     });
 
-    try {
-      await _processLLMResponse();
-      await _updateChat();
-    } catch (e, stackTrace) {
-      _handleError(e, stackTrace);
-    }
-
-    setState(() {
-      _isLoading = false;
-    });
+    await _handleSubmitted(
+      SubmitData(
+        userMessage.content ?? '',
+        (userMessage.files ?? []).map((f) => f as PlatformFile).toList(),
+      ),
+      addUserMessage: false,
+    );
   }
 
   Future<bool> _checkNeedToolCallFunction() async {
@@ -585,23 +584,19 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   // 消息提交处理
-  Future<void> _handleSubmitted(SubmitData data) async {
+  Future<void> _handleSubmitted(SubmitData data,
+      {bool addUserMessage = true}) async {
     setState(() {
       _isCancelled = false;
     });
     final files = data.files.map((file) => platformFileToFile(file)).toList();
 
-    if (data.text.isNotEmpty) {
+    if (addUserMessage && data.text.isNotEmpty) {
       _addUserMessage(data.text, files);
     }
 
     try {
       while (await _checkNeedToolCall()) {
-        // if (_isRunningFunction) {
-        //   await Future.delayed(const Duration(microseconds: 100));
-        //   continue;
-        // }
-
         if (_runFunctionEvent != null) {
           // 等待用户授权
           final event = _runFunctionEvent!;
@@ -641,6 +636,7 @@ class _ChatPageState extends State<ChatPage> {
       await _updateChat();
     } catch (e, stackTrace) {
       _handleError(e, stackTrace);
+      await _updateChat();
     }
 
     setState(() {
@@ -667,6 +663,28 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<String> _getSystemPrompt() async {
+    return ProviderManager.settingsProvider.generalSetting.systemPrompt;
+    // final promptGenerator = SystemPromptGenerator();
+
+    // var tools = <Map<String, dynamic>>[];
+    // for (var entry in ProviderManager.mcpServerProvider.tools.entries) {
+    //   if (ProviderManager.serverStateProvider.isEnabled(entry.key)) {
+    //     tools.addAll(entry.value);
+    //   }
+    // }
+
+    // if (tools.isEmpty) {
+    //   return ProviderManager.settingsProvider.generalSetting.systemPrompt;
+    // }
+
+    // final systemPrompt = promptGenerator.generateSystemPrompt(tools);
+
+    // Logger.root.info('systemPrompt: $systemPrompt');
+
+    // return systemPrompt;
+  }
+
+  Future<String> _getLasstUserMessagePrompt(String userMessage) async {
     final promptGenerator = SystemPromptGenerator();
 
     var tools = <Map<String, dynamic>>[];
@@ -680,11 +698,9 @@ class _ChatPageState extends State<ChatPage> {
       return ProviderManager.settingsProvider.generalSetting.systemPrompt;
     }
 
-    final systemPrompt = promptGenerator.generateSystemPrompt(tools);
+    final toolPrompt = promptGenerator.generateToolPrompt(tools);
 
-    Logger.root.info('systemPrompt: $systemPrompt');
-
-    return systemPrompt;
+    return "<user_message>\n$userMessage\n</user_message>\n\n<tool_prompt>\n$toolPrompt\n</tool_prompt>";
   }
 
   Future<void> _processLLMResponse() async {
@@ -693,16 +709,31 @@ class _ChatPageState extends State<ChatPage> {
 
     final modelSetting = ProviderManager.settingsProvider.modelSetting;
 
+    final lastUserMessageIndex = messageList.lastIndexWhere(
+      (m) => m.role == MessageRole.user,
+    );
+
+    final systemPrompt = await _getSystemPrompt();
+
+    messageList[lastUserMessageIndex] =
+        messageList[lastUserMessageIndex].copyWith(
+      content: await _getLasstUserMessagePrompt(
+          messageList[lastUserMessageIndex].content ?? ''),
+    );
+
     final stream = _llmClient!.chatStreamCompletion(CompletionRequest(
       model: ProviderManager.chatModelProvider.currentModel.name,
       messages: [
         ChatMessage(
-          content: await _getSystemPrompt(),
+          content: systemPrompt,
           role: MessageRole.system,
         ),
-        ...messageList.map((m) => m.copyWith(
-              content: m.content?.replaceAll("done=\"true\"", ""),
-            )),
+        // ...messageList.map((m) => m.copyWith(
+        //       content: m.content?.replaceAll("done=\"true\"", ""),
+        //     )),
+        ...messageList.where((m) =>
+            !m.content!.startsWith('<function') ||
+            !m.content!.startsWith('<call_function_result')),
       ],
       modelSetting: modelSetting,
     ));

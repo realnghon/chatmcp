@@ -105,13 +105,13 @@
     "preview": "Preview",
     "loadContentFailed": "Failed to load content, please retry",
     "openingBrowser": "Opening browser",
-    "functionCallAuth": "Function Call Authorization",
-    "allowFunctionExecution": "Do you want to allow the following function to execute:",
+    "functionCallAuth": "Tool Call Authorization",
+    "allowFunctionExecution": "Do you want to allow the following tool to execute:",
     "parameters": "Parameters: {params}",
     "allow": "Allow",
     "loadDiagramFailed": "Failed to load diagram, please retry",
     "copiedToClipboard": "Copied to clipboard",
     "chinese": "Chinese",
-    "functionRunning": "Running function...",
-    "userCancelledToolCall": "Function execution failed"
+    "functionRunning": "Running Tool...",
+    "userCancelledToolCall": "Tool execution failed"
 }

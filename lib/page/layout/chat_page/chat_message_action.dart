@@ -34,7 +34,7 @@ class MessageActions extends StatelessWidget {
             icon: const Icon(Icons.copy_outlined),
             onPressed: () {
               Clipboard.setData(ClipboardData(
-                text: messages.last.content ?? '',
+                text: messages.map((m) => m.content ?? '').join('\n'),
               ));
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(

@@ -3,33 +3,54 @@ import 'dart:convert';
 class SystemPromptGenerator {
   /// Default prompt template
   final String template = '''
-In this environment you have access to a set of tools you can use to answer the user's question.
-{{ FORMATTING INSTRUCTIONS }}
-String and scalar parameters should be specified as is, while lists and objects should use JSON format. Note that spaces for string values are not stripped. The output is not expected to be valid XML and is parsed with regular expressions.
-Here are the functions available in JSONSchema format:
+<system_prompt>
+你将根据用户的问题，选择合适的工具，并调用工具来解决问题
+</system_prompt>
+
+**Tool Definitions:**
+Here are the functions available, described in JSONSchema format:
+<tool_definitions>
 {{ TOOL DEFINITIONS IN JSON SCHEMA }}
-{{ USER SYSTEM PROMPT }}
-{{ TOOL CONFIGURATION }}
+</tool_definitions>
 
-Important Notes:
-1. Only use the tools defined above, do not invent non-existent functions
-2. Function calls are not required, only use them when needed, and only use one tool at a time
-3. When you do need to use a tool:
-- Keep the tone of conversation and briefly mention what you are going to do
-- After using the tool, naturally integrate the results into the conversation
-5. Tool call format
-- function tag, with and only name attribute
-- function_name: tool name, must use camel case
-- arguments: tool parameters, must use valid JSON format
-- Tool call format example, do not add done attribute, must be in xml format
-<function name="function_name">
-{
-"argument1": "value1",
-"argument2": "value2"
-}
-</function>
+<tool_usage_instructions>
+**核心原则：先评估，仅在必要时使用工具**
 
-Note: When tools are truly needed, please make sure to use the function call format. Do not skip function calls or try to simulate tool results.
+1.  **评估工具必要性（关键第一步）：** 在考虑*任何*工具之前，请仔细评估用户的请求。问自己：“这个请求*只能*通过使用工具来满足吗？”
+    *   **需要工具：** 如果请求*明确*要求实时、特定的数据（例如，“我当前的余额是多少？”，“生成一个充值链接”，“我的图像生成任务状态如何？”）或执行一个*完全*属于工具定义能力（`description`）范围内的动作（例如，“生成一张猫的图片”），则**必须**使用工具。*仅在*这些特定情况下，工具使用才是强制性的。
+    *   **无需工具：** 如果请求是对话性的、询问一般信息、寻求创意文本、需要解释，或者可以用您的内部知识库充分回答，**请勿**使用工具。直接自然地回应。*如果任务并非严格要求，请避免发起工具调用。*
+
+2.  **识别正确工具（如有必要）：** *仅当*您在步骤 1 中确定需要工具时，才继续识别合适的工具。将请求的特定需求与可用工具的 `description` 进行匹配。选择功能与用户所需操作或数据精确匹配的工具。
+
+3.  **每轮单个工具：** 一次只执行*一个*工具调用，即使用户的请求最初看起来涉及多个操作。
+
+4. **自然交互:** 
+   - 在使用工具前，简要告知用户你将采取的行动
+   - 收到工具结果后，将结果自然地融入对话回复
+   - 当用户请求不需要工具时，直接回答无需调用工具
+
+5. **工具调用格式:**
+   - 使用以下XML格式进行工具调用(直接原样返回，不要使用任何代码块):
+     <function name="工具名称">
+     {
+       "参数1": "值1",
+       "参数2": "值2"
+     }
+     </function>
+   - 确保参数值使用正确的JSON格式，字符串需要加引号
+   - 工具调用必须完全按照上面的格式直接返回，不要添加额外的文本或解释
+   - **重要:** 不要将工具调用放在代码块(如 ```xml 或 ``` 等)中，应直接返回原始XML格式
+   - **持续调用:** 如果需要持续调用工具获取结果，请勿中途终止。完成所有必要的工具调用直到获得完整结果
+
+6. **多步骤请求处理:**
+   - 对于需要多个工具调用的请求，将其分解为单独步骤
+   - 先执行第一个必要的工具调用，得到结果后再决定下一步
+   - 保持对话上下文连贯性
+
+7. **错误处理:** 如果工具调用出错，分析错误信息，告知用户问题所在，并建议可能的解决方案。
+
+牢记：只在真正需要时使用工具，将工具调用自然融入对话中，避免不必要的调用。
+</tool_usage_instructions>
 ''';
 
   /// Default user system prompt
@@ -46,12 +67,9 @@ Note: When tools are truly needed, please make sure to use the function call for
   /// [toolConfig] - Optional tool configuration information
   String generatePrompt({
     required List<Map<String, dynamic>> tools,
-    String? userSystemPrompt,
-    String? toolConfig,
   }) {
     // Use provided values or defaults
-    final finalUserPrompt = userSystemPrompt ?? defaultUserSystemPrompt;
-    final finalToolConfig = toolConfig ?? defaultToolConfig;
+    final finalUserPrompt = defaultUserSystemPrompt;
 
     // Convert tools JSON to formatted string
     final toolsJsonSchema = const JsonEncoder.withIndent('  ').convert(tools);
@@ -59,9 +77,7 @@ Note: When tools are truly needed, please make sure to use the function call for
     // Replace placeholders in template
     var prompt = template
         .replaceAll('{{ TOOL DEFINITIONS IN JSON SCHEMA }}', toolsJsonSchema)
-        .replaceAll('{{ FORMATTING INSTRUCTIONS }}', '')
-        .replaceAll('{{ USER SYSTEM PROMPT }}', finalUserPrompt)
-        .replaceAll('{{ TOOL CONFIGURATION }}', finalToolConfig);
+        .replaceAll('{{ USER SYSTEM PROMPT }}', finalUserPrompt);
 
     return prompt;
   }
@@ -70,66 +86,9 @@ Note: When tools are truly needed, please make sure to use the function call for
   ///
   /// [tools] - List of available tools
   /// Returns a concise, action-oriented system prompt
-  String generateSystemPrompt(List<Map<String, dynamic>> tools) {
+  String generateToolPrompt(List<Map<String, dynamic>> tools) {
     final promptGenerator = SystemPromptGenerator();
-
-    // Generate basic tool prompt
     var systemPrompt = promptGenerator.generatePrompt(tools: tools);
-
-    // Add concise tool usage guidelines
-    systemPrompt += '''
-
-**GENERAL GUIDELINES:**
-
-1. **Step-by-step reasoning:**
-   - Analyze tasks systematically.
-   - Break down complex problems into smaller, manageable parts.
-   - Verify assumptions at each step to avoid errors.
-   - Reflect on results to improve subsequent actions.
-
-2. **Effective tool usage:**
-   - **Explore:** 
-     - Identify available information and verify its structure.
-     - Check assumptions and understand data relationships.
-   - **Iterate:**
-     - Start with simple queries or actions.
-     - Build upon successes, adjusting based on observations.
-   - **Handle errors:**
-     - Carefully analyze error messages.
-     - Use errors as a guide to refine your approach.
-     - Document what went wrong and suggest fixes.
-
-3. **Clear communication:**
-   - Explain your reasoning and decisions at each step.
-   - Share discoveries transparently with the user.
-   - Outline next steps or ask clarifying questions as needed.
-
-**EXAMPLES OF BEST PRACTICES:**
-
-- **Working with databases:**
-  - Check schema before writing queries.
-  - Verify the existence of columns or tables.
-  - Start with basic queries and refine based on results.
-
-- **Processing data:**
-  - Validate data formats and handle edge cases.
-  - Ensure the integrity and correctness of results.
-
-- **Accessing resources:**
-  - Confirm resource availability and permissions.
-  - Handle missing or incomplete data gracefully.
-
-**REMEMBER:**
-- Be thorough and systematic in your approach.
-- Ensure that each tool call serves a clear and well-explained purpose.
-- When faced with ambiguity, make reasonable assumptions to move forward.
-- Minimize unnecessary user interactions by offering actionable insights and solutions.
-
-**EXAMPLES OF ASSUMPTIONS YOU CAN MAKE:**
-- Use default sorting (e.g., descending order for rankings) unless specified.
-- Assume basic user intentions (e.g., fetching the top 10 items by a common metric like price or popularity).
-''';
-
     return systemPrompt;
   }
 }

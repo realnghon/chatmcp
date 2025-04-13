@@ -327,7 +327,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get tool => '工具';
 
   @override
-  String get userCancelledToolCall => '功能执行失败';
+  String get userCancelledToolCall => '工具执行失败';
 
   @override
   String get code => '代码';
@@ -342,10 +342,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get openingBrowser => 'Opening browser';
 
   @override
-  String get functionCallAuth => '函数调用授权';
+  String get functionCallAuth => '工具调用授权';
 
   @override
-  String get allowFunctionExecution => '是否允许执行以下函数:';
+  String get allowFunctionExecution => '是否允许执行以下工具:';
 
   @override
   String parameters(Object params) {
@@ -365,5 +365,5 @@ class AppLocalizationsZh extends AppLocalizations {
   String get chinese => '中文';
 
   @override
-  String get functionRunning => '正在执行功能...';
+  String get functionRunning => '正在执行工具...';
 }

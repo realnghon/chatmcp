@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:chatmcp/provider/mcp_server_provider.dart';
-import 'package:chatmcp/generated/app_localizations.dart';
 import 'package:chatmcp/provider/serve_state_provider.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:flutter_popup/flutter_popup.dart';
@@ -26,6 +25,16 @@ class _McpToolsState extends State<McpTools> {
   void initState() {
     super.initState();
     _loadServers();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 监听 provider 变化并重新加载服务器列表
+    final provider = Provider.of<McpServerProvider>(context);
+    if (provider.loadingServerTools == false) {
+      _loadServers();
+    }
   }
 
   @override
@@ -138,7 +147,8 @@ class _McpToolsState extends State<McpTools> {
               children: [
                 Consumer<ServerStateProvider>(
                   builder: (context, stateProvider, _) {
-                    return Text('MCP: ${stateProvider.enabledCount}');
+                    return Text(
+                        'MCP${stateProvider.enabledCount > 0 ? ': ${stateProvider.enabledCount}' : ''}');
                   },
                 ),
                 const SizedBox(width: 4),

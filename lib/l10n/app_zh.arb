@@ -103,14 +103,14 @@
     "userCancelledToolCall": "用户取消了工具调用",
     "code": "代码",
     "preview": "预览",
-    "functionCallAuth": "函数调用授权",
-    "allowFunctionExecution": "是否允许执行以下函数:",
+    "functionCallAuth": "工具调用授权",
+    "allowFunctionExecution": "是否允许执行以下工具:",
     "parameters": "参数: {params}",
     "allow": "允许",
     "loadContentFailed": "加载内容失败，请重试",
     "loadDiagramFailed": "加载图表失败，请重试",
     "copiedToClipboard": "已复制到剪贴板",
     "chinese": "中文",
-    "functionRunning": "正在执行功能...",
-    "userCancelledToolCall": "功能执行失败"
+    "functionRunning": "正在执行工具...",
+    "userCancelledToolCall": "工具执行失败"
 }

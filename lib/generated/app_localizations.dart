@@ -698,7 +698,7 @@ abstract class AppLocalizations {
   /// No description provided for @userCancelledToolCall.
   ///
   /// In en, this message translates to:
-  /// **'Function execution failed'**
+  /// **'Tool execution failed'**
   String get userCancelledToolCall;
 
   /// No description provided for @code.
@@ -728,13 +728,13 @@ abstract class AppLocalizations {
   /// No description provided for @functionCallAuth.
   ///
   /// In en, this message translates to:
-  /// **'Function Call Authorization'**
+  /// **'Tool Call Authorization'**
   String get functionCallAuth;
 
   /// No description provided for @allowFunctionExecution.
   ///
   /// In en, this message translates to:
-  /// **'Do you want to allow the following function to execute:'**
+  /// **'Do you want to allow the following tool to execute:'**
   String get allowFunctionExecution;
 
   /// No description provided for @parameters.
@@ -770,7 +770,7 @@ abstract class AppLocalizations {
   /// No description provided for @functionRunning.
   ///
   /// In en, this message translates to:
-  /// **'Running function...'**
+  /// **'Running Tool...'**
   String get functionRunning;
 }
 
