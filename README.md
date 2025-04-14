@@ -10,17 +10,15 @@ Cross-platform `Macos | Windows | Linux | iOS | Android` AI Chat Client
 
 ## Install
 
-Desktop: MacOS | Windows | Linux [Release](https://github.com/daodao97/chatmcp/releases)
+| macOS | Windows | Linux | iOS | Android |
+|-------|---------|-------|------|---------|
+| [Release](https://github.com/daodao97/chatmcp/releases) | [Release](https://github.com/daodao97/chatmcp/releases) | [Release](https://github.com/daodao97/chatmcp/releases) ¹ | [TestFlight](https://testflight.apple.com/join/dCXksFJV) | [Release](https://github.com/daodao97/chatmcp/releases) |
 
-  Note: On Linux you need to install libsqlite3-0 libsqlite3-dev, as this dependency needs it https://pub.dev/packages/sqflite_common_ffi
+¹ Note: On Linux you need to install libsqlite3-0 libsqlite3-dev, as this dependency needs it https://pub.dev/packages/sqflite_common_ffi
 
-  ```bash
-  sudo apt-get install libsqlite3-0 libsqlite3-dev
-  ```
-
-IOS: [TestFlight](https://testflight.apple.com/join/dCXksFJV)
-
-Android: [Release](https://github.com/daodao97/chatmcp/releases)
+```bash
+sudo apt-get install libsqlite3-0 libsqlite3-dev
+```
 
 ## Preview
 
