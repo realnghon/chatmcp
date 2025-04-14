@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:chatmcp/llm/model.dart';
 import 'package:chatmcp/llm/llm_factory.dart';
 import 'package:chatmcp/llm/base_llm_client.dart';
+import 'package:flutter/rendering.dart';
 import 'package:logging/logging.dart';
 import 'package:file_picker/file_picker.dart';
 import 'input_area.dart';
@@ -695,7 +696,7 @@ class _ChatPageState extends State<ChatPage> {
     }
 
     if (tools.isEmpty) {
-      return ProviderManager.settingsProvider.generalSetting.systemPrompt;
+      return userMessage;
     }
 
     final toolPrompt = promptGenerator.generateToolPrompt(tools);
@@ -715,11 +716,13 @@ class _ChatPageState extends State<ChatPage> {
 
     final systemPrompt = await _getSystemPrompt();
 
-    messageList[lastUserMessageIndex] =
-        messageList[lastUserMessageIndex].copyWith(
-      content: await _getLasstUserMessagePrompt(
-          messageList[lastUserMessageIndex].content ?? ''),
-    );
+    if (ProviderManager.serverStateProvider.enabledCount > 0) {
+      messageList[lastUserMessageIndex] =
+          messageList[lastUserMessageIndex].copyWith(
+        content: await _getLasstUserMessagePrompt(
+            messageList[lastUserMessageIndex].content ?? ''),
+      );
+    }
 
     final stream = _llmClient!.chatStreamCompletion(CompletionRequest(
       model: ProviderManager.chatModelProvider.currentModel.name,
