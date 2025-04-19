@@ -383,4 +383,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String seconds(Object seconds) {
     return '${seconds}s';
   }
+
+  @override
+  String get fieldRequired => 'This field is required';
+
+  @override
+  String get autoApprove => 'Auto Approve';
+
+  @override
+  String get verify => 'Verify Key';
+
+  @override
+  String get howToGet => 'How to get';
+
+  @override
+  String get modelList => 'Model List';
+
+  @override
+  String get enableModels => 'Enable Models';
+
+  @override
+  String get disableAllModels => 'Disable All Models';
+
+  @override
+  String get saveSuccess => 'Settings saved successfully';
 }

@@ -1,3 +1,5 @@
+import 'package:chatmcp/llm/llm_factory.dart';
+import 'package:chatmcp/llm/model.dart' as llm_model;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -7,16 +9,37 @@ import 'package:logging/logging.dart';
 class KeysSetting {
   String apiKey;
   String apiEndpoint;
+  String? apiStyle;
+  String? providerName;
+  List<String>? models;
+  List<String>? enabledModels;
+  String? providerId;
+  bool custom = false;
+  String icon = '';
 
   KeysSetting({
     required this.apiKey,
     required this.apiEndpoint,
+    this.apiStyle,
+    this.providerName,
+    this.models,
+    this.enabledModels,
+    this.providerId,
+    this.custom = false,
+    this.icon = '',
   });
 
   Map<String, dynamic> toJson() {
     return {
       'apiKey': apiKey,
       'apiEndpoint': apiEndpoint,
+      'apiStyle': apiStyle,
+      'providerName': providerName,
+      'models': models,
+      'enabledModels': enabledModels,
+      'provider': providerId,
+      'custom': custom,
+      'icon': icon,
     };
   }
 
@@ -24,6 +47,15 @@ class KeysSetting {
     return KeysSetting(
       apiKey: json['apiKey'] as String,
       apiEndpoint: json['apiEndpoint'] as String,
+      apiStyle: json['apiStyle'] as String? ?? 'openai',
+      providerName: json['providerName'] as String,
+      models: json['models'] != null ? List<String>.from(json['models']) : [],
+      enabledModels: json['enabledModels'] != null
+          ? List<String>.from(json['enabledModels'])
+          : [],
+      providerId: json['provider'] as String? ?? '',
+      icon: json['icon'] as String? ?? '',
+      custom: json['custom'] as bool? ?? false,
     );
   }
 }
@@ -117,12 +149,53 @@ class ChatSetting {
   }
 }
 
+final List<KeysSetting> defaultApiSettings = [
+  KeysSetting(
+    apiKey: '',
+    apiEndpoint: '',
+    apiStyle: 'openai',
+    providerId: 'openai',
+    providerName: 'OpenAI',
+    icon: 'openai',
+    custom: false,
+  ),
+  KeysSetting(
+    apiKey: '',
+    apiEndpoint: '',
+    apiStyle: 'claude',
+    providerId: 'claude',
+    providerName: 'Claude',
+    icon: 'claude',
+    custom: false,
+  ),
+  KeysSetting(
+    apiKey: '',
+    apiEndpoint: '',
+    apiStyle: 'deepseek',
+    providerId: 'deepseek',
+    providerName: 'DeepSeek',
+    icon: 'deepseek',
+    custom: false,
+  ),
+  KeysSetting(
+    apiKey: '',
+    apiEndpoint: '',
+    apiStyle: 'openai',
+    providerId: 'ollama',
+    providerName: 'Ollama',
+    icon: 'ollama',
+    custom: false,
+  ),
+];
+
+final apiSettingsKey = 'apiSettings_v6';
+
 class SettingsProvider extends ChangeNotifier {
   static final SettingsProvider _instance = SettingsProvider._internal();
   factory SettingsProvider() => _instance;
   SettingsProvider._internal();
 
-  Map<String, KeysSetting> _apiSettings = {};
+  List<KeysSetting> _apiSettings = [];
 
   GeneralSetting _generalSetting = GeneralSetting(
     theme: 'light',
@@ -131,7 +204,7 @@ class SettingsProvider extends ChangeNotifier {
 
   ChatSetting _modelSetting = ChatSetting();
 
-  Map<String, KeysSetting> get apiSettings => _apiSettings;
+  List<KeysSetting> get apiSettings => _apiSettings;
 
   GeneralSetting get generalSetting => _generalSetting;
 
@@ -144,15 +217,63 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<Map<String, KeysSetting>> loadSettings() async {
+  List<llm_model.Model> _availableModels = [];
+
+  List<llm_model.Model> get availableModels => _availableModels;
+
+  Future<void> updateAvailableModels(
+      {required List<llm_model.Model> models}) async {
+    _availableModels = models;
+    notifyListeners();
+  }
+
+  Future<List<llm_model.Model>> getAvailableModels() async {
+    final models = <llm_model.Model>[];
+    for (var setting in _apiSettings) {
+      for (var model in setting.enabledModels ?? []) {
+        var m = llm_model.Model(
+            name: model,
+            label: model,
+            providerId: setting.providerId ?? '',
+            icon: setting.icon,
+            providerName: setting.providerName ?? '');
+
+        if (LLMFactoryHelper.isChatModel(m)) {
+          models.add(m);
+        }
+      }
+    }
+    return models;
+  }
+
+  Future<List<KeysSetting>> loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
-    final String? settingsJson = prefs.getString('apiSettings');
+    final String? settingsJson = prefs.getString(apiSettingsKey);
+
+    List<KeysSetting> settings = [];
 
     if (settingsJson != null) {
-      final Map<String, dynamic> decoded = jsonDecode(settingsJson);
-      _apiSettings = decoded.map((key, value) =>
-          MapEntry(key, KeysSetting.fromJson(value as Map<String, dynamic>)));
+      try {
+        final List<dynamic> decoded = jsonDecode(settingsJson);
+        settings = decoded
+            .map((value) => KeysSetting.fromJson(value as Map<String, dynamic>))
+            .toList();
+      } catch (e) {
+        Logger.root.severe('Error parsing $apiSettingsKey: $e');
+        // 发生错误时使用默认设置
+        settings = [..._apiSettings];
+      }
+    } else {
+      // 没有保存的设置，使用默认设置
+      settings = [..._apiSettings];
     }
+
+    // 确保设置不为空
+    if (settings.isEmpty) {
+      settings = [...defaultApiSettings];
+    }
+
+    _apiSettings = settings;
 
     final String? generalSettingsJson = prefs.getString('generalSettings');
     if (generalSettingsJson != null) {
@@ -166,26 +287,28 @@ class SettingsProvider extends ChangeNotifier {
       _modelSetting = ChatSetting.fromJson(decoded);
     }
 
+    final availableModels = await getAvailableModels();
+    updateAvailableModels(models: availableModels);
+
     notifyListeners();
 
     return _apiSettings;
   }
 
   Future<void> updateApiSettings({
-    required Map<String, KeysSetting> apiSettings,
+    required List<KeysSetting> apiSettings,
   }) async {
     final prefs = await SharedPreferences.getInstance();
 
     _apiSettings = apiSettings;
 
-    final encodedSettings =
-        apiSettings.map((key, value) => MapEntry(key, value.toJson()));
+    final encodedSettings = apiSettings.map((value) => value.toJson()).toList();
 
-    await prefs.setString('apiSettings', jsonEncode(encodedSettings));
-    Logger.root.info('updateApiSettings: $encodedSettings');
+    await prefs.setString(apiSettingsKey, jsonEncode(encodedSettings));
+    Logger.root.info('updateApiSettings: ${jsonEncode(encodedSettings)}');
 
-    await ProviderManager.chatModelProvider.loadAvailableModels();
-    Logger.root.info('updateApiSettings: success');
+    final availableModels = await getAvailableModels();
+    updateAvailableModels(models: availableModels);
 
     notifyListeners();
   }

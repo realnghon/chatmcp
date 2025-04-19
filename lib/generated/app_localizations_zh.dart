@@ -374,13 +374,37 @@ class AppLocalizationsZh extends AppLocalizations {
   String get thinkingProcessWithDuration => '思考中, 用时';
 
   @override
-  String get thinkingEndWithDuration => '思考结束, 用时';
+  String get thinkingEndWithDuration => '思考完成，用时';
 
   @override
-  String get thinkingEndComplete => '思考结束';
+  String get thinkingEndComplete => '思考完成';
 
   @override
   String seconds(Object seconds) {
     return '$seconds秒';
   }
+
+  @override
+  String get fieldRequired => '此字段为必填项';
+
+  @override
+  String get autoApprove => '自动批准';
+
+  @override
+  String get verify => '验证密钥';
+
+  @override
+  String get howToGet => '如何获取';
+
+  @override
+  String get modelList => '模型列表';
+
+  @override
+  String get enableModels => '启用模型';
+
+  @override
+  String get disableAllModels => '禁用所有模型';
+
+  @override
+  String get saveSuccess => '设置保存成功';
 }

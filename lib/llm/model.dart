@@ -234,26 +234,34 @@ class LLMResponse {
 class Model {
   final String name;
   final String label;
-  final String provider;
+  final String providerId;
+  final String icon;
+  final String providerName;
 
   Model({
     required this.name,
     required this.label,
-    required this.provider,
+    required this.providerId,
+    required this.icon,
+    required this.providerName,
   });
 
   factory Model.fromJson(Map<String, dynamic> json) {
     return Model(
       name: json['name'],
       label: json['label'],
-      provider: json['provider'],
+      providerId: json['provider'],
+      icon: json['icon'],
+      providerName: json['providerName'],
     );
   }
 
   Map<String, dynamic> toJson() => {
         'name': name,
         'label': label,
-        'provider': provider,
+        'provider': providerId,
+        'icon': icon,
+        'providerName': providerName,
       };
 
   @override

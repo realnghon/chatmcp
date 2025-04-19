@@ -118,5 +118,13 @@
     "thinkingProcessWithDuration": "Thinking, time used",
     "thinkingEndWithDuration": "Thinking finished, time used",
     "thinkingEndComplete": "Thinking finished",
-    "seconds": "{seconds}s"
+    "seconds": "{seconds}s",
+    "fieldRequired": "This field is required",
+    "autoApprove": "Auto Approve",
+    "verify": "Verify Key",
+    "howToGet": "How to get",
+    "modelList": "Model List",
+    "enableModels": "Enable Models",
+    "disableAllModels": "Disable All Models",
+    "saveSuccess": "Settings saved successfully"
 }

@@ -108,6 +108,25 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<bool> _showFunctionApprovalDialog(RunFunctionEvent event) async {
+    // 检查工具名称的前缀以确定是哪个服务器的工具
+    final clientName =
+        _findClientName(ProviderManager.mcpServerProvider.tools, event.name);
+    if (clientName == null) return false;
+
+    final serverConfig = await ProviderManager.mcpServerProvider.loadServers();
+    final servers = serverConfig['mcpServers'] as Map<String, dynamic>? ?? {};
+
+    if (servers.containsKey(clientName)) {
+      final config = servers[clientName] as Map<String, dynamic>? ?? {};
+      final autoApprove = config['auto_approve'] as bool? ?? false;
+
+      // 如果设置了自动批准，直接返回true
+      if (autoApprove) {
+        return true;
+      }
+    }
+
+    // 否则显示授权对话框
     var t = AppLocalizations.of(context)!;
     return await showDialog<bool>(
           context: context,

@@ -1,31 +1,56 @@
+import 'package:chatmcp/page/layout/widgets/llm_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:chatmcp/provider/provider_manager.dart';
 import 'package:chatmcp/provider/chat_model_provider.dart';
-import 'package:chatmcp/llm/model.dart';
-import 'package:chatmcp/llm/llm_factory.dart';
+import 'package:chatmcp/llm/model.dart' as llm_model;
 import 'package:flutter_popup/flutter_popup.dart';
+import 'package:chatmcp/utils/color.dart';
 
-class ModelSelector extends StatelessWidget {
+class ModelSelector extends StatefulWidget {
   const ModelSelector({super.key});
 
-  bool isCurrentModel(Model model) {
+  @override
+  State<ModelSelector> createState() => _ModelSelectorState();
+}
+
+class _ModelSelectorState extends State<ModelSelector> {
+  // 缓存future避免重复执行
+  List<llm_model.Model> _models = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _updateModels();
+    // 添加监听器
+    ProviderManager.settingsProvider.addListener(_updateModels);
+  }
+
+  @override
+  void dispose() {
+    // 移除监听器避免内存泄漏
+    ProviderManager.settingsProvider.removeListener(_updateModels);
+    super.dispose();
+  }
+
+  void _updateModels() {
+    setState(() {
+      _models = ProviderManager.settingsProvider.availableModels;
+    });
+  }
+
+  bool isCurrentModel(llm_model.Model model) {
     return model.name == ProviderManager.chatModelProvider.currentModel.name &&
-        model.provider ==
-            ProviderManager.chatModelProvider.currentModel.provider;
+        model.providerId ==
+            ProviderManager.chatModelProvider.currentModel.providerId;
   }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<ChatModelProvider>(
       builder: (context, chatModelProvider, child) {
-        final availableModels = ProviderManager
-            .chatModelProvider.availableModels
-            .where((model) => LLMFactoryHelper.isChatModel(model))
-            .toList();
-
         return ModelSelectorPopup(
-          availableModels: availableModels,
+          availableModels: _models,
           isCurrentModel: isCurrentModel,
           onModelSelected: (model) {
             ProviderManager.chatModelProvider.currentModel = model;
@@ -36,10 +61,16 @@ class ModelSelector extends StatelessWidget {
   }
 }
 
+// 创建一个通知类来监听弹出窗口的打开状态
+class PopupNotification extends Notification {
+  final bool opened;
+  PopupNotification(this.opened);
+}
+
 class ModelSelectorPopup extends StatefulWidget {
-  final List<Model> availableModels;
-  final bool Function(Model) isCurrentModel;
-  final void Function(Model) onModelSelected;
+  final List<llm_model.Model> availableModels;
+  final bool Function(llm_model.Model) isCurrentModel;
+  final void Function(llm_model.Model) onModelSelected;
 
   const ModelSelectorPopup({
     super.key,
@@ -63,18 +94,18 @@ class _ModelSelectorPopupState extends State<ModelSelectorPopup> {
   }
 
   // 按 provider 对模型进行分组并根据搜索文本过滤
-  Map<String, List<Model>> _getFilteredModelsByProvider() {
-    final modelsByProvider = <String, List<Model>>{};
+  Map<String, List<llm_model.Model>> _getFilteredModelsByProvider() {
+    final modelsByProvider = <String, List<llm_model.Model>>{};
 
     // 筛选匹配搜索文本的模型
     final filteredModels = widget.availableModels.where((model) {
       return _searchText.isEmpty ||
           model.label.toLowerCase().contains(_searchText) ||
-          model.provider.toLowerCase().contains(_searchText);
+          model.providerId.toLowerCase().contains(_searchText);
     }).toList();
 
     for (var model in filteredModels) {
-      modelsByProvider.putIfAbsent(model.provider, () => []).add(model);
+      modelsByProvider.putIfAbsent(model.providerId, () => []).add(model);
     }
 
     return modelsByProvider;
@@ -91,7 +122,7 @@ class _ModelSelectorPopupState extends State<ModelSelectorPopup> {
           child: Text(
             'No results found',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  color: AppColors.getInactiveTextColor(context),
                 ),
           ),
         ),
@@ -103,19 +134,31 @@ class _ModelSelectorPopupState extends State<ModelSelectorPopup> {
     modelsByProvider.forEach((provider, models) {
       // 添加分隔线
       if (items.isNotEmpty) {
-        items.add(const Divider(height: 1, indent: 8, endIndent: 8));
+        items.add(Divider(
+          height: 1,
+          indent: 8,
+          endIndent: 8,
+          color: AppColors.getCodePreviewBorderColor(context),
+        ));
       }
+
+      final firstModel = models.first;
 
       // 添加提供商标题
       items.add(
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 6, 16, 2),
-          child: Text(
-            provider,
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.bold,
+          child: Row(
+            children: [
+              LlmIcon(icon: firstModel.icon),
+              const SizedBox(width: 8),
+              Text(
+                firstModel.providerName,
+                style: TextStyle(
+                  color: AppColors.getThemeTextColor(context),
                 ),
+              ),
+            ],
           ),
         ),
       );
@@ -133,7 +176,7 @@ class _ModelSelectorPopupState extends State<ModelSelectorPopup> {
               Navigator.of(context).pop();
             },
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 6, 16, 6),
+              padding: const EdgeInsets.fromLTRB(32, 6, 16, 6),
               child: Row(
                 children: [
                   Expanded(
@@ -141,8 +184,8 @@ class _ModelSelectorPopupState extends State<ModelSelectorPopup> {
                       model.label,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: widget.isCurrentModel(model)
-                                ? Theme.of(context).colorScheme.primary
-                                : null,
+                                ? AppColors.getTextButtonColor(context)
+                                : AppColors.getThemeTextColor(context),
                           ),
                     ),
                   ),
@@ -150,7 +193,7 @@ class _ModelSelectorPopupState extends State<ModelSelectorPopup> {
                     Icon(
                       Icons.check,
                       size: 14,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: AppColors.getTextButtonColor(context),
                     ),
                 ],
               ),
@@ -173,14 +216,19 @@ class _ModelSelectorPopupState extends State<ModelSelectorPopup> {
   Widget build(BuildContext context) {
     final currentModel = widget.availableModels.firstWhere(
       (model) => widget.isCurrentModel(model),
-      orElse: () => Model(name: '', label: 'Loading...', provider: ''),
+      orElse: () => llm_model.Model(
+        name: '',
+        label: 'Loading...',
+        providerId: '',
+        icon: '',
+        providerName: '',
+      ),
     );
 
     return CustomPopup(
       showArrow: true,
-      arrowColor: Theme.of(context).popupMenuTheme.color ?? Colors.white,
-      backgroundColor: Theme.of(context).popupMenuTheme.color ?? Colors.white,
-      barrierColor: Colors.transparent,
+      arrowColor: AppColors.getLayoutBackgroundColor(context),
+      backgroundColor: AppColors.getLayoutBackgroundColor(context),
       content: StatefulBuilder(
         builder: (BuildContext context, StateSetter popupSetState) {
           return Container(
@@ -196,21 +244,27 @@ class _ModelSelectorPopupState extends State<ModelSelectorPopup> {
                   padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 4.0),
                   child: TextField(
                     controller: _searchController,
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.getThemeTextColor(context),
+                        ),
                     decoration: InputDecoration(
                       hintText: 'Search',
-                      hintStyle: Theme.of(context).textTheme.bodySmall,
-                      prefixIcon: const Icon(Icons.search, size: 16),
+                      hintStyle:
+                          Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: AppColors.getInactiveTextColor(context),
+                              ),
+                      prefixIcon: Icon(
+                        Icons.search,
+                        size: 16,
+                        color: AppColors.getInactiveTextColor(context),
+                      ),
                       isDense: true,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
                       ),
                       filled: true,
-                      fillColor: Theme.of(context)
-                          .colorScheme
-                          .surfaceContainerHighest
-                          .withAlpha(128),
+                      fillColor: AppColors.getSidebarBackgroundColor(context),
                       contentPadding: const EdgeInsets.symmetric(
                           vertical: 6, horizontal: 8),
                     ),
@@ -236,18 +290,26 @@ class _ModelSelectorPopupState extends State<ModelSelectorPopup> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Flexible(
-              child: Text(
-                currentModel.label,
-                style: Theme.of(context).textTheme.bodyMedium,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
+              child: Row(
+                children: [
+                  LlmIcon(icon: currentModel.icon),
+                  const SizedBox(width: 4),
+                  Text(
+                    currentModel.label,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppColors.getThemeTextColor(context),
+                        ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ],
               ),
             ),
             const SizedBox(width: 4),
             Icon(
               Icons.expand_more,
               size: 18,
-              color: Theme.of(context).iconTheme.color,
+              color: AppColors.getInactiveTextColor(context),
             ),
           ],
         ),

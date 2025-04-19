@@ -231,7 +231,7 @@ class AppColors {
   // 函数图标颜色
   static Color getFunctionIconColor(BuildContext context) {
     return getThemeColor(context,
-        lightColor: Colors.orange, darkColor: Colors.orange);
+        lightColor: Colors.orange[200], darkColor: Colors.orange[300]);
   }
 
   // 函数文本颜色

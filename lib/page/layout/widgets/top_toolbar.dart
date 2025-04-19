@@ -181,8 +181,6 @@ class TopToolbar extends StatelessWidget {
                                           Icons.menu,
                                         ),
                                         onPressed: () {
-                                          // open drawer
-                                          print('open drawer');
                                           Scaffold.of(context).openDrawer();
                                         },
                                       ),

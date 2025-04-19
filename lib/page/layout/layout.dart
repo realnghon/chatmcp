@@ -28,7 +28,6 @@ class _LayoutPageState extends State<LayoutPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final llms = await ProviderManager.settingsProvider.loadSettings();
       if (llms.isNotEmpty) {
-        ProviderManager.chatModelProvider.loadAvailableModels();
       } else if (mounted) {
         _showSettingsDialog(context);
       }

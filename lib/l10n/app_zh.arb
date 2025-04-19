@@ -115,7 +115,15 @@
     "userCancelledToolCall": "工具执行失败",
     "thinkingProcess": "思考中",
     "thinkingProcessWithDuration": "思考中, 用时",
-    "thinkingEndWithDuration": "思考结束, 用时",
-    "thinkingEndComplete": "思考结束",
-    "seconds": "{seconds}秒"
+    "thinkingEndWithDuration": "思考完成，用时",
+    "thinkingEndComplete": "思考完成",
+    "seconds": "{seconds}秒",
+    "fieldRequired": "此字段为必填项",
+    "autoApprove": "自动批准",
+    "verify": "验证密钥",
+    "howToGet": "如何获取",
+    "modelList": "模型列表",
+    "enableModels": "启用模型",
+    "disableAllModels": "禁用所有模型",
+    "saveSuccess": "设置保存成功"
 }

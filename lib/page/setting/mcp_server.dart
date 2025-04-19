@@ -10,6 +10,8 @@ import 'package:logging/logging.dart';
 import 'dart:io';
 import 'package:chatmcp/utils/process.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:form_builder_validators/form_builder_validators.dart';
 
 class McpServer extends StatefulWidget {
   const McpServer({super.key});
@@ -433,6 +435,7 @@ class _McpServerState extends State<McpServer> {
           'command': '',
           'args': <String>[],
           'env': <String, String>{},
+          'auto_approve': false,
         };
 
     String resultServerName = serverName;
@@ -446,11 +449,9 @@ class _McpServerState extends State<McpServer> {
             .map((e) => '${e.key}=${e.value}')
             .join('\n') ??
         '';
+    bool autoApprove = serverConfig['auto_approve'] as bool? ?? false;
 
-    final serverNameController = TextEditingController(text: resultServerName);
-    final commandController = TextEditingController(text: resultCommand);
-    final argsController = TextEditingController(text: resultArgs);
-    final envController = TextEditingController(text: resultEnv);
+    final formKey = GlobalKey<FormBuilderState>();
 
     try {
       if (!context.mounted) {
@@ -464,22 +465,130 @@ class _McpServerState extends State<McpServer> {
         builder: (BuildContext dialogContext) {
           return AlertDialog(
             title: Text(
-              'MCP Server - $serverName',
+              'MCP Server - ${serverName.isEmpty ? l10n.addServer : serverName}',
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
             ),
             content: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (serverName.isEmpty)
-                    TextField(
-                      controller: serverNameController,
-                      onChanged: (value) => resultServerName = value,
+              child: FormBuilder(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (serverName.isEmpty)
+                      FormBuilderTextField(
+                        name: 'serverName',
+                        initialValue: resultServerName,
+                        decoration: InputDecoration(
+                          labelText: l10n.serverName,
+                          hintStyle: TextStyle(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withAlpha(102),
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .outline
+                                  .withAlpha(51),
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .outline
+                                  .withAlpha(51),
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                          prefixIcon: Icon(
+                            CupertinoIcons.command,
+                            color: Theme.of(context).colorScheme.primary,
+                            size: 20,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
+                        ),
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                    if (serverName.isEmpty) const SizedBox(height: 16),
+                    FormBuilderTextField(
+                      name: 'command',
+                      initialValue: resultCommand,
                       decoration: InputDecoration(
-                        labelText: l10n.serverName,
+                        labelText: l10n.command,
+                        hintText: l10n.commandExample,
+                        hintStyle: TextStyle(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withAlpha(102),
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .outline
+                                .withAlpha(51),
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .outline
+                                .withAlpha(51),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                        prefixIcon: Icon(
+                          CupertinoIcons.command,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: 20,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                      ),
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return l10n.fieldRequired;
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    FormBuilderTextField(
+                      name: 'args',
+                      initialValue: resultArgs,
+                      decoration: InputDecoration(
+                        labelText: l10n.arguments,
+                        hintText: l10n.argumentsExample,
                         hintStyle: TextStyle(
                           color: Theme.of(context)
                               .colorScheme
@@ -523,158 +632,75 @@ class _McpServerState extends State<McpServer> {
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
-                  if (serverName.isEmpty) const SizedBox(height: 16),
-                  TextField(
-                    controller: commandController,
-                    onChanged: (value) => resultCommand = value,
-                    decoration: InputDecoration(
-                      labelText: l10n.command,
-                      hintText: l10n.commandExample,
-                      hintStyle: TextStyle(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withAlpha(102),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(
+                    const SizedBox(height: 16),
+                    FormBuilderTextField(
+                      name: 'env',
+                      initialValue: resultEnv,
+                      maxLines: 4,
+                      decoration: InputDecoration(
+                        labelText: l10n.environmentVariables,
+                        hintText: l10n.envVarsFormat,
+                        hintStyle: TextStyle(
                           color: Theme.of(context)
                               .colorScheme
-                              .outline
-                              .withAlpha(51),
+                              .onSurface
+                              .withAlpha(102),
                         ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .outline
-                              .withAlpha(51),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .outline
+                                .withAlpha(51),
+                          ),
                         ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .outline
+                                .withAlpha(51),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                        prefixIcon: Icon(
+                          CupertinoIcons.command,
                           color: Theme.of(context).colorScheme.primary,
+                          size: 20,
                         ),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
                       ),
-                      prefixIcon: Icon(
-                        CupertinoIcons.command,
-                        color: Theme.of(context).colorScheme.primary,
-                        size: 20,
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
                     ),
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: Theme.of(context).colorScheme.onSurface,
+                    const SizedBox(height: 16),
+                    FormBuilderCheckbox(
+                      name: 'auto_approve',
+                      initialValue: autoApprove,
+                      title: Text(
+                        l10n.autoApprove,
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.zero,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: argsController,
-                    onChanged: (value) => resultArgs = value,
-                    decoration: InputDecoration(
-                      labelText: l10n.arguments,
-                      hintText: l10n.argumentsExample,
-                      hintStyle: TextStyle(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withAlpha(102),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .outline
-                              .withAlpha(51),
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .outline
-                              .withAlpha(51),
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                      prefixIcon: Icon(
-                        CupertinoIcons.command,
-                        color: Theme.of(context).colorScheme.primary,
-                        size: 20,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
-                    ),
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: envController,
-                    onChanged: (value) => resultEnv = value,
-                    maxLines: 4,
-                    decoration: InputDecoration(
-                      labelText: l10n.environmentVariables,
-                      hintText: l10n.envVarsFormat,
-                      hintStyle: TextStyle(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withAlpha(102),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .outline
-                              .withAlpha(51),
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .outline
-                              .withAlpha(51),
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: BorderSide(
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                      prefixIcon: Icon(
-                        CupertinoIcons.command,
-                        color: Theme.of(context).colorScheme.primary,
-                        size: 20,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
-                    ),
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
             actions: [
@@ -689,8 +715,15 @@ class _McpServerState extends State<McpServer> {
               ),
               TextButton(
                 onPressed: () {
+                  if (!formKey.currentState!.saveAndValidate()) {
+                    return;
+                  }
+
+                  final values = formKey.currentState!.value;
+                  final commandValue = values['command'] as String;
+
                   if ((Platform.isIOS || Platform.isAndroid) &&
-                      !commandController.text.trim().startsWith('http')) {
+                      !commandValue.trim().startsWith('http')) {
                     showErrorDialog(
                         dialogContext, 'Mobile only supports mcp sse servers');
                     return;
@@ -717,8 +750,17 @@ class _McpServerState extends State<McpServer> {
       );
 
       if (confirmed == true && context.mounted) {
+        final formValues = formKey.currentState!.value;
+        final saveServerName = serverName.isEmpty
+            ? (formValues['serverName'] as String).trim()
+            : serverName;
+        final command = (formValues['command'] as String).trim();
+        final args =
+            (formValues['args'] as String).trim().split(RegExp(r'\s+'));
+        final envStr = formValues['env'] as String;
+
         final env = Map<String, String>.fromEntries(
-          resultEnv
+          envStr
               .split('\n')
               .where((line) => line.trim().isNotEmpty)
               .map((line) {
@@ -737,13 +779,11 @@ class _McpServerState extends State<McpServer> {
           config['mcpServers'] = <String, dynamic>{};
         }
 
-        final saveServerName =
-            serverName.isEmpty ? resultServerName.trim() : serverName;
-
         config['mcpServers'][saveServerName] = {
-          'command': resultCommand.trim(),
-          'args': resultArgs.trim().split(RegExp(r'\s+')),
+          'command': command,
+          'args': args,
           'env': env,
+          'auto_approve': formValues['auto_approve'] as bool? ?? false,
         };
 
         if (mounted) {
@@ -755,10 +795,7 @@ class _McpServerState extends State<McpServer> {
         await provider.saveServers(config);
       }
     } finally {
-      serverNameController.dispose();
-      commandController.dispose();
-      argsController.dispose();
-      envController.dispose();
+      // No controllers to dispose as FormBuilder handles that internally
     }
   }
 

@@ -802,6 +802,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{seconds}s'**
   String seconds(Object seconds);
+
+  /// No description provided for @fieldRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required'**
+  String get fieldRequired;
+
+  /// No description provided for @autoApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto Approve'**
+  String get autoApprove;
+
+  /// No description provided for @verify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify Key'**
+  String get verify;
+
+  /// No description provided for @howToGet.
+  ///
+  /// In en, this message translates to:
+  /// **'How to get'**
+  String get howToGet;
+
+  /// No description provided for @modelList.
+  ///
+  /// In en, this message translates to:
+  /// **'Model List'**
+  String get modelList;
+
+  /// No description provided for @enableModels.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Models'**
+  String get enableModels;
+
+  /// No description provided for @disableAllModels.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable All Models'**
+  String get disableAllModels;
+
+  /// No description provided for @saveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings saved successfully'**
+  String get saveSuccess;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
