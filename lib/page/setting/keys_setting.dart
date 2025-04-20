@@ -25,6 +25,7 @@ class _KeysSettingsState extends State<KeysSettings> {
   bool _isLoading = false;
   int _selectedProvider = 0;
   bool _hasChanges = false;
+  bool _obscureText = true; // 添加密码可见性状态
 
   final List<KeySettingControllers> _controllers = [];
 
@@ -817,7 +818,7 @@ class _KeysSettingsState extends State<KeysSettings> {
           const SizedBox(height: 4),
           TextFormField(
             controller: controllers.keyController,
-            obscureText: true,
+            obscureText: _obscureText,
             decoration: InputDecoration(
               hintText: l10n.enterApiKey(config.providerName ?? ''),
               hintStyle: TextStyle(
@@ -845,11 +846,16 @@ class _KeysSettingsState extends State<KeysSettings> {
                   const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               isDense: true,
               suffixIcon: IconButton(
-                icon: const Icon(CupertinoIcons.eye_slash, size: 16),
+                icon: Icon(
+                  _obscureText ? CupertinoIcons.eye_slash : CupertinoIcons.eye,
+                  size: 16,
+                ),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 onPressed: () {
-                  // 切换密码可见性
+                  setState(() {
+                    _obscureText = !_obscureText;
+                  });
                 },
               ),
             ),

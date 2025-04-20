@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import '../mcp/mcp.dart';
 import 'package:logging/logging.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:dio/dio.dart';
+import 'package:http/http.dart' as http;
 import 'package:chatmcp/utils/platform.dart';
 import '../mcp/client/mcp_client_interface.dart';
 
@@ -270,12 +270,11 @@ class McpServerProvider extends ChangeNotifier {
 
   Future<Map<String, dynamic>> loadMarketServers() async {
     try {
-      final dio = Dio();
-      final response = await dio.get(mcpServerMarket);
+      final response = await http.get(Uri.parse(mcpServerMarket));
       if (response.statusCode == 200) {
         Logger.root
-            .info('Successfully loaded market servers: ${response.data}');
-        final Map<String, dynamic> jsonData = json.decode(response.data);
+            .info('Successfully loaded market servers: ${response.body}');
+        final Map<String, dynamic> jsonData = json.decode(response.body);
 
         final Map<String, dynamic> servers =
             jsonData['mcpServers'] as Map<String, dynamic>;

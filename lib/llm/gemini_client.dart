@@ -1,4 +1,4 @@
-import 'package:dio/dio.dart';
+import 'package:http/http.dart' as http;
 import 'base_llm_client.dart';
 import 'dart:convert';
 import 'model.dart';
@@ -7,21 +7,17 @@ import 'package:logging/logging.dart';
 class GeminiClient extends BaseLLMClient {
   final String apiKey;
   final String baseUrl;
-  final Dio _dio;
+  final Map<String, String> _headers;
 
   GeminiClient({
     required this.apiKey,
     String? baseUrl,
-    Dio? dio,
   })  : baseUrl = (baseUrl == null || baseUrl.isEmpty)
             ? 'https://generativelanguage.googleapis.com/v1beta'
             : baseUrl,
-        _dio = dio ??
-            Dio(BaseOptions(
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            ));
+        _headers = {
+          'Content-Type': 'application/json',
+        };
 
   @override
   Future<LLMResponse> chatCompletion(CompletionRequest request) async {
@@ -39,25 +35,19 @@ class GeminiClient extends BaseLLMClient {
     };
 
     try {
-      final response = await _dio.post(
-        "$baseUrl/models/$modelName:generateContent?key=$apiKey",
-        data: jsonEncode(body),
+      final response = await http.post(
+        Uri.parse("$baseUrl/models/$modelName:generateContent?key=$apiKey"),
+        headers: _headers,
+        body: jsonEncode(body),
       );
 
-      // 确保响应数据是字符串并解析为 JSON
-      String responseStr = '';
-      if (response.data is String) {
-        responseStr = response.data;
-      } else if (response.data is ResponseBody) {
-        responseStr = await utf8.decodeStream(response.data.stream);
-      } else {
-        responseStr = jsonEncode(response.data);
+      final responseBody = utf8.decode(response.bodyBytes);
+      Logger.root.fine('Gemini response: $responseBody');
+      if (response.statusCode >= 400) {
+        throw Exception('HTTP ${response.statusCode}: $responseBody');
       }
 
-      print('responseStr: $responseStr');
-
-      dynamic jsonData = jsonDecode(responseStr);
-
+      final jsonData = jsonDecode(responseBody);
       final candidates = jsonData['candidates'] as List;
       if (candidates.isEmpty) {
         throw Exception('No response from Gemini API');
@@ -93,43 +83,44 @@ class GeminiClient extends BaseLLMClient {
     }
 
     try {
-      _dio.options.responseType = ResponseType.stream;
-      final response = await _dio.post(
-        "$baseUrl/models/$modelName:streamGenerateContent?key=$apiKey&alt=sse",
-        data: jsonEncode(body),
-      );
+      final request = http.Request(
+          'POST',
+          Uri.parse(
+              "$baseUrl/models/$modelName:streamGenerateContent?key=$apiKey&alt=sse"));
+      request.headers.addAll(_headers);
+      request.body = jsonEncode(body);
 
-      String buffer = '';
-      await for (final chunk in response.data.stream) {
-        final decodedChunk = utf8.decode(chunk);
-        buffer += decodedChunk;
+      final response = await http.Client().send(request);
 
-        while (buffer.contains('\n')) {
-          final index = buffer.indexOf('\n');
-          final line = buffer.substring(0, index).trim();
-          buffer = buffer.substring(index + 1);
+      if (response.statusCode >= 400) {
+        final responseBody = await response.stream.bytesToString();
+        Logger.root.fine('Gemini response: $responseBody');
 
-          if (line.isEmpty) continue;
+        throw Exception('HTTP ${response.statusCode}: $responseBody');
+      }
 
-          if (!line.startsWith('data: ')) continue;
+      final stream = response.stream
+          .transform(utf8.decoder)
+          .transform(const LineSplitter());
 
-          try {
-            final json =
-                jsonDecode(line.substring(6)); // Remove 'data: ' prefix
+      await for (final line in stream) {
+        if (line.isEmpty || !line.startsWith('data: ')) continue;
 
-            final candidates = json['candidates'] as List;
-            if (candidates.isEmpty) continue;
+        try {
+          final json = jsonDecode(line.substring(6)); // Remove 'data: ' prefix
 
-            final content = candidates[0]['content'];
-            final text = content['parts'][0]['text'];
+          final candidates = json['candidates'] as List;
+          if (candidates.isEmpty) continue;
 
-            yield LLMResponse(
-              content: text,
-            );
-          } catch (e) {
-            Logger.root.severe('Failed to parse chunk: $line $e');
-            continue;
-          }
+          final content = candidates[0]['content'];
+          final text = content['parts'][0]['text'];
+
+          yield LLMResponse(
+            content: text,
+          );
+        } catch (e) {
+          Logger.root.severe('Failed to parse chunk: $line $e');
+          continue;
         }
       }
     } catch (e) {
@@ -181,9 +172,16 @@ $conversationText""",
     }
 
     try {
-      final response = await _dio.get("$baseUrl/models?key=$apiKey");
-      final data = response.data;
+      final response = await http.get(
+        Uri.parse("$baseUrl/models?key=$apiKey"),
+        headers: _headers,
+      );
 
+      if (response.statusCode != 200) {
+        throw Exception('HTTP ${response.statusCode}: ${response.body}');
+      }
+
+      final data = jsonDecode(response.body);
       final models = (data['models'] as List)
           .map((m) => m['name'].toString().replaceAll('models/', ''))
           .where((name) => name.startsWith('gemini-'))
