@@ -14,7 +14,7 @@ class GeminiClient extends BaseLLMClient {
     String? baseUrl,
     Dio? dio,
   })  : baseUrl = (baseUrl == null || baseUrl.isEmpty)
-            ? 'https://generativelanguage.googleapis.com/v1bate'
+            ? 'https://generativelanguage.googleapis.com/v1beta'
             : baseUrl,
         _dio = dio ??
             Dio(BaseOptions(
@@ -203,7 +203,7 @@ List<Map<String, dynamic>> chatMessageToGeminiMessage(
     final parts = <Map<String, dynamic>>[];
 
     // Add text content
-    if (message.content != null) {
+    if (message.content != null && message.content!.isNotEmpty) {
       parts.add({
         'text': message.content,
       });
@@ -221,6 +221,13 @@ List<Map<String, dynamic>> chatMessageToGeminiMessage(
           });
         }
       }
+    }
+
+    // 确保至少有一个part
+    if (parts.isEmpty) {
+      parts.add({
+        'text': ' ', // 添加一个空格作为默认文本
+      });
     }
 
     return {
