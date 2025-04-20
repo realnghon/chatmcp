@@ -3,12 +3,13 @@ import 'claude_client.dart';
 import 'deepseek_client.dart';
 import 'base_llm_client.dart';
 import 'ollama_client.dart';
+import 'gemini_client.dart';
 import 'package:chatmcp/provider/provider_manager.dart';
 import 'package:chatmcp/provider/settings_provider.dart';
 import 'package:logging/logging.dart';
 import 'model.dart' as llm_model;
 
-enum LLMProvider { openai, claude, ollama, deepseek }
+enum LLMProvider { openai, claude, ollama, deepseek, gemini }
 
 class LLMFactory {
   static BaseLLMClient create(LLMProvider provider,
@@ -22,6 +23,8 @@ class LLMFactory {
         return DeepSeekClient(apiKey: apiKey, baseUrl: baseUrl);
       case LLMProvider.ollama:
         return OllamaClient(baseUrl: baseUrl);
+      case LLMProvider.gemini:
+        return GeminiClient(apiKey: apiKey, baseUrl: baseUrl);
     }
   }
 }
@@ -38,6 +41,7 @@ class LLMFactoryHelper {
     "claude": LLMProvider.claude,
     "deepseek": LLMProvider.deepseek,
     "ollama": LLMProvider.ollama,
+    "gemini": LLMProvider.gemini,
   };
 
   static BaseLLMClient createFromModel(llm_model.Model currentModel) {
@@ -52,12 +56,12 @@ class LLMFactoryHelper {
       Logger.root.fine(
           'Using API Key: ${apiKey.isEmpty ? 'empty' : apiKey.substring(0, 10)}***** for provider: ${currentModel.providerId} model: $currentModel');
 
+      var provider = LLMFactoryHelper.providerMap[currentModel.providerId];
+
+      provider ??= LLMProvider.values.byName(currentModel.apiStyle);
+
       // 创建 LLM 客户端
-      return LLMFactory.create(
-          LLMFactoryHelper.providerMap[currentModel.providerId] ??
-              (throw ArgumentError("Unknown provider: $currentModel")),
-          apiKey: apiKey,
-          baseUrl: baseUrl);
+      return LLMFactory.create(provider, apiKey: apiKey, baseUrl: baseUrl);
     } catch (e) {
       // 如果找不到匹配的提供商，使用默认的OpenAI
       Logger.root

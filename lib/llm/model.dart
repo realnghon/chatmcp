@@ -235,6 +235,7 @@ class Model {
   final String name;
   final String label;
   final String providerId;
+  final String apiStyle;
   final String icon;
   final String providerName;
 
@@ -244,6 +245,7 @@ class Model {
     required this.providerId,
     required this.icon,
     required this.providerName,
+    required this.apiStyle,
   });
 
   factory Model.fromJson(Map<String, dynamic> json) {
@@ -253,6 +255,7 @@ class Model {
       providerId: json['provider'],
       icon: json['icon'],
       providerName: json['providerName'],
+      apiStyle: json['apiStyle'],
     );
   }
 
@@ -262,6 +265,7 @@ class Model {
         'provider': providerId,
         'icon': icon,
         'providerName': providerName,
+        'apiStyle': apiStyle,
       };
 
   @override
