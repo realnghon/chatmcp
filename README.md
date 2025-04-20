@@ -61,20 +61,41 @@ brew install node
 
 ## Debug 
 
-- logs 
+- logs & data
 
-`~/Library/Application Support/run.daodao.chatmcp/logs`
+macOS:
+```bash
+~/Library/Application Support/ChatMcp
+```
 
-- data
+Windows:
+```bash
+%APPDATA%\ChatMcp
+```
 
-`~/Library/Application Support/ChatMcp`
+Linux:
+```bash
+~/.local/share/ChatMcp
+```
 
+Mobile:
+- Application Documents Directory
 
 reset app can use this command
 
+macOS:
 ```bash
-rm -rf ~/Library/Application\ Support/run.daodao.chatmcp
 rm -rf ~/Library/Application\ Support/ChatMcp
+```
+
+Windows:
+```bash
+rd /s /q "%APPDATA%\ChatMcp"
+```
+
+Linux:
+```bash
+rm -rf ~/.local/share/ChatMcp
 ```
 
 ## Development

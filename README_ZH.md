@@ -61,21 +61,43 @@ brew install node
 2. 从"MCP 服务器"页面安装 MCP 服务器
 3. 与 MCP 服务器开始对话
 
-## 调试
+## 调试 
 
-- 日志位置
+- logs & data
 
-`~/Library/Application Support/run.daodao.chatmcp/logs`
-
-- 数据位置
-
-`~/Library/Application Support/ChatMcp`
-
-重置应用可以使用以下命令：
-
+macOS:
 ```bash
-rm -rf ~/Library/Application\ Support/run.daodao.chatmcp
+~/Library/Application Support/ChatMcp
+```
+
+Windows:
+```bash
+%APPDATA%\ChatMcp
+```
+
+Linux:
+```bash
+~/.local/share/ChatMcp
+```
+
+Mobile:
+- Application Documents Directory
+
+reset app can use this command
+
+macOS:
+```bash
 rm -rf ~/Library/Application\ Support/ChatMcp
+```
+
+Windows:
+```bash
+rd /s /q "%APPDATA%\ChatMcp"
+```
+
+Linux:
+```bash
+rm -rf ~/.local/share/ChatMcp
 ```
 
 ## 开发
