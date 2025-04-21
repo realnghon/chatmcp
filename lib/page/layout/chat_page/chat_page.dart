@@ -41,6 +41,7 @@ class _ChatPageState extends State<ChatPage> {
   bool _isLoading = false; // 是否正在加载
   String _parentMessageId = ''; // 父消息ID
   bool _isCancelled = false; // 是否取消
+  bool _isWating = false; // 是否正在补全
 
   WidgetsToImageController toImagecontroller = WidgetsToImageController();
   // to save image bytes of widget
@@ -411,7 +412,7 @@ class _ChatPageState extends State<ChatPage> {
 
     return Expanded(
       child: MessageList(
-        messages: _isLoading
+        messages: _isWating
             ? [
                 ..._messages,
                 ChatMessage(content: '', role: MessageRole.loading)
@@ -743,6 +744,10 @@ class _ChatPageState extends State<ChatPage> {
       );
     }
 
+    setState(() {
+      _isWating = true;
+    });
+
     final stream = _llmClient!.chatStreamCompletion(CompletionRequest(
       model: ProviderManager.chatModelProvider.currentModel.name,
       messages: [
@@ -807,7 +812,14 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<void> _processResponseStream(Stream<LLMResponse> stream) async {
+    bool isFirstChunk = true;
     await for (final chunk in stream) {
+      if (isFirstChunk) {
+        setState(() {
+          _isWating = false;
+        });
+        isFirstChunk = false;
+      }
       if (_isCancelled) break;
       setState(() {
         _currentResponse += chunk.content ?? '';

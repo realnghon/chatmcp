@@ -11,6 +11,7 @@ import 'dart:io' as io;
 import 'package:chatmcp/utils/color.dart';
 import 'chat_message_action.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
+import 'chat_loading.dart';
 
 // 文件附件组件
 class FileAttachment extends StatelessWidget {
@@ -159,7 +160,7 @@ class ChatUIMessage extends StatelessWidget {
 
   List<ChatMessage> _filterMessages(List<ChatMessage> messages) {
     if (messages.length <= 1) return messages;
-    return messages.where((m) => m.role != MessageRole.loading).toList();
+    return messages.where((m) => m.content != '').toList();
   }
 
   BubblePosition _getMessagePosition(int index, int total) {
@@ -282,11 +283,12 @@ class ChatMessageContent extends StatelessWidget {
     final messages = <Widget>[];
 
     if (message.role == MessageRole.loading) {
-      messages.add(MessageBubble(
-        message: ChatMessage(content: '', role: MessageRole.loading),
-        position: position,
-        useTransparentBackground: useTransparentBackground,
-      ));
+      // messages.add(MessageBubble(
+      //   message: ChatMessage(content: 'xx', role: MessageRole.loading),
+      //   position: position,
+      //   useTransparentBackground: useTransparentBackground,
+      // ));
+      messages.add(const ChatLoading());
     }
 
     if (message.files != null && message.files!.isNotEmpty) {
