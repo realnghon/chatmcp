@@ -160,7 +160,11 @@ class ChatUIMessage extends StatelessWidget {
 
   List<ChatMessage> _filterMessages(List<ChatMessage> messages) {
     if (messages.length <= 1) return messages;
-    return messages.where((m) => m.content != '').toList();
+    return messages
+        .where((m) =>
+            m.role != MessageRole.assistant ||
+            (m.role == MessageRole.assistant && m.content != ''))
+        .toList();
   }
 
   BubblePosition _getMessagePosition(int index, int total) {

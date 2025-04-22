@@ -725,6 +725,10 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<void> _processLLMResponse() async {
+    setState(() {
+      _isWating = true;
+    });
+
     final List<ChatMessage> messageList = _prepareMessageList();
     Logger.root.info('start process llm response: $messageList');
 
@@ -743,10 +747,6 @@ class _ChatPageState extends State<ChatPage> {
             messageList[lastUserMessageIndex].content ?? ''),
       );
     }
-
-    setState(() {
-      _isWating = true;
-    });
 
     final stream = _llmClient!.chatStreamCompletion(CompletionRequest(
       model: ProviderManager.chatModelProvider.currentModel.name,
@@ -898,6 +898,7 @@ class _ChatPageState extends State<ChatPage> {
       _userRejected = false;
       _isLoading = false;
       _isCancelled = false;
+      _isWating = false;
     });
 
     if (mounted) {
