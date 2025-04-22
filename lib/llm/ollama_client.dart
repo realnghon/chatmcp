@@ -39,35 +39,6 @@ class OllamaClient extends BaseLLMClient {
   }
 
   @override
-  Future<String> genTitle(List<ChatMessage> messages) async {
-    final conversationText = messages.map((msg) {
-      final role = msg.role == MessageRole.user ? "Human" : "Assistant";
-      return "$role: ${msg.content}";
-    }).join("\n");
-
-    final prompt = ChatMessage(
-      role: MessageRole.user,
-      content:
-          """You are a conversation title generator. Please generate a concise title (maximum 20 characters) for the following conversation.
-The title should summarize the main topic. Only return the title without any explanation or extra punctuation.
-
-Conversation:
-$conversationText""",
-    );
-
-    try {
-      final response = await chatCompletion(CompletionRequest(
-        model: "llama3.2",
-        messages: [prompt],
-      ));
-      return response.content?.trim() ?? "New Chat";
-    } catch (e) {
-      Logger.root.warning('Failed to generate title: $e');
-      return "New Chat";
-    }
-  }
-
-  @override
   Future<LLMResponse> chatCompletion(CompletionRequest request) async {
     final messages = request.messages.map((m) {
       final role = m.role == MessageRole.user ? 'user' : 'assistant';
@@ -97,6 +68,7 @@ $conversationText""",
       );
 
       final responseBody = utf8.decode(response.bodyBytes);
+      Logger.root.fine('Ollama request: $bodyStr');
       Logger.root.fine('Ollama response: $responseBody');
 
       final jsonData = jsonDecode(responseBody);

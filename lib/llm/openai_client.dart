@@ -170,35 +170,6 @@ class OpenAIClient extends BaseLLMClient {
   }
 
   @override
-  Future<String> genTitle(List<ChatMessage> messages) async {
-    final conversationText = messages.map((msg) {
-      final role = msg.role == MessageRole.user ? "Human" : "Assistant";
-      return "$role: ${msg.content}";
-    }).join("\n");
-
-    try {
-      final prompt = ChatMessage(
-        role: MessageRole.assistant,
-        content:
-            """You are a conversation title generator. Generate a concise title (max 20 characters) for the following conversation.
-The title should summarize the main topic. Return only the title without any explanation or extra punctuation.
-
-Conversation:
-$conversationText""",
-      );
-
-      final response = await chatCompletion(CompletionRequest(
-        model: "gpt-4o-mini",
-        messages: [prompt],
-      ));
-      return response.content?.trim() ?? "New Chat";
-    } catch (e, trace) {
-      Logger.root.severe('OpenAI gen title error: $e, trace: $trace');
-      return "New Chat";
-    }
-  }
-
-  @override
   Future<List<String>> models() async {
     if (apiKey.isEmpty) {
       Logger.root.info('OpenAI API key not set, skipping model list fetch');

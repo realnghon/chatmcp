@@ -130,41 +130,6 @@ class GeminiClient extends BaseLLMClient {
   }
 
   @override
-  Future<String> genTitle(List<ChatMessage> messages) async {
-    final conversationText = messages.map((msg) {
-      final role = msg.role == MessageRole.user ? "Human" : "Assistant";
-      return "$role: ${msg.content}";
-    }).join("\n");
-
-    try {
-      final prompt = ChatMessage(
-        role: MessageRole.assistant,
-        content:
-            """Generate a concise title (max 20 characters) for the following conversation.
-The title should summarize the main topic. Return only the title without any explanation or extra punctuation.
-
-Conversation:
-$conversationText""",
-      );
-
-      final response = await chatCompletion(CompletionRequest(
-        model: "gemini-2.0-flash",
-        messages: [prompt],
-      ));
-
-      // 获取标题并进行处理
-      String title = response.content?.trim() ?? "New Chat";
-      if (title.length > 50) {
-        title = title.substring(0, 50);
-      }
-      return title;
-    } catch (e, trace) {
-      Logger.root.severe('Gemini gen title error: $e, trace: $trace');
-      return "New Chat";
-    }
-  }
-
-  @override
   Future<List<String>> models() async {
     if (apiKey.isEmpty) {
       Logger.root.info('Gemini API key not set, skipping model list fetch');

@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:logging/logging.dart';
 
-class KeysSetting {
+class LLMProviderSetting {
   String apiKey;
   String apiEndpoint;
   String? apiStyle;
@@ -15,8 +15,9 @@ class KeysSetting {
   String? providerId;
   bool custom = false;
   String icon = '';
+  String? genTitleModel;
 
-  KeysSetting({
+  LLMProviderSetting({
     required this.apiKey,
     required this.apiEndpoint,
     this.apiStyle,
@@ -26,6 +27,7 @@ class KeysSetting {
     this.providerId,
     this.custom = false,
     this.icon = '',
+    this.genTitleModel,
   });
 
   Map<String, dynamic> toJson() {
@@ -39,11 +41,12 @@ class KeysSetting {
       'provider': providerId,
       'custom': custom,
       'icon': icon,
+      'genTitleModel': genTitleModel,
     };
   }
 
-  factory KeysSetting.fromJson(Map<String, dynamic> json) {
-    return KeysSetting(
+  factory LLMProviderSetting.fromJson(Map<String, dynamic> json) {
+    return LLMProviderSetting(
       apiKey: json['apiKey'] as String,
       apiEndpoint: json['apiEndpoint'] as String,
       apiStyle: json['apiStyle'] as String? ?? 'openai',
@@ -55,6 +58,7 @@ class KeysSetting {
       providerId: json['provider'] as String? ?? '',
       icon: json['icon'] as String? ?? '',
       custom: json['custom'] as bool? ?? false,
+      genTitleModel: json['genTitleModel'] as String? ?? '',
     );
   }
 }
@@ -142,8 +146,8 @@ class ChatSetting {
   }
 }
 
-final List<KeysSetting> defaultApiSettings = [
-  KeysSetting(
+final List<LLMProviderSetting> defaultApiSettings = [
+  LLMProviderSetting(
     apiKey: '',
     apiEndpoint: 'https://api.openai.com/v1',
     apiStyle: 'openai',
@@ -152,7 +156,7 @@ final List<KeysSetting> defaultApiSettings = [
     icon: 'openai',
     custom: false,
   ),
-  KeysSetting(
+  LLMProviderSetting(
     apiKey: '',
     apiEndpoint: 'https://api.anthropic.com/v1',
     apiStyle: 'claude',
@@ -161,7 +165,7 @@ final List<KeysSetting> defaultApiSettings = [
     icon: 'claude',
     custom: false,
   ),
-  KeysSetting(
+  LLMProviderSetting(
     apiKey: '',
     apiEndpoint: 'https://api.deepseek.com',
     apiStyle: 'deepseek',
@@ -170,7 +174,7 @@ final List<KeysSetting> defaultApiSettings = [
     icon: 'deepseek',
     custom: false,
   ),
-  KeysSetting(
+  LLMProviderSetting(
     apiKey: '',
     apiEndpoint: 'http://localhost:11434',
     apiStyle: 'openai',
@@ -179,7 +183,7 @@ final List<KeysSetting> defaultApiSettings = [
     icon: 'ollama',
     custom: false,
   ),
-  KeysSetting(
+  LLMProviderSetting(
     apiKey: '',
     apiEndpoint: 'https://generativelanguage.googleapis.com/v1beta',
     apiStyle: 'gemini',
@@ -188,7 +192,7 @@ final List<KeysSetting> defaultApiSettings = [
     icon: 'gemini',
     custom: false,
   ),
-  KeysSetting(
+  LLMProviderSetting(
     apiKey: '',
     apiEndpoint: 'https://openrouter.ai/api/v1',
     apiStyle: 'openai',
@@ -206,7 +210,7 @@ class SettingsProvider extends ChangeNotifier {
   factory SettingsProvider() => _instance;
   SettingsProvider._internal();
 
-  List<KeysSetting> _apiSettings = [];
+  List<LLMProviderSetting> _apiSettings = [];
 
   GeneralSetting _generalSetting = GeneralSetting(
     theme: 'light',
@@ -215,9 +219,10 @@ class SettingsProvider extends ChangeNotifier {
 
   ChatSetting _modelSetting = ChatSetting();
 
-  List<KeysSetting> get apiSettings => _apiSettings;
+  List<LLMProviderSetting> get apiSettings => _apiSettings;
 
-  KeysSetting getProviderSetting(String providerId) => _apiSettings.firstWhere(
+  LLMProviderSetting getProviderSetting(String providerId) =>
+      _apiSettings.firstWhere(
         (element) => element.providerId == providerId,
       );
 
@@ -262,17 +267,18 @@ class SettingsProvider extends ChangeNotifier {
     return models;
   }
 
-  Future<List<KeysSetting>> loadSettings() async {
+  Future<List<LLMProviderSetting>> loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     final String? settingsJson = prefs.getString(apiSettingsKey);
 
-    List<KeysSetting> settings = [];
+    List<LLMProviderSetting> settings = [];
 
     if (settingsJson != null) {
       try {
         final List<dynamic> decoded = jsonDecode(settingsJson);
         settings = decoded
-            .map((value) => KeysSetting.fromJson(value as Map<String, dynamic>))
+            .map((value) =>
+                LLMProviderSetting.fromJson(value as Map<String, dynamic>))
             .toList();
       } catch (e) {
         Logger.root.severe('Error parsing $apiSettingsKey: $e');
@@ -310,7 +316,7 @@ class SettingsProvider extends ChangeNotifier {
   }
 
   Future<void> updateApiSettings({
-    required List<KeysSetting> apiSettings,
+    required List<LLMProviderSetting> apiSettings,
   }) async {
     final prefs = await SharedPreferences.getInstance();
 

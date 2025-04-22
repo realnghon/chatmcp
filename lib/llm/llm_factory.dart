@@ -69,7 +69,7 @@ class LLMFactoryHelper {
 
       var openAISetting = ProviderManager.settingsProvider.apiSettings
           .firstWhere((element) => element.providerId == "openai",
-              orElse: () => KeysSetting(
+              orElse: () => LLMProviderSetting(
                   apiKey: '', apiEndpoint: '', providerId: 'openai'));
 
       return OpenAIClient(

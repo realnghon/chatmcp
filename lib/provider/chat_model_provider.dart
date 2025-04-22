@@ -12,14 +12,6 @@ class ChatModelProvider extends ChangeNotifier {
     _loadSavedModel();
   }
 
-  final List<llm_model.Model> _availableModels = [];
-
-  List<llm_model.Model> get availableModels => _availableModels;
-
-  List<llm_model.Model> getModels() {
-    return _availableModels;
-  }
-
   // Get the currently selected model
   static const String _modelKey = 'current_model';
   llm_model.Model _currentModel = llm_model.Model(

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:chatmcp/components/widgets/base.dart';
 import 'package:chatmcp/llm/llm_factory.dart';
+import 'package:chatmcp/utils/platform.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
@@ -30,7 +31,7 @@ class _KeysSettingsState extends State<KeysSettings> {
   final List<KeySettingControllers> _controllers = [];
 
   // 初始化一个默认配置
-  final List<KeysSetting> _llmApiConfigs = [];
+  final List<LLMProviderSetting> _llmApiConfigs = [];
 
   @override
   void initState() {
@@ -51,6 +52,7 @@ class _KeysSettingsState extends State<KeysSettings> {
         models: config.models ?? [],
         enabledModels: config.enabledModels ?? [],
         icon: config.icon ?? '',
+        genTitleModel: config.genTitleModel ?? '',
       ));
     }
   }
@@ -187,7 +189,7 @@ class _KeysSettingsState extends State<KeysSettings> {
 
   // 构建提供商卡片头部
   Widget _buildProviderCardHeader(
-      KeysSetting config, KeySettingControllers controllers) {
+      LLMProviderSetting config, KeySettingControllers controllers) {
     return Row(
       children: [
         LlmIcon(icon: config.icon),
@@ -281,7 +283,7 @@ class _KeysSettingsState extends State<KeysSettings> {
   }
 
   // 删除提供商的方法
-  void _deleteProvider(KeysSetting config) {
+  void _deleteProvider(LLMProviderSetting config) {
     setState(() {
       final index = _llmApiConfigs.indexOf(config);
       if (index != -1) {
@@ -432,7 +434,7 @@ class _KeysSettingsState extends State<KeysSettings> {
                 if (providerName.isNotEmpty) {
                   setState(() {
                     String providerId = Uuid().v4();
-                    _llmApiConfigs.add(KeysSetting(
+                    _llmApiConfigs.add(LLMProviderSetting(
                       providerName: providerName,
                       providerId: providerId,
                       apiKey: '',
@@ -515,7 +517,7 @@ class _KeysSettingsState extends State<KeysSettings> {
     );
   }
 
-  Widget _buildProviderListTile(int index, KeysSetting config) {
+  Widget _buildProviderListTile(int index, LLMProviderSetting config) {
     final isSelected = _selectedProvider == index;
 
     return ListTile(
@@ -873,6 +875,7 @@ class _KeysSettingsState extends State<KeysSettings> {
           const SizedBox(height: 12),
 
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
                 l10n.modelList,
@@ -883,6 +886,11 @@ class _KeysSettingsState extends State<KeysSettings> {
                 ),
               ),
               Spacer(),
+              if (kIsDesktop) ...[
+                // choose gen title model
+                const Gap(size: 12),
+                _buildGenTitleModel(controllers),
+              ],
               // add custom model
               OutlinedButton.icon(
                 icon: const Icon(Icons.add_circle_outline, size: 14),
@@ -958,11 +966,82 @@ class _KeysSettingsState extends State<KeysSettings> {
           // 模型列表
 
           const SizedBox(height: 12),
+
+          if (!kIsDesktop) ...[
+            const SizedBox(height: 12),
+            _buildGenTitleModel(controllers),
+            const SizedBox(height: 12),
+          ],
+
           // 模型列表，直接显示所有模型
           ...controllers.models.map((model) => _buildModelListItem(
               model, controllers.enabledModels.contains(model))),
           const SizedBox(height: 8), // 底部留一些空间
         ],
+      ),
+    );
+  }
+
+  Widget _buildGenTitleModel(KeySettingControllers controllers) {
+    return Center(
+      child: Container(
+        width: kIsDesktop ? 180 : double.infinity,
+        height: kIsDesktop ? null : 40,
+        margin: const EdgeInsets.only(right: 8),
+        child: DropdownButtonFormField<String>(
+          value: controllers.enabledModels.contains(controllers.genTitleModel)
+              ? controllers.genTitleModel
+              : (controllers.enabledModels.isNotEmpty
+                  ? controllers.enabledModels.first
+                  : null),
+          decoration: InputDecoration(
+            labelText: "标题模型",
+            labelStyle: TextStyle(fontSize: 12),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.outline.withAlpha(51),
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.outline.withAlpha(51),
+              ),
+            ),
+            isDense: true,
+          ),
+          icon: Icon(
+            CupertinoIcons.chevron_down,
+            size: 14,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+          style: TextStyle(fontSize: 12),
+          isExpanded: true,
+          items: controllers.enabledModels
+              .map((model) => DropdownMenuItem(
+                    value: model,
+                    child: Text(
+                      model,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ))
+              .toList(),
+          onChanged: (value) {
+            if (value != null) {
+              setState(() {
+                controllers.genTitleModel = value;
+                _hasChanges = true;
+              });
+            }
+          },
+        ),
       ),
     );
   }
@@ -1073,7 +1152,7 @@ class _KeysSettingsState extends State<KeysSettings> {
 
         await settings.updateApiSettings(
             apiSettings: _controllers
-                .map((e) => KeysSetting(
+                .map((e) => LLMProviderSetting(
                       providerId: e.providerId,
                       providerName: e.providerNameController.text,
                       apiKey: e.keyController.text,
@@ -1083,6 +1162,7 @@ class _KeysSettingsState extends State<KeysSettings> {
                       models: e.models,
                       enabledModels: e.enabledModels,
                       icon: e.icon,
+                      genTitleModel: e.genTitleModel,
                     ))
                 .toList());
 
@@ -1120,6 +1200,7 @@ class KeySettingControllers {
   String providerId;
   bool custom = false;
   String icon = '';
+  String genTitleModel = '';
   KeySettingControllers({
     required this.keyController,
     required this.endpointController,
@@ -1130,6 +1211,7 @@ class KeySettingControllers {
     this.icon = '',
     List<String>? models,
     List<String>? enabledModels,
+    this.genTitleModel = '',
   }) {
     this.models = models ?? [];
     this.enabledModels = enabledModels ?? [];

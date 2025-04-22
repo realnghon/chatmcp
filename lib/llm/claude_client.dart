@@ -207,36 +207,6 @@ class ClaudeClient extends BaseLLMClient {
   }
 
   @override
-  Future<String> genTitle(List<ChatMessage> messages) async {
-    final conversationText = messages.map((msg) {
-      final role = msg.role == MessageRole.user ? "Human" : "Assistant";
-      return "$role: ${msg.content}";
-    }).join("\n");
-
-    try {
-      final prompt = ChatMessage(
-        role: MessageRole.user,
-        content:
-            """Generate a concise title (max 20 characters) for the following conversation.
-The title should summarize the main topic. Return only the title without any explanation or extra punctuation.
-
-Conversation:
-$conversationText""",
-      );
-
-      final response = await chatCompletion(CompletionRequest(
-        model: "claude-3-5-haiku-20241022",
-        messages: [prompt],
-      ));
-
-      return response.content?.trim() ?? "New Chat";
-    } catch (e, trace) {
-      Logger.root.severe('Claude gen title error: $e, trace: $trace');
-      return "New Chat";
-    }
-  }
-
-  @override
   Future<Map<String, dynamic>> checkToolCall(
     String model,
     CompletionRequest request,

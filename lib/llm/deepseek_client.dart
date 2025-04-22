@@ -227,41 +227,6 @@ class DeepSeekClient extends BaseLLMClient {
   }
 
   @override
-  Future<String> genTitle(List<ChatMessage> messages) async {
-    final conversationText = messages.map((msg) {
-      final role = msg.role == MessageRole.user ? "Human" : "Assistant";
-      return "$role: ${msg.content}";
-    }).join("\n");
-
-    try {
-      final prompt = ChatMessage(
-        role: MessageRole.assistant,
-        content:
-            """You are a conversation title generator. Generate a concise title (max 20 characters) for the following conversation.
-The title should summarize the main topic. Return only the title without any explanation or extra punctuation.
-
-Conversation:
-$conversationText""",
-      );
-
-      final models = ProviderManager.chatModelProvider.getModels();
-      String modelName = "deepseek-chat";
-      if (models.any((m) => m.name == "deepseek-v3")) {
-        modelName = "deepseek-v3";
-      }
-
-      final response = await chatCompletion(CompletionRequest(
-        model: modelName,
-        messages: [prompt],
-      ));
-      return response.content?.trim() ?? "New Chat";
-    } catch (e, trace) {
-      Logger.root.severe('DeepSeek gen title error: $e, trace: $trace');
-      return "New Chat";
-    }
-  }
-
-  @override
   Future<List<String>> models() async {
     if (apiKey.isEmpty) {
       Logger.root
