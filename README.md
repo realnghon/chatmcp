@@ -143,3 +143,7 @@ Your feedback helps us improve chatmcp and helps other users make informed decis
 ## License
 
 This project is licensed under the [Apache License 2.0](./LICENSE).
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=daodao97/chatmcp&type=Date)](https://www.star-history.com/#daodao97/chatmcp&Date)

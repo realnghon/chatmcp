@@ -145,3 +145,7 @@ flutter run -d macos
 ## 许可证
 
 本项目采用 [Apache License 2.0](./LICENSE) 许可证。
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=daodao97/chatmcp&type=Date)](https://www.star-history.com/#daodao97/chatmcp&Date)
