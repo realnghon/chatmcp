@@ -126,5 +126,6 @@
     "modelList": "Model List",
     "enableModels": "Enable Models",
     "disableAllModels": "Disable All Models",
-    "saveSuccess": "Settings saved successfully"
+    "saveSuccess": "Settings saved successfully",
+    "genTitleModel": "Gen Title"
 }

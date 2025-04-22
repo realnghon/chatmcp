@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:chatmcp/components/widgets/base.dart';
 import 'package:chatmcp/llm/llm_factory.dart';
+import 'package:chatmcp/utils/color.dart';
 import 'package:chatmcp/utils/platform.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,8 +12,41 @@ import '../../provider/settings_provider.dart';
 import '../../provider/provider_manager.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
 import 'package:flutter_switch/flutter_switch.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:chatmcp/page/layout/widgets/llm_icon.dart';
+
+class LLMSettingControllers {
+  TextEditingController keyController;
+  TextEditingController endpointController;
+  String apiStyleController;
+  TextEditingController providerNameController;
+  List<String> models = [];
+  List<String> enabledModels = [];
+  String providerId;
+  bool custom = false;
+  String icon = '';
+  String genTitleModel = '';
+  LLMSettingControllers({
+    required this.keyController,
+    required this.endpointController,
+    this.apiStyleController = 'openai',
+    required this.providerNameController,
+    this.providerId = '',
+    this.custom = false,
+    this.icon = '',
+    List<String>? models,
+    List<String>? enabledModels,
+    this.genTitleModel = '',
+  }) {
+    this.models = models ?? [];
+    this.enabledModels = enabledModels ?? [];
+  }
+
+  void dispose() {
+    keyController.dispose();
+    endpointController.dispose();
+    providerNameController.dispose();
+  }
+}
 
 class KeysSettings extends StatefulWidget {
   const KeysSettings({super.key});
@@ -28,33 +62,42 @@ class _KeysSettingsState extends State<KeysSettings> {
   bool _hasChanges = false;
   bool _obscureText = true; // 添加密码可见性状态
 
-  final List<KeySettingControllers> _controllers = [];
+  final List<LLMSettingControllers> _controllers = [];
 
-  // 初始化一个默认配置
+  // 记录每个卡片的展开状态
+  final Map<int, bool> _expandedState = {};
+
   final List<LLMProviderSetting> _llmApiConfigs = [];
+
+  void _addModelsWithoutDuplicates(
+      LLMSettingControllers controllers, List<String> newModels) {
+    for (var model in newModels) {
+      if (!controllers.models.contains(model)) {
+        controllers.models.add(model);
+      }
+    }
+
+    if (controllers.enabledModels.isEmpty) {
+      controllers.enabledModels.addAll(newModels);
+    } else {
+      for (var model in newModels) {
+        if (!controllers.enabledModels.contains(model)) {
+          controllers.enabledModels.add(model);
+        }
+      }
+    }
+
+    controllers.enabledModels.sort((a, b) =>
+        controllers.models.indexOf(a) - controllers.models.indexOf(b));
+    setState(() {
+      _hasChanges = true;
+    });
+  }
 
   @override
   void initState() {
     super.initState();
-
     _loadSettings();
-
-    // 初始化控制器
-    for (var config in _llmApiConfigs) {
-      _controllers.add(KeySettingControllers(
-        keyController: TextEditingController(),
-        endpointController: TextEditingController(),
-        apiStyleController: config.apiStyle ?? 'openai',
-        providerNameController:
-            TextEditingController(text: config.providerName ?? ''),
-        providerId: config.providerId ?? '',
-        custom: config.custom,
-        models: config.models ?? [],
-        enabledModels: config.enabledModels ?? [],
-        icon: config.icon ?? '',
-        genTitleModel: config.genTitleModel ?? '',
-      ));
-    }
   }
 
   @override
@@ -68,9 +111,7 @@ class _KeysSettingsState extends State<KeysSettings> {
   Future<void> _loadSettings() async {
     final settings = Provider.of<SettingsProvider>(context, listen: false);
     final apiSettings = await settings.loadSettings();
-    print("apiSettings: ${jsonEncode(apiSettings)}");
 
-    // 清空原有列表
     setState(() {
       _llmApiConfigs.clear();
       _controllers.clear();
@@ -81,7 +122,7 @@ class _KeysSettingsState extends State<KeysSettings> {
       setState(() {
         _llmApiConfigs.add(apiSetting);
         // 为每个配置添加一个控制器
-        _controllers.add(KeySettingControllers(
+        _controllers.add(LLMSettingControllers(
           keyController: TextEditingController(text: apiSetting.apiKey),
           endpointController:
               TextEditingController(text: apiSetting.apiEndpoint),
@@ -92,7 +133,8 @@ class _KeysSettingsState extends State<KeysSettings> {
           custom: apiSetting.custom,
           models: apiSetting.models ?? [],
           enabledModels: apiSetting.enabledModels ?? [],
-          icon: apiSetting.icon ?? '',
+          icon: apiSetting.icon,
+          genTitleModel: apiSetting.genTitleModel ?? '',
         ));
       });
     }
@@ -100,9 +142,7 @@ class _KeysSettingsState extends State<KeysSettings> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(12.0),
@@ -159,7 +199,9 @@ class _KeysSettingsState extends State<KeysSettings> {
   Widget _buildProviderConfigCard(int index) {
     final config = _llmApiConfigs[index];
     final controllers = _controllers[index];
-    final l10n = AppLocalizations.of(context)!;
+
+    // 初始化展开状态，默认不展开
+    _expandedState[index] ??= false;
 
     return Card(
       elevation: 0,
@@ -171,25 +213,52 @@ class _KeysSettingsState extends State<KeysSettings> {
           color: Theme.of(context).colorScheme.outline.withAlpha(26),
         ),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 卡片头部（图标、名称、删除按钮）
-            _buildProviderCardHeader(config, controllers),
-            const SizedBox(height: 16),
-            // 配置表单
-            _buildProviderConfigForm(index, showTitle: false),
-          ],
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 卡片头部（点击可折叠）
+          InkWell(
+            onTap: () {
+              setState(() {
+                _expandedState[index] = !(_expandedState[index] ?? false);
+              });
+            },
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _buildProviderCardHeader(config, controllers),
+                  ),
+                  Icon(
+                    _expandedState[index] ?? false
+                        ? CupertinoIcons.chevron_up
+                        : CupertinoIcons.chevron_down,
+                    size: 18,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.6),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // 展开的配置内容
+          if (_expandedState[index] ?? false)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 16.0),
+              child: _buildProviderConfigForm(index, showTitle: false),
+            ),
+        ],
       ),
     );
   }
 
   // 构建提供商卡片头部
   Widget _buildProviderCardHeader(
-      LLMProviderSetting config, KeySettingControllers controllers) {
+      LLMProviderSetting config, LLMSettingControllers controllers) {
     return Row(
       children: [
         LlmIcon(icon: config.icon),
@@ -445,7 +514,7 @@ class _KeysSettingsState extends State<KeysSettings> {
                       enabledModels: [],
                       icon: '',
                     ));
-                    _controllers.add(KeySettingControllers(
+                    _controllers.add(LLMSettingControllers(
                       keyController: TextEditingController(),
                       endpointController: TextEditingController(),
                       providerNameController:
@@ -455,6 +524,7 @@ class _KeysSettingsState extends State<KeysSettings> {
                       models: [],
                       enabledModels: [],
                       icon: '',
+                      genTitleModel: '',
                     ));
                   });
                 }
@@ -878,7 +948,7 @@ class _KeysSettingsState extends State<KeysSettings> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
-                l10n.modelList,
+                '${l10n.modelList} (${controllers.models.length})',
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
@@ -946,15 +1016,7 @@ class _KeysSettingsState extends State<KeysSettings> {
 
                   final models = await llm.models();
                   setState(() {
-                    controllers.models.addAll(models);
-                    if (controllers.enabledModels.isEmpty) {
-                      controllers.enabledModels.addAll(models);
-                    } else {
-                      // 确保enabledModels按照models中的顺序排序
-                      controllers.enabledModels.sort((a, b) =>
-                          controllers.models.indexOf(a) -
-                          controllers.models.indexOf(b));
-                    }
+                    _addModelsWithoutDuplicates(controllers, models);
                     // 设置变更标志
                     _hasChanges = true;
                   });
@@ -982,7 +1044,8 @@ class _KeysSettingsState extends State<KeysSettings> {
     );
   }
 
-  Widget _buildGenTitleModel(KeySettingControllers controllers) {
+  Widget _buildGenTitleModel(LLMSettingControllers controllers) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Container(
         width: kIsDesktop ? 180 : double.infinity,
@@ -995,7 +1058,7 @@ class _KeysSettingsState extends State<KeysSettings> {
                   ? controllers.enabledModels.first
                   : null),
           decoration: InputDecoration(
-            labelText: "标题模型",
+            labelText: l10n.genTitleModel,
             labelStyle: TextStyle(fontSize: 12),
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
@@ -1187,39 +1250,5 @@ class _KeysSettingsState extends State<KeysSettings> {
         }
       }
     }
-  }
-}
-
-class KeySettingControllers {
-  TextEditingController keyController;
-  TextEditingController endpointController;
-  String apiStyleController;
-  TextEditingController providerNameController;
-  List<String> models = [];
-  List<String> enabledModels = [];
-  String providerId;
-  bool custom = false;
-  String icon = '';
-  String genTitleModel = '';
-  KeySettingControllers({
-    required this.keyController,
-    required this.endpointController,
-    this.apiStyleController = 'openai',
-    required this.providerNameController,
-    this.providerId = '',
-    this.custom = false,
-    this.icon = '',
-    List<String>? models,
-    List<String>? enabledModels,
-    this.genTitleModel = '',
-  }) {
-    this.models = models ?? [];
-    this.enabledModels = enabledModels ?? [];
-  }
-
-  void dispose() {
-    keyController.dispose();
-    endpointController.dispose();
-    providerNameController.dispose();
   }
 }

@@ -850,6 +850,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Settings saved successfully'**
   String get saveSuccess;
+
+  /// No description provided for @genTitleModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Gen Title'**
+  String get genTitleModel;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

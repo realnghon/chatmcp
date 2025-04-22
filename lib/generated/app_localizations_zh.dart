@@ -407,4 +407,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get saveSuccess => '设置保存成功';
+
+  @override
+  String get genTitleModel => '标题生成';
 }

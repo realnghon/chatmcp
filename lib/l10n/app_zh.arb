@@ -125,5 +125,6 @@
     "modelList": "模型列表",
     "enableModels": "启用模型",
     "disableAllModels": "禁用所有模型",
-    "saveSuccess": "设置保存成功"
+    "saveSuccess": "设置保存成功",
+    "genTitleModel": "标题生成"
 }

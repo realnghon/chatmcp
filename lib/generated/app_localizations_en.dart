@@ -407,4 +407,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saveSuccess => 'Settings saved successfully';
+
+  @override
+  String get genTitleModel => 'Gen Title';
 }
