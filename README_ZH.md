@@ -148,4 +148,4 @@ flutter run -d macos
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=daodao97/chatmcp&type=Date)](https://www.star-history.com/#daodao97/chatmcp&Date)
+![](https://api.star-history.com/svg?repos=daodao97/chatmcp&type=Date)
