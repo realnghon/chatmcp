@@ -1,6 +1,5 @@
 import 'package:chatmcp/provider/provider_manager.dart';
 import 'package:logging/logging.dart';
-
 import 'model.dart';
 import 'utils.dart';
 import 'package:http/http.dart' as http;
@@ -9,6 +8,24 @@ abstract class BaseLLMClient {
   Future<LLMResponse> chatCompletion(CompletionRequest request);
 
   Stream<LLMResponse> chatStreamCompletion(CompletionRequest request);
+
+  String joinPaths(String first, String second) {
+    if (first.isEmpty) return second;
+    if (second.isEmpty) return first;
+
+    final firstWithoutTrailing =
+        first.endsWith('/') ? first.substring(0, first.length - 1) : first;
+    final secondWithoutLeading =
+        second.startsWith('/') ? second.substring(1) : second;
+
+    return '$firstWithoutTrailing/$secondWithoutLeading';
+  }
+
+  String getEndpoint(String url, String path) {
+    final urlObj = Uri.parse(url);
+    final newPath = joinPaths(urlObj.path, path);
+    return urlObj.replace(path: newPath).toString();
+  }
 
   Future<Map<String, dynamic>> checkToolCall(
     String model,

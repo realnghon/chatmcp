@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'model.dart';
 import 'package:logging/logging.dart';
 import './openai_client.dart';
-import 'package:chatmcp/provider/provider_manager.dart';
 
 class DeepSeekClient extends BaseLLMClient {
   final String apiKey;

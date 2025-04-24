@@ -47,9 +47,11 @@ class OpenAIClient extends BaseLLMClient {
     final bodyStr = jsonEncode(body);
     Logger.root.fine('OpenAI request: $bodyStr');
 
+    final endpoint = getEndpoint(baseUrl, "/chat/completions");
+
     try {
       final response = await http.post(
-        Uri.parse("$baseUrl/chat/completions"),
+        Uri.parse(endpoint),
         headers: _headers,
         body: jsonEncode(body),
       );
@@ -82,8 +84,7 @@ class OpenAIClient extends BaseLLMClient {
         toolCalls: toolCalls,
       );
     } catch (e) {
-      throw await handleError(
-          e, 'OpenAI', '$baseUrl/chat/completions', bodyStr);
+      throw await handleError(e, 'OpenAI', endpoint, bodyStr);
     }
   }
 
@@ -107,9 +108,10 @@ class OpenAIClient extends BaseLLMClient {
 
     Logger.root.fine("debug log:openai stream body: ${jsonEncode(body)}");
 
+    final endpoint = getEndpoint(baseUrl, "/chat/completions");
+
     try {
-      final request =
-          http.Request('POST', Uri.parse("$baseUrl/chat/completions"));
+      final request = http.Request('POST', Uri.parse(endpoint));
       request.headers.addAll(_headers);
       request.body = jsonEncode(body);
 
@@ -164,8 +166,7 @@ class OpenAIClient extends BaseLLMClient {
         }
       }
     } catch (e) {
-      throw await handleError(
-          e, 'OpenAI', '$baseUrl/chat/completions', jsonEncode(body));
+      throw await handleError(e, 'OpenAI', endpoint, jsonEncode(body));
     }
   }
 
@@ -178,7 +179,7 @@ class OpenAIClient extends BaseLLMClient {
 
     try {
       final response = await http.get(
-        Uri.parse("$baseUrl/models"),
+        Uri.parse(getEndpoint(baseUrl, "/models")),
         headers: _headers,
       );
 
