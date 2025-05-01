@@ -461,4 +461,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get serverType => 'Server Type';
+
+  @override
+  String get reset => 'Reset';
 }

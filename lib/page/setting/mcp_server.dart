@@ -827,13 +827,22 @@ class _McpServerState extends State<McpServer> {
                     config['mcpServers'] = <String, dynamic>{};
                   }
 
-                  config['mcpServers'][saveServerName] = {
+                  Map<String, dynamic> newMcpServers = {};
+                  newMcpServers[saveServerName] = {
                     'type': type,
                     'command': command,
                     'args': args,
                     'env': env,
                     'auto_approve': values['auto_approve'] as bool? ?? false,
                   };
+
+                  for (var entry in config['mcpServers'].entries) {
+                    if (entry.key != saveServerName) {
+                      newMcpServers[entry.key] = entry.value;
+                    }
+                  }
+
+                  config['mcpServers'] = newMcpServers;
 
                   if (mounted) {
                     setState(() {

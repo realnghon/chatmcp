@@ -461,4 +461,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get serverType => '服务类型';
+
+  @override
+  String get reset => '重置';
 }

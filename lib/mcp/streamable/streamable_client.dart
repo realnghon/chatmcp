@@ -114,7 +114,7 @@ class StreamableClient implements McpClient {
   /// 获取通用HTTP头
   Future<Map<String, String>> _commonHeaders() async {
     final headers = <String, String>{
-      'Accept': 'application/json',
+      'Accept': 'application/json, text/event-stream',
       'Content-Type': 'application/json',
     };
 
@@ -215,9 +215,13 @@ class StreamableClient implements McpClient {
     final replayMessageId = options.replayMessageId;
     String? lastEventId;
 
+    // 确保流是可以多次监听的广播流
+    final broadcastStream =
+        stream.isBroadcast ? stream : stream.asBroadcastStream();
+
     // 解码UTF-8并拆分为行
     final lineStream =
-        stream.transform(utf8.decoder).transform(const LineSplitter());
+        broadcastStream.transform(utf8.decoder).transform(const LineSplitter());
 
     // SSE处理变量
     String? eventName;
@@ -317,9 +321,12 @@ class StreamableClient implements McpClient {
     );
 
     // 当中止控制器关闭时，取消订阅
-    _abortController?.stream.listen((_) {
-      subscription.cancel();
-    });
+    if (_abortController != null && !_abortController!.isClosed) {
+      // 由于_abortController现在是广播流，无需担心多次监听
+      _abortController!.stream.listen((_) {
+        subscription.cancel();
+      });
+    }
   }
 
   /// 启动客户端连接
@@ -329,7 +336,8 @@ class StreamableClient implements McpClient {
       throw Exception('StreamableClient already started!');
     }
 
-    _abortController = StreamController<bool>();
+    // 使用广播流控制器以支持多次监听
+    _abortController = StreamController<bool>.broadcast();
   }
 
   /// 关闭客户端连接
@@ -398,25 +406,43 @@ class StreamableClient implements McpClient {
       if (message.id != null) {
         if (contentType?.contains('text/event-stream') == true) {
           // 为请求处理SSE流响应
-          _handleSseStream(
-            Stream.value(response.bodyBytes),
-            StartSSEOptions(),
-          );
+          // 创建响应体的字节流的一次性副本，确保类型为List<int>而不是Uint8List
+          final responseBodyBytes = response.bodyBytes;
+          // 将Uint8List显式转换为List<int>类型的Stream
+          final responseBodyStream = Stream<List<int>>.value(responseBodyBytes);
 
-          // 创建一个监听器等待响应
-          onMessage = (responseMessage) {
+          // 注册一个临时处理函数
+          final oldOnMessage = onMessage;
+
+          // 使用函数声明而不是变量赋值
+          void completerOnMessage(JSONRPCMessage responseMessage) {
             if (responseMessage.id == message.id && !completer.isCompleted) {
               completer.complete(responseMessage);
             }
-          };
+            // 同时调用原始消息处理器
+            oldOnMessage?.call(responseMessage);
+          }
+
+          onMessage = completerOnMessage;
+
+          // 处理SSE流
+          _handleSseStream(
+            responseBodyStream,
+            StartSSEOptions(),
+          );
 
           // 设置超时
           return completer.future.timeout(
             const Duration(seconds: 30),
             onTimeout: () {
+              // 恢复原始消息处理器
+              onMessage = oldOnMessage;
               throw TimeoutException('Request timed out: ${message.id}');
             },
-          );
+          ).whenComplete(() {
+            // 请求完成后恢复原始消息处理器
+            onMessage = oldOnMessage;
+          });
         } else if (contentType?.contains('application/json') == true) {
           // 对于非流式服务器，我们可能会得到直接的JSON响应
           final data = jsonDecode(response.body);

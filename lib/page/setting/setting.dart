@@ -26,7 +26,7 @@ class _SettingPageState extends State<SettingPage> {
           content: KeysSettings()),
       SettingTab(
           title: l10n.mcpServer,
-          icon: CupertinoIcons.cloud,
+          icon: CupertinoIcons.hammer,
           content: McpServer()),
     ];
   }

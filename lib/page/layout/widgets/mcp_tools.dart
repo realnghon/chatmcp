@@ -1,3 +1,4 @@
+import 'package:chatmcp/components/widgets/base.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -145,26 +146,32 @@ class _McpToolsState extends State<McpTools> {
                             ),
                           ),
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Consumer<ServerStateProvider>(
-                  builder: (context, stateProvider, _) {
-                    return Text(
-                        'MCP${stateProvider.enabledCount > 0 ? ': ${stateProvider.enabledCount}' : ''}');
-                  },
-                ),
-                const SizedBox(width: 4),
-                Icon(
-                  mcpServerProvider.loadingServerTools
-                      ? CupertinoIcons.clock
-                      : Icons.expand_more,
-                  size: 18,
-                  color: Theme.of(context).iconTheme.color,
-                ),
-              ],
+          child: MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Consumer<ServerStateProvider>(
+                    builder: (context, stateProvider, _) {
+                      return Row(
+                        children: [
+                          Icon(
+                            CupertinoIcons.hammer,
+                            size: 14,
+                            color: Theme.of(context).iconTheme.color,
+                          ),
+                          if (stateProvider.enabledCount > 0) ...[
+                            const Gap(size: 4),
+                            Text('${stateProvider.enabledCount}'),
+                          ],
+                        ],
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -248,8 +255,7 @@ class _McpToolsState extends State<McpTools> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    SizedBox(
-                      width: 150,
+                    Expanded(
                       child: Text(
                         serverName,
                         overflow: TextOverflow.ellipsis,

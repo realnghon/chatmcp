@@ -958,6 +958,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Server Type'**
   String get serverType;
+
+  /// No description provided for @reset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get reset;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
