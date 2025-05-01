@@ -721,7 +721,7 @@ class _ChatPageState extends State<ChatPage> {
 
     final toolPrompt = promptGenerator.generateToolPrompt(tools);
 
-    return "<user_message>\n$userMessage\n</user_message>\n\n<tool_prompt>\n$toolPrompt\n</tool_prompt>";
+    return "<user_message>\n$userMessage\n</user_message>\n\n$toolPrompt\n";
   }
 
   Future<void> _processLLMResponse() async {
