@@ -130,13 +130,18 @@ class _McpToolsState extends State<McpTools> {
                       )
                     : _cachedServers == null || _cachedServers!.isEmpty
                         ? Center(
-                            child: Text('没有可用的服务器',
+                            child: Text('No available servers',
                                 style: Theme.of(context).textTheme.bodyMedium),
                           )
-                        : SingleChildScrollView(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: _buildMenuItems(context),
+                        : Container(
+                            constraints: const BoxConstraints(
+                              maxHeight: 400, // 限制菜单项列表的最大高度
+                            ),
+                            child: SingleChildScrollView(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: _buildMenuItems(context),
+                              ),
                             ),
                           ),
           ),
@@ -194,7 +199,7 @@ class _McpToolsState extends State<McpTools> {
         SizedBox(
           height: 40,
           child: Center(
-            child: Text('加载出错: $_error',
+            child: Text('Load failed: $_error',
                 style: Theme.of(context).textTheme.bodyMedium),
           ),
         )
@@ -207,8 +212,8 @@ class _McpToolsState extends State<McpTools> {
         SizedBox(
           height: 40,
           child: Center(
-            child:
-                Text('没有可用的服务器', style: Theme.of(context).textTheme.bodyMedium),
+            child: Text('No available servers',
+                style: Theme.of(context).textTheme.bodyMedium),
           ),
         )
       ];
@@ -243,20 +248,28 @@ class _McpToolsState extends State<McpTools> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
+                    SizedBox(
+                      width: 150,
+                      child: Text(
+                        serverName,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
+                    ),
                     Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(serverName),
                         if (isEnabled && isRunning && toolCount > 0)
                           Container(
-                            margin: const EdgeInsets.only(left: 8),
+                            margin: const EdgeInsets.only(right: 8),
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: Colors.green.withOpacity(0.2),
+                              color: Colors.green.withAlpha(51),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Text(
-                              '$toolCount',
+                              '$toolCount tools',
                               style: const TextStyle(
                                 fontSize: 12,
                                 color: Colors.green,
@@ -264,46 +277,46 @@ class _McpToolsState extends State<McpTools> {
                               ),
                             ),
                           ),
-                      ],
-                    ),
-                    FlutterSwitch(
-                      width: 55.0,
-                      height: 25.0,
-                      value: isEnabled,
-                      onToggle: (val) {
-                        if (!isStarting) {
-                          _handleServerToggle(context, serverName, val);
-                        }
-                      },
-                      toggleSize: 20.0,
-                      activeColor: Colors.blue,
-                      inactiveColor: Colors.grey[300]!,
-                      activeToggleColor: Colors.white,
-                      inactiveToggleColor: Colors.blue,
-                      showOnOff: true,
-                      activeText: "ON",
-                      inactiveText: "OFF",
-                      valueFontSize: 10.0,
-                      activeTextColor: Colors.white,
-                      inactiveTextColor: Colors.black,
-                      activeIcon: isStarting
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.orange),
-                              ),
-                            )
-                          : isRunning
-                              ? const Icon(
-                                  Icons.check_circle,
-                                  size: 16,
-                                  color: Colors.green,
+                        FlutterSwitch(
+                          width: 55.0,
+                          height: 25.0,
+                          value: isEnabled,
+                          onToggle: (val) {
+                            if (!isStarting) {
+                              _handleServerToggle(context, serverName, val);
+                            }
+                          },
+                          toggleSize: 20.0,
+                          activeColor: Colors.blue,
+                          inactiveColor: Colors.grey[300]!,
+                          activeToggleColor: Colors.white,
+                          inactiveToggleColor: Colors.blue,
+                          showOnOff: true,
+                          activeText: "ON",
+                          inactiveText: "OFF",
+                          valueFontSize: 10.0,
+                          activeTextColor: Colors.white,
+                          inactiveTextColor: Colors.black,
+                          activeIcon: isStarting
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.orange),
+                                  ),
                                 )
-                              : null,
-                      disabled: isStarting,
+                              : isRunning
+                                  ? const Icon(
+                                      Icons.check_circle,
+                                      size: 16,
+                                      color: Colors.green,
+                                    )
+                                  : null,
+                          disabled: isStarting,
+                        ),
+                      ],
                     ),
                   ],
                 );

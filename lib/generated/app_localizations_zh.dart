@@ -140,7 +140,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get delete => '删除';
 
   @override
-  String get command => '命令';
+  String get command => '命令 或 服务地址';
 
   @override
   String get arguments => '参数';
@@ -152,7 +152,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get serverName => '服务器名称';
 
   @override
-  String get commandExample => '例如：npx、uvx';
+  String get commandExample => '例如：npx、uvx、https://mcpserver.com';
 
   @override
   String get argumentsExample => '参数之间用空格分隔，例如：-m mcp.server';
@@ -410,4 +410,55 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get genTitleModel => '标题生成';
+
+  @override
+  String get serverNameTooLong => '服务名称长度不能超过 50 个字符';
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
+  String get providerName => 'Provider Name';
+
+  @override
+  String get apiStyle => 'API Style';
+
+  @override
+  String get enterProviderName => 'Enter provider name';
+
+  @override
+  String get providerNameRequired => 'Provider name is required';
+
+  @override
+  String get addModel => 'Add Model';
+
+  @override
+  String get modelName => 'Model Name';
+
+  @override
+  String get enterModelName => 'Enter model name';
+
+  @override
+  String get noApiConfigs => 'No API configurations available';
+
+  @override
+  String get add => 'Add';
+
+  @override
+  String get fetch => 'Fetch';
+
+  @override
+  String get on => 'ON';
+
+  @override
+  String get off => 'OFF';
+
+  @override
+  String get apiUrl => 'API URL';
+
+  @override
+  String get selectApiStyle => 'Please select API style';
+
+  @override
+  String get serverType => '服务类型';
 }

@@ -16,9 +16,13 @@ class SSEClient implements McpClient {
   final _processStateController = StreamController<ProcessState>.broadcast();
   Stream<ProcessState> get processStateStream => _processStateController.stream;
 
+  HttpClient? _httpClient;
+  HttpClientRequest? _request;
+  HttpClientResponse? _response;
   StreamSubscription? _sseSubscription;
   final _writeLock = Lock();
   String? _messageEndpoint;
+  final _buffer = StringBuffer();
 
   bool _isConnecting = false;
   bool _disposed = false;
@@ -59,50 +63,26 @@ class SSEClient implements McpClient {
       Logger.root.info('Starting SSE connection: ${serverConfig.command}');
       _processStateController.add(const ProcessState.starting());
 
-      final client = HttpClient();
-      final request = await client.getUrl(Uri.parse(serverConfig.command));
-      request.headers.set('Accept', 'text/event-stream');
-      request.headers.set('Cache-Control', 'no-cache');
-      request.headers.set('Connection', 'keep-alive');
+      _httpClient = HttpClient();
+      _request = await _httpClient!.getUrl(Uri.parse(serverConfig.command));
+      _request!.headers.set('Accept', 'text/event-stream');
+      _request!.headers.set('Cache-Control', 'no-cache');
+      _request!.headers.set('Connection', 'keep-alive');
 
-      final response = await request.close();
+      _response = await _request!.close();
 
-      if (response.statusCode != 200) {
-        throw Exception('SSE connection failed: ${response.statusCode}');
+      if (_response!.statusCode != 200) {
+        throw Exception('SSE connection failed: ${_response!.statusCode}');
       }
 
       _reconnectAttempts = 0;
+      _buffer.clear();
 
-      _sseSubscription = response
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .listen(
-        (String line) {
-          Logger.root.fine('SSEClient: $line');
-          if (line.startsWith('event: endpoint')) {
-            return;
-          }
-          if (line.startsWith('data: ')) {
-            final data = line.substring(6);
-            if (_messageEndpoint == null) {
-              final uri = Uri.parse(serverConfig.command);
-              final baseUrl = uri.origin;
-              _messageEndpoint = data.startsWith("http")
-                  ? data
-                  : baseUrl + (data.startsWith("/") ? data : "/$data");
-              Logger.root.info('Received message endpoint: $_messageEndpoint');
-              _processStateController.add(const ProcessState.running());
-            } else {
-              try {
-                final jsonData = jsonDecode(data);
-                final message = JSONRPCMessage.fromJson(jsonData);
-                _handleMessage(message);
-              } catch (e, stack) {
-                Logger.root
-                    .severe('Failed to parse server message: $e\n$stack');
-              }
-            }
-          }
+      _sseSubscription = _response!.transform(utf8.decoder).listen(
+        (String chunk) {
+          Logger.root.fine('SSE chunk received: $chunk');
+          _buffer.write(chunk);
+          _processSSEBuffer();
         },
         onError: (error) {
           Logger.root.severe('SSE connection error: $error');
@@ -122,6 +102,71 @@ class SSEClient implements McpClient {
       _scheduleReconnect();
     } finally {
       _isConnecting = false;
+    }
+  }
+
+  void _processSSEBuffer() {
+    final content = _buffer.toString();
+    final lines = content.split('\n');
+
+    String currentEvent = '';
+    String? currentData;
+
+    int processedIndex = 0;
+
+    for (int i = 0; i < lines.length; i++) {
+      final line = lines[i].trim();
+
+      if (line.isEmpty) {
+        // 空行表示事件结束
+        if (currentEvent.isNotEmpty && currentData != null) {
+          _handleSSEEvent(currentEvent, currentData);
+          currentEvent = '';
+          currentData = null;
+        }
+        processedIndex = i + 1;
+        continue;
+      }
+
+      if (line.startsWith('event:')) {
+        currentEvent = line.substring(6).trim();
+        Logger.root.fine('SSE event: $currentEvent');
+      } else if (line.startsWith('data:')) {
+        currentData = line.substring(5).trim();
+        Logger.root.fine('SSE data: $currentData');
+      }
+    }
+
+    // 清理已处理的内容
+    if (processedIndex > 0 && processedIndex < lines.length) {
+      _buffer.clear();
+      for (int i = processedIndex; i < lines.length; i++) {
+        _buffer.writeln(lines[i]);
+      }
+    } else if (processedIndex >= lines.length) {
+      _buffer.clear();
+    }
+  }
+
+  void _handleSSEEvent(String event, String data) {
+    Logger.root.fine('Handling SSE event: $event, data: $data');
+
+    if (event == 'endpoint') {
+      final uri = Uri.parse(serverConfig.command);
+      final baseUrl = uri.origin;
+      _messageEndpoint = data.startsWith("http")
+          ? data
+          : baseUrl + (data.startsWith("/") ? data : "/$data");
+      Logger.root.info('Received message endpoint: $_messageEndpoint');
+      _processStateController.add(const ProcessState.running());
+    } else if (event == 'message') {
+      try {
+        final jsonData = jsonDecode(data);
+        final message = JSONRPCMessage.fromJson(jsonData);
+        _handleMessage(message);
+      } catch (e, stack) {
+        Logger.root.severe('Failed to parse server message: $e\n$stack');
+      }
     }
   }
 
@@ -148,9 +193,30 @@ class SSEClient implements McpClient {
     _disposed = true;
     _reconnectTimer?.cancel();
     _reconnectTimer = null;
-    await _sseSubscription?.cancel();
+
+    // 尝试关闭底层的HTTP连接
+    try {
+      _sseSubscription?.cancel();
+
+      // 尝试分离并关闭socket
+      if (_response != null) {
+        await _response!.detachSocket().then((socket) {
+          socket.destroy();
+        });
+      }
+
+      // 中止请求
+      _request?.abort();
+
+      // 关闭HTTP客户端
+      _httpClient?.close(force: true);
+    } catch (e) {
+      Logger.root.info('关闭SSE连接时发生错误: $e');
+    }
+
     await _processStateController.close();
     _messageEndpoint = null;
+    _buffer.clear();
   }
 
   Future<void> _sendHttpPost(Map<String, dynamic> data) async {
@@ -160,18 +226,29 @@ class SSEClient implements McpClient {
 
     await _writeLock.synchronized(() async {
       try {
+        Logger.root.info('发送HTTP请求到 $_messageEndpoint: ${jsonEncode(data)}');
+
         final response = await http.post(
           Uri.parse(_messageEndpoint!),
           headers: _headers,
           body: jsonEncode(data),
         );
 
+        Logger.root.info('HTTP响应状态码: ${response.statusCode}');
+
         if (response.statusCode >= 400) {
+          Logger.root
+              .severe('HTTP POST失败: ${response.statusCode} - ${response.body}');
           throw Exception(
               'HTTP POST failed: ${response.statusCode} - ${response.body}');
+        } else {
+          // 记录成功响应
+          if (response.body.isNotEmpty) {
+            Logger.root.info('HTTP响应内容: ${response.body}');
+          }
         }
-      } catch (e) {
-        Logger.root.severe('Failed to send HTTP POST: $e');
+      } catch (e, stack) {
+        Logger.root.severe('发送HTTP POST失败: $e\n$stack');
         rethrow;
       }
     });
@@ -203,6 +280,23 @@ class SSEClient implements McpClient {
 
   @override
   Future<JSONRPCMessage> sendInitialize() async {
+    // 确保连接已经建立
+    if (_messageEndpoint == null) {
+      Logger.root.warning('尝试初始化但消息端点尚未建立，等待端点建立...');
+      // 等待一段时间以确保SSE连接已建立并获取到端点
+      for (int i = 0; i < 10; i++) {
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (_messageEndpoint != null) break;
+      }
+
+      if (_messageEndpoint == null) {
+        throw StateError('消息端点在等待后仍未建立，无法完成初始化');
+      }
+    }
+
+    Logger.root.info('开始发送初始化请求到 $_messageEndpoint');
+
+    // 发送初始化请求
     final initMessage =
         JSONRPCMessage(id: 'init-1', method: 'initialize', params: {
       'protocolVersion': '2024-11-05',
@@ -213,16 +307,24 @@ class SSEClient implements McpClient {
       'clientInfo': {'name': 'DartMCPClient', 'version': '1.0.0'}
     });
 
-    Logger.root
-        .info('Initialization request: ${jsonEncode(initMessage.toString())}');
+    Logger.root.info('初始化请求内容: ${jsonEncode(initMessage.toJson())}');
 
-    final initResponse = await sendMessage(initMessage);
-    Logger.root.info('Initialization response: $initResponse');
+    try {
+      final initResponse = await sendMessage(initMessage);
+      Logger.root.info('初始化响应: $initResponse');
 
-    final notifyMessage = JSONRPCMessage(method: 'initialized', params: {});
+      // 等待一小段时间确保服务器已处理初始化请求
+      await Future.delayed(const Duration(milliseconds: 100));
 
-    await _sendHttpPost(notifyMessage.toJson());
-    return initResponse;
+      // 发送初始化完成通知
+      Logger.root.info('发送初始化完成通知');
+      await _sendNotification('notifications/initialized', {});
+
+      return initResponse;
+    } catch (e, stack) {
+      Logger.root.severe('初始化失败: $e\n$stack');
+      rethrow;
+    }
   }
 
   @override
@@ -254,5 +356,16 @@ class SSEClient implements McpClient {
     );
 
     return sendMessage(message);
+  }
+
+  // 添加一个实用方法来发送符合格式的通知
+  Future<void> _sendNotification(
+      String method, Map<String, dynamic> params) async {
+    final notification = JSONRPCMessage(
+      method: method,
+      params: params,
+    );
+
+    await _sendHttpPost(notification.toJson());
   }
 }

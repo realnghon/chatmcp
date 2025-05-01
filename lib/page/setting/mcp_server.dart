@@ -11,7 +11,6 @@ import 'dart:io';
 import 'package:chatmcp/utils/process.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
-import 'package:form_builder_validators/form_builder_validators.dart';
 
 class McpServer extends StatefulWidget {
   const McpServer({super.key});
@@ -432,6 +431,7 @@ class _McpServerState extends State<McpServer> {
     final serverConfig = newServerConfig ??
         servers[serverName] as Map<String, dynamic>? ??
         {
+          'type': '', // streamable, sse, stdio
           'command': '',
           'args': <String>[],
           'env': <String, String>{},
@@ -439,6 +439,7 @@ class _McpServerState extends State<McpServer> {
         };
 
     String resultServerName = serverName;
+    String resultType = serverConfig['type']?.toString() ?? '';
     String resultCommand = serverConfig['command']?.toString() ?? '';
     String resultArgs = (serverConfig['args'] as List<dynamic>?)
             ?.map((e) => e.toString())
@@ -525,8 +526,76 @@ class _McpServerState extends State<McpServer> {
                           fontSize: 15,
                           color: Theme.of(context).colorScheme.onSurface,
                         ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return l10n.fieldRequired;
+                          }
+                          if (value.length > 50) {
+                            return l10n.serverNameTooLong;
+                          }
+                          return null;
+                        },
                       ),
                     if (serverName.isEmpty) const SizedBox(height: 16),
+                    FormBuilderDropdown<String>(
+                      name: 'type',
+                      initialValue: resultType,
+                      decoration: InputDecoration(
+                        labelText: l10n.serverType,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .outline
+                                .withAlpha(51),
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .outline
+                                .withAlpha(51),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                        prefixIcon: Icon(
+                          CupertinoIcons.gear,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: 20,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                      ),
+                      items: [
+                        DropdownMenuItem(
+                          value: 'sse',
+                          child: Text('SSE'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'stdio',
+                          child: Text('STDIO'),
+                        ),
+                        DropdownMenuItem(
+                          value: 'streamable',
+                          child: Text('Streamable'),
+                        ),
+                      ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return l10n.fieldRequired;
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
                     FormBuilderTextField(
                       name: 'command',
                       initialValue: resultCommand,
@@ -714,20 +783,65 @@ class _McpServerState extends State<McpServer> {
                 child: Text(l10n.cancel),
               ),
               TextButton(
-                onPressed: () {
+                onPressed: () async {
                   if (!formKey.currentState!.saveAndValidate()) {
                     return;
                   }
 
                   final values = formKey.currentState!.value;
-                  final commandValue = values['command'] as String;
+                  final saveServerName = serverName.isEmpty
+                      ? (values['serverName'] as String).trim()
+                      : serverName;
+                  final type = values['type'] as String;
+                  final command = (values['command'] as String).trim();
+                  final args =
+                      (values['args'] as String).trim().split(RegExp(r'\s+'));
+                  final envStr = values['env'] as String;
 
                   if ((Platform.isIOS || Platform.isAndroid) &&
-                      !commandValue.trim().startsWith('http')) {
-                    showErrorDialog(
-                        dialogContext, 'Mobile only supports mcp sse servers');
+                      type != 'sse' &&
+                      type != 'streamable' &&
+                      !command.trim().startsWith('http')) {
+                    showErrorDialog(dialogContext,
+                        'Mobile only supports mcp sse and streamable servers');
                     return;
                   }
+
+                  final env = Map<String, String>.fromEntries(
+                    envStr
+                        .split('\n')
+                        .where((line) => line.trim().isNotEmpty)
+                        .map((line) {
+                      final parts = line.split('=');
+                      if (parts.length < 2) {
+                        return MapEntry(parts[0].trim(), '');
+                      }
+                      return MapEntry(
+                        parts[0].trim(),
+                        parts.sublist(1).join('=').trim(),
+                      );
+                    }),
+                  );
+
+                  if (config['mcpServers'] == null) {
+                    config['mcpServers'] = <String, dynamic>{};
+                  }
+
+                  config['mcpServers'][saveServerName] = {
+                    'type': type,
+                    'command': command,
+                    'args': args,
+                    'env': env,
+                    'auto_approve': values['auto_approve'] as bool? ?? false,
+                  };
+
+                  if (mounted) {
+                    setState(() {
+                      _refreshCounter++;
+                    });
+                  }
+
+                  await provider.saveServers(config);
                   Navigator.pop(dialogContext, true);
                 },
                 style: TextButton.styleFrom(
@@ -750,49 +864,9 @@ class _McpServerState extends State<McpServer> {
       );
 
       if (confirmed == true && context.mounted) {
-        final formValues = formKey.currentState!.value;
-        final saveServerName = serverName.isEmpty
-            ? (formValues['serverName'] as String).trim()
-            : serverName;
-        final command = (formValues['command'] as String).trim();
-        final args =
-            (formValues['args'] as String).trim().split(RegExp(r'\s+'));
-        final envStr = formValues['env'] as String;
-
-        final env = Map<String, String>.fromEntries(
-          envStr
-              .split('\n')
-              .where((line) => line.trim().isNotEmpty)
-              .map((line) {
-            final parts = line.split('=');
-            if (parts.length < 2) {
-              return MapEntry(parts[0].trim(), '');
-            }
-            return MapEntry(
-              parts[0].trim(),
-              parts.sublist(1).join('=').trim(),
-            );
-          }),
-        );
-
-        if (config['mcpServers'] == null) {
-          config['mcpServers'] = <String, dynamic>{};
-        }
-
-        config['mcpServers'][saveServerName] = {
-          'command': command,
-          'args': args,
-          'env': env,
-          'auto_approve': formValues['auto_approve'] as bool? ?? false,
-        };
-
-        if (mounted) {
-          setState(() {
-            _refreshCounter++;
-          });
-        }
-
-        await provider.saveServers(config);
+        setState(() {
+          _refreshCounter++;
+        });
       }
     } finally {
       // No controllers to dispose as FormBuilder handles that internally

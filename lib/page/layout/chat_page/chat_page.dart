@@ -685,24 +685,6 @@ class _ChatPageState extends State<ChatPage> {
 
   Future<String> _getSystemPrompt() async {
     return ProviderManager.settingsProvider.generalSetting.systemPrompt;
-    // final promptGenerator = SystemPromptGenerator();
-
-    // var tools = <Map<String, dynamic>>[];
-    // for (var entry in ProviderManager.mcpServerProvider.tools.entries) {
-    //   if (ProviderManager.serverStateProvider.isEnabled(entry.key)) {
-    //     tools.addAll(entry.value);
-    //   }
-    // }
-
-    // if (tools.isEmpty) {
-    //   return ProviderManager.settingsProvider.generalSetting.systemPrompt;
-    // }
-
-    // final systemPrompt = promptGenerator.generateSystemPrompt(tools);
-
-    // Logger.root.info('systemPrompt: $systemPrompt');
-
-    // return systemPrompt;
   }
 
   Future<String> _getLasstUserMessagePrompt(String userMessage) async {

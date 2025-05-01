@@ -356,7 +356,7 @@ abstract class AppLocalizations {
   /// No description provided for @command.
   ///
   /// In en, this message translates to:
-  /// **'Command'**
+  /// **'Command Or Sever Url'**
   String get command;
 
   /// No description provided for @arguments.
@@ -380,7 +380,7 @@ abstract class AppLocalizations {
   /// No description provided for @commandExample.
   ///
   /// In en, this message translates to:
-  /// **'For example: npx, uvx'**
+  /// **'For example: npx, uvx, https://mcpserver.com'**
   String get commandExample;
 
   /// No description provided for @argumentsExample.
@@ -856,6 +856,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Gen Title'**
   String get genTitleModel;
+
+  /// No description provided for @serverNameTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Server name cannot exceed 50 characters'**
+  String get serverNameTooLong;
+
+  /// No description provided for @confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
+
+  /// No description provided for @providerName.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider Name'**
+  String get providerName;
+
+  /// No description provided for @apiStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'API Style'**
+  String get apiStyle;
+
+  /// No description provided for @enterProviderName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter provider name'**
+  String get enterProviderName;
+
+  /// No description provided for @providerNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider name is required'**
+  String get providerNameRequired;
+
+  /// No description provided for @addModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Model'**
+  String get addModel;
+
+  /// No description provided for @modelName.
+  ///
+  /// In en, this message translates to:
+  /// **'Model Name'**
+  String get modelName;
+
+  /// No description provided for @enterModelName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter model name'**
+  String get enterModelName;
+
+  /// No description provided for @noApiConfigs.
+  ///
+  /// In en, this message translates to:
+  /// **'No API configurations available'**
+  String get noApiConfigs;
+
+  /// No description provided for @add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
+
+  /// No description provided for @fetch.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch'**
+  String get fetch;
+
+  /// No description provided for @on.
+  ///
+  /// In en, this message translates to:
+  /// **'ON'**
+  String get on;
+
+  /// No description provided for @off.
+  ///
+  /// In en, this message translates to:
+  /// **'OFF'**
+  String get off;
+
+  /// No description provided for @apiUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'API URL'**
+  String get apiUrl;
+
+  /// No description provided for @selectApiStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select API style'**
+  String get selectApiStyle;
+
+  /// No description provided for @serverType.
+  ///
+  /// In en, this message translates to:
+  /// **'Server Type'**
+  String get serverType;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

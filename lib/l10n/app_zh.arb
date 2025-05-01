@@ -43,11 +43,11 @@
     "install": "安装",
     "edit": "编辑",
     "delete": "删除",
-    "command": "命令",
+    "command": "命令 或 服务地址",
     "arguments": "参数",
     "environmentVariables": "环境变量",
     "serverName": "服务器名称",
-    "commandExample": "例如：npx、uvx",
+    "commandExample": "例如：npx、uvx、https://mcpserver.com",
     "argumentsExample": "参数之间用空格分隔，例如：-m mcp.server",
     "envVarsFormat": "每行一个，格式：KEY=VALUE",
     "cancel": "取消",
@@ -126,5 +126,7 @@
     "enableModels": "启用模型",
     "disableAllModels": "禁用所有模型",
     "saveSuccess": "设置保存成功",
-    "genTitleModel": "标题生成"
+    "genTitleModel": "标题生成",
+    "serverNameTooLong": "服务名称长度不能超过 50 个字符",
+    "serverType": "服务类型"
 }

@@ -148,7 +148,7 @@ class StdioClient implements McpClient {
     try {
       await write(utf8.encode(jsonEncode(message.toJson())));
       return await completer.future.timeout(
-        const Duration(seconds: 30),
+        const Duration(seconds: 60 * 60),
         onTimeout: () {
           _pendingRequests.remove(message.id);
           throw TimeoutException('Request timed out: ${message.id}');

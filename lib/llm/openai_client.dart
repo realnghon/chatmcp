@@ -18,7 +18,6 @@ class OpenAIClient extends BaseLLMClient {
             : baseUrl,
         _headers = {
           'Content-Type': 'application/json; charset=utf-8',
-          'Accept': 'application/json; charset=utf-8',
           'Authorization': 'Bearer $apiKey',
         };
 

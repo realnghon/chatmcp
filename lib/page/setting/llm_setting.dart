@@ -1,8 +1,5 @@
-import 'dart:convert';
-
 import 'package:chatmcp/components/widgets/base.dart';
 import 'package:chatmcp/llm/llm_factory.dart';
-import 'package:chatmcp/utils/color.dart';
 import 'package:chatmcp/utils/platform.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
@@ -450,7 +447,6 @@ class _KeysSettingsState extends State<KeysSettings> {
 
   // 构建桌面端配置区域
   Widget _buildDesktopConfigSection() {
-    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
         Expanded(
@@ -477,17 +473,18 @@ class _KeysSettingsState extends State<KeysSettings> {
   }
 
   Future<void> _showAddProviderDialog() async {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) {
         final TextEditingController providerController =
             TextEditingController();
         return AlertDialog(
-          title: Text('Add Provider'),
+          title: Text(l10n.addProvider),
           content: TextField(
             controller: providerController,
             decoration: InputDecoration(
-              hintText: 'Provider Name',
+              hintText: l10n.providerName,
             ),
           ),
           actions: [
@@ -495,7 +492,7 @@ class _KeysSettingsState extends State<KeysSettings> {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             TextButton(
               onPressed: () {
@@ -530,7 +527,7 @@ class _KeysSettingsState extends State<KeysSettings> {
                 }
                 Navigator.pop(context);
               },
-              child: Text('Confirm'),
+              child: Text(l10n.confirm),
             ),
           ],
         );
@@ -539,16 +536,17 @@ class _KeysSettingsState extends State<KeysSettings> {
   }
 
   Future<void> _showAddModelDialog() async {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) {
         final TextEditingController modelController = TextEditingController();
         return AlertDialog(
-          title: Text('Add Model'),
+          title: Text(l10n.addModel),
           content: TextField(
             controller: modelController,
             decoration: InputDecoration(
-              hintText: 'Model Name',
+              hintText: l10n.enterModelName,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -559,7 +557,7 @@ class _KeysSettingsState extends State<KeysSettings> {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: Text('Cancel'),
+              child: Text(l10n.cancel),
             ),
             TextButton(
               onPressed: () {
@@ -579,7 +577,7 @@ class _KeysSettingsState extends State<KeysSettings> {
                 }
                 Navigator.pop(context);
               },
-              child: Text('Confirm'),
+              child: Text(l10n.confirm),
             ),
           ],
         );
@@ -627,9 +625,10 @@ class _KeysSettingsState extends State<KeysSettings> {
         index >= _llmApiConfigs.length ||
         index >= _controllers.length) {
       // 返回一个空白界面或提示信息
+      final l10n = AppLocalizations.of(context)!;
       return Center(
         child: Text(
-          '没有可用的API配置',
+          l10n.noApiConfigs,
           style: TextStyle(
             fontSize: 16,
             color: Theme.of(context).colorScheme.onSurface,
@@ -686,7 +685,7 @@ class _KeysSettingsState extends State<KeysSettings> {
 
           // Provider Name
           Text(
-            'Provider Name',
+            l10n.providerName,
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,
@@ -697,7 +696,7 @@ class _KeysSettingsState extends State<KeysSettings> {
           TextFormField(
             controller: controllers.providerNameController,
             decoration: InputDecoration(
-              hintText: '请输入提供商名称',
+              hintText: l10n.enterProviderName,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(
@@ -726,10 +725,10 @@ class _KeysSettingsState extends State<KeysSettings> {
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return '请输入提供商名称';
+                return l10n.providerNameRequired;
               }
               if (value.length > 50) {
-                return '名称不能超过50个字符';
+                return l10n.serverNameTooLong;
               }
               return null;
             },
@@ -744,7 +743,7 @@ class _KeysSettingsState extends State<KeysSettings> {
           // API 风格
           if (config.custom) ...[
             Text(
-              'API 风格',
+              l10n.apiStyle,
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
@@ -824,7 +823,7 @@ class _KeysSettingsState extends State<KeysSettings> {
               },
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return '请选择API风格';
+                  return l10n.selectApiStyle;
                 }
                 return null;
               },
@@ -834,7 +833,7 @@ class _KeysSettingsState extends State<KeysSettings> {
 
           // API URL
           Text(
-            'API URL',
+            l10n.apiUrl,
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w500,
@@ -965,7 +964,7 @@ class _KeysSettingsState extends State<KeysSettings> {
               OutlinedButton.icon(
                 icon: const Icon(Icons.add_circle_outline, size: 14),
                 label: Text(
-                  "Add",
+                  l10n.add,
                   style: const TextStyle(fontSize: 12),
                 ),
                 style: OutlinedButton.styleFrom(
@@ -989,7 +988,7 @@ class _KeysSettingsState extends State<KeysSettings> {
               OutlinedButton.icon(
                 icon: const Icon(CupertinoIcons.checkmark_seal, size: 14),
                 label: Text(
-                  "Fetch",
+                  l10n.fetch,
                   style: const TextStyle(fontSize: 12),
                 ),
                 style: OutlinedButton.styleFrom(
@@ -1115,6 +1114,7 @@ class _KeysSettingsState extends State<KeysSettings> {
     }
 
     final controllers = _controllers[_selectedProvider];
+    final l10n = AppLocalizations.of(context)!;
     // 检查模型是否在启用列表中
     bool modelEnabled = controllers.enabledModels.contains(modelName);
 
@@ -1192,8 +1192,8 @@ class _KeysSettingsState extends State<KeysSettings> {
               activeToggleColor: Colors.white,
               inactiveToggleColor: Colors.grey[500]!,
               showOnOff: true,
-              activeText: "ON",
-              inactiveText: "OFF",
+              activeText: l10n.on,
+              inactiveText: l10n.off,
               valueFontSize: 9.0,
               activeTextColor: Colors.white,
               inactiveTextColor: Colors.black,

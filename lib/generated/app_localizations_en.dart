@@ -140,7 +140,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get delete => 'Delete';
 
   @override
-  String get command => 'Command';
+  String get command => 'Command Or Sever Url';
 
   @override
   String get arguments => 'Arguments';
@@ -152,7 +152,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get serverName => 'Server Name';
 
   @override
-  String get commandExample => 'For example: npx, uvx';
+  String get commandExample => 'For example: npx, uvx, https://mcpserver.com';
 
   @override
   String get argumentsExample => 'Separate arguments with spaces, for example: -m mcp.server';
@@ -410,4 +410,55 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get genTitleModel => 'Gen Title';
+
+  @override
+  String get serverNameTooLong => 'Server name cannot exceed 50 characters';
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
+  String get providerName => 'Provider Name';
+
+  @override
+  String get apiStyle => 'API Style';
+
+  @override
+  String get enterProviderName => 'Enter provider name';
+
+  @override
+  String get providerNameRequired => 'Provider name is required';
+
+  @override
+  String get addModel => 'Add Model';
+
+  @override
+  String get modelName => 'Model Name';
+
+  @override
+  String get enterModelName => 'Enter model name';
+
+  @override
+  String get noApiConfigs => 'No API configurations available';
+
+  @override
+  String get add => 'Add';
+
+  @override
+  String get fetch => 'Fetch';
+
+  @override
+  String get on => 'ON';
+
+  @override
+  String get off => 'OFF';
+
+  @override
+  String get apiUrl => 'API URL';
+
+  @override
+  String get selectApiStyle => 'Please select API style';
+
+  @override
+  String get serverType => 'Server Type';
 }
