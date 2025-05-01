@@ -1,6 +1,10 @@
 import 'package:chatmcp/mcp/stdio/stdio_client.dart';
 import 'package:synchronized/synchronized.dart';
 
+import 'package:flutter_client_sse/constants/sse_request_type_enum.dart';
+import 'package:flutter_client_sse/flutter_client_sse.dart'
+    as flutter_client_sse;
+
 import '../client/mcp_client_interface.dart';
 import '../models/json_rpc_message.dart';
 import '../models/server.dart';
@@ -16,13 +20,9 @@ class SSEClient implements McpClient {
   final _processStateController = StreamController<ProcessState>.broadcast();
   Stream<ProcessState> get processStateStream => _processStateController.stream;
 
-  HttpClient? _httpClient;
-  HttpClientRequest? _request;
-  HttpClientResponse? _response;
   StreamSubscription? _sseSubscription;
   final _writeLock = Lock();
   String? _messageEndpoint;
-  final _buffer = StringBuffer();
 
   bool _isConnecting = false;
   bool _disposed = false;
@@ -34,6 +34,12 @@ class SSEClient implements McpClient {
   final Map<String, String> _headers = {
     'Content-Type': 'application/json; charset=utf-8',
     'Accept': 'application/json; charset=utf-8',
+  };
+
+  final Map<String, String> _sseHeaders = {
+    'Accept': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
   };
 
   SSEClient({required ServerConfig serverConfig})
@@ -60,44 +66,74 @@ class SSEClient implements McpClient {
 
     _isConnecting = true;
     try {
-      Logger.root.info('Starting SSE connection: ${serverConfig.command}');
+      Logger.root.info('开始建立SSE连接: ${serverConfig.command}');
       _processStateController.add(const ProcessState.starting());
 
-      _httpClient = HttpClient();
-      _request = await _httpClient!.getUrl(Uri.parse(serverConfig.command));
-      _request!.headers.set('Accept', 'text/event-stream');
-      _request!.headers.set('Cache-Control', 'no-cache');
-      _request!.headers.set('Connection', 'keep-alive');
+      _sseSubscription?.cancel();
 
-      _response = await _request!.close();
+      // 检查是否需要更新SSE连接URL中的会话ID
+      String connectionUrl = serverConfig.command;
 
-      if (_response!.statusCode != 200) {
-        throw Exception('SSE connection failed: ${_response!.statusCode}');
+      // 如果之前连接过且有消息端点且消息端点中包含会话ID，则尝试更新连接URL
+      if (_messageEndpoint != null) {
+        try {
+          final messageUri = Uri.parse(_messageEndpoint!);
+          if (messageUri.queryParameters.containsKey('session_id')) {
+            final sessionId = messageUri.queryParameters['session_id'];
+            if (sessionId != null && sessionId.isNotEmpty) {
+              Logger.root.info('使用当前会话ID进行SSE连接: $sessionId');
+
+              final originalUri = Uri.parse(connectionUrl);
+              final Map<String, String> queryParams =
+                  Map.from(originalUri.queryParameters);
+              queryParams['session_id'] = sessionId;
+
+              final updatedUri = Uri(
+                scheme: originalUri.scheme,
+                host: originalUri.host,
+                path: originalUri.path,
+                queryParameters: queryParams,
+              );
+
+              connectionUrl = updatedUri.toString();
+              Logger.root.info('更新后的SSE连接URL: $connectionUrl');
+            }
+          }
+        } catch (e) {
+          Logger.root.warning('尝试更新SSE连接URL时出错: $e');
+        }
       }
 
-      _reconnectAttempts = 0;
-      _buffer.clear();
+      Logger.root.info('建立SSE连接到: $connectionUrl');
 
-      _sseSubscription = _response!.transform(utf8.decoder).listen(
-        (String chunk) {
-          Logger.root.fine('SSE chunk received: $chunk');
-          _buffer.write(chunk);
-          _processSSEBuffer();
+      // 使用flutter_client_sse库建立SSE连接
+      _sseSubscription = flutter_client_sse.SSEClient.subscribeToSSE(
+        method: SSERequestType.GET,
+        url: connectionUrl,
+        header: _sseHeaders,
+      ).listen(
+        (event) {
+          Logger.root.fine(
+              '收到SSE事件: ${event.event}, ID: ${event.id}, 数据长度: ${event.data?.length ?? 0}字节');
+          _handleSSEEvent(event);
         },
         onError: (error) {
-          Logger.root.severe('SSE connection error: $error');
+          Logger.root.severe('SSE连接错误: $error');
           _processStateController
               .add(ProcessState.error(error, StackTrace.current));
           _scheduleReconnect();
         },
         onDone: () {
-          Logger.root.info('SSE connection closed');
+          Logger.root.info('SSE连接关闭');
           _processStateController.add(const ProcessState.exited(0));
           _scheduleReconnect();
         },
       );
+
+      Logger.root.info('SSE连接建立成功，等待事件...');
+      _reconnectAttempts = 0;
     } catch (e, stack) {
-      Logger.root.severe('SSE connection failed: $e\n$stack');
+      Logger.root.severe('SSE连接失败: $e\n$stack');
       _processStateController.add(ProcessState.error(e, stack));
       _scheduleReconnect();
     } finally {
@@ -105,68 +141,48 @@ class SSEClient implements McpClient {
     }
   }
 
-  void _processSSEBuffer() {
-    final content = _buffer.toString();
-    final lines = content.split('\n');
+  void _handleSSEEvent(flutter_client_sse.SSEModel event) {
+    final eventType = event.event;
+    final data = event.data;
 
-    String currentEvent = '';
-    String? currentData;
+    Logger.root.info('event: $eventType, data: $data');
 
-    int processedIndex = 0;
-
-    for (int i = 0; i < lines.length; i++) {
-      final line = lines[i].trim();
-
-      if (line.isEmpty) {
-        // 空行表示事件结束
-        if (currentEvent.isNotEmpty && currentData != null) {
-          _handleSSEEvent(currentEvent, currentData);
-          currentEvent = '';
-          currentData = null;
-        }
-        processedIndex = i + 1;
-        continue;
-      }
-
-      if (line.startsWith('event:')) {
-        currentEvent = line.substring(6).trim();
-        Logger.root.fine('SSE event: $currentEvent');
-      } else if (line.startsWith('data:')) {
-        currentData = line.substring(5).trim();
-        Logger.root.fine('SSE data: $currentData');
-      }
-    }
-
-    // 清理已处理的内容
-    if (processedIndex > 0 && processedIndex < lines.length) {
-      _buffer.clear();
-      for (int i = processedIndex; i < lines.length; i++) {
-        _buffer.writeln(lines[i]);
-      }
-    } else if (processedIndex >= lines.length) {
-      _buffer.clear();
-    }
-  }
-
-  void _handleSSEEvent(String event, String data) {
-    Logger.root.fine('Handling SSE event: $event, data: $data');
-
-    if (event == 'endpoint') {
+    if (eventType == 'endpoint' && data != null) {
       final uri = Uri.parse(serverConfig.command);
       final baseUrl = uri.origin;
-      _messageEndpoint = data.startsWith("http")
-          ? data
-          : baseUrl + (data.startsWith("/") ? data : "/$data");
-      Logger.root.info('Received message endpoint: $_messageEndpoint');
-      _processStateController.add(const ProcessState.running());
-    } else if (event == 'message') {
+      // 处理并规范化消息端点URL，确保没有多余的空格
+      String rawEndpoint;
+      if (data.startsWith("http")) {
+        rawEndpoint = data.trim();
+      } else {
+        final path = data.trim();
+        rawEndpoint = baseUrl + (path.startsWith("/") ? path : "/$path");
+      }
+
+      try {
+        // 验证消息端点URL是否有效
+        final parsedUri = Uri.parse(rawEndpoint);
+        if (!parsedUri.hasScheme || !parsedUri.hasAuthority) {
+          Logger.root.severe('收到无效的消息端点URL: $rawEndpoint');
+          return;
+        }
+
+        _messageEndpoint = rawEndpoint;
+        Logger.root.info('成功设置消息端点: $_messageEndpoint');
+        _processStateController.add(const ProcessState.running());
+      } catch (e) {
+        Logger.root.severe('解析消息端点URL失败: $rawEndpoint, 错误: $e');
+      }
+    } else if (eventType == 'message' && data != null) {
       try {
         final jsonData = jsonDecode(data);
         final message = JSONRPCMessage.fromJson(jsonData);
         _handleMessage(message);
       } catch (e, stack) {
-        Logger.root.severe('Failed to parse server message: $e\n$stack');
+        Logger.root.severe('解析服务器消息失败: $e\n$stack');
       }
+    } else {
+      Logger.root.info('收到未处理的SSE事件类型: $eventType');
     }
   }
 
@@ -182,8 +198,24 @@ class SSEClient implements McpClient {
     final delay = _initialReconnectDelay * (1 << (_reconnectAttempts - 1));
     Logger.root.info('计划在 ${delay.inSeconds} 秒后进行第 $_reconnectAttempts 次重连尝试');
 
-    _reconnectTimer = Timer(delay, () {
+    // 在重连前尝试刷新会话ID
+    _reconnectTimer = Timer(delay, () async {
       _reconnectTimer = null;
+
+      // 如果消息端点已建立，尝试刷新会话ID
+      if (_messageEndpoint != null) {
+        try {
+          final refreshed = await _refreshSessionId();
+          if (refreshed) {
+            Logger.root.info('重连前成功刷新会话ID');
+          } else {
+            Logger.root.warning('重连前刷新会话ID失败，使用原有会话ID继续');
+          }
+        } catch (e) {
+          Logger.root.warning('重连前刷新会话ID时发生错误: $e');
+        }
+      }
+
       _connect();
     });
   }
@@ -194,42 +226,46 @@ class SSEClient implements McpClient {
     _reconnectTimer?.cancel();
     _reconnectTimer = null;
 
-    // 尝试关闭底层的HTTP连接
-    try {
-      _sseSubscription?.cancel();
-
-      // 尝试分离并关闭socket
-      if (_response != null) {
-        await _response!.detachSocket().then((socket) {
-          socket.destroy();
-        });
-      }
-
-      // 中止请求
-      _request?.abort();
-
-      // 关闭HTTP客户端
-      _httpClient?.close(force: true);
-    } catch (e) {
-      Logger.root.info('关闭SSE连接时发生错误: $e');
-    }
+    // 取消SSE订阅
+    await _sseSubscription?.cancel();
+    _sseSubscription = null;
 
     await _processStateController.close();
     _messageEndpoint = null;
-    _buffer.clear();
   }
 
   Future<void> _sendHttpPost(Map<String, dynamic> data) async {
     if (_messageEndpoint == null) {
-      throw StateError('Message endpoint not initialized ${jsonEncode(data)}');
+      throw StateError('消息端点未初始化 ${jsonEncode(data)}');
     }
 
     await _writeLock.synchronized(() async {
       try {
-        Logger.root.info('发送HTTP请求到 $_messageEndpoint: ${jsonEncode(data)}');
+        // 构建URL并确保它是有效的
+        final String cleanEndpoint = _messageEndpoint!.trim();
+        Logger.root.info('构建HTTP请求URL: $cleanEndpoint');
+
+        // 解析URL以检查和处理可能存在的问题
+        final uri = Uri.parse(cleanEndpoint);
+
+        // 检查URL查询参数中是否有session_id
+        if (uri.queryParameters.containsKey('session_id')) {
+          final sessionId = uri.queryParameters['session_id'];
+          Logger.root.info('检测到会话ID: $sessionId');
+
+          // 验证会话ID是否有效（通常是非空且有一定长度的UUID）
+          if (sessionId == null || sessionId.isEmpty || sessionId.length < 10) {
+            Logger.root.warning('可能无效的会话ID: $sessionId，尝试获取新的会话ID');
+            // 这里可以添加获取新会话ID的逻辑
+          }
+        } else {
+          Logger.root.warning('URL中没有检测到会话ID参数');
+        }
+
+        Logger.root.info('发送HTTP请求到 $cleanEndpoint: ${jsonEncode(data)}');
 
         final response = await http.post(
-          Uri.parse(_messageEndpoint!),
+          Uri.parse(cleanEndpoint),
           headers: _headers,
           body: jsonEncode(data),
         );
@@ -237,14 +273,15 @@ class SSEClient implements McpClient {
         Logger.root.info('HTTP响应状态码: ${response.statusCode}');
 
         if (response.statusCode >= 400) {
+          final errorBody = response.body;
           Logger.root
-              .severe('HTTP POST失败: ${response.statusCode} - ${response.body}');
+              .severe('HTTP POST failed: ${response.statusCode} - $errorBody');
           throw Exception(
-              'HTTP POST failed: ${response.statusCode} - ${response.body}');
+              'MCP HTTP POST ERROR: ${response.statusCode} - $errorBody');
         } else {
           // 记录成功响应
           if (response.body.isNotEmpty) {
-            Logger.root.info('HTTP响应内容: ${response.body}');
+            Logger.root.info('HTTP response content: ${response.body}');
           }
         }
       } catch (e, stack) {
@@ -254,22 +291,108 @@ class SSEClient implements McpClient {
     });
   }
 
+  Future<bool> _refreshSessionId() async {
+    // 如果没有消息端点，无法刷新会话ID
+    if (_messageEndpoint == null) {
+      Logger.root.severe('尝试刷新会话ID但消息端点尚未建立');
+      return false;
+    }
+
+    try {
+      Logger.root.info('尝试刷新会话ID');
+
+      // 提取原始URL的基本部分（不包含查询参数）
+      final Uri originalUri = Uri.parse(_messageEndpoint!);
+      final String baseUrl =
+          '${originalUri.scheme}://${originalUri.host}${originalUri.path}';
+
+      // 构建获取新会话ID的URL（这里需要根据实际API调整）
+      final String sessionUrl = '$baseUrl?action=new_session';
+
+      Logger.root.info('请求新的会话ID: $sessionUrl');
+
+      // 发送请求获取新的会话ID
+      final response = await http.get(Uri.parse(sessionUrl));
+
+      if (response.statusCode == 200) {
+        try {
+          final Map<String, dynamic> responseData = jsonDecode(response.body);
+          final String? newSessionId = responseData['session_id'];
+
+          if (newSessionId != null && newSessionId.isNotEmpty) {
+            // 更新消息端点的会话ID
+            final Map<String, String> queryParams =
+                Map.from(originalUri.queryParameters);
+            queryParams['session_id'] = newSessionId;
+
+            final Uri newUri = Uri(
+              scheme: originalUri.scheme,
+              host: originalUri.host,
+              path: originalUri.path,
+              queryParameters: queryParams,
+            );
+
+            _messageEndpoint = newUri.toString();
+            Logger.root.info('成功刷新会话ID，新的消息端点: $_messageEndpoint');
+            return true;
+          } else {
+            Logger.root.severe('获取新会话ID失败: 响应中没有有效的会话ID');
+          }
+        } catch (e) {
+          Logger.root.severe('解析会话ID响应时出错: $e');
+        }
+      } else {
+        Logger.root.severe(
+            '获取新会话ID失败，状态码: ${response.statusCode}, 响应: ${response.body}');
+      }
+    } catch (e, stack) {
+      Logger.root.severe('刷新会话ID时发生异常: $e\n$stack');
+    }
+
+    return false;
+  }
+
   @override
   Future<JSONRPCMessage> sendMessage(JSONRPCMessage message) async {
     if (message.id == null) {
-      throw ArgumentError('Message must have an ID');
+      throw ArgumentError('消息必须有ID');
     }
 
     final completer = Completer<JSONRPCMessage>();
     _pendingRequests[message.id!] = completer;
 
     try {
-      await _sendHttpPost(message.toJson());
+      Logger.root.info('准备发送消息: ${message.id} - ${message.method}');
+      bool retried = false;
+
+      // 尝试发送请求，如果会话ID无效则尝试刷新
+      while (true) {
+        try {
+          await _sendHttpPost(message.toJson());
+          break; // 如果成功发送，则跳出循环
+        } catch (e) {
+          // 检查是否是会话ID无效的错误
+          if (!retried && e.toString().contains('Invalid session id')) {
+            Logger.root.warning('检测到会话ID无效，尝试刷新会话ID');
+            retried = true;
+
+            // 尝试刷新会话ID
+            bool refreshed = await _refreshSessionId();
+            if (refreshed) {
+              Logger.root.info('会话ID已刷新，重试发送消息');
+              continue; // 重试发送请求
+            }
+          }
+          // 其他错误或刷新会话ID失败，直接抛出异常
+          rethrow;
+        }
+      }
+
       return await completer.future.timeout(
-        const Duration(seconds: 30),
+        const Duration(seconds: 60 * 60),
         onTimeout: () {
           _pendingRequests.remove(message.id);
-          throw TimeoutException('Request timed out: ${message.id}');
+          throw TimeoutException('请求超时: ${message.id}');
         },
       );
     } catch (e) {
@@ -284,12 +407,25 @@ class SSEClient implements McpClient {
     if (_messageEndpoint == null) {
       Logger.root.warning('尝试初始化但消息端点尚未建立，等待端点建立...');
       // 等待一段时间以确保SSE连接已建立并获取到端点
-      for (int i = 0; i < 10; i++) {
-        await Future.delayed(const Duration(milliseconds: 500));
-        if (_messageEndpoint != null) break;
+      int attempts = 0;
+      const maxAttempts = 30; // 增加到30次尝试
+      const delay = Duration(milliseconds: 500);
+
+      while (_messageEndpoint == null && attempts < maxAttempts) {
+        await Future.delayed(delay);
+        attempts++;
+        Logger.root.info('等待消息端点建立: 尝试 $attempts/$maxAttempts');
+
+        // 如果连接已关闭或出错，尝试重新连接
+        if (_disposed || _sseSubscription == null) {
+          Logger.root.warning('SSE连接可能已关闭，尝试重新连接');
+          await _connect();
+        }
       }
 
       if (_messageEndpoint == null) {
+        Logger.root.severe(
+            '消息端点在 ${maxAttempts * delay.inMilliseconds / 1000} 秒后仍未建立');
         throw StateError('消息端点在等待后仍未建立，无法完成初始化');
       }
     }
@@ -366,6 +502,26 @@ class SSEClient implements McpClient {
       params: params,
     );
 
-    await _sendHttpPost(notification.toJson());
+    try {
+      await _sendHttpPost(notification.toJson());
+    } catch (e) {
+      // 如果是会话ID无效的错误，尝试刷新后重试一次
+      if (e.toString().contains('Invalid session id')) {
+        Logger.root.warning('发送通知时检测到会话ID无效，尝试刷新会话ID并重试');
+
+        // 尝试刷新会话ID
+        bool refreshed = await _refreshSessionId();
+        if (refreshed) {
+          Logger.root.info('会话ID已刷新，重试发送通知');
+          await _sendHttpPost(notification.toJson());
+        } else {
+          Logger.root.severe('刷新会话ID失败，无法发送通知: $method');
+          rethrow;
+        }
+      } else {
+        // 其他错误直接抛出
+        rethrow;
+      }
+    }
   }
 }

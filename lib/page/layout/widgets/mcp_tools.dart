@@ -259,6 +259,19 @@ class _McpToolsState extends State<McpTools> {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        Container(
+                          margin: const EdgeInsets.only(right: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
+                          child: Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: isRunning ? Colors.green : Colors.grey,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ),
                         if (isEnabled && isRunning && toolCount > 0)
                           Container(
                             margin: const EdgeInsets.only(right: 8),

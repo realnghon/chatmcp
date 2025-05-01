@@ -81,6 +81,7 @@ dependencies:
   flutter_popup: ^3.3.4
   flutter_form_builder: ^10.0.1
   form_builder_validators: ^11.1.2
+  flutter_client_sse: ^2.0.3
 
 dev_dependencies:
   flutter_test:
