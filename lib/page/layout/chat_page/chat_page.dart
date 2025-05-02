@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:chatmcp/llm/model.dart';
 import 'package:chatmcp/llm/llm_factory.dart';
 import 'package:chatmcp/llm/base_llm_client.dart';
-import 'package:flutter/rendering.dart';
 import 'package:logging/logging.dart';
 import 'package:file_picker/file_picker.dart';
 import 'input_area.dart';
@@ -114,7 +113,8 @@ class _ChatPageState extends State<ChatPage> {
         _findClientName(ProviderManager.mcpServerProvider.tools, event.name);
     if (clientName == null) return false;
 
-    final serverConfig = await ProviderManager.mcpServerProvider.loadServers();
+    final serverConfig =
+        await ProviderManager.mcpServerProvider.loadServersAll();
     final servers = serverConfig['mcpServers'] as Map<String, dynamic>? ?? {};
 
     if (servers.containsKey(clientName)) {
@@ -453,15 +453,24 @@ class _ChatPageState extends State<ChatPage> {
       String toolName, Map<String, dynamic> toolArguments) async {
     final clientName =
         _findClientName(ProviderManager.mcpServerProvider.tools, toolName);
-    if (clientName == null) return;
+    if (clientName == null) {
+      Logger.root.severe('clientName is null');
+      return;
+    }
 
     final mcpClient = ProviderManager.mcpServerProvider.getClient(clientName);
-    if (mcpClient == null) return;
+    if (mcpClient == null) {
+      Logger.root.severe('mcpClient is null');
+      return;
+    }
 
     final response = await mcpClient.sendToolCall(
       name: toolName,
       arguments: toolArguments,
     );
+
+    Logger.root.info(
+        'send tool call name: $toolName arguments: $toolArguments response: $response');
 
     setState(() {
       _currentResponse = response.result['content'].toString();

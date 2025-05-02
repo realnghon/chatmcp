@@ -64,5 +64,7 @@ class ProviderManager {
   static Future<void> init() async {
     await SettingsProvider().loadSettings();
     await ChatProvider().loadChats();
+    await McpServerProvider().init();
+    await McpServerProvider().loadInMemoryServers();
   }
 }

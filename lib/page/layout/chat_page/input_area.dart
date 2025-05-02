@@ -131,10 +131,7 @@ class _InputAreaState extends State<InputArea> {
           FutureBuilder<int>(
             future: ProviderManager.mcpServerProvider.installedServersCount,
             builder: (context, snapshot) {
-              if (snapshot.hasData && snapshot.data! > 0) {
-                return const McpTools();
-              }
-              return const SizedBox.shrink();
+              return const McpTools();
             },
           ),
           if (_selectedFiles.isNotEmpty)

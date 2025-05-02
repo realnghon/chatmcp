@@ -51,14 +51,14 @@ class _McpToolsState extends State<McpTools> {
 
     try {
       final provider = Provider.of<McpServerProvider>(context, listen: false);
-      final servers = await provider.mcpServers;
+      final servers = await provider.loadServersAll();
 
       setState(() {
-        _cachedServers = servers;
+        _cachedServers = servers['mcpServers'].keys.toList();
         _isLoading = false;
       });
 
-      _stateProvider.syncFromProvider(provider, servers);
+      _stateProvider.syncFromProvider(provider, _cachedServers!);
     } catch (e) {
       setState(() {
         _error = e.toString();

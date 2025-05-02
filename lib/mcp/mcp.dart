@@ -4,6 +4,8 @@ import './client/mcp_client_interface.dart';
 import './stdio/stdio_client.dart';
 import './sse/sse_client.dart';
 import './streamable/streamable_client.dart';
+import 'inmemory/client.dart';
+import 'inmemory_server/factory.dart';
 
 Future<McpClient?> initializeMcpServer(
     Map<String, dynamic> mcpServerConfig) async {
@@ -25,6 +27,15 @@ Future<McpClient?> initializeMcpServer(
       case 'stdio':
         mcpClient = StdioClient(serverConfig: serverConfig);
         break;
+      case 'inmemory':
+        final memoryServer =
+            MemoryServerFactory.createMemoryServer(serverConfig.command);
+        if (memoryServer == null) {
+          Logger.root.severe('Failed to create memory server');
+          return null;
+        }
+        mcpClient = InMemoryClient(server: memoryServer);
+        break;
       default:
         // 降级为基于命令的逻辑
         if (serverConfig.command.startsWith('http')) {
@@ -44,8 +55,6 @@ Future<McpClient?> initializeMcpServer(
 
   // Initialize client
   await mcpClient.initialize();
-  // Wait for 10 seconds
-  await Future.delayed(const Duration(seconds: 10));
   final initResponse = await mcpClient.sendInitialize();
   Logger.root.info('Initialization response: $initResponse');
 

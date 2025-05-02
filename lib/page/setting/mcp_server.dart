@@ -84,6 +84,8 @@ class _McpServerState extends State<McpServer> {
                       _buildFilterChip(l10n.all),
                       const SizedBox(width: 12),
                       _buildFilterChip(l10n.installed),
+                      const SizedBox(width: 12),
+                      _buildFilterChip("inmemory"),
                       const Spacer(),
                       _buildActionButton(
                         icon: CupertinoIcons.add,
@@ -108,7 +110,9 @@ class _McpServerState extends State<McpServer> {
                     child: FutureBuilder<Map<String, dynamic>>(
                       future: (_selectedTab == l10n.all
                           ? provider.loadMarketServers()
-                          : provider.loadServers()),
+                          : _selectedTab == "inmemory"
+                              ? provider.loadInMemoryServers()
+                              : provider.loadServers()),
                       key: ValueKey('server_list_$_refreshCounter'),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
@@ -284,12 +288,13 @@ class _McpServerState extends State<McpServer> {
                 isLoading: _serverLoading[serverName] == true,
               ),
               const Gap(size: 10),
-              _buildActionButton(
-                icon: CupertinoIcons.pencil,
-                tooltip: l10n.edit,
-                onPressed: () =>
-                    _showEditDialog(context, serverName, provider, null),
-              ),
+              if (serverConfig['type'] != 'inmemory')
+                _buildActionButton(
+                  icon: CupertinoIcons.pencil,
+                  tooltip: l10n.edit,
+                  onPressed: () =>
+                      _showEditDialog(context, serverName, provider, null),
+                ),
               const Gap(size: 10),
               _buildActionButton(
                 icon: CupertinoIcons.delete,
@@ -423,15 +428,19 @@ class _McpServerState extends State<McpServer> {
   ) async {
     if (!context.mounted) return;
 
-    final config = await provider.loadServers();
-    final servers = config['mcpServers'] ?? {};
+    var config = await provider.loadServers();
+    if (_selectedTab == "inmemory") {
+      config = await provider.loadInMemoryServers();
+    }
+
+    var servers = config['mcpServers'] ?? {};
 
     if (!context.mounted) return;
 
     final serverConfig = newServerConfig ??
         servers[serverName] as Map<String, dynamic>? ??
         {
-          'type': '', // streamable, sse, stdio
+          'type': 'sse', // streamable, sse, stdio, inmemory
           'command': '',
           'args': <String>[],
           'env': <String, String>{},
@@ -453,6 +462,8 @@ class _McpServerState extends State<McpServer> {
     bool autoApprove = serverConfig['auto_approve'] as bool? ?? false;
 
     final formKey = GlobalKey<FormBuilderState>();
+
+    final isEdit = serverName.isNotEmpty;
 
     try {
       if (!context.mounted) {
@@ -478,7 +489,7 @@ class _McpServerState extends State<McpServer> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    if (serverName.isEmpty)
+                    if (!isEdit)
                       FormBuilderTextField(
                         name: 'serverName',
                         initialValue: resultServerName,
@@ -536,7 +547,7 @@ class _McpServerState extends State<McpServer> {
                           return null;
                         },
                       ),
-                    if (serverName.isEmpty) const SizedBox(height: 16),
+                    if (!isEdit) const SizedBox(height: 16),
                     FormBuilderDropdown<String>(
                       name: 'type',
                       initialValue: resultType,
@@ -587,6 +598,12 @@ class _McpServerState extends State<McpServer> {
                           value: 'streamable',
                           child: Text('Streamable'),
                         ),
+                        if (isEdit)
+                          DropdownMenuItem(
+                            value: 'inmemory',
+                            enabled: false,
+                            child: Text('InMemory'),
+                          ),
                       ],
                       validator: (value) {
                         if (value == null || value.isEmpty) {

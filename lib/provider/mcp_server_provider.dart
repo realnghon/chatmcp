@@ -8,6 +8,25 @@ import 'package:http/http.dart' as http;
 import 'package:chatmcp/utils/platform.dart';
 import '../mcp/client/mcp_client_interface.dart';
 
+var defaultInMemoryServers = [
+  {
+    'name': 'Math',
+    'type': 'inmemory',
+    'command': 'math',
+    'env': {},
+    'args': [],
+    'tools': [],
+  },
+  {
+    'name': 'Artifact Instructions',
+    'type': 'inmemory',
+    'command': 'artifact_instructions',
+    'env': {},
+    'args': [],
+    'tools': [],
+  },
+];
+
 class McpServerProvider extends ChangeNotifier {
   static final McpServerProvider _instance = McpServerProvider._internal();
   factory McpServerProvider() => _instance;
@@ -17,7 +36,7 @@ class McpServerProvider extends ChangeNotifier {
 
   static const _configFileName = 'mcp_server.json';
 
-  Map<String, McpClient> _servers = {};
+  final Map<String, McpClient> _servers = {};
 
   Map<String, McpClient> get clients => _servers;
 
@@ -48,17 +67,27 @@ class McpServerProvider extends ChangeNotifier {
 
   // get installed servers count
   Future<int> get installedServersCount async {
-    final allServerConfig = await loadServers();
+    final allServerConfig = await _loadServers();
     final serverConfig = allServerConfig['mcpServers'] as Map<String, dynamic>;
     return serverConfig.length;
   }
 
   // Read server configuration
-  Future<Map<String, dynamic>> loadServers() async {
+  Future<Map<String, dynamic>> _loadServers() async {
+    File? file; // Make file nullable or assign later
     try {
       await _initConfigFile();
-      final file = File(await _configFilePath);
+      final configPath = await _configFilePath;
+      file = File(configPath); // Assign file here
       final String contents = await file.readAsString();
+
+      // Check if contents are empty before attempting to decode
+      if (contents.trim().isEmpty) {
+        Logger.root.warning(
+            'Configuration file ($configPath) is empty. Returning default configuration.');
+        return {'mcpServers': <String, dynamic>{}};
+      }
+
       final Map<String, dynamic> data = json.decode(contents);
       if (data['mcpServers'] == null) {
         data['mcpServers'] = <String, dynamic>{};
@@ -68,11 +97,75 @@ class McpServerProvider extends ChangeNotifier {
         server.value['installed'] = true;
       }
       return data;
-    } catch (e, stackTrace) {
+    } on FormatException catch (e, stackTrace) {
+      // Catch specific exception
+      final configPath = await _configFilePath;
       Logger.root.severe(
-          'Failed to read configuration file: $e, stackTrace: $stackTrace');
+          'Failed to parse configuration file ($configPath): $e, stackTrace: $stackTrace');
+      // Log the problematic content if possible and file is not null
+      if (file != null) {
+        try {
+          final String errorContents = await file
+              .readAsString(); // Read again or use already read contents if file was assigned earlier
+          Logger.root.severe(
+              'Problematic configuration file content: "$errorContents"');
+        } catch (readError) {
+          Logger.root.severe(
+              'Could not read configuration file content after format error: $readError');
+        }
+      }
+      return {
+        'mcpServers': <String, dynamic>{}
+      }; // Return default on format error
+    } catch (e, stackTrace) {
+      // Catch other potential errors
+      final configPath = await _configFilePath;
+      Logger.root.severe(
+          'Failed to read configuration file ($configPath): $e, stackTrace: $stackTrace');
       return {'mcpServers': <String, dynamic>{}};
     }
+  }
+
+  Future<Map<String, dynamic>> loadServersAll() async {
+    final allServerConfig = await _loadServers();
+    return allServerConfig;
+  }
+
+  Future<Map<String, dynamic>> loadServers() async {
+    final allServerConfig = await _loadServers();
+    final serverConfig = allServerConfig['mcpServers'] as Map<String, dynamic>;
+    final servers = Map.fromEntries(serverConfig.entries
+        .where((entry) => entry.value['type'] != 'inmemory'));
+    return {
+      'mcpServers': servers,
+    };
+  }
+
+  Future<Map<String, dynamic>> loadInMemoryServers() async {
+    final allServerConfig = await _loadServers();
+    final serverConfig = allServerConfig['mcpServers'] as Map<String, dynamic>;
+
+    // 检查默认内存服务器是否已存在，如不存在则添加
+    bool needSave = false;
+    for (var server in defaultInMemoryServers) {
+      if (!serverConfig.containsKey(server['name'])) {
+        serverConfig[server['name'] as String] = server;
+        needSave = true;
+      }
+    }
+
+    // 如果有新增服务器，保存配置
+    if (needSave) {
+      await saveServers({'mcpServers': serverConfig});
+    }
+
+    // 过滤得到所有内存类型服务器
+    final servers = Map.fromEntries(serverConfig.entries
+        .where((entry) => entry.value['type'] == 'inmemory'));
+
+    return {
+      'mcpServers': servers,
+    };
   }
 
   // Save server configuration
@@ -147,6 +240,17 @@ class McpServerProvider extends ChangeNotifier {
       // Ensure configuration file exists
       await _initConfigFile();
 
+      // // add default inmemory servers
+      // final allServerConfig = await _loadServers();
+      // final serverConfig =
+      //     allServerConfig['mcpServers'] as Map<String, dynamic>;
+      // for (var server in defaultInMemoryServers) {
+      //   if (!serverConfig.containsKey(server['name'])) {
+      //     serverConfig[server['name']!] = server;
+      //   }
+      // }
+      // await saveServers({'mcpServers': serverConfig});
+
       final configFilePath = await _configFilePath;
       Logger.root.info('mcp_server path: $configFilePath');
 
@@ -183,13 +287,13 @@ class McpServerProvider extends ChangeNotifier {
   }
 
   Future<int> get mcpServerCount async {
-    final allServerConfig = await loadServers();
+    final allServerConfig = await _loadServers();
     final serverConfig = allServerConfig['mcpServers'] as Map<String, dynamic>;
     return serverConfig.length;
   }
 
   Future<List<String>> get mcpServers async {
-    final allServerConfig = await loadServers();
+    final allServerConfig = await _loadServers();
     final serverConfig = allServerConfig['mcpServers'] as Map<String, dynamic>;
     return serverConfig.keys.toList();
   }
@@ -209,7 +313,7 @@ class McpServerProvider extends ChangeNotifier {
   }
 
   Future<McpClient?> startMcpServer(String serverName) async {
-    final allServerConfig = await loadServers();
+    final allServerConfig = await _loadServers();
     final serverConfig = allServerConfig['mcpServers'][serverName];
     final client = await initializeMcpServer(serverConfig);
     if (client != null) {
@@ -294,7 +398,7 @@ class McpServerProvider extends ChangeNotifier {
         }
 
         // 获取本地已安装的mcp服务器
-        final localInstalledServers = await loadServers();
+        final localInstalledServers = await _loadServers();
         //遍历sseServers，如果本地已安装的mcp服务器中存在，则将sseServers中的该服务器设置为已安装
         for (var server in sseServers.entries) {
           if (localInstalledServers['mcpServers'][server.key] != null) {
