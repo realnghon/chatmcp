@@ -1,4 +1,5 @@
 import 'package:chatmcp/components/widgets/base.dart';
+import 'package:chatmcp/utils/color.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -105,11 +106,13 @@ class _McpToolsState extends State<McpTools> {
           }
         });
 
+        final backgroundColor = AppColors.getThemeColor(context,
+            lightColor: Colors.white, darkColor: Colors.grey[800]);
+
         return CustomPopup(
           showArrow: true,
-          arrowColor: Theme.of(context).popupMenuTheme.color ?? Colors.white,
-          backgroundColor:
-              Theme.of(context).popupMenuTheme.color ?? Colors.white,
+          arrowColor: backgroundColor,
+          backgroundColor: backgroundColor,
           barrierColor: Colors.transparent,
           content: Container(
             constraints: BoxConstraints(
@@ -306,16 +309,28 @@ class _McpToolsState extends State<McpTools> {
                             }
                           },
                           toggleSize: 20.0,
-                          activeColor: Colors.blue,
-                          inactiveColor: Colors.grey[300]!,
-                          activeToggleColor: Colors.white,
-                          inactiveToggleColor: Colors.blue,
+                          activeColor: AppColors.getThemeColor(context,
+                              lightColor: Colors.blue,
+                              darkColor: Colors.blue.shade700),
+                          inactiveColor: AppColors.getThemeColor(context,
+                              lightColor: Colors.grey[300]!,
+                              darkColor: Colors.grey[600]!),
+                          activeToggleColor: AppColors.getThemeColor(context,
+                              lightColor: Colors.white,
+                              darkColor: Colors.white),
+                          inactiveToggleColor: AppColors.getThemeColor(context,
+                              lightColor: Colors.blue,
+                              darkColor: Colors.blue.shade300),
                           showOnOff: true,
                           activeText: "ON",
                           inactiveText: "OFF",
                           valueFontSize: 10.0,
-                          activeTextColor: Colors.white,
-                          inactiveTextColor: Colors.black,
+                          activeTextColor: AppColors.getThemeColor(context,
+                              lightColor: Colors.white,
+                              darkColor: Colors.white),
+                          inactiveTextColor: AppColors.getThemeColor(context,
+                              lightColor: Colors.black,
+                              darkColor: Colors.white),
                           activeIcon: isStarting
                               ? const SizedBox(
                                   width: 16,
