@@ -260,10 +260,26 @@ class DeepSeekClient extends BaseLLMClient {
 List<Map<String, dynamic>> chatMessageToDeepSeekMessage(
     List<ChatMessage> messages) {
   final openaiMessages = chatMessageToOpenAIMessage(messages);
-  final lastMessage = openaiMessages.last;
-  if (lastMessage['role'] == 'assistant') {
-    lastMessage['role'] = 'user';
-    openaiMessages[openaiMessages.length - 1] = lastMessage;
+
+  final newMessages = [openaiMessages.first];
+
+  for (final message in openaiMessages.sublist(1)) {
+    if (newMessages.last['role'] == message['role']) {
+      // 如果当前消息的类型与最后一条消息类型相同，拼接内容
+      newMessages.last['content'] =
+          '${newMessages.last['content']}\n\n${message['content']}';
+    } else {
+      // 如果消息类型不同，添加新消息
+      newMessages.add(message);
+    }
   }
-  return openaiMessages;
+
+  if (newMessages.last['role'] == 'assistant') {
+    newMessages.add({
+      'role': 'user',
+      'content': 'please continue',
+    });
+  }
+
+  return newMessages;
 }
