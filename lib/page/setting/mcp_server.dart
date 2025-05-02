@@ -844,22 +844,14 @@ class _McpServerState extends State<McpServer> {
                     config['mcpServers'] = <String, dynamic>{};
                   }
 
-                  Map<String, dynamic> newMcpServers = {};
-                  newMcpServers[saveServerName] = {
+                  await provider.addMcpServer({
+                    'name': saveServerName,
                     'type': type,
                     'command': command,
                     'args': args,
                     'env': env,
                     'auto_approve': values['auto_approve'] as bool? ?? false,
-                  };
-
-                  for (var entry in config['mcpServers'].entries) {
-                    if (entry.key != saveServerName) {
-                      newMcpServers[entry.key] = entry.value;
-                    }
-                  }
-
-                  config['mcpServers'] = newMcpServers;
+                  });
 
                   if (mounted) {
                     setState(() {
@@ -867,7 +859,6 @@ class _McpServerState extends State<McpServer> {
                     });
                   }
 
-                  await provider.saveServers(config);
                   Navigator.pop(dialogContext, true);
                 },
                 style: TextButton.styleFrom(
@@ -924,11 +915,7 @@ class _McpServerState extends State<McpServer> {
     );
 
     if (confirmed == true && context.mounted) {
-      final config = await provider.loadServers();
-      config['mcpServers'].remove(serverName);
-      await provider.saveServers(config);
-      await provider.loadMarketServers();
-      provider.removeClient(serverName);
+      await provider.removeMcpServer(serverName);
       setState(() {
         _refreshCounter++;
       });

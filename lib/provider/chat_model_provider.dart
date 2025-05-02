@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:chatmcp/llm/model.dart' as llm_model;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:chatmcp/llm/llm_factory.dart';
 import 'dart:convert';
-import 'package:logging/logging.dart';
 
 class ChatModelProvider extends ChangeNotifier {
   static final ChatModelProvider _instance = ChatModelProvider._internal();

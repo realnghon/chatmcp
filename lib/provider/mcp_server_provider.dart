@@ -168,6 +168,26 @@ class McpServerProvider extends ChangeNotifier {
     };
   }
 
+  Future<void> addMcpServer(Map<String, dynamic> server) async {
+    final allServerConfig = await _loadServers();
+    // 创建一个新的Map，先放入新元素，再放入旧元素
+    final newServers = <String, dynamic>{};
+    newServers[server['name']] = server;
+    // 添加原有的服务器配置
+    newServers.addAll(allServerConfig['mcpServers'] as Map<String, dynamic>);
+    // 更新配置
+    allServerConfig['mcpServers'] = newServers;
+    await saveServers(allServerConfig);
+    notifyListeners();
+  }
+
+  Future<void> removeMcpServer(String serverName) async {
+    final allServerConfig = await _loadServers();
+    allServerConfig['mcpServers'].remove(serverName);
+    await saveServers(allServerConfig);
+    notifyListeners();
+  }
+
   // Save server configuration
   Future<void> saveServers(Map<String, dynamic> servers) async {
     try {

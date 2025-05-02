@@ -17,8 +17,9 @@ class ServerConfig {
   factory ServerConfig.fromJson(Map<String, dynamic> json) {
     return ServerConfig(
       command: json['command'] as String,
-      args: (json['args'] as List<dynamic>).cast<String>(),
-      env: (json['env'] as Map<String, dynamic>?)?.cast<String, String>() ??
+      args: ((json['args'] ?? []) as List<dynamic>).cast<String>(),
+      env: ((json['env'] ?? {}) as Map<String, dynamic>?)
+              ?.cast<String, String>() ??
           const {},
       type: json['type'] as String? ?? '',
     );

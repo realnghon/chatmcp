@@ -259,5 +259,11 @@ class DeepSeekClient extends BaseLLMClient {
 
 List<Map<String, dynamic>> chatMessageToDeepSeekMessage(
     List<ChatMessage> messages) {
-  return chatMessageToOpenAIMessage(messages);
+  final openaiMessages = chatMessageToOpenAIMessage(messages);
+  final lastMessage = openaiMessages.last;
+  if (lastMessage['role'] == 'assistant') {
+    lastMessage['role'] = 'user';
+    openaiMessages[openaiMessages.length - 1] = lastMessage;
+  }
+  return openaiMessages;
 }
