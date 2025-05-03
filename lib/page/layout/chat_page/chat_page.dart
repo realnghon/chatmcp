@@ -87,13 +87,9 @@ class _ChatPageState extends State<ChatPage> {
 
   RunFunctionEvent? _runFunctionEvent;
   bool _isRunningFunction = false;
-  bool _userApproved = false;
-  bool _userRejected = false;
 
   Future<void> _onRunFunction(RunFunctionEvent event) async {
     setState(() {
-      _userApproved = false;
-      _userRejected = false;
       _runFunctionEvent = event;
     });
 
@@ -150,7 +146,6 @@ class _ChatPageState extends State<ChatPage> {
                   child: Text(t.cancel),
                   onPressed: () {
                     setState(() {
-                      _userRejected = true;
                       _runFunctionEvent = null;
                     });
                     Navigator.of(context).pop(false);
@@ -159,9 +154,6 @@ class _ChatPageState extends State<ChatPage> {
                 TextButton(
                   child: Text(t.allow),
                   onPressed: () {
-                    setState(() {
-                      _userApproved = true;
-                    });
                     Navigator.of(context).pop(true);
                   },
                 ),
@@ -274,7 +266,7 @@ class _ChatPageState extends State<ChatPage> {
       treeMessages.insert(0, currentMessage);
 
       final parentId = currentMessage.parentMessageId;
-      if (parentId == null || parentId.isEmpty) break;
+      if (parentId.isEmpty) break;
 
       currentMessage = messages.firstWhere(
         (m) => m.messageId == parentId,
@@ -346,8 +338,6 @@ class _ChatPageState extends State<ChatPage> {
         _parentMessageId = '';
         _runFunctionEvent = null;
         _isRunningFunction = false;
-        _userApproved = false;
-        _userRejected = false;
       });
       return;
     }
@@ -372,8 +362,6 @@ class _ChatPageState extends State<ChatPage> {
         _parentMessageId = parentId;
         _runFunctionEvent = null;
         _isRunningFunction = false;
-        _userApproved = false;
-        _userRejected = false;
       });
     }
   }
@@ -538,12 +526,7 @@ class _ChatPageState extends State<ChatPage> {
     final content = lastMessage.content ?? '';
     if (content.isEmpty) return false;
 
-    final messages = _messages
-        .where((m) =>
-            m.content != null &&
-            !m.content!.startsWith('<function') &&
-            !m.content!.startsWith('<call_function_result'))
-        .toList();
+    final messages = _messages.toList();
 
     Logger.root.info('check need tool call: $messages');
 
@@ -635,25 +618,21 @@ class _ChatPageState extends State<ChatPage> {
           if (approved) {
             setState(() {
               _isRunningFunction = true;
-              _userApproved = false;
             });
 
-            final toolName = event.name;
-            await _sendToolCallAndProcessResponse(toolName, event.arguments);
+            await _sendToolCallAndProcessResponse(event.name, event.arguments);
             setState(() {
               _isRunningFunction = false;
             });
             _runFunctionEvent = null;
           } else {
-            // 用户拒绝了函数调用
             setState(() {
-              _userRejected = false;
               _runFunctionEvent = null;
             });
             final msgId = Uuid().v4();
             _messages.add(ChatMessage(
               messageId: msgId,
-              content: '用户取消了工具调用',
+              content: 'call function rejected',
               role: MessageRole.assistant,
               parentMessageId: _parentMessageId,
             ));
@@ -779,8 +758,12 @@ class _ChatPageState extends State<ChatPage> {
 
     for (final message in messageList.sublist(1)) {
       if (newMessages.last.role == message.role) {
+        String content = message.content ?? '';
+        content =
+            content.replaceAll('<call_function_result', '\nfunction_result\n');
+        content = content.replaceAll('</call_function_result>', '');
         newMessages.last = newMessages.last.copyWith(
-          content: '${newMessages.last.content}\n\n${message.content}',
+          content: '${newMessages.last.content}\n\n$content',
         );
       } else {
         newMessages.add(message);
@@ -905,8 +888,6 @@ class _ChatPageState extends State<ChatPage> {
     setState(() {
       _isRunningFunction = false;
       _runFunctionEvent = null;
-      _userApproved = false;
-      _userRejected = false;
       _isLoading = false;
       _isCancelled = false;
       _isWating = false;
