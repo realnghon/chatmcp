@@ -25,7 +25,7 @@ class DeepSeekClient extends BaseLLMClient {
   Future<LLMResponse> chatCompletion(CompletionRequest request) async {
     final body = {
       'model': request.model,
-      'messages': chatMessageToDeepSeekMessage(request.messages),
+      'messages': chatMessageToOpenAIMessage(request.messages),
     };
     if (request.modelSetting != null) {
       body['temperature'] = request.modelSetting!.temperature;
@@ -87,7 +87,7 @@ class DeepSeekClient extends BaseLLMClient {
   Stream<LLMResponse> chatStreamCompletion(CompletionRequest request) async* {
     final body = {
       'model': request.model,
-      'messages': chatMessageToDeepSeekMessage(request.messages),
+      'messages': chatMessageToOpenAIMessage(request.messages),
       'stream': true,
     };
     if (request.modelSetting != null) {
@@ -255,31 +255,4 @@ class DeepSeekClient extends BaseLLMClient {
       return [];
     }
   }
-}
-
-List<Map<String, dynamic>> chatMessageToDeepSeekMessage(
-    List<ChatMessage> messages) {
-  final openaiMessages = chatMessageToOpenAIMessage(messages);
-
-  final newMessages = [openaiMessages.first];
-
-  for (final message in openaiMessages.sublist(1)) {
-    if (newMessages.last['role'] == message['role']) {
-      // 如果当前消息的类型与最后一条消息类型相同，拼接内容
-      newMessages.last['content'] =
-          '${newMessages.last['content']}\n\n${message['content']}';
-    } else {
-      // 如果消息类型不同，添加新消息
-      newMessages.add(message);
-    }
-  }
-
-  if (newMessages.last['role'] == 'assistant') {
-    newMessages.add({
-      'role': 'user',
-      'content': 'please continue',
-    });
-  }
-
-  return newMessages;
 }
