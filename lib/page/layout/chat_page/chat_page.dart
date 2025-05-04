@@ -49,7 +49,7 @@ class _ChatPageState extends State<ChatPage> {
   bool mobile = kIsMobile;
 
   List<RunFunctionEvent> _runFunctionEvents = [];
-  bool _isRunningFunction = true;
+  bool _isRunningFunction = false;
 
   @override
   void initState() {
@@ -179,6 +179,7 @@ class _ChatPageState extends State<ChatPage> {
   void _removeListeners() {
     ProviderManager.settingsProvider.removeListener(_onSettingsChanged);
     ProviderManager.chatProvider.removeListener(_onChatProviderChanged);
+    ProviderManager.chatModelProvider.removeListener(_initializeLLMClient);
   }
 
   void _initializeLLMClient() {
@@ -326,8 +327,6 @@ class _ChatPageState extends State<ChatPage> {
       );
     }
 
-    // print(
-    //     'treeMessages:\n${const JsonEncoder.withIndent('  ').convert(treeMessages)}');
     return treeMessages;
   }
 
@@ -337,7 +336,7 @@ class _ChatPageState extends State<ChatPage> {
     setState(() {
       _showCodePreview = false;
     });
-    if (activeChat == null) {
+    if (activeChat == null && _messages.isEmpty) {
       setState(() {
         _messages = [];
         _chat = null;
@@ -346,7 +345,7 @@ class _ChatPageState extends State<ChatPage> {
       _resetState();
       return;
     }
-    if (_chat?.id != activeChat.id) {
+    if (_chat?.id != activeChat?.id) {
       final messages = await _getHistoryTreeMessages();
       // 找到最后一条用户消息的索引
       final lastUserIndex =
