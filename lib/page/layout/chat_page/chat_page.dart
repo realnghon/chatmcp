@@ -48,6 +48,9 @@ class _ChatPageState extends State<ChatPage> {
 
   bool mobile = kIsMobile;
 
+  List<RunFunctionEvent> _runFunctionEvents = [];
+  bool _isRunningFunction = false;
+
   @override
   void initState() {
     super.initState();
@@ -85,12 +88,9 @@ class _ChatPageState extends State<ChatPage> {
     on<RunFunctionEvent>(_onRunFunction);
   }
 
-  RunFunctionEvent? _runFunctionEvent;
-  bool _isRunningFunction = false;
-
   Future<void> _onRunFunction(RunFunctionEvent event) async {
     setState(() {
-      _runFunctionEvent = event;
+      _runFunctionEvents.add(event);
     });
 
     // 显示授权对话框
@@ -146,7 +146,7 @@ class _ChatPageState extends State<ChatPage> {
                   child: Text(t.cancel),
                   onPressed: () {
                     setState(() {
-                      _runFunctionEvent = null;
+                      _runFunctionEvents.clear();
                     });
                     Navigator.of(context).pop(false);
                   },
@@ -336,7 +336,7 @@ class _ChatPageState extends State<ChatPage> {
         _messages = [];
         _chat = null;
         _parentMessageId = '';
-        _runFunctionEvent = null;
+        _runFunctionEvents.clear();
         _isRunningFunction = false;
       });
       return;
@@ -360,7 +360,7 @@ class _ChatPageState extends State<ChatPage> {
         _messages = messages;
         _chat = activeChat;
         _parentMessageId = parentId;
-        _runFunctionEvent = null;
+        _runFunctionEvents.clear();
         _isRunningFunction = false;
       });
     }
@@ -519,7 +519,7 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<bool> _checkNeedToolCallFunction() async {
-    if (_runFunctionEvent != null) return true;
+    if (_runFunctionEvents.isNotEmpty) return true;
 
     final lastMessage = _messages.last;
 
@@ -546,25 +546,30 @@ class _ChatPageState extends State<ChatPage> {
       return false;
     }
 
-    _runFunctionEvent = RunFunctionEvent(
-      result['tool_calls'][0]['name'],
-      result['tool_calls'][0]['arguments'],
-    );
+    final toolCalls = result['tool_calls'] as List;
+    for (var toolCall in toolCalls) {
+      final functionEvent = RunFunctionEvent(
+        toolCall['name'],
+        toolCall['arguments'],
+      );
 
-    _messages.add(ChatMessage(
-      content:
-          "<function name=\"${_runFunctionEvent!.name}\">\n${jsonc.encode(_runFunctionEvent!.arguments)}\n</function>",
-      role: MessageRole.assistant,
-      parentMessageId: _parentMessageId,
-    ));
+      _runFunctionEvents.add(functionEvent);
 
-    _onRunFunction(_runFunctionEvent!);
+      _messages.add(ChatMessage(
+        content:
+            "<function name=\"${functionEvent.name}\">\n${jsonc.encode(functionEvent.arguments)}\n</function>",
+        role: MessageRole.assistant,
+        parentMessageId: _parentMessageId,
+      ));
+
+      _onRunFunction(functionEvent);
+    }
 
     return needToolCall;
   }
 
   Future<bool> _checkNeedToolCallXml() async {
-    if (_runFunctionEvent != null) return true;
+    if (_runFunctionEvents.isNotEmpty) return true;
 
     final lastMessage = _messages.last;
     if (lastMessage.role == MessageRole.user) return true;
@@ -576,20 +581,25 @@ class _ChatPageState extends State<ChatPage> {
     final RegExp functionTagRegex = RegExp(
         '<function\\s+name=["\']([^"\']*)["\']\\s*>(.*?)</function>',
         dotAll: true);
-    final match = functionTagRegex.firstMatch(content);
+    final matches = functionTagRegex.allMatches(content);
 
-    if (match == null) return false;
+    if (matches.isEmpty) return false;
 
-    final toolName = match.group(1);
-    final toolArguments = match.group(2);
+    for (var match in matches) {
+      final toolName = match.group(1);
+      final toolArguments = match.group(2);
 
-    if (toolName == null || toolArguments == null) return false;
+      if (toolName == null || toolArguments == null) continue;
 
-    final toolArgumentsMap = jsonc.decode(toolArguments);
+      try {
+        final toolArgumentsMap = jsonc.decode(toolArguments);
+        _onRunFunction(RunFunctionEvent(toolName, toolArgumentsMap));
+      } catch (e) {
+        Logger.root.warning('解析工具参数失败: $e');
+      }
+    }
 
-    _onRunFunction(RunFunctionEvent(toolName, toolArgumentsMap));
-
-    return true;
+    return _runFunctionEvents.isNotEmpty;
   }
 
   Future<bool> _checkNeedToolCall() async {
@@ -610,33 +620,39 @@ class _ChatPageState extends State<ChatPage> {
 
     try {
       while (await _checkNeedToolCall()) {
-        if (_runFunctionEvent != null) {
-          // 等待用户授权
-          final event = _runFunctionEvent!;
-          final approved = await _showFunctionApprovalDialog(event);
+        if (_runFunctionEvents.isNotEmpty) {
+          // 顺序处理每个函数调用
+          while (_runFunctionEvents.isNotEmpty) {
+            final event = _runFunctionEvents.first;
 
-          if (approved) {
-            setState(() {
-              _isRunningFunction = true;
-            });
+            // 等待用户授权
+            final approved = await _showFunctionApprovalDialog(event);
 
-            await _sendToolCallAndProcessResponse(event.name, event.arguments);
-            setState(() {
-              _isRunningFunction = false;
-            });
-            _runFunctionEvent = null;
-          } else {
-            setState(() {
-              _runFunctionEvent = null;
-            });
-            final msgId = Uuid().v4();
-            _messages.add(ChatMessage(
-              messageId: msgId,
-              content: 'call function rejected',
-              role: MessageRole.assistant,
-              parentMessageId: _parentMessageId,
-            ));
-            _parentMessageId = msgId;
+            if (approved) {
+              setState(() {
+                _isRunningFunction = true;
+              });
+
+              await _sendToolCallAndProcessResponse(
+                  event.name, event.arguments);
+              setState(() {
+                _isRunningFunction = false;
+              });
+              _runFunctionEvents.removeAt(0);
+            } else {
+              setState(() {
+                _runFunctionEvents.clear();
+              });
+              final msgId = Uuid().v4();
+              _messages.add(ChatMessage(
+                messageId: msgId,
+                content: 'call function rejected',
+                role: MessageRole.assistant,
+                parentMessageId: _parentMessageId,
+              ));
+              _parentMessageId = msgId;
+              break;
+            }
           }
         }
 
@@ -702,8 +718,6 @@ class _ChatPageState extends State<ChatPage> {
     List<ChatMessage> messageList = _prepareMessageList();
     messageList = messageMerge(messageList);
 
-    Logger.root.info('start process llm response: $messageList');
-
     final modelSetting = ProviderManager.settingsProvider.modelSetting;
 
     final lastUserMessageIndex = messageList.lastIndexWhere(
@@ -719,6 +733,8 @@ class _ChatPageState extends State<ChatPage> {
             messageList[lastUserMessageIndex].content ?? ''),
       );
     }
+
+    Logger.root.info('start process llm response: $messageList');
 
     final stream = _llmClient!.chatStreamCompletion(CompletionRequest(
       model: ProviderManager.chatModelProvider.currentModel.name,
@@ -760,8 +776,9 @@ class _ChatPageState extends State<ChatPage> {
       if (newMessages.last.role == message.role) {
         String content = message.content ?? '';
         content =
-            content.replaceAll('<call_function_result', '\nfunction_result\n');
+            content.replaceAll('<call_function_result', '\nfunction_result');
         content = content.replaceAll('</call_function_result>', '');
+        content = content.replaceAll('>', '');
         newMessages.last = newMessages.last.copyWith(
           content: '${newMessages.last.content}\n\n$content',
         );
@@ -887,7 +904,7 @@ class _ChatPageState extends State<ChatPage> {
     // 重置所有相关状态
     setState(() {
       _isRunningFunction = false;
-      _runFunctionEvent = null;
+      _runFunctionEvents.clear();
       _isLoading = false;
       _isCancelled = false;
       _isWating = false;
