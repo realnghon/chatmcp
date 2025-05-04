@@ -342,9 +342,8 @@ class _ChatPageState extends State<ChatPage> {
         _messages = [];
         _chat = null;
         _parentMessageId = '';
-        _runFunctionEvents.clear();
-        _isRunningFunction = false;
       });
+      _resetState();
       return;
     }
     if (_chat?.id != activeChat.id) {
@@ -366,9 +365,8 @@ class _ChatPageState extends State<ChatPage> {
         _messages = messages;
         _chat = activeChat;
         _parentMessageId = parentId;
-        _runFunctionEvents.clear();
-        _isRunningFunction = false;
       });
+      _resetState();
     }
   }
 
@@ -908,13 +906,7 @@ class _ChatPageState extends State<ChatPage> {
     Logger.root.severe(error, stackTrace);
 
     // 重置所有相关状态
-    setState(() {
-      _isRunningFunction = false;
-      _runFunctionEvents.clear();
-      _isLoading = false;
-      _isCancelled = false;
-      _isWating = false;
-    });
+    _resetState();
 
     if (mounted) {
       showDialog(
@@ -990,12 +982,18 @@ class _ChatPageState extends State<ChatPage> {
     return height > width;
   }
 
-  void _handleCancel() {
+  void _resetState() {
     setState(() {
-      _isComposing = false;
+      _isRunningFunction = false;
+      _runFunctionEvents.clear();
       _isLoading = false;
-      _isCancelled = true;
+      _isCancelled = false;
+      _isWating = false;
     });
+  }
+
+  void _handleCancel() {
+    _resetState();
   }
 
   CodePreviewEvent? _codePreviewEvent;
