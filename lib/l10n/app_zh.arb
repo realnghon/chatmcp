@@ -139,5 +139,6 @@
     "ignoreThisVersion": "忽略此版本",
     "releaseNotes": "更新内容：",
     "openUrlFailed": "无法打开链接",
-    "checkingForUpdates": "正在检查更新..."
+    "checkingForUpdates": "正在检查更新...",
+    "checkUpdate": "检查更新"
 }

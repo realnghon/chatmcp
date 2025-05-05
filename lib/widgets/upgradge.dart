@@ -15,13 +15,17 @@ class UpgradeNotice extends StatefulWidget {
   final String owner;
   final String repo;
   final List<String> enablePlatforms;
+  final bool showCheckUpdate;
+  final bool autoCheck;
   const UpgradeNotice({
     super.key,
-    this.checkInterval = const Duration(minutes: 5),
+    this.checkInterval = const Duration(minutes: 60 * 24),
     this.showOnlyOnce = true,
     this.owner = 'daodao97',
     this.repo = 'chatmcp',
     this.enablePlatforms = const ["android", "macos", "windows", "linux"],
+    this.showCheckUpdate = false,
+    this.autoCheck = true,
   });
 
   @override
@@ -39,14 +43,18 @@ class _UpgradeNoticeState extends State<UpgradeNotice> {
   @override
   void initState() {
     super.initState();
-    // 延迟初始检查，避免应用启动时的性能影响
-    Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        _checkForUpdates();
-      }
-    });
-    _checkTimer =
-        Timer.periodic(widget.checkInterval, (_) => _checkForUpdates());
+
+    // 如果启用了自动检查，则延迟初始检查并设置定时器
+    if (widget.autoCheck) {
+      // 延迟初始检查，避免应用启动时的性能影响
+      Future.delayed(const Duration(seconds: 3), () {
+        if (mounted) {
+          _checkForUpdates();
+        }
+      });
+      _checkTimer =
+          Timer.periodic(widget.checkInterval, (_) => _checkForUpdates());
+    }
   }
 
   @override
@@ -59,7 +67,10 @@ class _UpgradeNoticeState extends State<UpgradeNotice> {
     // 防止多次同时检查
     if (_isChecking) return;
 
-    _isChecking = true;
+    setState(() {
+      _isChecking = true;
+    });
+
     try {
       // 获取本地存储
       final prefs = await SharedPreferences.getInstance();
@@ -74,7 +85,9 @@ class _UpgradeNoticeState extends State<UpgradeNotice> {
       if (widget.showOnlyOnce &&
           lastNotifiedVersion != null &&
           prefs.getBool('$_dismissPrefix$lastNotifiedVersion') == true) {
-        _isChecking = false;
+        setState(() {
+          _isChecking = false;
+        });
         return;
       }
 
@@ -108,14 +121,42 @@ class _UpgradeNoticeState extends State<UpgradeNotice> {
             // 记录最新通知的版本
             await prefs.setString('last_shown_version', latestVersion);
           }
+        } else if (!widget.autoCheck && mounted) {
+          // 手动检查模式下，如果没有新版本也要显示提示
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("已是最新版本"),
+              duration: const Duration(seconds: 2),
+            ),
+          );
         }
       } else {
         debugPrint('GitHub API请求失败，状态码: ${response.statusCode}');
+        if (!widget.autoCheck && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("检查更新失败"),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
       }
     } catch (e) {
       debugPrint('检查更新出错: $e');
+      if (!widget.autoCheck && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("检查更新失败"),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
     } finally {
-      _isChecking = false;
+      if (mounted) {
+        setState(() {
+          _isChecking = false;
+        });
+      }
     }
   }
 
@@ -202,52 +243,95 @@ class _UpgradeNoticeState extends State<UpgradeNotice> {
     if (Platform.isLinux && !widget.enablePlatforms.contains("linux")) {
       return const SizedBox.shrink();
     }
-    if (!_hasNewVersion) {
-      return const SizedBox.shrink();
-    }
 
     final l10n = AppLocalizations.of(context)!;
     final MediaQueryData mediaQuery = MediaQuery.of(context);
     final bool isVeryNarrow = mediaQuery.size.width < 400;
     final bool isNarrow = mediaQuery.size.width < 600 && !isVeryNarrow;
 
-    return GestureDetector(
-      onTap: () => _showUpdateDialog(context),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.red[50],
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.red.shade200),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (isVeryNarrow)
-              const Icon(Icons.new_releases, size: 14, color: Colors.red)
-            else ...[
-              const Icon(Icons.arrow_downward, size: 16, color: Colors.red),
-              const SizedBox(width: 4),
-              if (isNarrow)
-                const Icon(Icons.new_releases, size: 12, color: Colors.red)
-              else
-                Flexible(
-                  child: Text(
-                    l10n.newVersionFound(_newVersion),
-                    style: const TextStyle(
-                      color: Colors.red,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+    // 如果有新版本，显示更新通知
+    if (_hasNewVersion) {
+      return GestureDetector(
+        onTap: () => _showUpdateDialog(context),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.red[50],
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.red.shade200),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (isVeryNarrow)
+                const Icon(Icons.new_releases, size: 14, color: Colors.red)
+              else ...[
+                const Icon(Icons.arrow_downward, size: 16, color: Colors.red),
+                const SizedBox(width: 4),
+                if (isNarrow)
+                  const Icon(Icons.new_releases, size: 12, color: Colors.red)
+                else
+                  Flexible(
+                    child: Text(
+                      l10n.newVersionFound(_newVersion),
+                      style: const TextStyle(
+                        color: Colors.red,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
                   ),
-                ),
+              ],
             ],
-          ],
+          ),
         ),
-      ),
-    );
+      );
+    }
+
+    // 如果启用手动检查更新，且没有新版本，显示检查更新按钮
+    if (widget.showCheckUpdate) {
+      return GestureDetector(
+        onTap: _isChecking ? null : () => _checkForUpdates(),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey.shade300),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _isChecking
+                  ? const SizedBox(
+                      width: 14,
+                      height: 14,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Icon(Icons.update, size: 14, color: Colors.grey),
+              if (!isVeryNarrow) ...[
+                const SizedBox(width: 4),
+                Text(
+                  _isChecking ? l10n.checkingForUpdates : l10n.checkUpdate,
+                  style: TextStyle(
+                    color: Colors.grey[700],
+                    fontSize: 12,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ],
+            ],
+          ),
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
   }
 
   Future<void> _showUpdateDialog(BuildContext context) async {

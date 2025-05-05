@@ -155,5 +155,6 @@
     "ignoreThisVersion": "Ignore This Version",
     "releaseNotes": "Release Notes:",
     "openUrlFailed": "Failed to open URL",
-    "checkingForUpdates": "Checking for updates..."
+    "checkingForUpdates": "Checking for updates...",
+    "checkUpdate": "Update Check"
 }

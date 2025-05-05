@@ -496,4 +496,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get checkingForUpdates => 'Checking for updates...';
+
+  @override
+  String get checkUpdate => 'Update Check';
 }

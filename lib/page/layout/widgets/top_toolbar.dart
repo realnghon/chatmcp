@@ -99,6 +99,10 @@ class TopToolbar extends StatelessWidget {
                   ),
                 ),
               ),
+            UpgradeNotice(
+              showCheckUpdate: true,
+              autoCheck: false,
+            ),
             InkWell(
               onTap: () {
                 _onShowChatSetting(context);

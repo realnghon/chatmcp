@@ -496,4 +496,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get checkingForUpdates => '正在检查更新...';
+
+  @override
+  String get checkUpdate => '检查更新';
 }
