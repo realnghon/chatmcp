@@ -216,9 +216,9 @@ class SSEClient implements McpClient {
       queryParams['sessionId'] = newSessionId; // 使用标准化的参数名
 
       final normalizedUri = Uri(
-        scheme: uri.scheme,  // 使用原始URI的scheme
-        host: uri.host,      // 使用原始URI的host
-        port: uri.port,      // 使用原始URI的port
+        scheme: parsedUri.scheme,
+        host: parsedUri.host,
+        port: parsedUri.port,
         path: parsedUri.path,
         queryParameters: queryParams,
       );
