@@ -218,6 +218,7 @@ class SSEClient implements McpClient {
       final normalizedUri = Uri(
         scheme: parsedUri.scheme,
         host: parsedUri.host,
+        port: parsedUri.port,
         path: parsedUri.path,
         queryParameters: queryParams,
       );
