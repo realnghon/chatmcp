@@ -508,4 +508,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aboutApp => 'About';
+
+  @override
+  String get networkError => 'Network error occurred';
+
+  @override
+  String get noElementError => 'No element found';
+
+  @override
+  String get permissionError => 'Permission denied';
+
+  @override
+  String get unknownError => 'Unknown error occurred';
+
+  @override
+  String get timeoutError => 'Request timed out';
+
+  @override
+  String get notFoundError => 'Resource not found';
+
+  @override
+  String get invalidError => 'Invalid request';
+
+  @override
+  String get unauthorizedError => 'Unauthorized access';
 }

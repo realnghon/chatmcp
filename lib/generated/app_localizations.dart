@@ -1048,6 +1048,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'About'**
   String get aboutApp;
+
+  /// No description provided for @networkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Network error occurred'**
+  String get networkError;
+
+  /// No description provided for @noElementError.
+  ///
+  /// In en, this message translates to:
+  /// **'No element found'**
+  String get noElementError;
+
+  /// No description provided for @permissionError.
+  ///
+  /// In en, this message translates to:
+  /// **'Permission denied'**
+  String get permissionError;
+
+  /// No description provided for @unknownError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown error occurred'**
+  String get unknownError;
+
+  /// No description provided for @timeoutError.
+  ///
+  /// In en, this message translates to:
+  /// **'Request timed out'**
+  String get timeoutError;
+
+  /// No description provided for @notFoundError.
+  ///
+  /// In en, this message translates to:
+  /// **'Resource not found'**
+  String get notFoundError;
+
+  /// No description provided for @invalidError.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid request'**
+  String get invalidError;
+
+  /// No description provided for @unauthorizedError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unauthorized access'**
+  String get unauthorizedError;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

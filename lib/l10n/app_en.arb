@@ -159,5 +159,13 @@
     "checkUpdate": "Update Check",
     "appDescription": "ChatMCP is a cross-platform AI client, dedicated to making AI accessible to more people.",
     "visitWebsite": "website",
-    "aboutApp": "About"
+    "aboutApp": "About",
+    "networkError": "Network error occurred",
+    "noElementError": "No element found",
+    "permissionError": "Permission denied",
+    "unknownError": "Unknown error occurred",
+    "timeoutError": "Request timed out",
+    "notFoundError": "Resource not found",
+    "invalidError": "Invalid request",
+    "unauthorizedError": "Unauthorized access"
 }

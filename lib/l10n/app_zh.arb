@@ -143,5 +143,13 @@
     "checkUpdate": "检查更新",
     "appDescription": "ChatMCP 是一款跨平台的 AI 客户端，致力于让更多人方便地使用 AI。",
     "visitWebsite": "站点",
-    "aboutApp": "关于"
+    "aboutApp": "关于",
+    "networkError": "网络连接问题，请检查网络后重试",
+    "noElementError": "未找到匹配内容，请重试",
+    "permissionError": "权限不足，请检查设置",
+    "unknownError": "发生未知错误",
+    "timeoutError": "请求超时，请稍后重试",
+    "notFoundError": "未找到请求的资源",
+    "invalidError": "无效的请求或参数",
+    "unauthorizedError": "未授权访问，请检查权限"
 }
