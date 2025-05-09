@@ -508,4 +508,28 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get aboutApp => '关于';
+
+  @override
+  String get networkError => '网络连接问题，请检查网络后重试';
+
+  @override
+  String get noElementError => '未找到匹配内容，请重试';
+
+  @override
+  String get permissionError => '权限不足，请检查设置';
+
+  @override
+  String get unknownError => '发生未知错误';
+
+  @override
+  String get timeoutError => '请求超时，请稍后重试';
+
+  @override
+  String get notFoundError => '未找到请求的资源';
+
+  @override
+  String get invalidError => '无效的请求或参数';
+
+  @override
+  String get unauthorizedError => '未授权访问，请检查权限';
 }

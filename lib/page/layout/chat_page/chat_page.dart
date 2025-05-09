@@ -251,6 +251,10 @@ class _ChatPageState extends State<ChatPage> {
 
     // print('messages:\n${const JsonEncoder.withIndent('  ').convert(messages)}');
 
+    if (messages.isEmpty) {
+      return [];
+    }
+
     final lastMessage = messages.last;
     return _getTreeMessages(lastMessage.messageId, messages);
   }
@@ -941,16 +945,11 @@ class _ChatPageState extends State<ChatPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    AppLocalizations.of(context)!.userCancelledToolCall,
+                    _getUserFriendlyErrorMessage(error),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: AppColors.getErrorTextColor(),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  SelectableText(
-                    error.toString(),
-                    style: TextStyle(color: AppColors.getErrorTextColor()),
                   ),
                 ],
               ),
@@ -965,6 +964,27 @@ class _ChatPageState extends State<ChatPage> {
         },
       );
     }
+  }
+
+  // 处理错误信息
+  String _getUserFriendlyErrorMessage(dynamic error) {
+    final errorMap = {
+      'connection': AppLocalizations.of(context)!.networkError,
+      'timeout': AppLocalizations.of(context)!.timeoutError,
+      'permission': AppLocalizations.of(context)!.permissionError,
+      'cancelled': AppLocalizations.of(context)!.userCancelledToolCall,
+      'No element': AppLocalizations.of(context)!.noElementError,
+      'not found': AppLocalizations.of(context)!.notFoundError,
+      'invalid': AppLocalizations.of(context)!.invalidError,
+      'unauthorized': AppLocalizations.of(context)!.unauthorizedError,
+    };
+
+    for (final entry in errorMap.entries) {
+      if (error.toString().toLowerCase().contains(entry.key.toLowerCase())) {
+        return entry.value;
+      }
+    }
+    return AppLocalizations.of(context)!.unknownError;
   }
 
   // 处理分享事件
