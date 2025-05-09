@@ -1,5 +1,6 @@
 import 'dart:io' show Platform;
 
+import 'package:chatmcp/utils/color.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -296,7 +297,7 @@ class _UpgradeNoticeState extends State<UpgradeNotice> {
         onTap: _isChecking ? null : () => _checkForUpdates(),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.grey[100],
+            color: AppColors.getInkIconHoverColor(context),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: Colors.grey.shade300),
           ),

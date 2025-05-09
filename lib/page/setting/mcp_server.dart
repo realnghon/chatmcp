@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:chatmcp/components/widgets/base.dart';
+import 'package:chatmcp/page/setting/mcp_info.dart';
 import 'package:chatmcp/provider/provider_manager.dart';
+import 'package:chatmcp/utils/platform.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
@@ -367,6 +369,13 @@ class _McpServerState extends State<McpServer> {
                 isLoading: _serverLoading[serverName] == true,
               ),
               const Gap(size: 10),
+              if (provider.mcpServerIsRunning(serverName))
+                _buildActionButton(
+                  icon: CupertinoIcons.info_circle,
+                  tooltip: "info",
+                  onPressed: () => _showInfoDialog(context, serverName),
+                ),
+              const Gap(size: 10),
               _buildActionButton(
                 icon: CupertinoIcons.pencil,
                 tooltip: l10n.edit,
@@ -419,6 +428,37 @@ class _McpServerState extends State<McpServer> {
         ),
       ),
     );
+  }
+
+  void _showInfoDialog(BuildContext context, String serverName) {
+    if (kIsMobile) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => Scaffold(
+                  body: SafeArea(
+                    child: McpInfo(serverName: serverName),
+                  ),
+                )),
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (context) => Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8.0),
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width * 0.8,
+              height: MediaQuery.of(context).size.height * 0.8,
+              child: McpInfo(serverName: serverName),
+            ),
+          ),
+        ),
+      );
+    }
   }
 
   Widget _buildActionButton({

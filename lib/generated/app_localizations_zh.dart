@@ -499,4 +499,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get checkUpdate => '检查更新';
+
+  @override
+  String get appDescription => 'ChatMCP 是一款跨平台的 AI 客户端，致力于让更多人方便地使用 AI。';
+
+  @override
+  String get visitWebsite => '站点';
+
+  @override
+  String get aboutApp => '关于';
 }

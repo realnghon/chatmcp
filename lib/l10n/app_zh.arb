@@ -140,5 +140,8 @@
     "releaseNotes": "更新内容：",
     "openUrlFailed": "无法打开链接",
     "checkingForUpdates": "正在检查更新...",
-    "checkUpdate": "检查更新"
+    "checkUpdate": "检查更新",
+    "appDescription": "ChatMCP 是一款跨平台的 AI 客户端，致力于让更多人方便地使用 AI。",
+    "visitWebsite": "站点",
+    "aboutApp": "关于"
 }

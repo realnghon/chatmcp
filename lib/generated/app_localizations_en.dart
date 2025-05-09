@@ -499,4 +499,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get checkUpdate => 'Update Check';
+
+  @override
+  String get appDescription => 'ChatMCP is a cross-platform AI client, dedicated to making AI accessible to more people.';
+
+  @override
+  String get visitWebsite => 'website';
+
+  @override
+  String get aboutApp => 'About';
 }

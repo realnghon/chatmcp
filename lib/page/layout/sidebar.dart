@@ -8,6 +8,7 @@ import 'package:chatmcp/utils/color.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:chatmcp/components/widgets/base.dart';
+import 'package:chatmcp/page/layout/widgets/app_info.dart';
 
 class SidebarPanel extends StatelessWidget {
   final VoidCallback? onToggle;
@@ -217,6 +218,9 @@ class SidebarToolbar extends StatelessWidget {
               const Gap(size: 4),
               _buildDeleteButton(context),
             ],
+            const Spacer(),
+            const AppInfo(),
+            const Gap(size: 4),
           ],
         ),
       ),

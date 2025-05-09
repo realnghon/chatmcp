@@ -1030,6 +1030,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Update Check'**
   String get checkUpdate;
+
+  /// No description provided for @appDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'ChatMCP is a cross-platform AI client, dedicated to making AI accessible to more people.'**
+  String get appDescription;
+
+  /// No description provided for @visitWebsite.
+  ///
+  /// In en, this message translates to:
+  /// **'website'**
+  String get visitWebsite;
+
+  /// No description provided for @aboutApp.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get aboutApp;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

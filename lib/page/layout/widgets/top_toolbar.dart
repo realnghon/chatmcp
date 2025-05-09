@@ -10,11 +10,9 @@ import 'package:provider/provider.dart';
 import 'package:chatmcp/provider/chat_provider.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:chatmcp/page/layout/widgets/mcp_tools.dart';
 import 'package:chatmcp/provider/mcp_server_provider.dart';
 // test page
 import 'package:chatmcp/widgets/markdown/markit_widget.dart';
-import 'package:chatmcp/widgets/browser/browser.dart';
 import 'package:chatmcp/utils/event_bus.dart';
 import 'package:chatmcp/page/layout/widgets/chat_setting.dart';
 import 'package:flutter_popup/flutter_popup.dart';
@@ -76,10 +74,6 @@ class TopToolbar extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            UpgradeNotice(
-              showCheckUpdate: true,
-              autoCheck: false,
-            ),
             if (ProviderManager.chatProvider.activeChat != null)
               InkWell(
                 onTap: () {
