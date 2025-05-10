@@ -11,9 +11,9 @@ class WindowControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // 只在Linux和Windows平台显示
-    // if (!kIsLinux && !kIsWindows) {
-    //   return const SizedBox.shrink();
-    // }
+    if (!kIsLinux && !kIsWindows) {
+      return const SizedBox.shrink();
+    }
 
     final l10n = AppLocalizations.of(context)!;
 
