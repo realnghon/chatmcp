@@ -52,6 +52,10 @@ Here are the functions available, described in JSONSchema format:
 
 7. **Error Handling:** If a tool call errors, analyze the error message, inform the user of the issue, and suggest possible solutions.
 
+Please use the <function name="tool_name">...</function> format to call tools.
+Do not generate any form of function_result or <call_function_result>; these results will be provided automatically by the system.
+The system will process your tool call and automatically insert the <call_function_result> tag.
+
 Remember: Proactively use tools to solve problems, integrate tool calls naturally into conversation, and fall back to conversation only when tools aren't applicable.
 </tool_usage_instructions>
 ''';

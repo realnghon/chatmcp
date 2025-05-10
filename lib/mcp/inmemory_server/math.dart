@@ -266,83 +266,267 @@ class MathServer extends MemoryServer {
 
   @override
   Map<String, dynamic> onToolCall(JSONRPCMessage message) {
-    String name = message.params?['name'];
-    Map<String, dynamic> arguments = message.params?['arguments'];
-    Logger.root
-        .fine('memory_server onToolCall name: $name arguments: $arguments');
-    switch (name) {
-      case 'add':
-        return {
-          'result':
-              add(castToNumber(arguments['a']), castToNumber(arguments['b']))
-        };
-      case 'subtract':
-        return {
-          'result': subtract(
-              castToNumber(arguments['a']), castToNumber(arguments['b']))
-        };
-      case 'multiply':
-        return {
-          'result': multiply(
-              castToNumber(arguments['a']), castToNumber(arguments['b']))
-        };
-      case 'divide':
-        return {
-          'result':
-              divide(castToNumber(arguments['a']), castToNumber(arguments['b']))
-        };
-      case 'power':
-        return {
-          'result':
-              power(castToNumber(arguments['a']), castToNumber(arguments['b']))
-        };
-      case 'sqrt':
-        return {'result': sqrt(castToNumber(arguments['a']))};
-      case 'cbrt':
-        return {'result': cbrt(castToNumber(arguments['a']))};
-      case 'abs':
-        return {'result': abs(castToNumber(arguments['a']))};
-      case 'sin':
-        return {'result': sin(castToNumber(arguments['a']))};
-      case 'cos':
-        return {'result': cos(castToNumber(arguments['a']))};
-      case 'tan':
-        return {'result': tan(castToNumber(arguments['a']))};
-      case 'log':
-        if (arguments.containsKey('base')) {
-          return {
-            'result': logWithBase(
-                castToNumber(arguments['a']), castToNumber(arguments['base']))
-          };
-        } else {
-          return {'result': log(castToNumber(arguments['a']))};
-        }
-      case 'max':
-        return {
-          'result':
-              max(castToNumber(arguments['a']), castToNumber(arguments['b']))
-        };
-      case 'min':
-        return {
-          'result':
-              min(castToNumber(arguments['a']), castToNumber(arguments['b']))
-        };
-      case 'round':
-        return {'result': round(castToNumber(arguments['a']))};
-      case 'ceil':
-        return {'result': ceil(castToNumber(arguments['a']))};
-      case 'floor':
-        return {'result': floor(castToNumber(arguments['a']))};
-      case 'mod':
-        return {
-          'result':
-              mod(castToNumber(arguments['a']), castToNumber(arguments['b']))
-        };
-      case 'factorial':
-        return {'result': factorial(castToNumber(arguments['a']))};
-      default:
-        return {'result': 'unknown tool'};
+    try {
+      String name = message.params?['name'];
+      if (name == null) {
+        return {'error': 'Tool name cannot be empty'};
+      }
+
+      Map<String, dynamic>? arguments = message.params?['arguments'];
+      if (arguments == null) {
+        return {'error': 'Arguments cannot be empty'};
+      }
+
+      Logger.root
+          .fine('memory_server onToolCall name: $name arguments: $arguments');
+
+      // Execute operations based on tool name
+      switch (name) {
+        case 'add':
+          if (!_validateRequiredArgs(arguments, ['a', 'b'])) {
+            return {'error': 'Missing required parameters: a, b'};
+          }
+          var a = castToNumber(arguments['a']);
+          var b = castToNumber(arguments['b']);
+          if (a == null || b == null) {
+            return {'error': 'Parameters must be valid numbers'};
+          }
+          return {'result': add(a, b)};
+        case 'subtract':
+          if (!_validateRequiredArgs(arguments, ['a', 'b'])) {
+            return {'error': 'Missing required parameters: a, b'};
+          }
+          var a = castToNumber(arguments['a']);
+          var b = castToNumber(arguments['b']);
+          if (a == null || b == null) {
+            return {'error': 'Parameters must be valid numbers'};
+          }
+          return {'result': subtract(a, b)};
+        case 'multiply':
+          if (!_validateRequiredArgs(arguments, ['a', 'b'])) {
+            return {'error': 'Missing required parameters: a, b'};
+          }
+          var a = castToNumber(arguments['a']);
+          var b = castToNumber(arguments['b']);
+          if (a == null || b == null) {
+            return {'error': 'Parameters must be valid numbers'};
+          }
+          return {'result': multiply(a, b)};
+        case 'divide':
+          if (!_validateRequiredArgs(arguments, ['a', 'b'])) {
+            return {'error': 'Missing required parameters: a, b'};
+          }
+          var a = castToNumber(arguments['a']);
+          var b = castToNumber(arguments['b']);
+          if (a == null || b == null) {
+            return {'error': 'Parameters must be valid numbers'};
+          }
+          if (b == 0) {
+            return {'error': 'Division by zero is not allowed'};
+          }
+          return {'result': divide(a, b)};
+        case 'power':
+          if (!_validateRequiredArgs(arguments, ['a', 'b'])) {
+            return {'error': 'Missing required parameters: a, b'};
+          }
+          var a = castToNumber(arguments['a']);
+          var b = castToNumber(arguments['b']);
+          if (a == null || b == null) {
+            return {'error': 'Parameters must be valid numbers'};
+          }
+          try {
+            return {'result': power(a, b)};
+          } catch (e) {
+            return {'error': 'Power operation error: $e'};
+          }
+        case 'sqrt':
+          if (!_validateRequiredArgs(arguments, ['a'])) {
+            return {'error': 'Missing required parameter: a'};
+          }
+          var a = castToNumber(arguments['a']);
+          if (a == null) {
+            return {'error': 'Parameter must be a valid number'};
+          }
+          if (a < 0) {
+            return {'error': 'Cannot compute square root of negative number'};
+          }
+          return {'result': sqrt(a)};
+        case 'cbrt':
+          if (!_validateRequiredArgs(arguments, ['a'])) {
+            return {'error': 'Missing required parameter: a'};
+          }
+          var a = castToNumber(arguments['a']);
+          if (a == null) {
+            return {'error': 'Parameter must be a valid number'};
+          }
+          return {'result': cbrt(a)};
+        case 'abs':
+          if (!_validateRequiredArgs(arguments, ['a'])) {
+            return {'error': 'Missing required parameter: a'};
+          }
+          var a = castToNumber(arguments['a']);
+          if (a == null) {
+            return {'error': 'Parameter must be a valid number'};
+          }
+          return {'result': abs(a)};
+        case 'sin':
+          if (!_validateRequiredArgs(arguments, ['a'])) {
+            return {'error': 'Missing required parameter: a'};
+          }
+          var a = castToNumber(arguments['a']);
+          if (a == null) {
+            return {'error': 'Parameter must be a valid number'};
+          }
+          return {'result': sin(a)};
+        case 'cos':
+          if (!_validateRequiredArgs(arguments, ['a'])) {
+            return {'error': 'Missing required parameter: a'};
+          }
+          var a = castToNumber(arguments['a']);
+          if (a == null) {
+            return {'error': 'Parameter must be a valid number'};
+          }
+          return {'result': cos(a)};
+        case 'tan':
+          if (!_validateRequiredArgs(arguments, ['a'])) {
+            return {'error': 'Missing required parameter: a'};
+          }
+          var a = castToNumber(arguments['a']);
+          if (a == null) {
+            return {'error': 'Parameter must be a valid number'};
+          }
+          // Check for singularities in the tan function
+          if ((a % (math.pi / 2)).abs() < 1e-10 &&
+              (a % math.pi).abs() > 1e-10) {
+            return {'error': 'Tangent is undefined at π/2 + nπ'};
+          }
+          return {'result': tan(a)};
+        case 'log':
+          if (!_validateRequiredArgs(arguments, ['a'])) {
+            return {'error': 'Missing required parameter: a'};
+          }
+          var a = castToNumber(arguments['a']);
+          if (a == null) {
+            return {'error': 'Parameter must be a valid number'};
+          }
+          if (a <= 0) {
+            return {'error': 'Logarithm requires a positive number'};
+          }
+
+          if (arguments.containsKey('base')) {
+            var base = castToNumber(arguments['base']);
+            if (base == null) {
+              return {'error': 'Base parameter must be a valid number'};
+            }
+            if (base <= 0 || base == 1) {
+              return {
+                'error': 'Logarithm base must be positive and not equal to 1'
+              };
+            }
+            return {'result': logWithBase(a, base)};
+          } else {
+            return {'result': log(a)};
+          }
+        case 'max':
+          if (!_validateRequiredArgs(arguments, ['a', 'b'])) {
+            return {'error': 'Missing required parameters: a, b'};
+          }
+          var a = castToNumber(arguments['a']);
+          var b = castToNumber(arguments['b']);
+          if (a == null || b == null) {
+            return {'error': 'Parameters must be valid numbers'};
+          }
+          return {'result': max(a, b)};
+        case 'min':
+          if (!_validateRequiredArgs(arguments, ['a', 'b'])) {
+            return {'error': 'Missing required parameters: a, b'};
+          }
+          var a = castToNumber(arguments['a']);
+          var b = castToNumber(arguments['b']);
+          if (a == null || b == null) {
+            return {'error': 'Parameters must be valid numbers'};
+          }
+          return {'result': min(a, b)};
+        case 'round':
+          if (!_validateRequiredArgs(arguments, ['a'])) {
+            return {'error': 'Missing required parameter: a'};
+          }
+          var a = castToNumber(arguments['a']);
+          if (a == null) {
+            return {'error': 'Parameter must be a valid number'};
+          }
+          return {'result': round(a)};
+        case 'ceil':
+          if (!_validateRequiredArgs(arguments, ['a'])) {
+            return {'error': 'Missing required parameter: a'};
+          }
+          var a = castToNumber(arguments['a']);
+          if (a == null) {
+            return {'error': 'Parameter must be a valid number'};
+          }
+          return {'result': ceil(a)};
+        case 'floor':
+          if (!_validateRequiredArgs(arguments, ['a'])) {
+            return {'error': 'Missing required parameter: a'};
+          }
+          var a = castToNumber(arguments['a']);
+          if (a == null) {
+            return {'error': 'Parameter must be a valid number'};
+          }
+          return {'result': floor(a)};
+        case 'mod':
+          if (!_validateRequiredArgs(arguments, ['a', 'b'])) {
+            return {'error': 'Missing required parameters: a, b'};
+          }
+          var a = castToNumber(arguments['a']);
+          var b = castToNumber(arguments['b']);
+          if (a == null || b == null) {
+            return {'error': 'Parameters must be valid numbers'};
+          }
+          if (b == 0) {
+            return {'error': 'Modulo by zero is not allowed'};
+          }
+          return {'result': mod(a, b)};
+        case 'factorial':
+          if (!_validateRequiredArgs(arguments, ['a'])) {
+            return {'error': 'Missing required parameter: a'};
+          }
+          var a = castToNumber(arguments['a']);
+          if (a == null) {
+            return {'error': 'Parameter must be a valid number'};
+          }
+          if (a < 0) {
+            return {'error': 'Factorial cannot be applied to negative numbers'};
+          }
+          if (a > 20) {
+            return {
+              'error':
+                  'Factorial too large, please use a number less than or equal to 20'
+            };
+          }
+          try {
+            return {'result': factorial(a)};
+          } catch (e) {
+            return {'error': 'Factorial calculation error: $e'};
+          }
+        default:
+          return {'error': 'Unknown tool: $name'};
+      }
+    } catch (e, stackTrace) {
+      Logger.root.severe('MathServer error: $e\n$stackTrace');
+      return {'error': 'Error occurred during calculation: $e'};
     }
+  }
+
+  // 验证必要参数是否存在
+  bool _validateRequiredArgs(
+      Map<String, dynamic> args, List<String> requiredArgs) {
+    for (var arg in requiredArgs) {
+      if (!args.containsKey(arg) || args[arg] == null) {
+        return false;
+      }
+    }
+    return true;
   }
 
   int add(int a, int b) {
@@ -358,19 +542,29 @@ class MathServer extends MemoryServer {
   }
 
   double divide(int a, int b) {
+    if (b == 0) {
+      throw ArgumentError('Division by zero is not allowed');
+    }
     return a / b;
   }
 
   int power(int a, int b) {
+    if (b < 0) {
+      throw ArgumentError(
+          'Negative exponents are not supported in this implementation');
+    }
     return math.pow(a, b).toInt();
   }
 
   double sqrt(int a) {
+    if (a < 0) {
+      throw ArgumentError('Cannot compute square root of negative number');
+    }
     return math.sqrt(a);
   }
 
   double cbrt(int a) {
-    return math.pow(a, 1 / 3).toDouble();
+    return math.pow(a.abs(), 1 / 3).toDouble() * (a < 0 ? -1 : 1);
   }
 
   int abs(int a) {
@@ -386,14 +580,27 @@ class MathServer extends MemoryServer {
   }
 
   double tan(num a) {
+    // Check for singularities in the tan function
+    if ((a % (math.pi / 2)).abs() < 1e-10 && (a % math.pi).abs() > 1e-10) {
+      throw ArgumentError('Tangent is undefined at π/2 + nπ');
+    }
     return math.tan(a);
   }
 
   double log(num a) {
+    if (a <= 0) {
+      throw ArgumentError('Logarithm requires a positive number');
+    }
     return math.log(a);
   }
 
   double logWithBase(num a, num base) {
+    if (a <= 0) {
+      throw ArgumentError('Logarithm requires a positive number');
+    }
+    if (base <= 0 || base == 1) {
+      throw ArgumentError('Logarithm base must be positive and not equal to 1');
+    }
     return math.log(a) / math.log(base);
   }
 
@@ -418,12 +625,19 @@ class MathServer extends MemoryServer {
   }
 
   int mod(int a, int b) {
+    if (b == 0) {
+      throw ArgumentError('Modulo by zero is not allowed');
+    }
     return a % b;
   }
 
   int factorial(int a) {
     if (a < 0) {
       throw ArgumentError('Factorial cannot be applied to negative numbers');
+    }
+    if (a > 20) {
+      throw ArgumentError(
+          'Factorial too large, please use a number less than or equal to 20');
     }
     if (a <= 1) {
       return 1;
@@ -433,8 +647,33 @@ class MathServer extends MemoryServer {
 }
 
 castToNumber(dynamic value) {
+  if (value == null) {
+    return null;
+  }
+
   if (value is int) {
     return value;
   }
-  return num.tryParse(value);
+
+  if (value is double) {
+    return value.toInt();
+  }
+
+  if (value is String) {
+    if (value.trim().isEmpty) {
+      return null;
+    }
+
+    try {
+      var parsed = num.tryParse(value);
+      if (parsed == null) {
+        return null;
+      }
+      return parsed is double ? parsed.toInt() : parsed;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  return null;
 }
