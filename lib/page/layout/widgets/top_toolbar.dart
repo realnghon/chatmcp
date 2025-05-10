@@ -17,6 +17,7 @@ import 'package:chatmcp/utils/event_bus.dart';
 import 'package:chatmcp/page/layout/widgets/chat_setting.dart';
 import 'package:flutter_popup/flutter_popup.dart';
 import 'package:chatmcp/widgets/upgradge.dart';
+import 'package:chatmcp/page/layout/widgets/window_controls.dart';
 
 class TopToolbar extends StatelessWidget {
   final bool hideSidebar;
@@ -196,72 +197,81 @@ class TopToolbar extends StatelessWidget {
                   padding: kIsDesktop
                       ? EdgeInsets.only(left: hideSidebar ? 70 : 0, top: 2)
                       : null,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Flexible(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (hideSidebar && kIsDesktop)
-                              InkIcon(
-                                icon: CupertinoIcons.sidebar_right,
-                                onTap: onToggleSidebar,
-                              ),
-                            Flexible(
-                              child: ConstrainedBox(
-                                constraints: const BoxConstraints(minWidth: 50),
-                                child: Row(
-                                  children: [
-                                    if (kIsAndroid) ...[
-                                      Gap(size: 12),
-                                      InkIcon(
-                                        icon: CupertinoIcons.sidebar_left,
-                                        onTap: () {
-                                          Scaffold.of(context).openDrawer();
-                                        },
-                                      ),
-                                    ],
-                                    const ModelSelector(),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            constraints: BoxConstraints(
-                              maxWidth: MediaQuery.of(context).size.width < 400
-                                  ? 30
-                                  : 120,
-                            ),
-                            child: UpgradeNotice(),
-                          ),
-                          if (ProviderManager.chatProvider.activeChat !=
-                              null) ...[
-                            Gap(size: 8),
-                            InkIcon(
-                              icon: CupertinoIcons.add,
-                              onTap: () {
-                                ProviderManager.chatProvider.clearActiveChat();
-                              },
-                            ),
-                          ],
-                          _buildMoreMenu(context),
-                        ],
-                      ),
-                    ],
-                  ),
+                  child: kIsDesktop
+                      ? wm.DragToMoveArea(
+                          child: _buildToolbarContent(context),
+                        )
+                      : _buildToolbarContent(context),
                 ),
               ),
             );
           },
         );
       },
+    );
+  }
+
+  Widget _buildToolbarContent(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Flexible(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (hideSidebar && kIsDesktop)
+                InkIcon(
+                  icon: CupertinoIcons.sidebar_right,
+                  onTap: onToggleSidebar,
+                ),
+              Flexible(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minWidth: 50),
+                  child: Row(
+                    children: [
+                      if (kIsAndroid) ...[
+                        Gap(size: 12),
+                        InkIcon(
+                          icon: CupertinoIcons.sidebar_left,
+                          onTap: () {
+                            Scaffold.of(context).openDrawer();
+                          },
+                        ),
+                      ],
+                      const ModelSelector(),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width < 400 ? 30 : 120,
+              ),
+              child: UpgradeNotice(),
+            ),
+            if (ProviderManager.chatProvider.activeChat != null) ...[
+              Gap(size: 8),
+              InkIcon(
+                icon: CupertinoIcons.add,
+                onTap: () {
+                  ProviderManager.chatProvider.clearActiveChat();
+                },
+              ),
+            ],
+            if (kIsDesktop) ...[
+              const Gap(size: 8),
+              const WindowControls(),
+            ],
+            _buildMoreMenu(context),
+          ],
+        ),
+      ],
     );
   }
 }

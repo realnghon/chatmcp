@@ -64,9 +64,7 @@ void main() async {
       center: true,
       // backgroundColor: Colors.transparent,
       skipTaskbar: false,
-      titleBarStyle: (kIsLinux || kIsWindows)
-          ? wm.TitleBarStyle.normal
-          : wm.TitleBarStyle.hidden,
+      titleBarStyle: wm.TitleBarStyle.hidden,
     );
 
     await wm.windowManager.waitUntilReadyToShow(windowOptions, () async {

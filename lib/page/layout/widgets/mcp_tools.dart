@@ -107,14 +107,10 @@ class _McpToolsState extends State<McpTools> {
           }
         });
 
-        final backgroundColor = AppColors.getThemeColor(context,
-            lightColor: Colors.white, darkColor: Colors.grey[800]);
-
         return CustomPopup(
           showArrow: true,
-          arrowColor: backgroundColor,
-          backgroundColor: backgroundColor,
-          barrierColor: Colors.transparent,
+          arrowColor: AppColors.getLayoutBackgroundColor(context),
+          backgroundColor: AppColors.getLayoutBackgroundColor(context),
           content: Container(
             constraints: BoxConstraints(
               maxWidth: 400,
@@ -154,8 +150,14 @@ class _McpToolsState extends State<McpTools> {
             builder: (context, stateProvider, _) {
               return InkIcon(
                 icon: CupertinoIcons.hammer,
-                text: stateProvider.enabledCount > 0
-                    ? ' ${stateProvider.enabledCount}'
+                tooltip: 'MCP Server',
+                child: stateProvider.enabledCount > 0
+                    ? Text(
+                        ' ${stateProvider.enabledCount}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                        ),
+                      )
                     : null,
               );
             },

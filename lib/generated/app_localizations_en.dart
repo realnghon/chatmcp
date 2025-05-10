@@ -472,6 +472,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stop => 'stop';
 
   @override
+  String get search => 'Search';
+
+  @override
   String newVersionFound(Object version) {
     return 'New version $version available';
   }
@@ -532,4 +535,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unauthorizedError => 'Unauthorized access';
+
+  @override
+  String get minimize => 'Minimize';
+
+  @override
+  String get maximize => 'Maximize';
 }

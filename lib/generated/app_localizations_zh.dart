@@ -472,6 +472,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get stop => '停止';
 
   @override
+  String get search => '搜索';
+
+  @override
   String newVersionFound(Object version) {
     return '发现新版本 $version';
   }
@@ -532,4 +535,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get unauthorizedError => '未授权访问，请检查权限';
+
+  @override
+  String get minimize => '最小化';
+
+  @override
+  String get maximize => '最大化';
 }

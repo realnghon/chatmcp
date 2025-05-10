@@ -122,8 +122,6 @@ class _InputAreaState extends State<InputArea> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
     return Container(
       decoration: BoxDecoration(
         // color: Theme.of(context).cardColor,
@@ -132,8 +130,8 @@ class _InputAreaState extends State<InputArea> {
         border: Border.all(
             color: AppColors.getInputAreaBorderColor(context), width: 1),
       ),
-      margin: const EdgeInsets.only(
-          left: 12.0, right: 12.0, top: 2.0, bottom: 12.0),
+      margin:
+          const EdgeInsets.only(left: 12.0, right: 12.0, top: 2.0, bottom: 8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -316,7 +314,7 @@ class _InputAreaState extends State<InputArea> {
           ),
           Padding(
             padding:
-                const EdgeInsets.only(left: 12.0, right: 12.0, bottom: 12.0),
+                const EdgeInsets.only(left: 12.0, right: 12.0, bottom: 6.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -339,7 +337,7 @@ class _InputAreaState extends State<InputArea> {
                         ),
                       ] else ...[
                         InkIcon(
-                          icon: CupertinoIcons.paperclip,
+                          icon: CupertinoIcons.plus_app,
                           onTap: () {
                             if (widget.disabled) return;
                             _pickFiles();
@@ -354,8 +352,7 @@ class _InputAreaState extends State<InputArea> {
                 if (!widget.disabled) ...[
                   const Spacer(),
                   InkIcon(
-                    icon: Icons.arrow_circle_up,
-                    color: Theme.of(context).iconTheme.color,
+                    icon: CupertinoIcons.arrow_up_circle,
                     onTap: () {
                       if (widget.disabled ||
                           textController.text.trim().isEmpty) {

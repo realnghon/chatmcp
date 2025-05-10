@@ -977,6 +977,12 @@ abstract class AppLocalizations {
   /// **'stop'**
   String get stop;
 
+  /// No description provided for @search.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get search;
+
   /// No description provided for @newVersionFound.
   ///
   /// In en, this message translates to:
@@ -1096,6 +1102,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unauthorized access'**
   String get unauthorizedError;
+
+  /// No description provided for @minimize.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimize'**
+  String get minimize;
+
+  /// No description provided for @maximize.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximize'**
+  String get maximize;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

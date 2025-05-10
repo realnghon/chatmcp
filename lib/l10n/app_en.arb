@@ -148,6 +148,7 @@
     "reset": "Reset",
     "start": "Start",
     "stop": "stop",
+    "search": "Search",
     "newVersionFound": "New version {version} available",
     "newVersionAvailable": "New version available",
     "updateNow": "Update Now",
@@ -167,5 +168,7 @@
     "timeoutError": "Request timed out",
     "notFoundError": "Resource not found",
     "invalidError": "Invalid request",
-    "unauthorizedError": "Unauthorized access"
+    "unauthorizedError": "Unauthorized access",
+    "minimize": "Minimize",
+    "maximize": "Maximize"
 }

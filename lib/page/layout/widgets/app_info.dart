@@ -60,7 +60,6 @@ class AppInfo extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final version = await _getAppVersion();
 
-    // ignore: use_build_context_synchronously
     showDialog(
       context: context,
       builder: (context) => Dialog(

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class LlmIcon extends StatelessWidget {
   final String icon;
@@ -13,25 +15,34 @@ class LlmIcon extends StatelessWidget {
     super.key,
     required this.icon,
     this.color,
-    this.size = 16,
+    this.size = 16, // 基础默认值保持为常量16
   });
 
   @override
   Widget build(BuildContext context) {
+    // 在build方法中根据平台动态设置尺寸
+    final double effectiveSize = size != 16
+        ? size
+        : (kIsWeb
+            ? 16.0
+            : (Platform.isAndroid || Platform.isIOS)
+                ? 24.0
+                : 16.0);
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final defaultColor = isDark ? Colors.white : Colors.black;
 
     if (icon.isNotEmpty) {
       return ColorAwareSvg(
         assetName: 'assets/logo/$icon.svg',
-        size: size,
+        size: effectiveSize,
         color: color ?? defaultColor,
       );
     }
 
     return ColorAwareSvg(
       assetName: 'assets/logo/ai-chip.svg',
-      size: size,
+      size: effectiveSize,
       color: color ?? defaultColor,
     );
   }
