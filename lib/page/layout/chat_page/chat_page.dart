@@ -49,6 +49,9 @@ class _ChatPageState extends State<ChatPage> {
   List<RunFunctionEvent> _runFunctionEvents = [];
   bool _isRunningFunction = false;
 
+  final num _maxLoop = 100;
+  num _currentLoop = 0;
+
   @override
   void initState() {
     super.initState();
@@ -640,6 +643,10 @@ class _ChatPageState extends State<ChatPage> {
 
     try {
       while (await _checkNeedToolCall()) {
+        if (_currentLoop > _maxLoop) {
+          break;
+        }
+
         if (_runFunctionEvents.isNotEmpty) {
           // 顺序处理每个函数调用
           while (_runFunctionEvents.isNotEmpty) {
@@ -677,6 +684,7 @@ class _ChatPageState extends State<ChatPage> {
         }
 
         await _processLLMResponse();
+        _currentLoop++;
       }
       await _updateChat();
     } catch (e, stackTrace) {
@@ -795,10 +803,22 @@ class _ChatPageState extends State<ChatPage> {
     for (final message in messageList.sublist(1)) {
       if (newMessages.last.role == message.role) {
         String content = message.content ?? '';
-        content =
-            content.replaceAll('<call_function_result', '\nfunction_result');
-        content = content.replaceAll('</call_function_result>', '');
-        content = content.replaceAll('>', '');
+
+        // final RegExp functionResultRegex = RegExp(
+        //     '<call_function_result\\s+name=["\']([^"\']*)["\']\\s*>(.*?)</call_function_result>',
+        //     dotAll: true);
+
+        // if (!content.contains('<call_function_result') ||
+        //     !functionResultRegex.hasMatch(content)) {
+        //   newMessages.add(message);
+        //   continue;
+        // }
+
+        // content =
+        //     content.replaceAll('<call_function_result', '\nfunction_result');
+        // content = content.replaceAll('</call_function_result>', '');
+        // content = content.replaceAll('>', '');
+
         newMessages.last = newMessages.last.copyWith(
           content: '${newMessages.last.content}\n\n$content',
         );
@@ -919,7 +939,13 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _handleError(dynamic error, StackTrace stackTrace) {
-    Logger.root.severe(error, stackTrace);
+    Logger.root.severe('error: $error');
+    Logger.root.severe('stackTrace: $stackTrace');
+
+    // 尝试提取更多错误信息
+    if (error is TypeError) {
+      Logger.root.severe('类型错误: ${error.toString()}');
+    }
 
     // 重置所有相关状态
     _resetState();
@@ -949,6 +975,14 @@ class _ChatPageState extends State<ChatPage> {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: AppColors.getErrorTextColor(),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'error type: ${error.runtimeType}',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.getErrorTextColor().withAlpha(128),
                     ),
                   ),
                 ],
@@ -1021,11 +1055,15 @@ class _ChatPageState extends State<ChatPage> {
       _isLoading = false;
       _isCancelled = false;
       _isWating = false;
+      _currentLoop = 0;
     });
   }
 
   void _handleCancel() {
     _resetState();
+    setState(() {
+      _isCancelled = true;
+    });
   }
 
   CodePreviewEvent? _codePreviewEvent;

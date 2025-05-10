@@ -34,7 +34,9 @@ class McpInfo extends StatelessWidget {
       return [];
     }
     return toolsData
-        .map((tool) => Tool(name: tool['name'], desc: tool['description']))
+        .map((tool) => Tool(
+            name: tool['name'] as String? ?? '',
+            desc: tool['description'] as String? ?? ''))
         .toList();
   }
 
