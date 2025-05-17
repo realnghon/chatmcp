@@ -10,7 +10,6 @@ import 'package:chatmcp/generated/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:chatmcp/widgets/ink_icon.dart';
 import 'package:chatmcp/utils/color.dart';
-import 'package:chatmcp/components/widgets/base.dart';
 
 class SubmitData {
   final String text;
@@ -185,13 +184,13 @@ class _InputAreaState extends State<InputArea> {
                                   const SizedBox(width: 6),
                                   Text(
                                     _truncateFileName(file.name),
-                                    style: FontUtils.getPlatformTextStyle(
-                                          context: context,
-                                          size: 12,
-                                          color: Theme.of(context)
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Theme.of(context)
                                           .textTheme
                                           .bodyMedium
-                                          ?.color),
+                                          ?.color,
+                                    ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ],
@@ -286,17 +285,17 @@ class _InputAreaState extends State<InputArea> {
                     }),
                   ],
                   keyboardType: TextInputType.multiline,
-                  style: FontUtils.getPlatformTextStyle(
-                                context: context,
-                                size: 14,
-                                color: AppColors.getInputAreaHintTextColor(context)),
+                  style: TextStyle(
+                    fontSize: 14.0,
+                    color: AppColors.getInputAreaTextColor(context),
+                  ),
                   scrollPhysics: const BouncingScrollPhysics(),
                   decoration: InputDecoration(
                     hintText: l10n.askMeAnything,
-                    hintStyle: FontUtils.getPlatformTextStyle(
-                                context: context,
-                                size: 14,
-                                color: AppColors.getInputAreaHintTextColor(context)),
+                    hintStyle: TextStyle(
+                      fontSize: 14.0,
+                      color: AppColors.getInputAreaHintTextColor(context),
+                    ),
                     filled: true,
                     fillColor: AppColors.getInputAreaBackgroundColor(context),
                     hoverColor: Colors.transparent,

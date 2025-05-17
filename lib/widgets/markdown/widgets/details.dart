@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:markdown_widget/markdown_widget.dart';
 import 'package:markdown/markdown.dart' as md;
 import 'package:chatmcp/widgets/markdown/markit_widget.dart';
-import 'package:chatmcp/components/widgets/base.dart';
 
 const _detailsTag = 'details';
 
@@ -14,18 +13,12 @@ class DetailConfig extends WidgetConfig {
   final TextStyle? contentStyle;
 
   DetailConfig({
-    required BuildContext context,
-    TextStyle? summaryStyle,
-    TextStyle? contentStyle,
-  }) : summaryStyle = summaryStyle ?? FontUtils.getPlatformTextStyle(
-          context: context,
-          size: 14,
-          fontWeight: FontWeight.bold,
-        ),
-        contentStyle = contentStyle ?? FontUtils.getPlatformTextStyle(
-          context: context,
-          size: 14,
-        );
+    this.summaryStyle = const TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.bold,
+    ),
+    this.contentStyle = const TextStyle(fontSize: 14),
+  });
 }
 
 class DetailsWidget extends StatefulWidget {
