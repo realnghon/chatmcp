@@ -319,7 +319,7 @@ class _UpgradeNoticeState extends State<UpgradeNotice> {
                 Text(
                   _isChecking ? l10n.checkingForUpdates : l10n.checkUpdate,
                   style: TextStyle(
-                    color: Colors.grey[700],
+                    color: AppColors.getThemeTextColor(context),
                     fontSize: 12,
                   ),
                   overflow: TextOverflow.ellipsis,

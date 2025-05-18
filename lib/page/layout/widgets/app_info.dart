@@ -1,64 +1,37 @@
 import 'package:chatmcp/page/layout/widgets/llm_icon.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:chatmcp/widgets/ink_icon.dart';
 import 'package:chatmcp/utils/color.dart';
-import 'package:flutter/services.dart';
 import 'package:chatmcp/utils/platform.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:chatmcp/widgets/upgradge.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AppInfo extends StatelessWidget {
-  final String? appVersion;
   final String? appWebsite;
   final String? githubUrl;
   final String? licenseInfo;
 
   const AppInfo({
     super.key,
-    this.appVersion,
     this.appWebsite,
     this.githubUrl = 'https://github.com/daodao97/chatmcp',
     this.licenseInfo = 'Apache License 2.0',
   });
 
   Future<String> _getAppVersion() async {
-    // 如果已提供版本号，则使用提供的版本号
-    if (appVersion != null) {
-      return appVersion!;
-    }
-
-    try {
-      // 获取本地存储
-      final prefs = await SharedPreferences.getInstance();
-
-      // 获取存储的版本号，如果没有则从PackageInfo获取
-      final storedVersion = prefs.getString('app_version');
-      if (storedVersion != null) {
-        return storedVersion;
-      }
-
-      // 获取当前应用版本
-      final packageInfo = await PackageInfo.fromPlatform();
-      final currentVersion = packageInfo.version;
-      debugPrint('当前应用版本: $currentVersion');
-
-      // 存储版本号以供下次使用
-      await prefs.setString('app_version', currentVersion);
-
-      return currentVersion;
-    } catch (e) {
-      debugPrint('获取版本号时出错: $e');
-      return '1.0.0'; // 默认版本号
-    }
+    final packageInfo = await PackageInfo.fromPlatform();
+    return packageInfo.version;
   }
 
   void _showAboutDialog(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
     final version = await _getAppVersion();
+
+    Logger.root.info('AppInfo: $version');
+
+    if (!context.mounted) return;
 
     showDialog(
       context: context,
