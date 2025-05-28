@@ -7,9 +7,9 @@ import 'package:provider/provider.dart';
 import 'package:chatmcp/provider/mcp_server_provider.dart';
 import 'package:chatmcp/provider/serve_state_provider.dart';
 import 'package:flutter_switch/flutter_switch.dart';
-import 'package:flutter_popup/flutter_popup.dart';
 import 'package:chatmcp/provider/settings_provider.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
+import 'package:chatmcp/components/widgets/custom_popup.dart';
 import 'dart:async';
 
 class ConvSetting extends StatefulWidget {
@@ -171,42 +171,36 @@ class _ConvSettingState extends State<ConvSetting> {
           }
         });
 
-        return CustomPopup(
+        return BasePopup(
           showArrow: true,
-          arrowColor: AppColors.getLayoutBackgroundColor(context),
-          backgroundColor: AppColors.getLayoutBackgroundColor(context),
-          content: Container(
-            constraints: BoxConstraints(
-              maxWidth: 400,
-              maxHeight: MediaQuery.of(context).size.height * 0.6,
-            ),
-            child: _isLoading
-                ? const Center(
-                    child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  )
-                : _error != null
-                    ? Center(
-                        child: Text(_error!,
-                            style: Theme.of(context).textTheme.bodyMedium),
-                      )
-                    : Container(
-                        constraints: const BoxConstraints(
-                          maxHeight: 400,
-                        ),
-                        child: SingleChildScrollView(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              _buildSettingsSection(context),
-                            ],
-                          ),
+          maxWidth: 400,
+          padding: EdgeInsets.zero,
+          content: _isLoading
+              ? const Center(
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                )
+              : _error != null
+                  ? Center(
+                      child: Text(_error!,
+                          style: Theme.of(context).textTheme.bodyMedium),
+                    )
+                  : Container(
+                      constraints: const BoxConstraints(
+                        maxHeight: 400,
+                      ),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _buildSettingsSection(context),
+                          ],
                         ),
                       ),
-          ),
+                    ),
           child: Consumer<ServerStateProvider>(
             builder: (context, stateProvider, _) {
               final l10n = AppLocalizations.of(context)!;
