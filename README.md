@@ -1,5 +1,5 @@
 <div align="center">
-<img src="./macos/Runner/Assets.xcassets/AppIcon.appiconset/icon_128@1x.webp" alt="logo">
+<img src="./assets/logo.png" alt="logo">
 <h1>chatmcp</h1>
 
 Cross-platform `Macos | Windows | Linux | iOS | Android` AI Chat Client
