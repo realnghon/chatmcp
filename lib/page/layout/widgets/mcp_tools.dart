@@ -1,4 +1,3 @@
-import 'package:chatmcp/components/widgets/base.dart';
 import 'package:chatmcp/utils/color.dart';
 import 'package:chatmcp/widgets/ink_icon.dart';
 import 'package:flutter/cupertino.dart';
