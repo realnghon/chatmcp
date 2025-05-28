@@ -1,5 +1,5 @@
 <div align="center">
-<img src="./assets/logo.png" alt="logo">
+<img src="./assets/logo.png" alt="logo" width="120" height="120">
 <h1>chatmcp</h1>
 
 Cross-platform `Macos | Windows | Linux | iOS | Android` AI Chat Client

@@ -1,5 +1,5 @@
 <div align="center">
-<img src="./assets/logo.png" alt="logo">
+<img src="./assets/logo.png" alt="logo" width="120" height="120">
 <h1>chatmcp</h1>
 
 跨平台 `MacOS | Windows | Linux | iOS | Android` AI 聊天客户端
