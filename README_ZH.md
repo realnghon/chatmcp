@@ -107,6 +107,26 @@ flutter pub get
 flutter run -d macos
 ```
 
+### Android 签名配置
+
+如果您需要构建发布版本的 Android 应用，请配置签名：
+
+```bash
+# 生成签名密钥
+./scripts/create_keystore.sh
+
+# 验证签名配置
+./scripts/verify_signing.sh
+
+# 构建签名的 APK
+flutter build apk --release
+
+# 构建签名的 App Bundle（推荐用于 Google Play）
+flutter build appbundle --release
+```
+
+详细的签名配置说明请参考：[Android 签名配置指南](./docs/android-signing.md)
+
 ## 功能特性
 
 - [x] 与 MCP 服务器对话

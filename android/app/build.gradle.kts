@@ -5,6 +5,11 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// 从环境变量读取签名配置
+fun getEnvOrProperty(name: String): String? {
+    return System.getenv(name) ?: project.findProperty(name) as String?
+}
+
 android {
     namespace = "run.daodao.chatmcp"
     compileSdk = flutter.compileSdkVersion
@@ -18,6 +23,16 @@ android {
 
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17.toString()
+    }
+
+    // 签名配置
+    signingConfigs {
+        create("release") {
+            keyAlias = getEnvOrProperty("SIGNING_KEY_ALIAS")
+            keyPassword = getEnvOrProperty("SIGNING_KEY_PASSWORD")
+            storeFile = getEnvOrProperty("SIGNING_STORE_PATH")?.let { file(it) }
+            storePassword = getEnvOrProperty("SIGNING_STORE_PASSWORD")
+        }
     }
 
     defaultConfig {
@@ -34,9 +49,27 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // 使用release签名配置，如果配置不完整则回退到debug签名
+            val releaseSigningConfig = signingConfigs.getByName("release")
+            signingConfig = if (releaseSigningConfig.storeFile != null &&
+                                releaseSigningConfig.keyAlias != null &&
+                                releaseSigningConfig.keyPassword != null &&
+                                releaseSigningConfig.storePassword != null) {
+                releaseSigningConfig
+            } else {
+                println("Warning: Release signing config is incomplete, using debug signing")
+                signingConfigs.getByName("debug")
+            }
+            
+            // 开启代码压缩和混淆
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+        
+        debug {
             signingConfig = signingConfigs.getByName("debug")
+            isDebuggable = true
         }
     }
 }
