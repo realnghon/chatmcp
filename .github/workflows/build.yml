@@ -85,11 +85,12 @@ jobs:
       - name: Build ${{ matrix.build_target }}
         shell: bash
         run: |
-          flutter build ${{ matrix.build_target }} --release
+          echo "apk_build: ${{ matrix.apk_build }}"
           if [ "${{ matrix.apk_build }}" == "true" ]; then
             flutter build apk --release --split-per-abi
             flutter build appbundle --release
           fi
+          flutter build ${{ matrix.build_target }} --release
       
       - name: Package Linux App
         if: matrix.os == 'ubuntu-latest'
