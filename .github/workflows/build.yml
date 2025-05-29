@@ -90,7 +90,7 @@ jobs:
             flutter build apk --release --split-per-abi
             flutter build appbundle --release
           fi
-          flutter build ${{ matrix.build_target }} --release
+          # flutter build ${{ matrix.build_target }} --release
       
       - name: Package Linux App
         if: matrix.os == 'ubuntu-latest'
