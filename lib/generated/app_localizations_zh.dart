@@ -197,7 +197,8 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get temperatureTooltip => '采样温度控制输出的随机性：\n• 0.0：适合代码生成和数学解题\n• 1.0：适合数据抽取和分析\n• 1.3：适合通用对话和翻译\n• 1.5：适合创意写作和诗歌创作';
+  String get temperatureTooltip =>
+      '采样温度控制输出的随机性：\n• 0.0：适合代码生成和数学解题\n• 1.0：适合数据抽取和分析\n• 1.3：适合通用对话和翻译\n• 1.5：适合创意写作和诗歌创作';
 
   @override
   String topP(Object value) {
@@ -205,7 +206,8 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get topPTooltip => 'Top P（核采样）是temperature的替代方案。模型只考虑累积概率超过P的标记。建议不要同时修改temperature和top_p。';
+  String get topPTooltip =>
+      'Top P（核采样）是temperature的替代方案。模型只考虑累积概率超过P的标记。建议不要同时修改temperature和top_p。';
 
   @override
   String get maxTokens => '最大令牌数';
@@ -219,7 +221,8 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get frequencyPenaltyTooltip => '频率惩罚参数。正值会根据新标记在文本中的现有频率来惩罚它们，降低模型逐字重复同样内容的可能性。';
+  String get frequencyPenaltyTooltip =>
+      '频率惩罚参数。正值会根据新标记在文本中的现有频率来惩罚它们，降低模型逐字重复同样内容的可能性。';
 
   @override
   String presencePenalty(Object value) {
@@ -227,7 +230,8 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get presencePenaltyTooltip => '存在惩罚参数。正值会根据新标记是否出现在文本中来惩罚它们，增加模型谈论新主题的可能性。';
+  String get presencePenaltyTooltip =>
+      '存在惩罚参数。正值会根据新标记是否出现在文本中来惩罚它们，增加模型谈论新主题的可能性。';
 
   @override
   String get enterMaxTokens => '输入最大令牌数';

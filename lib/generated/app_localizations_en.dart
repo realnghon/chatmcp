@@ -45,13 +45,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enableArtifacts => 'Enable Artifacts';
 
   @override
-  String get enableArtifactsDescription => 'Enable the artifacts of the AI assistant in the conversation, will use more tokens';
+  String get enableArtifactsDescription =>
+      'Enable the artifacts of the AI assistant in the conversation, will use more tokens';
 
   @override
   String get enableToolUsage => 'Enable Tool Usage';
 
   @override
-  String get enableToolUsageDescription => 'Enable the usage of tools in the conversation, will use more tokens';
+  String get enableToolUsageDescription =>
+      'Enable the usage of tools in the conversation, will use more tokens';
 
   @override
   String get themeSettings => 'Theme Settings';
@@ -72,19 +74,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get showAssistantAvatar => 'Show Assistant Avatar';
 
   @override
-  String get showAssistantAvatarDescription => 'Show the avatar of the AI assistant in the conversation';
+  String get showAssistantAvatarDescription =>
+      'Show the avatar of the AI assistant in the conversation';
 
   @override
   String get showUserAvatar => 'Show User Avatar';
 
   @override
-  String get showUserAvatarDescription => 'Show the avatar of the user in the conversation';
+  String get showUserAvatarDescription =>
+      'Show the avatar of the user in the conversation';
 
   @override
   String get systemPrompt => 'System Prompt';
 
   @override
-  String get systemPromptDescription => 'This is the system prompt for the conversation with the AI assistant, used to set the behavior and style of the assistant';
+  String get systemPromptDescription =>
+      'This is the system prompt for the conversation with the AI assistant, used to set the behavior and style of the assistant';
 
   @override
   String get llmKey => 'LLM Key';
@@ -113,10 +118,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterApiEndpoint => 'Enter API endpoint URL';
 
   @override
-  String get platformNotSupported => 'Current platform does not support MCP Server';
+  String get platformNotSupported =>
+      'Current platform does not support MCP Server';
 
   @override
-  String get mcpServerDesktopOnly => 'MCP Server only supports desktop platforms (Windows, macOS, Linux)';
+  String get mcpServerDesktopOnly =>
+      'MCP Server only supports desktop platforms (Windows, macOS, Linux)';
 
   @override
   String get searchServer => 'Search server...';
@@ -155,7 +162,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commandExample => 'For example: npx, uvx, https://mcpserver.com';
 
   @override
-  String get argumentsExample => 'Separate arguments with spaces, for example: -m mcp.server';
+  String get argumentsExample =>
+      'Separate arguments with spaces, for example: -m mcp.server';
 
   @override
   String get envVarsFormat => 'One per line, format: KEY=VALUE';
@@ -197,7 +205,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get temperatureTooltip => 'Sampling temperature controls the randomness of output:\n• 0.0: Suitable for code generation and math problems\n• 1.0: Suitable for data extraction and analysis\n• 1.3: Suitable for general conversation and translation\n• 1.5: Suitable for creative writing and poetry';
+  String get temperatureTooltip =>
+      'Sampling temperature controls the randomness of output:\n• 0.0: Suitable for code generation and math problems\n• 1.0: Suitable for data extraction and analysis\n• 1.3: Suitable for general conversation and translation\n• 1.5: Suitable for creative writing and poetry';
 
   @override
   String topP(Object value) {
@@ -205,13 +214,15 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get topPTooltip => 'Top P (nucleus sampling) is an alternative to temperature. The model only considers tokens whose cumulative probability exceeds P. It is recommended not to modify both temperature and top_p at the same time.';
+  String get topPTooltip =>
+      'Top P (nucleus sampling) is an alternative to temperature. The model only considers tokens whose cumulative probability exceeds P. It is recommended not to modify both temperature and top_p at the same time.';
 
   @override
   String get maxTokens => 'Max Tokens';
 
   @override
-  String get maxTokensTooltip => 'Maximum number of tokens to generate. One token is approximately equal to 4 characters. Longer conversations require more tokens.';
+  String get maxTokensTooltip =>
+      'Maximum number of tokens to generate. One token is approximately equal to 4 characters. Longer conversations require more tokens.';
 
   @override
   String frequencyPenalty(Object value) {
@@ -219,7 +230,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get frequencyPenaltyTooltip => 'Frequency penalty parameter. Positive values penalize new tokens based on their existing frequency in the text, decreasing the model\'s likelihood of repeating the same content verbatim.';
+  String get frequencyPenaltyTooltip =>
+      'Frequency penalty parameter. Positive values penalize new tokens based on their existing frequency in the text, decreasing the model\'s likelihood of repeating the same content verbatim.';
 
   @override
   String presencePenalty(Object value) {
@@ -227,7 +239,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get presencePenaltyTooltip => 'Presence penalty parameter. Positive values penalize new tokens based on whether they appear in the text, increasing the model\'s likelihood of talking about new topics.';
+  String get presencePenaltyTooltip =>
+      'Presence penalty parameter. Positive values penalize new tokens based on whether they appear in the text, increasing the model\'s likelihood of talking about new topics.';
 
   @override
   String get enterMaxTokens => 'Enter max tokens';
@@ -260,7 +273,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get earlier => 'Earlier';
 
   @override
-  String get confirmDeleteSelected => 'Are you sure you want to delete the selected conversations?';
+  String get confirmDeleteSelected =>
+      'Are you sure you want to delete the selected conversations?';
 
   @override
   String get ok => 'OK';
@@ -345,7 +359,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get functionCallAuth => 'Tool Call Authorization';
 
   @override
-  String get allowFunctionExecution => 'Do you want to allow the following tool to execute:';
+  String get allowFunctionExecution =>
+      'Do you want to allow the following tool to execute:';
 
   @override
   String parameters(Object params) {
@@ -504,7 +519,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checkUpdate => 'Update Check';
 
   @override
-  String get appDescription => 'ChatMCP is a cross-platform AI client, dedicated to making AI accessible to more people.';
+  String get appDescription =>
+      'ChatMCP is a cross-platform AI client, dedicated to making AI accessible to more people.';
 
   @override
   String get visitWebsite => 'website';
@@ -549,13 +565,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get maxMessages => 'Max Messages';
 
   @override
-  String get maxMessagesDescription => 'Limit the maximum number of messages passed to LLM (1-1000)';
+  String get maxMessagesDescription =>
+      'Limit the maximum number of messages passed to LLM (1-1000)';
 
   @override
   String get maxLoops => 'Max Loops';
 
   @override
-  String get maxLoopsDescription => 'Limit the maximum number of tool call loops to prevent infinite loops (1-1000)';
+  String get maxLoopsDescription =>
+      'Limit the maximum number of tool call loops to prevent infinite loops (1-1000)';
 
   @override
   String get mcpServers => 'MCP Servers';
