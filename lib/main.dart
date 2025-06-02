@@ -18,6 +18,9 @@ import 'package:bot_toast/bot_toast.dart';
 final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
 
+// 添加全局的 navigator key
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -113,6 +116,7 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           scaffoldMessengerKey: _scaffoldMessengerKey,
+          navigatorKey: navigatorKey,
           title: 'ChatMcp',
           theme: ThemeData(
             useMaterial3: true,

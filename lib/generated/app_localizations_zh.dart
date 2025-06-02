@@ -339,7 +339,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get loadContentFailed => '加载内容失败，请重试';
 
   @override
-  String get openingBrowser => 'Opening browser';
+  String get openingBrowser => '正在打开浏览器';
 
   @override
   String get functionCallAuth => '工具调用授权';
@@ -415,49 +415,49 @@ class AppLocalizationsZh extends AppLocalizations {
   String get serverNameTooLong => '服务名称长度不能超过 50 个字符';
 
   @override
-  String get confirm => 'Confirm';
+  String get confirm => '确认';
 
   @override
-  String get providerName => 'Provider Name';
+  String get providerName => '提供商名称';
 
   @override
-  String get apiStyle => 'API Style';
+  String get apiStyle => 'API 风格';
 
   @override
-  String get enterProviderName => 'Enter provider name';
+  String get enterProviderName => '输入提供商名称';
 
   @override
-  String get providerNameRequired => 'Provider name is required';
+  String get providerNameRequired => '提供商名称为必填项';
 
   @override
-  String get addModel => 'Add Model';
+  String get addModel => '添加模型';
 
   @override
-  String get modelName => 'Model Name';
+  String get modelName => '模型名称';
 
   @override
-  String get enterModelName => 'Enter model name';
+  String get enterModelName => '输入模型名称';
 
   @override
-  String get noApiConfigs => 'No API configurations available';
+  String get noApiConfigs => '无可用的 API 配置';
 
   @override
-  String get add => 'Add';
+  String get add => '添加';
 
   @override
-  String get fetch => 'Fetch';
+  String get fetch => '获取';
 
   @override
-  String get on => 'ON';
+  String get on => '开启';
 
   @override
-  String get off => 'OFF';
+  String get off => '关闭';
 
   @override
-  String get apiUrl => 'API URL';
+  String get apiUrl => 'API 地址';
 
   @override
-  String get selectApiStyle => 'Please select API style';
+  String get selectApiStyle => '请选择 API 风格';
 
   @override
   String get serverType => '服务类型';
@@ -559,4 +559,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get mcpServers => 'MCP 服务器';
+
+  @override
+  String get getApiKey => '获取 API 秘钥';
 }

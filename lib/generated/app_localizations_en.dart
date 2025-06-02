@@ -559,4 +559,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mcpServers => 'MCP Servers';
+
+  @override
+  String get getApiKey => 'Get API Key';
 }

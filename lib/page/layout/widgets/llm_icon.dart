@@ -94,6 +94,10 @@ class ColorAwareSvg extends StatelessWidget {
             svgString.contains('stroke="hsl');
       }
 
+      if (svgString.contains("style") || svgString.contains("color")) {
+        hasColor = true;
+      }
+
       _colorCache[assetName] = hasColor;
       return hasColor;
     } catch (e) {
@@ -124,6 +128,7 @@ class ColorAwareSvg extends StatelessWidget {
           assetName,
           width: size,
           height: size,
+          allowDrawingOutsideViewBox: true,
           placeholderBuilder: (context) => Icon(
             CupertinoIcons.cloud,
             size: size,

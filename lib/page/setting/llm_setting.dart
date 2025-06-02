@@ -1,9 +1,14 @@
+import 'dart:io';
+
 import 'package:chatmcp/components/widgets/base.dart';
 import 'package:chatmcp/llm/llm_factory.dart';
+import 'package:chatmcp/utils/color.dart';
 import 'package:chatmcp/utils/platform.dart';
+import 'package:chatmcp/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
 import '../../provider/settings_provider.dart';
 import '../../provider/provider_manager.dart';
@@ -22,6 +27,8 @@ class LLMSettingControllers {
   bool custom = false;
   String icon = '';
   String genTitleModel = '';
+  String link;
+  int priority;
   LLMSettingControllers({
     required this.keyController,
     required this.endpointController,
@@ -33,6 +40,8 @@ class LLMSettingControllers {
     List<String>? models,
     List<String>? enabledModels,
     this.genTitleModel = '',
+    this.link = '',
+    this.priority = 0,
   }) {
     this.models = models ?? [];
     this.enabledModels = enabledModels ?? [];
@@ -132,6 +141,8 @@ class _KeysSettingsState extends State<KeysSettings> {
           enabledModels: apiSetting.enabledModels ?? [],
           icon: apiSetting.icon,
           genTitleModel: apiSetting.genTitleModel ?? '',
+          link: apiSetting.link ?? '',
+          priority: apiSetting.priority ?? 0,
         ));
       });
     }
@@ -881,13 +892,31 @@ class _KeysSettingsState extends State<KeysSettings> {
           const SizedBox(height: 12),
 
           // API Key
-          Text(
-            'API Key',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
+          Row(
+            children: [
+              Text(
+                l10n.apiKey,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+              Gap(size: 4),
+              if (config.link != null)
+                TextButton(
+                  onPressed: () async {
+                    await launchUrl(Uri.parse(config.link!));
+                  },
+                  child: Text(
+                    l10n.getApiKey,
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: AppColors.blue,
+                    ),
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 4),
           TextFormField(
@@ -1015,12 +1044,16 @@ class _KeysSettingsState extends State<KeysSettings> {
                       apiKey: controllers.keyController!.text,
                       baseUrl: controllers.endpointController!.text);
 
-                  final models = await llm.models();
-                  setState(() {
-                    _addModelsWithoutDuplicates(controllers, models);
-                    // 设置变更标志
-                    _hasChanges = true;
-                  });
+                  try {
+                    final models = await llm.models();
+                    setState(() {
+                      _addModelsWithoutDuplicates(controllers, models);
+                      // 设置变更标志
+                      _hasChanges = true;
+                    });
+                  } catch (e) {
+                    ToastUtils.error('Failed to fetch models: $e');
+                  }
                 },
               ),
               const Gap(size: 8),
@@ -1268,6 +1301,8 @@ class _KeysSettingsState extends State<KeysSettings> {
                       enabledModels: e.enabledModels,
                       icon: e.icon,
                       genTitleModel: e.genTitleModel,
+                      link: e.link,
+                      priority: e.priority,
                     ))
                 .toList());
 
@@ -1279,12 +1314,7 @@ class _KeysSettingsState extends State<KeysSettings> {
         }
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(AppLocalizations.of(context)!.saveSuccess),
-              backgroundColor: Colors.green,
-            ),
-          );
+          ToastUtils.success(AppLocalizations.of(context)!.saveSuccess);
         }
       } finally {
         if (mounted) {

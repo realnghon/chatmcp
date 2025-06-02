@@ -207,14 +207,6 @@ class _ConvSettingState extends State<ConvSetting> {
               return InkIcon(
                 icon: CupertinoIcons.gear,
                 tooltip: l10n.settings,
-                child: stateProvider.enabledCount > 0
-                    ? Text(
-                        ' ${stateProvider.enabledCount}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                        ),
-                      )
-                    : null,
               );
             },
           ),

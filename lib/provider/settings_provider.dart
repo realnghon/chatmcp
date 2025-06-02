@@ -16,6 +16,8 @@ class LLMProviderSetting {
   bool custom = false;
   String icon = '';
   String? genTitleModel;
+  String? link;
+  int? priority;
 
   LLMProviderSetting({
     required this.apiKey,
@@ -28,6 +30,8 @@ class LLMProviderSetting {
     this.custom = false,
     this.icon = '',
     this.genTitleModel,
+    this.link,
+    this.priority,
   });
 
   Map<String, dynamic> toJson() {
@@ -42,6 +46,8 @@ class LLMProviderSetting {
       'custom': custom,
       'icon': icon,
       'genTitleModel': genTitleModel,
+      'link': link,
+      'priority': priority,
     };
   }
 
@@ -59,6 +65,8 @@ class LLMProviderSetting {
       icon: json['icon'] as String? ?? '',
       custom: json['custom'] as bool? ?? false,
       genTitleModel: json['genTitleModel'] as String? ?? '',
+      link: json['link'] as String? ?? '',
+      priority: json['priority'] as int? ?? 0,
     );
   }
 }
@@ -207,6 +215,17 @@ final List<LLMProviderSetting> defaultApiSettings = [
     icon: 'openrouter',
     custom: false,
   ),
+  LLMProviderSetting(
+    apiKey: '',
+    apiEndpoint: 'https://api.302.ai/v1',
+    apiStyle: 'openai',
+    providerId: '302.AI',
+    providerName: '302.AI',
+    icon: '302ai',
+    custom: false,
+    link: 'https://302.ai?utm_source=chatmcp',
+    priority: 1,
+  ),
 ];
 
 final apiSettingsKey = 'apiSettings_v6';
@@ -263,7 +282,8 @@ class SettingsProvider extends ChangeNotifier {
             providerId: setting.providerId ?? '',
             icon: setting.icon,
             providerName: setting.providerName ?? '',
-            apiStyle: setting.apiStyle ?? '');
+            apiStyle: setting.apiStyle ?? '',
+            priority: setting.priority ?? 0);
 
         if (LLMFactoryHelper.isChatModel(m)) {
           models.add(m);
@@ -314,9 +334,13 @@ class SettingsProvider extends ChangeNotifier {
     }
 
     final availableModels = await getAvailableModels();
+
     updateAvailableModels(models: availableModels);
 
     notifyListeners();
+
+    // sort by priority descending _apiSettings
+    _apiSettings.sort((a, b) => (b.priority ?? 0).compareTo(a.priority ?? 0));
 
     return _apiSettings;
   }

@@ -176,5 +176,6 @@
     "maxMessagesDescription": "Limit the maximum number of messages passed to LLM (1-1000)",
     "maxLoops": "Max Loops",
     "maxLoopsDescription": "Limit the maximum number of tool call loops to prevent infinite loops (1-1000)",
-    "mcpServers": "MCP Servers"
+    "mcpServers": "MCP Servers",
+    "getApiKey": "Get API Key"
 }

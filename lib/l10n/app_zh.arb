@@ -160,5 +160,22 @@
     "maxMessagesDescription": "限制传递给 LLM 的最大消息数量 (1-1000)",
     "maxLoops": "最大循环数",
     "maxLoopsDescription": "限制工具调用的最大循环次数，防止无限循环 (1-1000)",
-    "mcpServers": "MCP 服务器"
+    "mcpServers": "MCP 服务器",
+    "getApiKey": "获取 API 秘钥",
+    "openingBrowser": "正在打开浏览器",
+    "confirm": "确认",
+    "providerName": "提供商名称",
+    "apiStyle": "API 风格",
+    "enterProviderName": "输入提供商名称",
+    "providerNameRequired": "提供商名称为必填项",
+    "addModel": "添加模型",
+    "modelName": "模型名称",
+    "enterModelName": "输入模型名称",
+    "noApiConfigs": "无可用的 API 配置",
+    "add": "添加",
+    "fetch": "获取",
+    "on": "开启",
+    "off": "关闭",
+    "apiUrl": "API 地址",
+    "selectApiStyle": "请选择 API 风格"
 }

@@ -238,6 +238,7 @@ class Model {
   final String apiStyle;
   final String icon;
   final String providerName;
+  final int priority;
 
   Model({
     required this.name,
@@ -246,6 +247,7 @@ class Model {
     required this.icon,
     required this.providerName,
     required this.apiStyle,
+    this.priority = 0,
   });
 
   factory Model.fromJson(Map<String, dynamic> json) {
@@ -256,6 +258,7 @@ class Model {
       icon: json['icon'],
       providerName: json['providerName'],
       apiStyle: json['apiStyle'],
+      priority: json['priority'] ?? 0,
     );
   }
 
@@ -266,6 +269,7 @@ class Model {
         'icon': icon,
         'providerName': providerName,
         'apiStyle': apiStyle,
+        'priority': priority,
       };
 
   @override

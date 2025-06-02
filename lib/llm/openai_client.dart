@@ -1,3 +1,4 @@
+import 'package:chatmcp/utils/toast.dart';
 import 'package:http/http.dart' as http;
 import 'base_llm_client.dart';
 import 'dart:convert';
@@ -172,7 +173,7 @@ class OpenAIClient extends BaseLLMClient {
   @override
   Future<List<String>> models() async {
     if (apiKey.isEmpty) {
-      Logger.root.info('OpenAI API key not set, skipping model list fetch');
+      ToastUtils.error('API key not set, skipping model list fetch');
       return [];
     }
 
@@ -193,7 +194,12 @@ class OpenAIClient extends BaseLLMClient {
       return models;
     } catch (e, trace) {
       Logger.root.severe('Failed to get model list: $e, trace: $trace');
-      return [];
+      throw LLMException(
+        name: 'OpenAI',
+        endpoint: getEndpoint(baseUrl, "/models"),
+        requestBody: '',
+        originalError: e,
+      );
     }
   }
 }

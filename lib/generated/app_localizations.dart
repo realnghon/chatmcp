@@ -1150,6 +1150,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'MCP Servers'**
   String get mcpServers;
+
+  /// No description provided for @getApiKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Get API Key'**
+  String get getApiKey;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
