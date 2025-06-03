@@ -199,9 +199,9 @@ class _ListViewToImageScreenState extends State<ListViewToImageScreen> {
           dialogTitle: ProviderManager.chatProvider.activeChat?.title ??
               'Save chat image',
           fileName:
-              'ChatMcp-${ProviderManager.chatProvider.activeChat?.title ?? DateTime.now().millisecondsSinceEpoch}.png',
+              'ChatMcp-${ProviderManager.chatProvider.activeChat?.title ?? DateTime.now().millisecondsSinceEpoch}.jpg',
           type: FileType.custom,
-          allowedExtensions: ['png'],
+          allowedExtensions: ['jpg'],
         );
         if (path != null) {
           await io.File(path).writeAsBytes(image);
@@ -217,12 +217,14 @@ class _ListViewToImageScreenState extends State<ListViewToImageScreen> {
 
         final tempDir = await getTemporaryDirectory();
         final tempFile = io.File(
-            '${tempDir.path}/ChatMcp_${safeTitle}_${DateTime.now().millisecondsSinceEpoch}.png');
+            '${tempDir.path}/ChatMcp_${safeTitle}_${DateTime.now().millisecondsSinceEpoch}.jpg');
         await tempFile.writeAsBytes(image);
 
-        await Share.shareXFiles(
-          [XFile(tempFile.path)],
-          subject: "ChatMcp $title",
+        await SharePlus.instance.share(
+          ShareParams(
+            files: [XFile(tempFile.path)],
+            subject: "ChatMcp $title",
+          ),
         );
       }
 

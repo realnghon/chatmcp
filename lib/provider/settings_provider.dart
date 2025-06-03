@@ -223,7 +223,7 @@ final List<LLMProviderSetting> defaultApiSettings = [
     providerName: '302.AI',
     icon: '302ai',
     custom: false,
-    link: 'https://302.ai?utm_source=chatmcp',
+    link: 'https://share.302.ai/euPaZh',
     priority: 1,
   ),
 ];

@@ -1,6 +1,9 @@
 lan:
 	flutter gen-l10n
 
+build-icon:
+	flutter pub run flutter_launcher_icons
+
 dep:
 	dart pub global run dependency_validator
 
