@@ -21,6 +21,7 @@ import 'package:chatmcp/utils/event_bus.dart';
 import 'chat_code_preview.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
 import 'package:jsonc/jsonc.dart';
+import 'package:chatmcp/mcp/models/json_rpc_message.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -469,16 +470,66 @@ class _ChatPageState extends State<ChatPage> {
       return;
     }
 
-    final response = await mcpClient.sendToolCall(
-      name: toolName,
-      arguments: toolArguments,
-    );
+    // 工具调用超时和重试配置
+    const int maxRetries = 3;
+    const Duration timeout = Duration(seconds: 60 * 5);
+
+    JSONRPCMessage? response;
+    String? lastError;
+
+    for (int attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        Logger.root.info(
+            'send tool call attempt ${attempt + 1}/$maxRetries - name: $toolName arguments: $toolArguments');
+
+        response = await mcpClient
+            .sendToolCall(
+              name: toolName,
+              arguments: toolArguments,
+            )
+            .timeout(timeout);
+
+        // 如果成功，跳出重试循环
+        break;
+      } catch (e) {
+        lastError = e.toString();
+        Logger.root
+            .warning('tool call attempt ${attempt + 1}/$maxRetries failed: $e');
+
+        // 如果不是最后一次尝试，等待一段时间后重试
+        if (attempt < maxRetries - 1) {
+          final delay = Duration(seconds: (attempt + 1) * 2); // 递增延迟
+          Logger.root.info('waiting ${delay.inSeconds}s before retry...');
+          await Future.delayed(delay);
+        }
+      }
+    }
+
+    // 如果所有重试都失败了
+    if (response == null) {
+      Logger.root
+          .severe('tool call failed after $maxRetries attempts: $lastError');
+      setState(() {
+        _parentMessageId = _messages.last.messageId;
+        final msgId = Uuid().v4();
+        _messages.add(ChatMessage(
+          messageId: msgId,
+          content:
+              '<call_function_result name="$toolName">\n工具调用失败: $lastError\n</call_function_result>',
+          role: MessageRole.assistant,
+          name: toolName,
+          parentMessageId: _parentMessageId,
+        ));
+        _parentMessageId = msgId;
+      });
+      return;
+    }
 
     Logger.root.info(
-        'send tool call name: $toolName arguments: $toolArguments response: $response');
+        'send tool call success - name: $toolName arguments: $toolArguments response: $response');
 
     setState(() {
-      _currentResponse = response.result['content'].toString();
+      _currentResponse = response!.result['content'].toString();
       if (_currentResponse.isNotEmpty) {
         _parentMessageId = _messages.last.messageId;
         final msgId = Uuid().v4();
@@ -719,10 +770,8 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<String> _getSystemPrompt() async {
-    return ProviderManager.settingsProvider.generalSetting.systemPrompt;
-  }
+    // return ProviderManager.settingsProvider.generalSetting.systemPrompt;
 
-  Future<String> _getLasstUserMessagePrompt(String userMessage) async {
     final promptGenerator = SystemPromptGenerator();
 
     var tools = <Map<String, dynamic>>[];
@@ -732,13 +781,11 @@ class _ChatPageState extends State<ChatPage> {
       }
     }
 
-    if (tools.isEmpty) {
-      return userMessage;
-    }
+    return promptGenerator.generatePrompt(tools: tools);
+  }
 
-    final toolPrompt = promptGenerator.generateToolPrompt(tools);
-
-    return "<user_message>\n$userMessage\n</user_message>\n\n$toolPrompt\n";
+  Future<String> _getLasstUserMessagePrompt(String userMessage) async {
+    return "<user_message>\n$userMessage\n</user_message>";
   }
 
   Future<void> _processLLMResponse() async {
@@ -747,7 +794,7 @@ class _ChatPageState extends State<ChatPage> {
     });
 
     List<ChatMessage> messageList = _prepareMessageList();
-    messageList = messageMerge(messageList);
+    // messageList = messageMerge(messageList);
 
     final modelSetting = ProviderManager.settingsProvider.modelSetting;
     final generalSetting = ProviderManager.settingsProvider.generalSetting;
@@ -759,21 +806,39 @@ class _ChatPageState extends State<ChatPage> {
       messageList = messageList.sublist(messageList.length - maxMessages);
     }
 
-    final lastUserMessageIndex = messageList.lastIndexWhere(
-      (m) => m.role == MessageRole.user,
-    );
+    // messageList 如果是 assistant and content start with <call_function_result> 则重写角色为 user
+    for (var message in messageList) {
+      if (message.role == MessageRole.assistant &&
+          message.content?.contains('done="true"') == true) {
+        messageList[messageList.indexOf(message)] = message.copyWith(
+          content: message.content?.replaceAll('done="true"', ''),
+        );
+      }
+      if (message.role == MessageRole.assistant &&
+          message.content?.startsWith('<call_function_result') == true) {
+        messageList[messageList.indexOf(message)] = message.copyWith(
+          role: MessageRole.user,
+          content: message.content
+              ?.replaceAll('<call_function_result name="', 'tool result: ')
+              .replaceAll('">', '')
+              .replaceAll('</call_function_result>', ''),
+        );
+      }
+    }
+
+    var _messageList = messageMerge(messageList);
+
+    if (_messageList.isNotEmpty &&
+        _messageList.last.role == MessageRole.assistant) {
+      _messageList.add(ChatMessage(
+        content: 'continue',
+        role: MessageRole.user,
+      ));
+    }
 
     final systemPrompt = await _getSystemPrompt();
 
-    if (ProviderManager.serverStateProvider.enabledCount > 0) {
-      messageList[lastUserMessageIndex] =
-          messageList[lastUserMessageIndex].copyWith(
-        content: await _getLasstUserMessagePrompt(
-            messageList[lastUserMessageIndex].content ?? ''),
-      );
-    }
-
-    Logger.root.info('start process llm response: $messageList');
+    Logger.root.info('start process llm response: $_messageList');
 
     final stream = _llmClient!.chatStreamCompletion(CompletionRequest(
       model: ProviderManager.chatModelProvider.currentModel.name,
@@ -782,7 +847,7 @@ class _ChatPageState extends State<ChatPage> {
           content: systemPrompt,
           role: MessageRole.system,
         ),
-        ...messageList,
+        ..._messageList,
       ],
       modelSetting: modelSetting,
     ));
@@ -809,10 +874,12 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   List<ChatMessage> messageMerge(List<ChatMessage> messageList) {
+    if (messageList.isEmpty) return [];
+
     final newMessages = [messageList.first];
 
     for (final message in messageList.sublist(1)) {
-      if (newMessages.last.role == message.role) {
+      if (newMessages.isNotEmpty && newMessages.last.role == message.role) {
         String content = message.content ?? '';
 
         // final RegExp functionResultRegex = RegExp(
@@ -838,7 +905,7 @@ class _ChatPageState extends State<ChatPage> {
       }
     }
 
-    if (newMessages.last.role != MessageRole.user) {
+    if (newMessages.isNotEmpty && newMessages.last.role != MessageRole.user) {
       newMessages.add(ChatMessage(
         content: 'continue',
         role: MessageRole.user,
@@ -885,11 +952,13 @@ class _ChatPageState extends State<ChatPage> {
       if (_isCancelled) break;
       setState(() {
         _currentResponse += chunk.content ?? '';
-        _messages.last = ChatMessage(
-          content: _currentResponse,
-          role: MessageRole.assistant,
-          parentMessageId: _parentMessageId,
-        );
+        if (_messages.isNotEmpty) {
+          _messages.last = ChatMessage(
+            content: _currentResponse,
+            role: MessageRole.assistant,
+            parentMessageId: _parentMessageId,
+          );
+        }
       });
     }
     _isCancelled = false;
@@ -904,11 +973,39 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<void> _createNewChat() async {
-    String title =
-        await _llmClient!.genTitle([_messages.first, _messages.last]);
+    if (_messages.isEmpty) return;
+
+    String title;
+    try {
+      title = await _llmClient!.genTitle([
+        if (_messages.isNotEmpty) _messages.first,
+        if (_messages.length > 1) _messages.last else _messages.first,
+      ]);
+    } catch (e) {
+      Logger.root.warning('生成标题失败: $e');
+      // 如果生成标题失败，使用默认标题或从用户消息中提取简短标题
+      final userMessage =
+          _messages.isNotEmpty ? _messages.first.content ?? '' : '';
+      title = _generateFallbackTitle(userMessage);
+    }
+
     await ProviderManager.chatProvider
         .createChat(Chat(title: title), _handleParentMessageId(_messages));
     Logger.root.info('create new chat: $title');
+  }
+
+  String _generateFallbackTitle(String userMessage) {
+    if (userMessage.isEmpty) {
+      return 'new chat';
+    }
+
+    // 提取用户消息的前20个字符作为标题
+    String title = userMessage.replaceAll('\n', ' ').trim();
+    if (title.length > 20) {
+      title = '${title.substring(0, 17)}...';
+    }
+
+    return title.isEmpty ? 'new chat' : title;
   }
 
   // messages parentMessageId 处理

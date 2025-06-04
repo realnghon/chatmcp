@@ -157,15 +157,15 @@ class ChatMessage {
     return jsonEncode(toJson());
   }
 
-  ChatMessage copyWith({
-    String? messageId,
-    String? parentMessageId,
-    String? content,
-  }) {
+  ChatMessage copyWith(
+      {String? messageId,
+      String? parentMessageId,
+      String? content,
+      MessageRole? role}) {
     return ChatMessage(
       messageId: messageId ?? this.messageId,
       parentMessageId: parentMessageId ?? this.parentMessageId,
-      role: role,
+      role: role ?? this.role,
       content: content ?? this.content,
       name: name,
       mcpServerName: mcpServerName,

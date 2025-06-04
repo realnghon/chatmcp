@@ -285,7 +285,7 @@ class SSEClient implements McpClient {
       await _sendHttpPost(message.toJson());
 
       return await completer.future.timeout(
-        const Duration(seconds: 60 * 60),
+        const Duration(seconds: 60 * 5),
         onTimeout: () {
           _pendingRequests.remove(message.id);
           throw TimeoutException('请求超时: ${message.id}');

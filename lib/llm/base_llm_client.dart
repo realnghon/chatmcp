@@ -113,20 +113,30 @@ abstract class BaseLLMClient {
   }
 
   Future<String> genTitle(List<ChatMessage> messages) async {
+    if (messages.isEmpty) return "new chat";
+
+    // 限制内容长度，避免触发内容过滤器
     final conversationText = messages.map((msg) {
       final role = msg.role == MessageRole.user ? "Human" : "Assistant";
-      return "$role: ${msg.content}";
+      final content = msg.content ?? '';
+      // 限制每条消息最多100个字符，避免内容过长
+      final truncatedContent =
+          content.length > 100 ? '${content.substring(0, 100)}...' : content;
+      return "$role: $truncatedContent";
     }).join("\n");
+
+    // 进一步限制总长度
+    final finalText = conversationText.length > 500
+        ? '${conversationText.substring(0, 500)}...'
+        : conversationText;
 
     try {
       final prompt = ChatMessage(
         role: MessageRole.user,
         content:
-            """You are a conversation title generator. Generate a concise title (max 20 characters) for the following conversation.
-The title should summarize the main topic. Return only the title without any explanation or extra punctuation.
+            """Generate a concise title (max 20 characters) for this conversation. Return only the title:
 
-Conversation:
-$conversationText""",
+$finalText""",
       );
 
       final response = await chatCompletion(CompletionRequest(
@@ -134,7 +144,8 @@ $conversationText""",
         messages: [prompt],
       ));
 
-      return response.content?.trim() ?? "New Chat";
+      final title = response.content?.trim() ?? "";
+      return title.isNotEmpty ? title : "";
     } catch (e, trace) {
       Logger.root.severe('OpenAI gen title error: $e, trace: $trace');
       return "New Chat";
