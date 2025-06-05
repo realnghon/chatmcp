@@ -23,19 +23,11 @@ class DeepSeekClient extends BaseLLMClient {
 
   @override
   Future<LLMResponse> chatCompletion(CompletionRequest request) async {
-    final body = {
+    final body = <String, dynamic>{
       'model': request.model,
       'messages': chatMessageToOpenAIMessage(request.messages),
     };
-    if (request.modelSetting != null) {
-      body['temperature'] = request.modelSetting!.temperature;
-      body['top_p'] = request.modelSetting!.topP;
-      body['frequency_penalty'] = request.modelSetting!.frequencyPenalty;
-      body['presence_penalty'] = request.modelSetting!.presencePenalty;
-      if (request.modelSetting!.maxTokens != null) {
-        body['max_tokens'] = request.modelSetting!.maxTokens!;
-      }
-    }
+    addModelSettingsToBody(body, request.modelSetting);
 
     if (request.tools != null && request.tools!.isNotEmpty) {
       body['tools'] = request.tools!;
@@ -90,15 +82,7 @@ class DeepSeekClient extends BaseLLMClient {
       'messages': chatMessageToOpenAIMessage(request.messages),
       'stream': true,
     };
-    if (request.modelSetting != null) {
-      body['temperature'] = request.modelSetting!.temperature;
-      body['top_p'] = request.modelSetting!.topP;
-      body['frequency_penalty'] = request.modelSetting!.frequencyPenalty;
-      body['presence_penalty'] = request.modelSetting!.presencePenalty;
-      if (request.modelSetting!.maxTokens != null) {
-        body['max_tokens'] = request.modelSetting!.maxTokens!;
-      }
-    }
+    addModelSettingsToBody(body, request.modelSetting);
 
     try {
       final bodyStr = jsonEncode(body);

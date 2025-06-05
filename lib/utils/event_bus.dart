@@ -3,10 +3,11 @@ import 'dart:async';
 import 'package:event_bus/event_bus.dart';
 
 class CodePreviewEvent {
+  final String hash;
   final String textContent;
   final Map<String, String> attributes;
 
-  const CodePreviewEvent(this.textContent, this.attributes);
+  const CodePreviewEvent(this.hash, this.textContent, this.attributes);
 }
 
 class ToggleCodePreviewEvent {

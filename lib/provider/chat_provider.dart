@@ -20,22 +20,40 @@ class ChatProvider extends ChangeNotifier {
 
   bool _showCodePreview = false;
   bool get showCodePreview => _showCodePreview;
-  void setShowCodePreview(bool show) {
-    _showCodePreview = show;
+
+  void setShowCodePreview(String hash, bool show) {
+    if (show) {
+      _showCodePreview = true;
+      _artifactEvent = _previewEvents[hash];
+    } else {
+      _showCodePreview = false;
+      _artifactEvent = null;
+    }
     notifyListeners();
   }
 
   CodePreviewEvent? _artifactEvent;
   CodePreviewEvent? get artifactEvent => _artifactEvent;
+  Map<String, CodePreviewEvent> _previewEvents = {};
+  Map<String, CodePreviewEvent> get previewEvents => _previewEvents;
 
-  void setArtifactEvent(CodePreviewEvent event) {
-    _artifactEvent = event;
+  void setPreviewEvent(CodePreviewEvent event) {
+    _previewEvents[event.hash] = event;
+    if (_artifactEvent != null && _artifactEvent!.hash == event.hash) {
+      _artifactEvent = event;
+    }
+    notifyListeners();
+  }
+
+  void clearPreviewEvent(String hash) {
+    _previewEvents.remove(hash);
     notifyListeners();
   }
 
   void clearArtifactEvent() {
     _artifactEvent = null;
-    setShowCodePreview(false);
+    _showCodePreview = false;
+    notifyListeners();
   }
 
   Future<void> loadChats() async {

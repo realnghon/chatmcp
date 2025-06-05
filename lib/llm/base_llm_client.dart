@@ -1,4 +1,5 @@
 import 'package:chatmcp/provider/provider_manager.dart';
+import 'package:chatmcp/provider/settings_provider.dart';
 import 'package:logging/logging.dart';
 import 'model.dart';
 import 'utils.dart';
@@ -153,6 +154,30 @@ $finalText""",
   }
 
   Future<List<String>> models();
+
+  /// 将模型设置添加到请求体中，只有大于0的参数才会被设置
+  Map<String, dynamic> addModelSettingsToBody(
+      Map<String, dynamic> body, ChatSetting? modelSetting) {
+    if (modelSetting == null) return body;
+
+    if (modelSetting.temperature > 0) {
+      body['temperature'] = modelSetting.temperature;
+    }
+    if (modelSetting.topP > 0) {
+      body['top_p'] = modelSetting.topP;
+    }
+    if (modelSetting.frequencyPenalty > 0) {
+      body['frequency_penalty'] = modelSetting.frequencyPenalty;
+    }
+    if (modelSetting.presencePenalty > 0) {
+      body['presence_penalty'] = modelSetting.presencePenalty;
+    }
+    if (modelSetting.maxTokens != null && modelSetting.maxTokens! > 0) {
+      body['max_tokens'] = modelSetting.maxTokens!;
+    }
+
+    return body;
+  }
 }
 
 class LLMException implements Exception {

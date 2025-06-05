@@ -1072,6 +1072,14 @@ class _ChatPageState extends State<ChatPage> {
                       color: AppColors.getErrorTextColor().withAlpha(128),
                     ),
                   ),
+                  if (error is LLMException)
+                    Text(
+                      'error: ${error.responseData}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.getErrorTextColor().withAlpha(128),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -1291,7 +1299,9 @@ class _ChatPageState extends State<ChatPage> {
             ],
           ),
         ),
-        if (!mobile && _showCodePreview)
+        if (!mobile &&
+            _showCodePreview &&
+            ProviderManager.chatProvider.artifactEvent != null)
           Expanded(
             flex: 2,
             child: ChatCodePreview(

@@ -88,21 +88,31 @@ class ArtifactAntArtifactWidget extends StatefulWidget {
 
 class _ArtifactAntArtifactWidgetState extends State<ArtifactAntArtifactWidget> {
   @override
-  Widget build(BuildContext context) {
-    String title = widget.attributes['title'] ?? '';
-    bool isClosed = widget.attributes['closed'] == 'true';
-
+  void initState() {
+    super.initState();
+    String hash = widget.attributes['hash'] ?? '';
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        ProviderManager.chatProvider.setArtifactEvent(
-          CodePreviewEvent(widget.textContent, widget.attributes),
+        ProviderManager.chatProvider.setPreviewEvent(
+          CodePreviewEvent(hash, widget.textContent, widget.attributes),
         );
       }
     });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    String title = widget.attributes['title'] ?? '';
+    bool isClosed = widget.attributes['closed'] == 'true';
+    String hash = widget.attributes['hash'] ?? '';
 
     return InkWell(
       onTap: () {
-        ProviderManager.chatProvider.setShowCodePreview(true);
+        print('onTap: $hash');
+        ProviderManager.chatProvider.setPreviewEvent(
+          CodePreviewEvent(hash, widget.textContent, widget.attributes),
+        );
+        ProviderManager.chatProvider.setShowCodePreview(hash, true);
       },
       child: Container(
         width: 300,

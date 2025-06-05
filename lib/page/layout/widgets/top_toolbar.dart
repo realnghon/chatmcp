@@ -145,6 +145,29 @@ class TopToolbar extends StatelessWidget {
                 ),
               ),
             ),
+          // delete chat
+          if (ProviderManager.chatProvider.activeChat != null)
+            InkWell(
+              onTap: () {
+                final chat = ProviderManager.chatProvider.activeChat;
+                if (chat != null) {
+                  ProviderManager.chatProvider.deleteChat(chat.id!);
+                }
+              },
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    const Icon(CupertinoIcons.delete, size: 18),
+                    const SizedBox(width: 12),
+                    Text(l10n.delete,
+                        style: TextStyle(
+                            color: AppColors.getThemeTextColor(context))),
+                  ],
+                ),
+              ),
+            ),
         ],
       ),
       maxWidth: 200,
