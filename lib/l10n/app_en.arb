@@ -48,7 +48,7 @@
     "environmentVariables": "Environment Variables",
     "serverName": "Server Name",
     "commandExample": "For example: npx, uvx, https://mcpserver.com",
-    "argumentsExample": "Separate arguments with spaces, for example: -m mcp.server",
+    "argumentsExample": "Separate arguments with spaces, use quotes for arguments with spaces, for example: -y obsidian-mcp '/Users/username/Documents/Obsidian Vault'",
     "envVarsFormat": "One per line, format: KEY=VALUE",
     "cancel": "Cancel",
     "save": "Save",

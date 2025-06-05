@@ -934,8 +934,21 @@ class _McpServerState extends State<McpServer> {
                       : serverName;
                   final type = values['type'] as String;
                   final command = (values['command'] as String).trim();
-                  final args =
-                      (values['args'] as String).trim().split(RegExp(r'\s+'));
+                  final argsString = (values['args'] as String).trim();
+
+                  // 改进的参数解析逻辑，支持引号包围的参数
+                  List<String> args = [];
+                  if (argsString.isNotEmpty) {
+                    // 匹配单引号、双引号包围的参数，或者不包含空格的参数
+                    RegExp regExp = RegExp(r'''"[^"]*"|'[^']*'|\S+''');
+                    Iterable<RegExpMatch> matches =
+                        regExp.allMatches(argsString);
+                    for (RegExpMatch match in matches) {
+                      // 保留原始引号
+                      args.add(match.group(0)!);
+                    }
+                  }
+
                   final envStr = values['env'] as String;
 
                   bool isMobile = Platform.isIOS || Platform.isAndroid;

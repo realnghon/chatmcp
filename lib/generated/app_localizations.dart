@@ -389,7 +389,7 @@ abstract class AppLocalizations {
   /// No description provided for @argumentsExample.
   ///
   /// In en, this message translates to:
-  /// **'Separate arguments with spaces, for example: -m mcp.server'**
+  /// **'Separate arguments with spaces, use quotes for arguments with spaces, for example: -y obsidian-mcp \'/Users/username/Documents/Obsidian Vault\''**
   String get argumentsExample;
 
   /// No description provided for @envVarsFormat.

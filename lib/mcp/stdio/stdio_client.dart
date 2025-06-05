@@ -42,9 +42,20 @@ class StdioClient implements McpClient {
 
     _processStateController.add(const ProcessState.starting());
 
+    final args = serverConfig.args.map((arg) {
+      String processed = arg;
+      if ((processed.startsWith('"') && processed.endsWith('"')) ||
+          (processed.startsWith("'") && processed.endsWith("'"))) {
+        if (processed.length >= 2) {
+          processed = processed.substring(1, processed.length - 1);
+        }
+      }
+      return processed;
+    }).toList();
+
     process = await startProcess(
       serverConfig.command,
-      serverConfig.args,
+      args,
       serverConfig.env,
     );
 

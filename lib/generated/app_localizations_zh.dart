@@ -155,7 +155,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get commandExample => '例如：npx、uvx、https://mcpserver.com';
 
   @override
-  String get argumentsExample => '参数之间用空格分隔，例如：-m mcp.server';
+  String get argumentsExample =>
+      '参数之间用空格分隔，包含空格的参数请用引号包围，例如：-y obsidian-mcp \'/Users/username/Documents/Obsidian Vault\'';
 
   @override
   String get envVarsFormat => '每行一个，格式：KEY=VALUE';
