@@ -47,7 +47,7 @@ class _ChatPageState extends State<ChatPage> {
 
   bool mobile = kIsMobile;
 
-  List<RunFunctionEvent> _runFunctionEvents = [];
+  final List<RunFunctionEvent> _runFunctionEvents = [];
   bool _isRunningFunction = false;
 
   num _currentLoop = 0;
@@ -56,7 +56,6 @@ class _ChatPageState extends State<ChatPage> {
   void initState() {
     super.initState();
     _initializeState();
-    // on<CodePreviewEvent>(_onArtifactEvent);
     on<ShareEvent>(_handleShare);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -194,16 +193,15 @@ class _ChatPageState extends State<ChatPage> {
 
   void _onChatProviderChanged() {
     _initializeHistoryMessages();
-
-    if (ProviderManager.chatProvider.artifactEvent != null) {
-      if (_isMobile()) {
-        _showMobileCodePreview();
-      }
+    if (_isMobile() &&
+        ProviderManager.chatProvider.showCodePreview &&
+        ProviderManager.chatProvider.artifactEvent != null) {
+      _showMobileCodePreview();
+    } else {
+      setState(() {
+        _showCodePreview = ProviderManager.chatProvider.showCodePreview;
+      });
     }
-
-    setState(() {
-      _showCodePreview = ProviderManager.chatProvider.showCodePreview;
-    });
   }
 
   bool _showCodePreview = false;
@@ -515,7 +513,7 @@ class _ChatPageState extends State<ChatPage> {
         _messages.add(ChatMessage(
           messageId: msgId,
           content:
-              '<call_function_result name="$toolName">\n工具调用失败: $lastError\n</call_function_result>',
+              '<call_function_result name="$toolName">\nfailed to call function: $lastError\n</call_function_result>',
           role: MessageRole.assistant,
           name: toolName,
           parentMessageId: _parentMessageId,
@@ -697,7 +695,7 @@ class _ChatPageState extends State<ChatPage> {
 
       while (await _checkNeedToolCall()) {
         if (_currentLoop > maxLoops) {
-          Logger.root.warning('达到最大循环次数限制: $maxLoops');
+          Logger.root.warning('reach max loops: $maxLoops');
           break;
         }
 
@@ -782,10 +780,6 @@ class _ChatPageState extends State<ChatPage> {
     }
 
     return promptGenerator.generatePrompt(tools: tools);
-  }
-
-  Future<String> _getLasstUserMessagePrompt(String userMessage) async {
-    return "<user_message>\n$userMessage\n</user_message>";
   }
 
   Future<void> _processLLMResponse() async {
@@ -881,21 +875,6 @@ class _ChatPageState extends State<ChatPage> {
     for (final message in messageList.sublist(1)) {
       if (newMessages.isNotEmpty && newMessages.last.role == message.role) {
         String content = message.content ?? '';
-
-        // final RegExp functionResultRegex = RegExp(
-        //     '<call_function_result\\s+name=["\']([^"\']*)["\']\\s*>(.*?)</call_function_result>',
-        //     dotAll: true);
-
-        // if (!content.contains('<call_function_result') ||
-        //     !functionResultRegex.hasMatch(content)) {
-        //   newMessages.add(message);
-        //   continue;
-        // }
-
-        // content =
-        //     content.replaceAll('<call_function_result', '\nfunction_result');
-        // content = content.replaceAll('</call_function_result>', '');
-        // content = content.replaceAll('>', '');
 
         newMessages.last = newMessages.last.copyWith(
           content: '${newMessages.last.content}\n\n$content',
@@ -1174,17 +1153,11 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
-  CodePreviewEvent? _codePreviewEvent;
-
-  void _onArtifactEvent(CodePreviewEvent event) {
-    // _toggleCodePreview();
-    setState(() {
-      _codePreviewEvent = event;
-    });
-  }
-
   bool showModalCodePreview = false;
   void _showMobileCodePreview() {
+    if (showModalCodePreview) {
+      return;
+    }
     setState(() {
       showModalCodePreview = true;
     });
@@ -1193,46 +1166,57 @@ class _ChatPageState extends State<ChatPage> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
-        return SafeArea(
-          child: Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(20)),
-            ),
-            child: DraggableScrollableSheet(
-              initialChildSize: 0.6,
-              minChildSize: 0.3,
-              maxChildSize: 0.9,
-              expand: false,
-              builder: (context, scrollController) {
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 4,
-                      margin: const EdgeInsets.symmetric(vertical: 16),
-                      decoration: BoxDecoration(
-                        color: AppColors.getBottomSheetHandleColor(context),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
+        return Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: DraggableScrollableSheet(
+            initialChildSize: 0.9,
+            minChildSize: 0.3,
+            maxChildSize: 0.9,
+            expand: false,
+            builder: (context, scrollController) {
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.symmetric(vertical: 16),
+                    decoration: BoxDecoration(
+                      color: AppColors.getBottomSheetHandleColor(context),
+                      borderRadius: BorderRadius.circular(2),
                     ),
-                    Expanded(
-                      child: _codePreviewEvent != null
-                          ? ChatCodePreview(
-                              codePreviewEvent: _codePreviewEvent!,
-                            )
-                          : const SizedBox.shrink(),
-                    ),
-                  ],
-                );
-              },
-            ),
+                  ),
+                  Expanded(
+                    child: ProviderManager.chatProvider.artifactEvent != null
+                        ? ChatCodePreview(
+                            codePreviewEvent:
+                                ProviderManager.chatProvider.artifactEvent!,
+                          )
+                        : const Center(
+                            child: Text(
+                              'No code preview',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ),
+                  ),
+                ],
+              );
+            },
           ),
         );
       },
-    );
+    ).whenComplete(() {
+      setState(() {
+        showModalCodePreview = false;
+      });
+      ProviderManager.chatProvider.clearArtifactEvent();
+    });
   }
 
   Widget _buildFunctionRunning() {

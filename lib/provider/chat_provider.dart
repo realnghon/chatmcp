@@ -35,7 +35,6 @@ class ChatProvider extends ChangeNotifier {
 
   void clearArtifactEvent() {
     _artifactEvent = null;
-    notifyListeners();
     setShowCodePreview(false);
   }
 

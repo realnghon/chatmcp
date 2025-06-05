@@ -280,8 +280,6 @@ class _ChatCodePreviewState extends State<ChatCodePreview> {
       language = "c";
     }
 
-    print("language: $language");
-
     final sandboxServerPort =
         ProviderManager.settingsProvider.sandboxServerPort;
 
