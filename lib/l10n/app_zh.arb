@@ -34,6 +34,8 @@
     "apiKeyValidation": "API 密钥必须至少包含 10 个字符",
     "apiEndpoint": "API 端点",
     "enterApiEndpoint": "请输入 API 端点 URL",
+    "apiVersion": "API 版本",
+    "enterApiVersion": "输入 API 版本",
     "platformNotSupported": "当前平台不支持 MCP Server",
     "mcpServerDesktopOnly": "MCP Server 仅支持桌面端（Windows、macOS、Linux）",
     "searchServer": "搜索服务器...",

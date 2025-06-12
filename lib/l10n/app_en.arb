@@ -34,6 +34,8 @@
     "apiKeyValidation": "API Key must be at least 10 characters",
     "apiEndpoint": "API Endpoint",
     "enterApiEndpoint": "Enter API endpoint URL",
+    "apiVersion": "API Version",
+    "enterApiVersion": "Enter API Version",
     "platformNotSupported": "Current platform does not support MCP Server",
     "mcpServerDesktopOnly": "MCP Server only supports desktop platforms (Windows, macOS, Linux)",
     "searchServer": "Search server...",

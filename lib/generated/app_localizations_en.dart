@@ -118,6 +118,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterApiEndpoint => 'Enter API endpoint URL';
 
   @override
+  String get apiVersion => 'API Version';
+
+  @override
+  String get enterApiVersion => 'Enter API Version';
+
+  @override
   String get platformNotSupported =>
       'Current platform does not support MCP Server';
 
