@@ -113,6 +113,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get enterApiEndpoint => '请输入 API 端点 URL';
 
   @override
+  String get apiVersion => 'API 版本';
+
+  @override
+  String get enterApiVersion => '输入 API 版本';
+
+  @override
   String get platformNotSupported => '当前平台不支持 MCP Server';
 
   @override

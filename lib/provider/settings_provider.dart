@@ -8,6 +8,7 @@ import 'package:logging/logging.dart';
 class LLMProviderSetting {
   String apiKey;
   String apiEndpoint;
+  String? apiVersion;
   String? apiStyle;
   String? providerName;
   List<String>? models;
@@ -22,6 +23,7 @@ class LLMProviderSetting {
   LLMProviderSetting({
     required this.apiKey,
     required this.apiEndpoint,
+    this.apiVersion,
     this.apiStyle,
     this.providerName,
     this.models,
@@ -38,6 +40,7 @@ class LLMProviderSetting {
     return {
       'apiKey': apiKey,
       'apiEndpoint': apiEndpoint,
+      'apiVersion': apiVersion,
       'apiStyle': apiStyle,
       'providerName': providerName,
       'models': models,
@@ -55,6 +58,7 @@ class LLMProviderSetting {
     return LLMProviderSetting(
       apiKey: json['apiKey'] as String,
       apiEndpoint: json['apiEndpoint'] as String,
+      apiVersion: json['apiVersion'] as String?,
       apiStyle: json['apiStyle'] as String? ?? 'openai',
       providerName: json['providerName'] as String,
       models: json['models'] != null ? List<String>.from(json['models']) : [],
@@ -161,6 +165,16 @@ class ChatSetting {
 }
 
 final List<LLMProviderSetting> defaultApiSettings = [
+  LLMProviderSetting(
+    apiKey: '',
+    apiEndpoint: 'https://YOUR_RESOURCE_NAME.openai.azure.com',
+    apiStyle: 'foundry',
+    apiVersion: '2025-01-01-preview',
+    providerId: 'foundry',
+    providerName: 'Azure AI Foundry',
+    icon: 'foundry',
+    custom: false,
+  ),
   LLMProviderSetting(
     apiKey: '',
     apiEndpoint: 'https://api.openai.com/v1',

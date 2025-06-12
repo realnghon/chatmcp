@@ -4,16 +4,17 @@ import 'deepseek_client.dart';
 import 'base_llm_client.dart';
 import 'ollama_client.dart';
 import 'gemini_client.dart';
+import 'foundry_client.dart';
 import 'package:chatmcp/provider/provider_manager.dart';
 import 'package:chatmcp/provider/settings_provider.dart';
 import 'package:logging/logging.dart';
 import 'model.dart' as llm_model;
 
-enum LLMProvider { openai, claude, ollama, deepseek, gemini }
+enum LLMProvider { openai, claude, ollama, deepseek, gemini, foundry}
 
 class LLMFactory {
   static BaseLLMClient create(LLMProvider provider,
-      {required String apiKey, required String baseUrl}) {
+      {required String apiKey, required String baseUrl, String? apiVersion}) {
     switch (provider) {
       case LLMProvider.openai:
         return OpenAIClient(apiKey: apiKey, baseUrl: baseUrl);
@@ -25,6 +26,8 @@ class LLMFactory {
         return OllamaClient(baseUrl: baseUrl);
       case LLMProvider.gemini:
         return GeminiClient(apiKey: apiKey, baseUrl: baseUrl);
+      case LLMProvider.foundry:
+        return FoundryClient(apiKey: apiKey, baseUrl: baseUrl, apiVersion: apiVersion);
     }
   }
 }
@@ -42,6 +45,7 @@ class LLMFactoryHelper {
     "deepseek": LLMProvider.deepseek,
     "ollama": LLMProvider.ollama,
     "gemini": LLMProvider.gemini,
+    "foundry": LLMProvider.foundry,
   };
 
   static BaseLLMClient createFromModel(llm_model.Model currentModel) {

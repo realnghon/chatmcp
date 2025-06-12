@@ -302,6 +302,18 @@ abstract class AppLocalizations {
   /// **'Enter API endpoint URL'**
   String get enterApiEndpoint;
 
+  /// No description provided for @apiVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'API Version'**
+  String get apiVersion;
+
+  /// No description provided for @enterApiVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter API Version'**
+  String get enterApiVersion;
+
   /// No description provided for @platformNotSupported.
   ///
   /// In en, this message translates to:

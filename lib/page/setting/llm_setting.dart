@@ -19,6 +19,7 @@ import 'package:chatmcp/page/layout/widgets/llm_icon.dart';
 class LLMSettingControllers {
   TextEditingController keyController;
   TextEditingController endpointController;
+  TextEditingController apiVersionController;
   String apiStyleController;
   TextEditingController providerNameController;
   List<String> models = [];
@@ -31,7 +32,8 @@ class LLMSettingControllers {
   int priority;
   LLMSettingControllers({
     required this.keyController,
-    required this.endpointController,
+    required this.endpointController,// 默认版本
+    required this.apiVersionController,
     this.apiStyleController = 'openai',
     required this.providerNameController,
     this.providerId = '',
@@ -50,6 +52,7 @@ class LLMSettingControllers {
   void dispose() {
     keyController.dispose();
     endpointController.dispose();
+    apiVersionController.dispose();
     providerNameController.dispose();
   }
 }
@@ -132,6 +135,8 @@ class _KeysSettingsState extends State<KeysSettings> {
           keyController: TextEditingController(text: apiSetting.apiKey),
           endpointController:
               TextEditingController(text: apiSetting.apiEndpoint),
+          apiVersionController:
+              TextEditingController(text: apiSetting.apiVersion),
           apiStyleController: apiSetting.apiStyle ?? 'openai',
           providerNameController:
               TextEditingController(text: apiSetting.providerName ?? ''),
@@ -526,6 +531,7 @@ class _KeysSettingsState extends State<KeysSettings> {
                     _controllers.add(LLMSettingControllers(
                       keyController: TextEditingController(),
                       endpointController: TextEditingController(),
+                      apiVersionController: TextEditingController(),
                       providerNameController:
                           TextEditingController(text: providerName),
                       providerId: providerId,
@@ -891,6 +897,55 @@ class _KeysSettingsState extends State<KeysSettings> {
           ),
           const SizedBox(height: 12),
 
+          // API Version
+          if(config.providerId == 'foundry') ...[
+            Text(
+              l10n.apiVersion,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 4),
+            TextFormField(
+              controller: controllers.apiVersionController,
+              decoration: InputDecoration(
+                //enabled: false,
+                hintText: l10n.enterApiVersion,
+                hintStyle: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface.withAlpha(102),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.outline.withAlpha(51),
+                  ),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.outline.withAlpha(51),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                isDense: true,
+              ),
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+
           // API Key
           Row(
             children: [
@@ -1042,7 +1097,8 @@ class _KeysSettingsState extends State<KeysSettings> {
 
                   final llm = LLMFactory.create(provider,
                       apiKey: controllers.keyController!.text,
-                      baseUrl: controllers.endpointController!.text);
+                      baseUrl: controllers.endpointController!.text,
+                      apiVersion: controllers.apiVersionController.text);
 
                   try {
                     final models = await llm.models();
@@ -1082,7 +1138,8 @@ class _KeysSettingsState extends State<KeysSettings> {
 
                   final llm = LLMFactory.create(provider,
                       apiKey: controllers.keyController!.text,
-                      baseUrl: controllers.endpointController!.text);
+                      baseUrl: controllers.endpointController!.text,
+                      apiVersion: controllers.apiVersionController.text);
 
                   final models = await llm.models();
                   setState(() {
@@ -1295,6 +1352,7 @@ class _KeysSettingsState extends State<KeysSettings> {
                       providerName: e.providerNameController.text,
                       apiKey: e.keyController.text,
                       apiEndpoint: e.endpointController.text,
+                      apiVersion: e.apiVersionController.text,
                       apiStyle: e.apiStyleController,
                       custom: e.custom,
                       models: e.models,
