@@ -178,7 +178,9 @@ class FoundryClient extends BaseLLMClient {
       }
 
       final data = jsonDecode(response.body);
-      final models = (data['data'] as List).where((m) => m['status'] == 'succeeded').map((m) => m['id'].toString()).toList();
+
+      // Filter out models o1-mini and o1-preview, because of unsupported system message
+      final models = (data['data'] as List).where((m) => m['status'] == 'succeeded' && m['model'] != 'o1-mini' && m['model'] != 'o1-preview').map((m) => m['id'].toString()).toList();
 
       return models;
     } catch (e, trace) {
