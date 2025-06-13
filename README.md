@@ -10,15 +10,22 @@ Cross-platform `Macos | Windows | Linux | iOS | Android` AI Chat Client
 
 ## Install
 
-| macOS | Windows | Linux | iOS | Android |
-|-------|---------|-------|------|---------|
+| macOS                                                   | Windows                                                 | Linux                                                     | iOS                                                      | Android                                                 |
+|---------------------------------------------------------|---------------------------------------------------------|-----------------------------------------------------------|----------------------------------------------------------|---------------------------------------------------------|
 | [Release](https://github.com/daodao97/chatmcp/releases) | [Release](https://github.com/daodao97/chatmcp/releases) | [Release](https://github.com/daodao97/chatmcp/releases) ¹ | [TestFlight](https://testflight.apple.com/join/dCXksFJV) | [Release](https://github.com/daodao97/chatmcp/releases) |
 
-¹ Note: On Linux you need to install libsqlite3-0 libsqlite3-dev, as this dependency needs it https://pub.dev/packages/sqflite_common_ffi
+¹ Note: On Linux you need to install `libsqlite3-0` and `libsqlite3-dev`, as this dependency needs it https://pub.dev/packages/sqflite_common_ffi
 
 ```bash
 sudo apt-get install libsqlite3-0 libsqlite3-dev
 ```
+
+## Documentation
+
+Also, you can use DeepWiki to get more information about chatmcp.  
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/daodao97/chatmcp) DeepWiki is an AI-powered platform that transforms any
+public GitHub repository into a fully interactive, easy-to-understand wiki. By analysing code, documentation, and configuration files, it creates
+clear explanations, interactive diagrams, and even allows for real-time Q&A with the AI.
 
 ## Preview
 
@@ -28,19 +35,19 @@ sudo apt-get install libsqlite3-0 libsqlite3-dev
 ![LaTeX Support](./docs/preview/latex.webp)
 ![HTML Preview](./docs/preview/html-preview.webp)
 ![Mermaid Diagram](./docs/preview/mermaid.webp)
-![mcp workflow](./docs/preview/mcp-workerflow.webp)
-![mcp inmemory](./docs/preview/mcp-inmemory.webp)
+![MCP Workflow](./docs/preview/mcp-workerflow.webp)
+![MCP InMemory](./docs/preview/mcp-inmemory.webp)
 ![MCP Tools](./docs/preview/mcp-tools.webp)
 ![LLM Provider](./docs/preview/llm-provider.webp)
 ![MCP Stdio](./docs/preview/mcp-stdio.webp)
 ![MCP SSE](./docs/preview/mcp-sse.webp)
-
 
 ## Usage
 
 Make sure you have installed `uvx` or `npx` in your system
 
 ### MacOS
+
 ```bash
 # uvx
 brew install uv
@@ -49,7 +56,8 @@ brew install uv
 brew install node 
 ```
 
-### Linux 
+### Linux
+
 ```bash
 # uvx
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -64,46 +72,53 @@ sudo apt install nodejs npm
 3. Chat with MCP Server
 
 - stdio mcp server
-![](./docs/mcp_stdio.webp)
+  ![](./docs/mcp_stdio.png)
 
 - sse mcp server
-![](./docs//mcp_sse.webp)
+  ![](./docs/mcp_sse.png)
 
-## Debug 
+## Debug
 
 - logs & data
 
 macOS:
+
 ```bash
 ~/Library/Application Support/ChatMcp
 ```
 
 Windows:
+
 ```bash
 %APPDATA%\ChatMcp
 ```
 
 Linux:
+
 ```bash
 ~/.local/share/ChatMcp
 ```
 
 Mobile:
+
 - Application Documents Directory
 
 reset app can use this command
 
 macOS:
+
 ```bash
 rm -rf ~/Library/Application\ Support/ChatMcp
 ```
 
 Windows:
+
 ```bash
 rd /s /q "%APPDATA%\ChatMcp"
 ```
 
 Linux:
+
 ```bash
 rm -rf ~/.local/share/ChatMcp
 ```
@@ -127,7 +142,7 @@ flutter run -d macos
 - [x] Claude LLM Model
 - [x] OLLama LLM Model
 - [x] DeepSeek LLM Model
-- [ ] RAG 
+- [ ] RAG
 - [ ] Better UI Design
 - [x] Dark/Light Theme
 
