@@ -103,6 +103,7 @@ flutter:
     - assets/logo.png
     - assets/sandbox/
     - assets/logo/
+    - assets/logo_256.png
 
 flutter_launcher_icons:
   remove_alpha_ios: true
@@ -124,4 +125,4 @@ flutter_launcher_icons:
     image_path: "assets/logo.png"
   linux:
     generate: true
-    image_path: "assets/logo.png"
+    image_path: "assets/logo_256.png"
