@@ -39,10 +39,13 @@ class UploadMenu extends StatelessWidget {
                 children: [
                   InkIcon(icon: CupertinoIcons.photo),
                   const SizedBox(width: 12),
-                  Text(
-                    t.selectFromGallery,
-                    style: TextStyle(
-                      color: AppColors.getThemeTextColor(context),
+                  Expanded(
+                    child: Text(
+                      t.selectFromGallery,
+                      style: TextStyle(
+                        color: AppColors.getThemeTextColor(context),
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
@@ -62,10 +65,13 @@ class UploadMenu extends StatelessWidget {
                 children: [
                   InkIcon(icon: CupertinoIcons.doc),
                   const SizedBox(width: 12),
-                  Text(
-                    t.selectFile,
-                    style: TextStyle(
-                      color: AppColors.getThemeTextColor(context),
+                  Expanded(
+                    child: Text(
+                      t.selectFile,
+                      style: TextStyle(
+                        color: AppColors.getThemeTextColor(context),
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
