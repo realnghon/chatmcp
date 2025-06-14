@@ -32,7 +32,7 @@ class LLMSettingControllers {
   int priority;
   LLMSettingControllers({
     required this.keyController,
-    required this.endpointController,// 默认版本
+    required this.endpointController, // 默认版本
     required this.apiVersionController,
     this.apiStyleController = 'openai',
     required this.providerNameController,
@@ -270,6 +270,8 @@ class _KeysSettingsState extends State<KeysSettings> {
   // 构建提供商卡片头部
   Widget _buildProviderCardHeader(
       LLMProviderSetting config, LLMSettingControllers controllers) {
+    final isEnabled = config.enable ?? true; // null 表示启用，只有 false 为禁用
+
     return Row(
       children: [
         LlmIcon(icon: config.icon),
@@ -284,6 +286,30 @@ class _KeysSettingsState extends State<KeysSettings> {
             ),
           ),
         ),
+        SizedBox(
+          width: 35.0,
+          child: FlutterSwitch(
+            value: isEnabled,
+            onToggle: (value) {
+              setState(() {
+                final index = _llmApiConfigs.indexOf(config);
+                if (index != -1) {
+                  _llmApiConfigs[index].enable = value ? null : false;
+                  _hasChanges = true;
+                }
+              });
+            },
+            width: 32.0,
+            height: 18.0,
+            toggleSize: 14.0,
+            borderRadius: 10.0,
+            padding: 1.5,
+            activeColor: Theme.of(context).colorScheme.primary,
+            inactiveColor: Theme.of(context).colorScheme.outline.withAlpha(76),
+            toggleColor: Colors.white,
+          ),
+        ),
+        const SizedBox(width: 4),
         if (config.custom)
           IconButton(
             icon: const Icon(CupertinoIcons.delete, size: 18),
@@ -384,7 +410,7 @@ class _KeysSettingsState extends State<KeysSettings> {
       children: [
         // 左侧提供商列表
         SizedBox(
-          width: 180,
+          width: 220,
           child: _buildProviderList(),
         ),
         const SizedBox(width: 12),
@@ -527,6 +553,7 @@ class _KeysSettingsState extends State<KeysSettings> {
                       models: [],
                       enabledModels: [],
                       icon: '',
+                      enable: null, // 默认启用
                     ));
                     _controllers.add(LLMSettingControllers(
                       keyController: TextEditingController(),
@@ -608,17 +635,21 @@ class _KeysSettingsState extends State<KeysSettings> {
 
   Widget _buildProviderListTile(int index, LLMProviderSetting config) {
     final isSelected = _selectedProvider == index;
+    final isEnabled = config.enable ?? true; // null 表示启用，只有 false 为禁用
 
     return ListTile(
       dense: true,
       visualDensity: VisualDensity.compact,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 0),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 0),
       selected: isSelected,
       selectedTileColor: Theme.of(context).colorScheme.primary.withAlpha(31),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),
-      leading: LlmIcon(icon: config.icon),
+      leading: SizedBox(
+        width: 20,
+        child: LlmIcon(icon: config.icon),
+      ),
       title: Text(
         config.providerName ?? '',
         style: TextStyle(
@@ -627,6 +658,26 @@ class _KeysSettingsState extends State<KeysSettings> {
           color: isSelected
               ? Theme.of(context).colorScheme.primary
               : Theme.of(context).colorScheme.onSurface,
+        ),
+      ),
+      trailing: SizedBox(
+        width: 35.0,
+        child: FlutterSwitch(
+          value: isEnabled,
+          onToggle: (value) {
+            setState(() {
+              _llmApiConfigs[index].enable = value ? null : false;
+              _hasChanges = true;
+            });
+          },
+          width: 32.0,
+          height: 18.0,
+          toggleSize: 14.0,
+          borderRadius: 10.0,
+          padding: 1.5,
+          activeColor: Theme.of(context).colorScheme.primary,
+          inactiveColor: Theme.of(context).colorScheme.outline.withAlpha(76),
+          toggleColor: Colors.white,
         ),
       ),
       onTap: () {
@@ -898,7 +949,7 @@ class _KeysSettingsState extends State<KeysSettings> {
           const SizedBox(height: 12),
 
           // API Version
-          if(config.providerId == 'foundry') ...[
+          if (config.providerId == 'foundry') ...[
             Text(
               l10n.apiVersion,
               style: TextStyle(
@@ -958,7 +1009,7 @@ class _KeysSettingsState extends State<KeysSettings> {
                 ),
               ),
               Gap(size: 4),
-              if (config.link != null)
+              if (config.link != null && config.link!.isNotEmpty)
                 TextButton(
                   onPressed: () async {
                     await launchUrl(Uri.parse(config.link!));
@@ -1361,6 +1412,7 @@ class _KeysSettingsState extends State<KeysSettings> {
                       genTitleModel: e.genTitleModel,
                       link: e.link,
                       priority: e.priority,
+                      enable: _llmApiConfigs[_controllers.indexOf(e)].enable,
                     ))
                 .toList());
 

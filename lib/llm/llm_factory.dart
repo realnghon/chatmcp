@@ -10,7 +10,7 @@ import 'package:chatmcp/provider/settings_provider.dart';
 import 'package:logging/logging.dart';
 import 'model.dart' as llm_model;
 
-enum LLMProvider { openai, claude, ollama, deepseek, gemini, foundry}
+enum LLMProvider { openai, claude, ollama, deepseek, gemini, foundry }
 
 class LLMFactory {
   static BaseLLMClient create(LLMProvider provider,
@@ -27,7 +27,8 @@ class LLMFactory {
       case LLMProvider.gemini:
         return GeminiClient(apiKey: apiKey, baseUrl: baseUrl);
       case LLMProvider.foundry:
-        return FoundryClient(apiKey: apiKey, baseUrl: baseUrl, apiVersion: apiVersion);
+        return FoundryClient(
+            apiKey: apiKey, baseUrl: baseUrl, apiVersion: apiVersion);
     }
   }
 }
@@ -56,13 +57,20 @@ class LLMFactoryHelper {
 
   static void _logApiKeyUsage(String provider, String model, String apiKey) {
     final maskedKey = _maskApiKey(apiKey);
-    Logger.root.info('Using API key for provider: $provider, model: $model, key: $maskedKey');
+    Logger.root.info(
+        'Using API key for provider: $provider, model: $model, key: $maskedKey');
   }
 
   static BaseLLMClient createFromModel(llm_model.Model currentModel) {
     try {
       final setting = ProviderManager.settingsProvider.apiSettings.firstWhere(
           (element) => element.providerId == currentModel.providerId);
+
+      // 检查提供商是否启用（null 表示启用，只有 false 为禁用）
+      final isEnabled = setting.enable ?? true;
+      if (!isEnabled) {
+        throw Exception('Provider ${currentModel.providerId} is disabled');
+      }
 
       // Set apiKey and baseUrl
       final apiKey = setting.apiKey;
@@ -78,8 +86,8 @@ class LLMFactoryHelper {
       return LLMFactory.create(provider, apiKey: apiKey, baseUrl: baseUrl);
     } catch (e) {
       // If no matching provider is found, use default OpenAI
-      Logger.root
-          .warning('No matching provider found: ${currentModel.providerId}, using default OpenAI configuration');
+      Logger.root.warning(
+          'No matching provider found: ${currentModel.providerId}, using default OpenAI configuration');
 
       var openAISetting = ProviderManager.settingsProvider.apiSettings
           .firstWhere((element) => element.providerId == "openai",

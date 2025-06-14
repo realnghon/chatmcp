@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_switch/flutter_switch.dart';
 
 class SettingSwitch extends StatelessWidget {
   final String title;
@@ -22,7 +23,9 @@ class SettingSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SwitchListTile(
+    return ListTile(
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
       title: Text(
         title,
         style: TextStyle(
@@ -38,8 +41,22 @@ class SettingSwitch extends StatelessWidget {
               Theme.of(context).colorScheme.onSurface.withAlpha(subtitleAlpha),
         ),
       ),
-      value: value,
-      onChanged: onChanged,
+      trailing: SizedBox(
+        width: 35.0,
+        child: FlutterSwitch(
+          value: value,
+          onToggle: onChanged,
+          width: 32.0,
+          height: 18.0,
+          toggleSize: 14.0,
+          borderRadius: 10.0,
+          padding: 1.5,
+          activeColor: Theme.of(context).colorScheme.primary,
+          inactiveColor: Theme.of(context).colorScheme.outline.withAlpha(76),
+          toggleColor: Colors.white,
+        ),
+      ),
+      onTap: () => onChanged(!value),
     );
   }
 }

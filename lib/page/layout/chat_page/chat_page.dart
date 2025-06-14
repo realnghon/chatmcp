@@ -169,25 +169,19 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _addListeners() {
-    ProviderManager.settingsProvider.addListener(_onSettingsChanged);
     ProviderManager.chatModelProvider.addListener(_initializeLLMClient);
     ProviderManager.chatProvider.addListener(_onChatProviderChanged);
   }
 
   void _removeListeners() {
-    ProviderManager.settingsProvider.removeListener(_onSettingsChanged);
-    ProviderManager.chatProvider.removeListener(_onChatProviderChanged);
     ProviderManager.chatModelProvider.removeListener(_initializeLLMClient);
+    ProviderManager.chatProvider.removeListener(_onChatProviderChanged);
   }
 
   void _initializeLLMClient() {
     _llmClient = LLMFactoryHelper.createFromModel(
         ProviderManager.chatModelProvider.currentModel);
     setState(() {});
-  }
-
-  void _onSettingsChanged() {
-    _initializeLLMClient();
   }
 
   void _onChatProviderChanged() {

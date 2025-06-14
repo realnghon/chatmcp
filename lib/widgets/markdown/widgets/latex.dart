@@ -126,15 +126,23 @@ class LatexNode extends SpanNode {
           ? PlaceholderAlignment.middle
           : PlaceholderAlignment.aboveBaseline,
       baseline: TextBaseline.alphabetic,
-      child: Math.tex(
-        content,
-        mathStyle: isInline ? MathStyle.text : MathStyle.display,
-        textStyle: style.copyWith(
-            fontSize: style.fontSize != null
-                ? (isInline ? style.fontSize : style.fontSize! * 1.2)
-                : (isInline ? 14.0 : 16.8)),
-        onErrorFallback: (error) => Text('LaTeX Error: $error',
-            style: style.copyWith(color: Colors.red)),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          maxWidth: 800,
+        ),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Math.tex(
+            content,
+            mathStyle: isInline ? MathStyle.text : MathStyle.display,
+            textStyle: style.copyWith(
+                fontSize: style.fontSize != null
+                    ? (isInline ? style.fontSize : style.fontSize! * 1.2)
+                    : (isInline ? 14.0 : 16.8)),
+            onErrorFallback: (error) => Text('LaTeX Error: $error',
+                style: style.copyWith(color: Colors.red)),
+          ),
+        ),
       ),
     );
   }
