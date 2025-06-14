@@ -79,7 +79,7 @@ class _UpgradeNoticeState extends State<UpgradeNotice> {
       // 获取当前应用版本
       final packageInfo = await PackageInfo.fromPlatform();
       final currentVersion = packageInfo.version;
-      debugPrint('当前应用版本: $currentVersion');
+      debugPrint('Current application version: $currentVersion');
 
       // 检查是否已经通知过用户
       final lastNotifiedVersion = prefs.getString('last_shown_version');
@@ -108,7 +108,7 @@ class _UpgradeNoticeState extends State<UpgradeNotice> {
         final htmlUrl = data['html_url'] as String;
         final body = data['body'] as String?;
 
-        debugPrint('检测到GitHub最新版本: $latestVersion');
+        debugPrint('Detected latest GitHub version: $latestVersion');
 
         if (_isNewerVersion(currentVersion, latestVersion)) {
           if (mounted) {
