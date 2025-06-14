@@ -20,7 +20,7 @@ import 'chat_message_to_image.dart';
 import 'package:chatmcp/utils/event_bus.dart';
 import 'chat_code_preview.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
-import 'package:jsonc/jsonc.dart';
+import 'dart:convert';
 import 'package:chatmcp/mcp/models/json_rpc_message.dart';
 
 class ChatPage extends StatefulWidget {
@@ -33,16 +33,16 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   Chat? _chat;
   List<ChatMessage> _messages = [];
-  bool _isComposing = false; // 是否正在输入
+  bool _isComposing = false; // Indicates if the user is currently composing a message
   BaseLLMClient? _llmClient;
   String _currentResponse = '';
-  bool _isLoading = false; // 是否正在加载
-  String _parentMessageId = ''; // 父消息ID
-  bool _isCancelled = false; // 是否取消
-  bool _isWating = false; // 是否正在补全
+  bool _isLoading = false; // Indicates if the chat is currently loading or processing a response
+  String _parentMessageId = ''; // Parent message ID
+  bool _isCancelled = false; // Indicates if the current operation has been cancelled by the user
+  bool _isWating = false; // Indicates if the system is waiting for a response from the LLM
 
   WidgetsToImageController toImagecontroller = WidgetsToImageController();
-  // to save image bytes of widget
+  // Stores image bytes of the widget for sharing functionality
   Uint8List? bytes;
 
   bool mobile = kIsMobile;
@@ -79,7 +79,7 @@ class _ChatPageState extends State<ChatPage> {
     super.dispose();
   }
 
-  // 初始化相关方法
+  // Initializes state and sets up related methods
   void _initializeState() {
     _initializeLLMClient();
     _addListeners();
@@ -92,10 +92,6 @@ class _ChatPageState extends State<ChatPage> {
       _runFunctionEvents.add(event);
     });
 
-    // 显示授权对话框
-    // if (mounted) {
-    //   await _showFunctionApprovalDialog(event);
-    // }
 
     if (!_isLoading) {
       _handleSubmitted(SubmitData("", []));
@@ -103,7 +99,7 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Future<bool> _showFunctionApprovalDialog(RunFunctionEvent event) async {
-    // 检查工具名称的前缀以确定是哪个服务器的工具
+    // Determines which MCP server's tool the function belongs to
     final clientName =
         _findClientName(ProviderManager.mcpServerProvider.tools, event.name);
     if (clientName == null) return false;
@@ -116,16 +112,16 @@ class _ChatPageState extends State<ChatPage> {
       final config = servers[clientName] as Map<String, dynamic>? ?? {};
       final autoApprove = config['auto_approve'] as bool? ?? false;
 
-      // 如果设置了自动批准，直接返回true
+      // Skips authorization dialog if auto-approve is enabled in server config
       if (autoApprove) {
         return true;
       }
     }
 
-    // 在异步操作后检查组件是否仍然挂载
+    // Verifies component is still mounted before showing dialog
     if (!mounted) return false;
 
-    // 否则显示授权对话框
+    // Displays authorization dialog for function execution
     var t = AppLocalizations.of(context)!;
     return await showDialog<bool>(
           context: context,
@@ -250,8 +246,6 @@ class _ChatPageState extends State<ChatPage> {
       _allMessages = messages;
     });
 
-    // print('messages:\n${const JsonEncoder.withIndent('  ').convert(messages)}');
-
     if (messages.isEmpty) {
       return [];
     }
@@ -302,7 +296,6 @@ class _ChatPageState extends State<ChatPage> {
       if (currentMessage.messageId.isEmpty) break;
     }
 
-    // print('messageId: ${lastMessage.messageId}');
 
     ChatMessage? nextMessage = messages
         .where((m) => m.role == MessageRole.user)
@@ -311,9 +304,6 @@ class _ChatPageState extends State<ChatPage> {
           orElse: () =>
               ChatMessage(messageId: '', content: '', role: MessageRole.user),
         );
-
-    // print(
-    // 'nextMessage:\n${const JsonEncoder.withIndent('  ').convert(nextMessage)}');
 
     while (nextMessage != null && nextMessage.messageId.isNotEmpty) {
       if (!treeMessages.any((m) => m.messageId == nextMessage!.messageId)) {
@@ -344,7 +334,7 @@ class _ChatPageState extends State<ChatPage> {
     return treeMessages;
   }
 
-  // 消息处理相关方法
+  // Message processing related methods
   Future<void> _initializeHistoryMessages() async {
     final activeChat = ProviderManager.chatProvider.activeChat;
     if (activeChat == null && _messages.isEmpty) {
@@ -358,16 +348,16 @@ class _ChatPageState extends State<ChatPage> {
     }
     if (_chat?.id != activeChat?.id) {
       final messages = await _getHistoryTreeMessages();
-      // 找到最后一条用户消息的索引
+      // Find the index of the last user message
       final lastUserIndex =
           messages.lastIndexWhere((m) => m.role == MessageRole.user);
       String parentId = '';
 
-      // 如果找到用户消息，且其后有助手消息，则使用助手消息的ID
+      // If a user message is found, and there is an assistant message after it, use the ID of the assistant message
       if (lastUserIndex != -1 && lastUserIndex + 1 < messages.length) {
         parentId = messages[lastUserIndex + 1].messageId;
       } else if (messages.isNotEmpty) {
-        // 如果没有找到合适的消息，使用最后一条消息的ID
+        // If no suitable message is found, use the ID of the last message
         parentId = messages.last.messageId;
       }
 
@@ -382,7 +372,7 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-  // UI 构建相关方法
+  // UI building related methods
   Widget _buildMessageList() {
     if (_messages.isEmpty) {
       final l10n = AppLocalizations.of(context)!;
@@ -435,7 +425,7 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
-  // 消息处理相关方法
+  // Message processing related methods
   void _handleTextChanged(String text) {
     setState(() {
       _isComposing = text.isNotEmpty;
@@ -453,22 +443,20 @@ class _ChatPageState extends State<ChatPage> {
     return null;
   }
 
-  Future<void> _sendToolCallAndProcessResponse(
-      String toolName, Map<String, dynamic> toolArguments) async {
-    final clientName =
-        _findClientName(ProviderManager.mcpServerProvider.tools, toolName);
+  Future<void> _sendToolCallAndProcessResponse(String toolName, Map<String, dynamic> toolArguments) async {
+    final clientName =_findClientName(ProviderManager.mcpServerProvider.tools, toolName);
     if (clientName == null) {
-      Logger.root.severe('clientName is null');
+      Logger.root.severe('No MCP server found for tool: $toolName');
       return;
     }
 
     final mcpClient = ProviderManager.mcpServerProvider.getClient(clientName);
     if (mcpClient == null) {
-      Logger.root.severe('mcpClient is null');
+      Logger.root.severe('No MCP client found for tool: $toolName');
       return;
     }
 
-    // 工具调用超时和重试配置
+    // Configures tool call with timeout and retry mechanism
     const int maxRetries = 3;
     const Duration timeout = Duration(seconds: 60 * 5);
 
@@ -487,26 +475,26 @@ class _ChatPageState extends State<ChatPage> {
             )
             .timeout(timeout);
 
-        // 如果成功，跳出重试循环
+        // Exits retry loop on successful response
         break;
       } catch (e) {
         lastError = e.toString();
         Logger.root
             .warning('tool call attempt ${attempt + 1}/$maxRetries failed: $e');
 
-        // 如果不是最后一次尝试，等待一段时间后重试
+        // Implements exponential backoff before next retry attempt
         if (attempt < maxRetries - 1) {
-          final delay = Duration(seconds: (attempt + 1) * 2); // 递增延迟
+          final delay = Duration(seconds: (attempt + 1) * 2); // Incremental delay
           Logger.root.info('waiting ${delay.inSeconds}s before retry...');
           await Future.delayed(delay);
         }
       }
     }
 
-    // 如果所有重试都失败了
+    // Logs error and updates UI when all retry attempts fail
     if (response == null) {
       Logger.root
-          .severe('tool call failed after $maxRetries attempts: $lastError');
+          .severe('Tool call failed after $maxRetries attempts: $lastError');
       setState(() {
         _parentMessageId = _messages.last.messageId;
         final msgId = Uuid().v4();
@@ -523,8 +511,7 @@ class _ChatPageState extends State<ChatPage> {
       return;
     }
 
-    Logger.root.info(
-        'send tool call success - name: $toolName arguments: $toolArguments response: $response');
+    Logger.root.info('Tool call success - name: $toolName arguments: $toolArguments response: $response');
 
     setState(() {
       _currentResponse = response!.result['content'].toString();
@@ -532,13 +519,13 @@ class _ChatPageState extends State<ChatPage> {
         _parentMessageId = _messages.last.messageId;
         final msgId = Uuid().v4();
         _messages.add(ChatMessage(
-          messageId: msgId,
-          content:
-              '<call_function_result name="$toolName">\n$_currentResponse\n</call_function_result>',
-          role: MessageRole.assistant,
-          name: toolName,
-          parentMessageId: _parentMessageId,
-        ));
+            messageId: msgId,
+            content: '<call_function_result name="$toolName">\n$_currentResponse\n</call_function_result>',
+            role: MessageRole.assistant,
+            name: toolName,
+            parentMessageId: _parentMessageId,
+          ),
+        );
         _parentMessageId = msgId;
       }
     });
@@ -584,55 +571,6 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
-  Future<bool> _checkNeedToolCallFunction() async {
-    if (_runFunctionEvents.isNotEmpty) return true;
-
-    final lastMessage = _messages.last;
-
-    final content = lastMessage.content ?? '';
-    if (content.isEmpty) return false;
-
-    final messages = _messages.toList();
-
-    Logger.root.info('check need tool call: $messages');
-
-    final result = await _llmClient!.checkToolCall(
-      ProviderManager.chatModelProvider.currentModel.name,
-      CompletionRequest(
-        model: ProviderManager.chatModelProvider.currentModel.name,
-        messages: [
-          ..._prepareMessageList(),
-        ],
-      ),
-      ProviderManager.mcpServerProvider.tools,
-    );
-    final needToolCall = result['need_tool_call'] ?? false;
-
-    if (!needToolCall) {
-      return false;
-    }
-
-    final toolCalls = result['tool_calls'] as List;
-    for (var toolCall in toolCalls) {
-      final functionEvent = RunFunctionEvent(
-        toolCall['name'],
-        toolCall['arguments'],
-      );
-
-      _runFunctionEvents.add(functionEvent);
-
-      _messages.add(ChatMessage(
-        content:
-            "<function name=\"${functionEvent.name}\">\n${jsonc.encode(functionEvent.arguments)}\n</function>",
-        role: MessageRole.assistant,
-        parentMessageId: _parentMessageId,
-      ));
-
-      _onRunFunction(functionEvent);
-    }
-
-    return needToolCall;
-  }
 
   Future<bool> _checkNeedToolCallXml() async {
     if (_runFunctionEvents.isNotEmpty) return true;
@@ -643,7 +581,7 @@ class _ChatPageState extends State<ChatPage> {
     final content = lastMessage.content ?? '';
     if (content.isEmpty) return false;
 
-    // 使用正则表达式检查是否包含 <function name=*>*</function> 格式的标签
+    // Parses function call tags in format <function name="toolName">args</function>
     final RegExp functionTagRegex = RegExp(
         '<function\\s+name=["\']([^"\']*)["\']\\s*>(.*?)</function>',
         dotAll: true);
@@ -658,15 +596,15 @@ class _ChatPageState extends State<ChatPage> {
       if (toolName == null || toolArguments == null) continue;
 
       try {
-        // 移除换行符和多余的空格
+        // Cleans and parses tool arguments by removing whitespace and newlines
         final cleanedToolArguments = toolArguments
             .replaceAll('\n', ' ')
             .replaceAll(RegExp(r'\s+'), ' ')
             .trim();
-        final toolArgumentsMap = jsonc.decode(cleanedToolArguments);
+        final toolArgumentsMap = jsonDecode(cleanedToolArguments);
         _onRunFunction(RunFunctionEvent(toolName, toolArgumentsMap));
       } catch (e) {
-        Logger.root.warning('解析工具参数失败: $e');
+        Logger.root.warning('Failed to parse tool parameters: $e');
       }
     }
 
@@ -677,7 +615,7 @@ class _ChatPageState extends State<ChatPage> {
     return await _checkNeedToolCallXml();
   }
 
-  // 消息提交处理
+  // Message submission processing
   Future<void> _handleSubmitted(SubmitData data,
       {bool addUserMessage = true}) async {
     setState(() {
@@ -700,11 +638,11 @@ class _ChatPageState extends State<ChatPage> {
         }
 
         if (_runFunctionEvents.isNotEmpty) {
-          // 顺序处理每个函数调用
+          // Processes function calls in sequential order
           while (_runFunctionEvents.isNotEmpty) {
             final event = _runFunctionEvents.first;
 
-            // 等待用户授权
+            // Requests user authorization
             final approved = await _showFunctionApprovalDialog(event);
 
             if (approved) {
@@ -724,11 +662,12 @@ class _ChatPageState extends State<ChatPage> {
               });
               final msgId = Uuid().v4();
               _messages.add(ChatMessage(
-                messageId: msgId,
-                content: 'call function rejected',
-                role: MessageRole.assistant,
-                parentMessageId: _parentMessageId,
-              ));
+                  messageId: msgId,
+                  content: 'call function rejected',
+                  role: MessageRole.assistant,
+                  parentMessageId: _parentMessageId,
+                ),
+              );
               _parentMessageId = msgId;
               break;
             }
@@ -788,19 +727,18 @@ class _ChatPageState extends State<ChatPage> {
     });
 
     List<ChatMessage> messageList = _prepareMessageList();
-    // messageList = messageMerge(messageList);
 
     final modelSetting = ProviderManager.settingsProvider.modelSetting;
     final generalSetting = ProviderManager.settingsProvider.generalSetting;
 
-    // 限制消息数量
+    // Limit the number of messages
     final maxMessages = generalSetting.maxMessages;
     if (messageList.length > maxMessages) {
-      // 保留最新的 maxMessages 条消息
+      // Maintains only the most recent messages up to maxMessages limit
       messageList = messageList.sublist(messageList.length - maxMessages);
     }
 
-    // messageList 如果是 assistant and content start with <call_function_result> 则重写角色为 user
+    // Converts assistant's function call results to user role for proper context
     for (var message in messageList) {
       if (message.role == MessageRole.assistant &&
           message.content?.contains('done="true"') == true) {
@@ -820,11 +758,11 @@ class _ChatPageState extends State<ChatPage> {
       }
     }
 
-    var _messageList = messageMerge(messageList);
+    var messageList0 = messageMerge(messageList);
 
-    if (_messageList.isNotEmpty &&
-        _messageList.last.role == MessageRole.assistant) {
-      _messageList.add(ChatMessage(
+    if (messageList0.isNotEmpty &&
+        messageList0.last.role == MessageRole.assistant) {
+      messageList0.add(ChatMessage(
         content: 'continue',
         role: MessageRole.user,
       ));
@@ -832,7 +770,7 @@ class _ChatPageState extends State<ChatPage> {
 
     final systemPrompt = await _getSystemPrompt();
 
-    Logger.root.info('start process llm response: $_messageList');
+    Logger.root.info('Start processing LLM response: $messageList0');
 
     final stream = _llmClient!.chatStreamCompletion(CompletionRequest(
       model: ProviderManager.chatModelProvider.currentModel.name,
@@ -841,14 +779,14 @@ class _ChatPageState extends State<ChatPage> {
           content: systemPrompt,
           role: MessageRole.system,
         ),
-        ..._messageList,
+        ...messageList0,
       ],
       modelSetting: modelSetting,
     ));
 
     _initializeAssistantResponse();
     await _processResponseStream(stream);
-    Logger.root.info('end process llm response');
+    Logger.root.info('End processing LLM response');
   }
 
   List<ChatMessage> _prepareMessageList() {
@@ -961,8 +899,8 @@ class _ChatPageState extends State<ChatPage> {
         if (_messages.length > 1) _messages.last else _messages.first,
       ]);
     } catch (e) {
-      Logger.root.warning('生成标题失败: $e');
-      // 如果生成标题失败，使用默认标题或从用户消息中提取简短标题
+      Logger.root.warning('Failed to generate title: $e');
+      // Creates fallback title from user message if title generation fails
       final userMessage =
           _messages.isNotEmpty ? _messages.first.content ?? '' : '';
       title = _generateFallbackTitle(userMessage);
@@ -970,7 +908,7 @@ class _ChatPageState extends State<ChatPage> {
 
     await ProviderManager.chatProvider
         .createChat(Chat(title: title), _handleParentMessageId(_messages));
-    Logger.root.info('create new chat: $title');
+    Logger.root.info('Created new chat: $title');
   }
 
   String _generateFallbackTitle(String userMessage) {
@@ -978,7 +916,7 @@ class _ChatPageState extends State<ChatPage> {
       return 'new chat';
     }
 
-    // 提取用户消息的前20个字符作为标题
+    // Creates title by truncating first 20 characters of user message
     String title = userMessage.replaceAll('\n', ' ').trim();
     if (title.length > 20) {
       title = '${title.substring(0, 17)}...';
@@ -987,19 +925,19 @@ class _ChatPageState extends State<ChatPage> {
     return title.isEmpty ? 'new chat' : title;
   }
 
-  // messages parentMessageId 处理
+  // Handles parent message ID assignment for conversation thread
   List<ChatMessage> _handleParentMessageId(List<ChatMessage> messages) {
     if (messages.isEmpty) return [];
 
-    // 找到最后一条用户消息的索引
+    // Locates the last user message to establish conversation thread
     int lastUserIndex =
         messages.lastIndexWhere((m) => m.role == MessageRole.user);
     if (lastUserIndex == -1) return messages;
 
-    // 获取从最后一条用户消息开始的所有消息
+    // Retrieves conversation thread starting from last user message
     List<ChatMessage> relevantMessages = messages.sublist(lastUserIndex);
 
-    // 如果消息数大于2，重置第二条之后消息的parentMessageId
+    // Resets parent IDs for long threads to maintain proper conversation flow
     if (relevantMessages.length > 2) {
       String secondMessageId = relevantMessages[1].messageId;
       for (int i = 2; i < relevantMessages.length; i++) {
@@ -1026,15 +964,15 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _handleError(dynamic error, StackTrace stackTrace) {
-    Logger.root.severe('error: $error');
-    Logger.root.severe('stackTrace: $stackTrace');
+    Logger.root.severe('Error: $error');
+    Logger.root.severe('Stack trace: $stackTrace');
 
-    // 尝试提取更多错误信息
+    // Extracts detailed error information for debugging purposes
     if (error is TypeError) {
-      Logger.root.severe('类型错误: ${error.toString()}');
+      Logger.root.severe('Type error: ${error.toString()}');
     }
 
-    // 重置所有相关状态
+    // Resets all state variables to their initial values
     _resetState();
 
     if (mounted) {
@@ -1095,7 +1033,7 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
-  // 处理错误信息
+  // Formats error messages for user display
   String _getUserFriendlyErrorMessage(dynamic error) {
     final errorMap = {
       'connection': AppLocalizations.of(context)!.networkError,
@@ -1116,7 +1054,7 @@ class _ChatPageState extends State<ChatPage> {
     return AppLocalizations.of(context)!.unknownError;
   }
 
-  // 处理分享事件
+  // Handles chat export functionality
   Future<void> _handleShare(ShareEvent event) async {
     if (_messages.isEmpty) return;
     await Future.delayed(const Duration(milliseconds: 100));
@@ -1169,6 +1107,9 @@ class _ChatPageState extends State<ChatPage> {
     setState(() {
       showModalCodePreview = true;
     });
+
+    const txtNoCodePreview = Text('No code preview', style: TextStyle(fontSize: 14, color: Colors.grey));
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -1199,19 +1140,8 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                   Expanded(
                     child: ProviderManager.chatProvider.artifactEvent != null
-                        ? ChatCodePreview(
-                            codePreviewEvent:
-                                ProviderManager.chatProvider.artifactEvent!,
-                          )
-                        : const Center(
-                            child: Text(
-                              'No code preview',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ),
+                        ? ChatCodePreview(codePreviewEvent:ProviderManager.chatProvider.artifactEvent!)
+                        : Center(child: txtNoCodePreview),
                   ),
                 ],
               );
