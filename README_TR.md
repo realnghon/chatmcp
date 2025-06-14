@@ -187,5 +187,5 @@ Bu proje Apache License 2.0 ile lisanslanmıştır.
 
 ## GitHub Yıldız Geçmişi
 
-![alt text](https://api-star-history.com/svg?repos=daodao97/chatmcp&type=Date)
+![](https://api.star-history.com/svg?repos=daodao97/chatmcp&type=Date)
 
