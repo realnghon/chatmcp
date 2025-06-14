@@ -18,7 +18,7 @@ import 'package:bot_toast/bot_toast.dart';
 final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
     GlobalKey<ScaffoldMessengerState>();
 
-// 添加全局的 navigator key
+// Add global navigator key
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
@@ -66,14 +66,23 @@ void main() async {
       size: Size(1200, 800),
       minimumSize: Size(400, 600),
       center: true,
-      // backgroundColor: Colors.transparent,
+      backgroundColor: Colors.transparent,
       skipTaskbar: false,
       titleBarStyle: wm.TitleBarStyle.hidden,
+      windowButtonVisibility: true,
+      alwaysOnTop: false,
+      fullScreen: false,
     );
 
     await wm.windowManager.waitUntilReadyToShow(windowOptions, () async {
-      await wm.windowManager.show();
-      await wm.windowManager.focus();
+      try {
+        await wm.windowManager.show();
+        await wm.windowManager.focus();
+        // Add a small delay to ensure window is properly initialized
+        await Future.delayed(const Duration(milliseconds: 100));
+      } catch (e) {
+        Logger.root.warning('Window initialization error: $e');
+      }
     });
   }
 
@@ -101,12 +110,12 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // 获取当前平台的默认字体
+  // Get default font for current platform
   String getPlatformFontFamily() {
     if (Platform.isWindows) {
-      return 'Microsoft YaHei'; // 微软雅黑
+      return 'Microsoft YaHei'; // Microsoft YaHei font
     }
-    return ''; // 其它平台使用 Flutter 默认字体
+    return ''; // Use Flutter default font for other platforms
   }
 
   @override

@@ -48,28 +48,38 @@ class LLMFactoryHelper {
     "foundry": LLMProvider.foundry,
   };
 
+  static String _maskApiKey(String apiKey) {
+    if (apiKey.isEmpty) return 'empty';
+    if (apiKey.length <= 8) return '***';
+    return '${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)}';
+  }
+
+  static void _logApiKeyUsage(String provider, String model, String apiKey) {
+    final maskedKey = _maskApiKey(apiKey);
+    Logger.root.info('Using API key for provider: $provider, model: $model, key: $maskedKey');
+  }
+
   static BaseLLMClient createFromModel(llm_model.Model currentModel) {
     try {
       final setting = ProviderManager.settingsProvider.apiSettings.firstWhere(
           (element) => element.providerId == currentModel.providerId);
 
-      // 获取配置信息
+      // Set apiKey and baseUrl
       final apiKey = setting.apiKey;
       final baseUrl = setting.apiEndpoint;
 
-      Logger.root.fine(
-          'Using API Key: ${apiKey.isEmpty ? 'empty' : apiKey.substring(0, 10)}***** for provider: ${currentModel.providerId} model: $currentModel');
+      _logApiKeyUsage(currentModel.providerId, currentModel.name, apiKey);
 
       var provider = LLMFactoryHelper.providerMap[currentModel.providerId];
 
       provider ??= LLMProvider.values.byName(currentModel.apiStyle);
 
-      // 创建 LLM 客户端
+      // Create LLM client
       return LLMFactory.create(provider, apiKey: apiKey, baseUrl: baseUrl);
     } catch (e) {
-      // 如果找不到匹配的提供商，使用默认的OpenAI
+      // If no matching provider is found, use default OpenAI
       Logger.root
-          .warning('未找到匹配的提供商配置: ${currentModel.providerId}，使用默认OpenAI配置');
+          .warning('No matching provider found: ${currentModel.providerId}, using default OpenAI configuration');
 
       var openAISetting = ProviderManager.settingsProvider.apiSettings
           .firstWhere((element) => element.providerId == "openai",
