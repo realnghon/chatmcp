@@ -9,7 +9,6 @@ import 'package:chatmcp/provider/chat_model_provider.dart';
 import 'package:chatmcp/utils/platform.dart';
 import 'package:chatmcp/utils/color.dart';
 import 'package:keyboard_dismisser/keyboard_dismisser.dart';
-import 'dart:convert';
 import 'package:chatmcp/page/setting/setting.dart';
 
 class LayoutPage extends StatefulWidget {

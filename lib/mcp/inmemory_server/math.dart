@@ -268,9 +268,6 @@ class MathServer extends MemoryServer {
   Map<String, dynamic> onToolCall(JSONRPCMessage message) {
     try {
       String name = message.params?['name'];
-      if (name == null) {
-        return {'error': 'Tool name cannot be empty'};
-      }
 
       Map<String, dynamic>? arguments = message.params?['arguments'];
       if (arguments == null) {
@@ -529,26 +526,26 @@ class MathServer extends MemoryServer {
     return true;
   }
 
-  int add(int a, int b) {
-    return a + b;
+  int add(num a, num b) {
+    return a.toInt() + b.toInt();
   }
 
-  int subtract(int a, int b) {
-    return a - b;
+  int subtract(num a, num b) {
+    return a.toInt() - b.toInt();
   }
 
-  int multiply(int a, int b) {
-    return a * b;
+  int multiply(num a, num b) {
+    return a.toInt() * b.toInt();
   }
 
-  double divide(int a, int b) {
+  double divide(num a, num b) {
     if (b == 0) {
       throw ArgumentError('Division by zero is not allowed');
     }
     return a / b;
   }
 
-  int power(int a, int b) {
+  int power(num a, num b) {
     if (b < 0) {
       throw ArgumentError(
           'Negative exponents are not supported in this implementation');
@@ -556,19 +553,19 @@ class MathServer extends MemoryServer {
     return math.pow(a, b).toInt();
   }
 
-  double sqrt(int a) {
+  double sqrt(num a) {
     if (a < 0) {
       throw ArgumentError('Cannot compute square root of negative number');
     }
     return math.sqrt(a);
   }
 
-  double cbrt(int a) {
+  double cbrt(num a) {
     return math.pow(a.abs(), 1 / 3).toDouble() * (a < 0 ? -1 : 1);
   }
 
-  int abs(int a) {
-    return a.abs();
+  int abs(num a) {
+    return a.abs().toInt();
   }
 
   double sin(num a) {
@@ -624,14 +621,14 @@ class MathServer extends MemoryServer {
     return a.floor();
   }
 
-  int mod(int a, int b) {
+  int mod(num a, num b) {
     if (b == 0) {
       throw ArgumentError('Modulo by zero is not allowed');
     }
-    return a % b;
+    return a.toInt() % b.toInt();
   }
 
-  int factorial(int a) {
+  int factorial(num a) {
     if (a < 0) {
       throw ArgumentError('Factorial cannot be applied to negative numbers');
     }
@@ -642,11 +639,11 @@ class MathServer extends MemoryServer {
     if (a <= 1) {
       return 1;
     }
-    return a * factorial(a - 1);
+    return a.toInt() * factorial(a - 1);
   }
 }
 
-castToNumber(dynamic value) {
+int? castToNumber(dynamic value) {
   if (value == null) {
     return null;
   }
@@ -669,7 +666,7 @@ castToNumber(dynamic value) {
       if (parsed == null) {
         return null;
       }
-      return parsed is double ? parsed.toInt() : parsed;
+      return parsed.toInt();
     } catch (_) {
       return null;
     }

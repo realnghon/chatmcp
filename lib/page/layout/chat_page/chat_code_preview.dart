@@ -24,7 +24,7 @@ class ChatCodePreview extends StatefulWidget {
 }
 
 class _ChatCodePreviewState extends State<ChatCodePreview> {
-  double _height = 300; // 默认高度
+  final double _height = 300; // 默认高度
   InAppWebViewController? controller;
   bool _hasError = false;
   int _retryCount = 0;

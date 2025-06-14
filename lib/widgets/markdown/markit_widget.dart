@@ -7,7 +7,6 @@ import './widgets/details.dart';
 import 'widgets/think.dart';
 import './widgets/artifact.dart';
 import './widgets/image.dart';
-import 'package:flutter_highlight/themes/github.dart';
 import './widgets/inline_code.dart';
 import './widgets/function.dart';
 import './widgets/function_result.dart';
@@ -29,7 +28,7 @@ This image is a math problem, involving the calculation of the cost of anti-slip
 
 <think name="test" age="18">33333
 
-''' + '\n${DateTime.now().toIso8601String()}';
+''' '\n${DateTime.now().toIso8601String()}';
 
     return Scaffold(
       appBar: AppBar(

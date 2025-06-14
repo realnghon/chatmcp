@@ -6,7 +6,7 @@ import 'package:chatmcp/utils/platform.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
 
 class WindowControls extends StatelessWidget {
-  const WindowControls({Key? key}) : super(key: key);
+  const WindowControls({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -61,12 +61,11 @@ class _WindowButton extends StatefulWidget {
   final bool isCloseButton;
 
   const _WindowButton({
-    Key? key,
     required this.icon,
     required this.onPressed,
     required this.tooltip,
     this.isCloseButton = false,
-  }) : super(key: key);
+  });
 
   @override
   _WindowButtonState createState() => _WindowButtonState();
