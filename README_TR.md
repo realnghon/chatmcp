@@ -24,7 +24,7 @@ sudo apt-get install libsqlite3-0 libsqlite3-dev
 ## Dokümantasyon
 
 Ayrıca, chatmcp hakkında daha fazla bilgi edinmek için DeepWiki'yi kullanabilirsiniz.
-![alt text](https://deepwiki.com/badge.svg)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/daodao97/chatmcp)
 DeepWiki, herhangi bir herkese açık GitHub deposunu tam etkileşimli, kolay anlaşılır bir wiki'ye dönüştüren yapay zeka destekli bir platformdur.
 Kodları, dokümantasyonu ve yapılandırma dosyalarını analiz ederek net açıklamalar ve etkileşimli diyagramlar oluşturur, hatta yapay zeka ile
 gerçek zamanlı olarak soru-cevap yapmanıza olanak tanır.
