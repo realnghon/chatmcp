@@ -30,8 +30,11 @@ var defaultInMemoryServers = [
 class McpServerProvider extends ChangeNotifier {
   static final McpServerProvider _instance = McpServerProvider._internal();
   factory McpServerProvider() => _instance;
+  
+  bool _isInitialized = false;
+  
   McpServerProvider._internal() {
-    init();
+    _initialize();
   }
 
   static const _configFileName = 'mcp_server.json';
@@ -253,26 +256,26 @@ class McpServerProvider extends ChangeNotifier {
     return tools;
   }
 
-  Future<void> init() async {
+  Future<void> _initialize() async {
+    if (_isInitialized) return;
+    
     try {
-      // Ensure configuration file exists
       await _initConfigFile();
+      _isInitialized = true;
+    } catch (e, stackTrace) {
+      Logger.root.severe('Failed to initialize MCP servers: $e, stackTrace: $stackTrace');
+    }
+  }
 
-      // // add default inmemory servers
-      // final allServerConfig = await _loadServers();
-      // final serverConfig =
-      //     allServerConfig['mcpServers'] as Map<String, dynamic>;
-      // for (var server in defaultInMemoryServers) {
-      //   if (!serverConfig.containsKey(server['name'])) {
-      //     serverConfig[server['name']!] = server;
-      //   }
-      // }
-      // await saveServers({'mcpServers': serverConfig});
+  Future<void> init() async {
+    if (!_isInitialized) {
+      await _initialize();
+    }
 
+    try {
       final configFilePath = await _configFilePath;
       Logger.root.info('mcp_server path: $configFilePath');
 
-      // Add configuration file content log
       final configFile = File(configFilePath);
       final configContent = await configFile.readAsString();
       Logger.root.info('mcp_server config: $configContent');
@@ -284,22 +287,13 @@ class McpServerProvider extends ChangeNotifier {
 
       Logger.root.info('mcp_server ignoreServers: $ignoreServers');
 
-      // _servers = await initializeAllMcpServers(configFilePath, ignoreServers);
-      // Logger.root.info('mcp_server count: ${_servers.length}');
-      // for (var entry in _servers.entries) {
-      //   addClient(entry.key, entry.value);
-      // }
-
       notifyListeners();
     } catch (e, stackTrace) {
-      Logger.root.severe(
-          'Failed to initialize MCP servers: $e, stackTrace: $stackTrace');
-      // Print more detailed error information
+      Logger.root.severe('Failed to initialize MCP servers: $e, stackTrace: $stackTrace');
       if (e is TypeError) {
         final configFile = File(await _configFilePath);
         final content = await configFile.readAsString();
-        Logger.root.severe(
-            'Configuration file parsing error, current content: $content');
+        Logger.root.severe('Configuration file parsing error, current content: $content');
       }
     }
   }
