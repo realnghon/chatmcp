@@ -5,7 +5,6 @@ import 'package:flutter/rendering.dart';
 import 'chat_message.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 
-import 'scroll_down_button.dart';
 
 class MessageList extends StatefulWidget {
   final List<ChatMessage> messages;

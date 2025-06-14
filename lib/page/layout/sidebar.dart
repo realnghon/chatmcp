@@ -1,5 +1,4 @@
 import 'package:chatmcp/widgets/ink_icon.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../setting/setting.dart';
 import 'package:provider/provider.dart';

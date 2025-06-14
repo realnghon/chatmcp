@@ -48,7 +48,7 @@ class CodeBlockNode extends ElementNode {
 
     bool isClosed = element.attributes['isClosed'] == 'true';
 
-    final widget = Container(
+    final widget = SizedBox(
       width: double.infinity,
       child: _CodeBlock(
           code: content,
@@ -347,7 +347,7 @@ class FencedCodeBlockSyntax extends m.BlockSyntax {
     }
 
     // 创建代码元素
-    final code = m.Element.text('code', lines.join('\n') + '\n');
+    final code = m.Element.text('code', '${lines.join('\n')}\n');
 
     // 如果有语言标记，添加 class
     if (infoString.isNotEmpty) {

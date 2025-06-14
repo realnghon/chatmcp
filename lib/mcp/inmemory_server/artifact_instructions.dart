@@ -7,10 +7,10 @@ class ArtifactServer extends MemoryServer {
   ArtifactServer() : super(name: 'artifact-instructions') {
     addTool(Tool(
       name: 'get_artifact_instructions',
-      description: 'Only call this function when you need instructions for a specific artifact type, and call it only once per type. ' +
-          'This tool provides guidance on creating and referencing artifacts, including code, documents, HTML, SVG, Mermaid diagrams, or React components. ' +
-          'Do not call this function repeatedly if instructions or definitions for the requested artifact type are already available in the current context. ' +
-          'Specify the desired artifact category through the type parameter: code, documents, html, svg, mermaid, or react. ' +
+      description: 'Only call this function when you need instructions for a specific artifact type, and call it only once per type. '
+          'This tool provides guidance on creating and referencing artifacts, including code, documents, HTML, SVG, Mermaid diagrams, or React components. '
+          'Do not call this function repeatedly if instructions or definitions for the requested artifact type are already available in the current context. '
+          'Specify the desired artifact category through the type parameter: code, documents, html, svg, mermaid, or react. '
           'After obtaining the instructions, use them appropriately and avoid duplicate calls for the same type.',
       inputSchema: ToolInput(
         type: 'object',

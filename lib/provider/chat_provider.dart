@@ -34,7 +34,7 @@ class ChatProvider extends ChangeNotifier {
 
   CodePreviewEvent? _artifactEvent;
   CodePreviewEvent? get artifactEvent => _artifactEvent;
-  Map<String, CodePreviewEvent> _previewEvents = {};
+  final Map<String, CodePreviewEvent> _previewEvents = {};
   Map<String, CodePreviewEvent> get previewEvents => _previewEvents;
 
   void setPreviewEvent(CodePreviewEvent event) {

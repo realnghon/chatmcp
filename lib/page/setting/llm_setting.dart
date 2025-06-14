@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:chatmcp/components/widgets/base.dart';
 import 'package:chatmcp/llm/llm_factory.dart';
@@ -307,7 +306,7 @@ class _KeysSettingsState extends State<KeysSettings> {
         style: ElevatedButton.styleFrom(
           backgroundColor: _hasChanges
               ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).colorScheme.surfaceVariant,
+              : Theme.of(context).colorScheme.surfaceContainerHighest,
           foregroundColor: _hasChanges
               ? Theme.of(context).colorScheme.onPrimary
               : Theme.of(context).colorScheme.onSurfaceVariant,
@@ -1096,8 +1095,8 @@ class _KeysSettingsState extends State<KeysSettings> {
                       LLMProvider.values.byName(controllers.apiStyleController);
 
                   final llm = LLMFactory.create(provider,
-                      apiKey: controllers.keyController!.text,
-                      baseUrl: controllers.endpointController!.text,
+                      apiKey: controllers.keyController.text,
+                      baseUrl: controllers.endpointController.text,
                       apiVersion: controllers.apiVersionController.text);
 
                   try {
@@ -1137,8 +1136,8 @@ class _KeysSettingsState extends State<KeysSettings> {
                       LLMProvider.values.byName(controllers.apiStyleController);
 
                   final llm = LLMFactory.create(provider,
-                      apiKey: controllers.keyController!.text,
-                      baseUrl: controllers.endpointController!.text,
+                      apiKey: controllers.keyController.text,
+                      baseUrl: controllers.endpointController.text,
                       apiVersion: controllers.apiVersionController.text);
 
                   final models = await llm.models();
