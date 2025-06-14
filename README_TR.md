@@ -116,7 +116,6 @@ rm -rf ~/.local/share/ChatMcp
 
 Flutter paketlerini yükleyin
 ```shell
-```bash
 flutter pub get
 ```
 Çalıştırmak için: 
