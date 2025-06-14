@@ -33,13 +33,17 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   Chat? _chat;
   List<ChatMessage> _messages = [];
-  bool _isComposing = false; // Indicates if the user is currently composing a message
+  bool _isComposing =
+      false; // Indicates if the user is currently composing a message
   BaseLLMClient? _llmClient;
   String _currentResponse = '';
-  bool _isLoading = false; // Indicates if the chat is currently loading or processing a response
+  bool _isLoading =
+      false; // Indicates if the chat is currently loading or processing a response
   String _parentMessageId = ''; // Parent message ID
-  bool _isCancelled = false; // Indicates if the current operation has been cancelled by the user
-  bool _isWating = false; // Indicates if the system is waiting for a response from the LLM
+  bool _isCancelled =
+      false; // Indicates if the current operation has been cancelled by the user
+  bool _isWating =
+      false; // Indicates if the system is waiting for a response from the LLM
 
   WidgetsToImageController toImagecontroller = WidgetsToImageController();
   // Stores image bytes of the widget for sharing functionality
@@ -91,7 +95,6 @@ class _ChatPageState extends State<ChatPage> {
     setState(() {
       _runFunctionEvents.add(event);
     });
-
 
     if (!_isLoading) {
       _handleSubmitted(SubmitData("", []));
@@ -296,7 +299,6 @@ class _ChatPageState extends State<ChatPage> {
       if (currentMessage.messageId.isEmpty) break;
     }
 
-
     ChatMessage? nextMessage = messages
         .where((m) => m.role == MessageRole.user)
         .firstWhere(
@@ -443,8 +445,10 @@ class _ChatPageState extends State<ChatPage> {
     return null;
   }
 
-  Future<void> _sendToolCallAndProcessResponse(String toolName, Map<String, dynamic> toolArguments) async {
-    final clientName =_findClientName(ProviderManager.mcpServerProvider.tools, toolName);
+  Future<void> _sendToolCallAndProcessResponse(
+      String toolName, Map<String, dynamic> toolArguments) async {
+    final clientName =
+        _findClientName(ProviderManager.mcpServerProvider.tools, toolName);
     if (clientName == null) {
       Logger.root.severe('No MCP server found for tool: $toolName');
       return;
@@ -484,7 +488,8 @@ class _ChatPageState extends State<ChatPage> {
 
         // Implements exponential backoff before next retry attempt
         if (attempt < maxRetries - 1) {
-          final delay = Duration(seconds: (attempt + 1) * 2); // Incremental delay
+          final delay =
+              Duration(seconds: (attempt + 1) * 2); // Incremental delay
           Logger.root.info('waiting ${delay.inSeconds}s before retry...');
           await Future.delayed(delay);
         }
@@ -511,16 +516,19 @@ class _ChatPageState extends State<ChatPage> {
       return;
     }
 
-    Logger.root.info('Tool call success - name: $toolName arguments: $toolArguments response: $response');
+    Logger.root.info(
+        'Tool call success - name: $toolName arguments: $toolArguments response: $response');
 
     setState(() {
       _currentResponse = response!.result['content'].toString();
       if (_currentResponse.isNotEmpty) {
         _parentMessageId = _messages.last.messageId;
         final msgId = Uuid().v4();
-        _messages.add(ChatMessage(
+        _messages.add(
+          ChatMessage(
             messageId: msgId,
-            content: '<call_function_result name="$toolName">\n$_currentResponse\n</call_function_result>',
+            content:
+                '<call_function_result name="$toolName">\n$_currentResponse\n</call_function_result>',
             role: MessageRole.assistant,
             name: toolName,
             parentMessageId: _parentMessageId,
@@ -571,7 +579,58 @@ class _ChatPageState extends State<ChatPage> {
     );
   }
 
+  /// function calling style tool use
+  Future<bool> _checkNeedToolCallFunction() async {
+    if (_runFunctionEvents.isNotEmpty) return true;
 
+    final lastMessage = _messages.last;
+
+    final content = lastMessage.content ?? '';
+    if (content.isEmpty) return false;
+
+    final messages = _messages.toList();
+
+    Logger.root.info('check need tool call: $messages');
+
+    final result = await _llmClient!.checkToolCall(
+      ProviderManager.chatModelProvider.currentModel.name,
+      CompletionRequest(
+        model: ProviderManager.chatModelProvider.currentModel.name,
+        messages: [
+          ..._prepareMessageList(),
+        ],
+      ),
+      ProviderManager.mcpServerProvider.tools,
+    );
+    final needToolCall = result['need_tool_call'] ?? false;
+
+    if (!needToolCall) {
+      return false;
+    }
+
+    final toolCalls = result['tool_calls'] as List;
+    for (var toolCall in toolCalls) {
+      final functionEvent = RunFunctionEvent(
+        toolCall['name'],
+        toolCall['arguments'],
+      );
+
+      _runFunctionEvents.add(functionEvent);
+
+      _messages.add(ChatMessage(
+        content:
+            "<function name=\"${functionEvent.name}\">\n${jsonEncode(functionEvent.arguments)}\n</function>",
+        role: MessageRole.assistant,
+        parentMessageId: _parentMessageId,
+      ));
+
+      _onRunFunction(functionEvent);
+    }
+
+    return needToolCall;
+  }
+
+  /// xml style function calling tool use
   Future<bool> _checkNeedToolCallXml() async {
     if (_runFunctionEvents.isNotEmpty) return true;
 
@@ -661,7 +720,8 @@ class _ChatPageState extends State<ChatPage> {
                 _runFunctionEvents.clear();
               });
               final msgId = Uuid().v4();
-              _messages.add(ChatMessage(
+              _messages.add(
+                ChatMessage(
                   messageId: msgId,
                   content: 'call function rejected',
                   role: MessageRole.assistant,
@@ -1108,7 +1168,8 @@ class _ChatPageState extends State<ChatPage> {
       showModalCodePreview = true;
     });
 
-    const txtNoCodePreview = Text('No code preview', style: TextStyle(fontSize: 14, color: Colors.grey));
+    const txtNoCodePreview = Text('No code preview',
+        style: TextStyle(fontSize: 14, color: Colors.grey));
 
     showModalBottomSheet(
       context: context,
@@ -1140,7 +1201,9 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                   Expanded(
                     child: ProviderManager.chatProvider.artifactEvent != null
-                        ? ChatCodePreview(codePreviewEvent:ProviderManager.chatProvider.artifactEvent!)
+                        ? ChatCodePreview(
+                            codePreviewEvent:
+                                ProviderManager.chatProvider.artifactEvent!)
                         : Center(child: txtNoCodePreview),
                   ),
                 ],
