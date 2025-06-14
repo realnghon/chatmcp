@@ -25,7 +25,7 @@ class _McpServerState extends State<McpServer> {
   final TextEditingController _searchController = TextEditingController();
   String _selectedTab = 'Installed';
   int _refreshCounter = 0;
-  Map<String, bool> _serverLoading = {};
+  final Map<String, bool> _serverLoading = {};
 
   // 验证URL是否合法
   bool isValidUrl(String urlString) {

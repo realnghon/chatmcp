@@ -75,6 +75,5 @@ class _TabsState extends State<Tabs> {
         ),
       ],
     );
-    ;
   }
 }

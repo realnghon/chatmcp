@@ -1,6 +1,5 @@
 import 'package:chatmcp/mcp/models/json_rpc_message.dart';
 import 'package:logging/logging.dart';
-import 'server.dart';
 
 enum ToolInputType {
   string,

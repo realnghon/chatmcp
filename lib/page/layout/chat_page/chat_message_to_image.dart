@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'dart:io' as io;
 import 'package:chatmcp/llm/model.dart';
@@ -100,7 +98,7 @@ class _ListViewToImageScreenState extends State<ListViewToImageScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        ProviderManager.chatProvider.activeChat!.title!,
+                        ProviderManager.chatProvider.activeChat!.title,
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -127,7 +125,7 @@ class _ListViewToImageScreenState extends State<ListViewToImageScreen> {
                 onRetry: (ChatMessage message) {},
                 onSwitch: (String messageId) {},
               );
-            }).toList(),
+            }),
           ],
         ),
       ),
@@ -343,7 +341,7 @@ class ScreenshotChatUIMessage extends StatelessWidget {
               const SizedBox(width: 8),
             ],
             // 使用Container代替Flexible，固定宽度
-            Container(
+            SizedBox(
               width: messageWidth,
               child: Column(
                 crossAxisAlignment:

@@ -15,8 +15,7 @@ import 'package:chatmcp/provider/mcp_server_provider.dart';
 import 'package:chatmcp/widgets/markdown/markit_widget.dart';
 import 'package:chatmcp/utils/event_bus.dart';
 import 'package:chatmcp/page/layout/widgets/chat_setting.dart';
-import 'package:flutter_popup/flutter_popup.dart';
-import 'package:chatmcp/widgets/upgradge.dart';
+import 'package:chatmcp/widgets/upgrade.dart';
 import 'package:chatmcp/page/layout/widgets/window_controls.dart';
 import 'package:chatmcp/components/widgets/custom_popup.dart';
 

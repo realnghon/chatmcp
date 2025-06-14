@@ -5,7 +5,7 @@ import 'package:chatmcp/utils/platform.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
 import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:chatmcp/widgets/upgradge.dart';
+import 'package:chatmcp/widgets/upgrade.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AppInfo extends StatelessWidget {

@@ -115,7 +115,7 @@ class SSEClient implements McpClient {
           response?.stream?.listen(
             (event) {
               Logger.root.fine(
-                  '收到SSE事件: ${event.event}, ID: ${event.id}, 数据长度: ${event.data?.length ?? 0}字节');
+                  '收到SSE事件: ${event.event}, ID: ${event.id}, 数据长度: ${event.data.length ?? 0}字节');
               _handleSSEEvent(event);
             },
           );
