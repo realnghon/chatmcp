@@ -34,12 +34,12 @@ class ChatSetting extends StatelessWidget {
                     color: colorScheme.surface,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: colorScheme.outline.withOpacity(0.1),
+                      color: colorScheme.outline.withAlpha(26),
                       width: 1,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: colorScheme.shadow.withOpacity(0.05),
+                        color: colorScheme.shadow.withAlpha(13),
                         blurRadius: 10,
                         offset: const Offset(0, 2),
                       ),
@@ -122,7 +122,7 @@ class ChatSetting extends StatelessWidget {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: colorScheme.primary.withOpacity(0.2),
+                        color: colorScheme.primary.withAlpha(51),
                         width: 1,
                       ),
                     ),
@@ -171,7 +171,7 @@ class ChatSetting extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: colorScheme.primary.withOpacity(0.1),
+              color: colorScheme.primary.withAlpha(26),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
@@ -200,7 +200,7 @@ class ChatSetting extends StatelessWidget {
       height: 1,
       indent: 20,
       endIndent: 20,
-      color: Theme.of(context).colorScheme.outline.withOpacity(0.08),
+      color: Theme.of(context).colorScheme.outline.withAlpha(21),
     );
   }
 
@@ -236,7 +236,7 @@ class ChatSetting extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: colorScheme.primary.withOpacity(0.1),
+                  color: colorScheme.primary.withAlpha(26),
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
@@ -257,7 +257,7 @@ class ChatSetting extends StatelessWidget {
                 tooltip,
                 style: TextStyle(
                   fontSize: 13,
-                  color: colorScheme.onSurface.withOpacity(0.6),
+                  color: colorScheme.onSurface.withAlpha(153),
                   height: 1.3,
                 ),
               ),
@@ -266,9 +266,9 @@ class ChatSetting extends StatelessWidget {
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
               activeTrackColor: colorScheme.primary,
-              inactiveTrackColor: colorScheme.primary.withOpacity(0.15),
+              inactiveTrackColor: colorScheme.primary.withAlpha(39),
               thumbColor: colorScheme.primary,
-              overlayColor: colorScheme.primary.withOpacity(0.1),
+              overlayColor: colorScheme.primary.withAlpha(26),
               trackHeight: 4,
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
               overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
@@ -315,7 +315,7 @@ class ChatSetting extends StatelessWidget {
                 tooltip,
                 style: TextStyle(
                   fontSize: 13,
-                  color: colorScheme.onSurface.withOpacity(0.6),
+                  color: colorScheme.onSurface.withAlpha(153),
                   height: 1.3,
                 ),
               ),
@@ -325,7 +325,7 @@ class ChatSetting extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: colorScheme.outline.withOpacity(0.2),
+                color: colorScheme.outline.withAlpha(51),
                 width: 1,
               ),
             ),
@@ -340,7 +340,7 @@ class ChatSetting extends StatelessWidget {
               decoration: InputDecoration(
                 hintText: l10n.enterMaxTokens,
                 hintStyle: TextStyle(
-                  color: colorScheme.onSurface.withOpacity(0.5),
+                  color: colorScheme.onSurface.withAlpha(128),
                   fontWeight: FontWeight.normal,
                 ),
                 contentPadding: const EdgeInsets.symmetric(

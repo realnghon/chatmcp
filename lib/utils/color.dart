@@ -101,175 +101,175 @@ class AppColors {
     return AppColors.grey[600]!;
   }
 
-  // 文件附件相关颜色
+  // file attachment related colors
   static Color getFileAttachmentBackgroundColor(BuildContext context) {
     return getThemeColor(context,
         lightColor: AppColors.grey[200], darkColor: AppColors.grey[800]);
   }
 
-  // 图片错误图标颜色
+  // image error icon color
   static Color getImageErrorIconColor(BuildContext context) {
     return getThemeColor(context,
         lightColor: AppColors.grey[600], darkColor: AppColors.grey[400]);
   }
 
-  // 消息气泡背景色
+  // message bubble background color
   static Color getMessageBubbleBackgroundColor(
       BuildContext context, bool isUserMessage) {
     return getThemeColor(context,
         lightColor: AppColors.grey[100], darkColor: Colors.white12);
   }
 
-  // 工具调用和工具结果文本颜色
+  // tool call and tool result text color
   static Color getToolCallTextColor() {
     return AppColors.grey[600]!;
   }
 
-  // 聊天头像背景色
+  // chat avatar background color
   static Color getChatAvatarBackgroundColor() {
     return AppColors.grey;
   }
 
-  // 聊天头像图标颜色
+  // chat avatar icon color
   static Color getChatAvatarIconColor() {
     return AppColors.white;
   }
 
-  // 欢迎信息文本颜色
+  // welcome message text color
   static Color getWelcomeMessageColor() {
     return AppColors.grey;
   }
 
-  // 错误提示图标颜色
+  // error hint icon color
   static Color getErrorIconColor() {
     return AppColors.red;
   }
 
-  // 错误提示文本颜色
+  // error hint text color
   static Color getErrorTextColor() {
     return AppColors.red;
   }
 
-  // 底部菜单滑块颜色
+  // bottom menu slider color
   static Color getBottomSheetHandleColor(BuildContext context) {
-    return AppColors.grey.withOpacity(0.3);
+    return AppColors.grey.withAlpha(77);
   }
 
-  // 工具栏底部边框颜色
+  // toolbar bottom border color
   static Color getToolbarBottomBorderColor(BuildContext context) {
     return getThemeColor(context,
         lightColor: AppColors.grey[200], darkColor: AppColors.grey[800]);
   }
 
-  // 侧边栏切换按钮图标颜色
+  // sidebar toggle icon color
   static Color getSidebarToggleIconColor() {
     return AppColors.grey[700]!;
   }
 
-  // Markdown相关颜色定义
+  // markdown related colors
 
-  // artifact组件背景色
+  // artifact component background color
   static Color getArtifactBackgroundColor(BuildContext context) {
     return getThemeColor(context,
         lightColor: Colors.grey[50], darkColor: Colors.grey[800]);
   }
 
-  // artifact组件边框颜色
+  // artifact component border color
   static Color getArtifactBorderColor(BuildContext context) {
     return getThemeColor(context,
         lightColor: Colors.grey[300], darkColor: Colors.grey[700]);
   }
 
-  // 进度指示器颜色
+  // progress indicator color
   static Color getProgressIndicatorColor(BuildContext context) {
     return getThemeColor(context,
         lightColor: Colors.orange, darkColor: Colors.orange);
   }
 
-  // 思考组件背景色
+  // think component background color
   static Color getThinkBackgroundColor(BuildContext context) {
     return getThemeColor(context,
         lightColor: AppColors.grey[300], darkColor: AppColors.grey[700]);
   }
 
-  // 思考组件边框颜色
+  // think component border color
   static Color getThinkBorderColor(BuildContext context) {
     return getThemeColor(context,
         lightColor: AppColors.grey[200], darkColor: AppColors.grey[700]);
   }
 
-  // 思考图标颜色
+  // think icon color
   static Color getThinkIconColor(BuildContext context) {
     return getThemeColor(context,
         lightColor: Colors.orange, darkColor: Colors.orange);
   }
 
-  // 思考文本颜色
+  // think text color
   static Color getThinkTextColor(BuildContext context) {
     return getThemeColor(context,
         lightColor: AppColors.grey[500], darkColor: AppColors.grey[300]);
   }
 
-  // 展开/收起图标颜色
+  // expand/collapse icon color
   static Color getExpandIconColor(BuildContext context) {
     return getThemeColor(context,
         lightColor: AppColors.grey[600], darkColor: AppColors.grey[300]);
   }
 
-  // 函数组件背景色
+  // function component background color
   static Color getFunctionBackgroundColor(BuildContext context) {
     return getThemeColor(context,
         lightColor: AppColors.grey[100], darkColor: AppColors.grey[900]);
   }
 
-  // 函数组件边框颜色
+  // function component border color
   static Color getFunctionBorderColor(BuildContext context) {
     return getThemeColor(context,
         lightColor: AppColors.grey[300], darkColor: AppColors.grey[700]);
   }
 
-  // 函数图标颜色
+  // function icon color
   static Color getFunctionIconColor(BuildContext context) {
     return getThemeColor(context,
         lightColor: Colors.orange[200], darkColor: Colors.orange[300]);
   }
 
-  // 函数文本颜色
+  // function text color
   static Color getFunctionTextColor(BuildContext context) {
     return getThemeColor(context,
         lightColor: AppColors.grey[500], darkColor: AppColors.grey[300]);
   }
 
-  // 运行按钮颜色
+  // run button color
   static Color getPlayButtonColor(BuildContext context) {
     return getThemeColor(context,
         lightColor: Colors.green, darkColor: Colors.green[300]);
   }
 
-  // 代码块工具栏背景色
+  // code block toolbar background color
   static Color getCodeBlockToolbarBackgroundColor(BuildContext context) {
     return getThemeColor(context,
         lightColor: AppColors.grey[300], darkColor: AppColors.grey[900]);
   }
 
-  // 代码块语言文本颜色
+  // code block language text color
   static Color getCodeBlockLanguageTextColor(BuildContext context) {
     return getThemeColor(context,
         lightColor: AppColors.grey[700], darkColor: AppColors.grey[300]);
   }
 
-  // 代码预览按钮背景色
+  // code preview button background color
   static Color getCodePreviewButtonBackgroundColor(BuildContext context) {
     return getThemeColor(context,
         lightColor: AppColors.grey[100], darkColor: AppColors.grey[900]);
   }
 
-  // 链接颜色
+  // link color
   static Color getLinkColor() {
     return Colors.blue;
   }
 
-  // 输入区域相关颜色
+  // input area related colors
   static Color getInputAreaBackgroundColor(BuildContext context) {
     return getThemeColor(context,
         lightColor: Colors.white, darkColor: Colors.grey.shade900);
@@ -302,23 +302,23 @@ class AppColors {
   }
 
   static Color getInputAreaFileIconColor(BuildContext context) {
-    return Theme.of(context).primaryColor.withOpacity(0.8);
+    return Theme.of(context).primaryColor.withAlpha(204);
   }
 
-  // InkIcon相关颜色
+  // InkIcon related colors
   static Color getInkIconHoverColor(BuildContext context) {
     return getThemeColor(context,
         lightColor: Colors.grey.shade200, darkColor: Colors.grey.shade700);
   }
 
-  // 聊天加载相关颜色
+  // chat loading related colors
   static Color getChatLoadingColor(BuildContext context) {
     return getThemeColor(context,
         lightColor: Theme.of(context).primaryColor,
         darkColor: Colors.white.withAlpha(50));
   }
 
-  // 输入区域光标颜色
+  // input area cursor color
   static Color getInputAreaCursorColor(BuildContext context) {
     return getThemeColor(context,
         lightColor: Colors.grey.shade400, darkColor: Colors.grey.shade400);

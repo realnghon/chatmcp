@@ -24,25 +24,25 @@ class _ConvSettingState extends State<ConvSetting> {
   bool _isLoading = true;
   String? _error;
 
-  // 服务器状态提供者
+  // server state provider
   final ServerStateProvider _stateProvider = ServerStateProvider();
 
-  // 添加TextEditingController作为状态变量
+  // add TextEditingController as state variable
   late TextEditingController _maxMessagesController;
   late TextEditingController _maxLoopsController;
 
-  // 防抖Timer
+  // debounce timer
   Timer? _debounceTimer;
 
   @override
   void initState() {
     super.initState();
     _loadServers();
-    // 初始化控制器
+    // initialize controllers
     _maxMessagesController = TextEditingController();
     _maxLoopsController = TextEditingController();
 
-    // 在下一帧设置初始值
+    // set initial values in the next frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         final settingsProvider =
@@ -57,17 +57,17 @@ class _ConvSettingState extends State<ConvSetting> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // 监听 provider 变化并重新加载服务器列表
+    // listen to provider changes and reload server list
     final provider = Provider.of<McpServerProvider>(context);
     if (provider.loadingServerTools == false) {
       _loadServers();
     }
 
-    // 只在初始化时或值真正改变时更新控制器
+    // update controllers only when initialized or values really changed
     final settingsProvider = Provider.of<SettingsProvider>(context);
     final generalSetting = settingsProvider.generalSetting;
 
-    // 使用 WidgetsBinding.instance.addPostFrameCallback 来避免在构建过程中修改状态
+    // use WidgetsBinding.instance.addPostFrameCallback to avoid modifying state in the build process
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         final currentMaxMessages = generalSetting.maxMessages.toString();
@@ -85,10 +85,10 @@ class _ConvSettingState extends State<ConvSetting> {
 
   @override
   void dispose() {
-    // 释放控制器
+    // release controllers
     _maxMessagesController.dispose();
     _maxLoopsController.dispose();
-    // 取消防抖Timer
+    // cancel debounce timer
     _debounceTimer?.cancel();
     super.dispose();
   }
@@ -117,35 +117,34 @@ class _ConvSettingState extends State<ConvSetting> {
     }
   }
 
-  // 处理服务器的状态切换
+  // handle server status switch
   Future<void> _handleServerToggle(
       BuildContext context, String serverName, bool newValue) async {
     final provider = Provider.of<McpServerProvider>(context, listen: false);
 
-    // 更新启用状态
+    // update enabled state
     _stateProvider.setEnabled(serverName, newValue);
 
-    // 更新Provider中的状态
+    // update state in Provider
     provider.toggleToolCategory(serverName, newValue);
 
-    // 如果新状态为true且服务器未运行，则启动服务器
+    // if new state is true and server is not running, start server
     if (newValue && !provider.mcpServerIsRunning(serverName)) {
-      // 设置启动中状态
       _stateProvider.setStarting(serverName, true);
 
       try {
         await provider.startMcpServer(serverName);
-        // 更新运行状态
+        // update running state
         _stateProvider.setRunning(serverName, true);
       } catch (e) {
-        // 启动失败，更新状态
+        // update state if server start failed
         _stateProvider.setRunning(serverName, false);
         _stateProvider.setStarting(serverName, false);
       }
     }
   }
 
-  // 防抖更新设置
+  // debounce update settings
   void _debouncedUpdateSettings(String field, int value) {
     _debounceTimer?.cancel();
     _debounceTimer = Timer(const Duration(milliseconds: 500), () {
@@ -220,8 +219,6 @@ class _ConvSettingState extends State<ConvSetting> {
 
     return Consumer<SettingsProvider>(
       builder: (context, settingsProvider, child) {
-        final generalSetting = settingsProvider.generalSetting;
-
         return Container(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -235,7 +232,7 @@ class _ConvSettingState extends State<ConvSetting> {
               ),
               const SizedBox(height: 12),
 
-              // Max Messages 设置
+              // Max Messages settings
               Row(
                 children: [
                   Expanded(
@@ -252,14 +249,14 @@ class _ConvSettingState extends State<ConvSetting> {
                         color: Theme.of(context)
                             .colorScheme
                             .outline
-                            .withOpacity(0.3),
+                            .withAlpha(77),
                       ),
                       borderRadius: BorderRadius.circular(6),
                       color: Theme.of(context).colorScheme.surface,
                     ),
                     child: Row(
                       children: [
-                        // 减少按钮
+                        // decrease button
                         SizedBox(
                           width: 32,
                           height: 36,
@@ -296,16 +293,16 @@ class _ConvSettingState extends State<ConvSetting> {
                             ),
                           ),
                         ),
-                        // 分隔线
+                        // separator
                         Container(
                           width: 1,
                           height: 20,
                           color: Theme.of(context)
                               .colorScheme
                               .outline
-                              .withOpacity(0.2),
+                              .withAlpha(51),
                         ),
-                        // 数字输入框
+                        // number input
                         Expanded(
                           child: TextField(
                             controller: _maxMessagesController,
@@ -335,16 +332,16 @@ class _ConvSettingState extends State<ConvSetting> {
                             },
                           ),
                         ),
-                        // 分隔线
+                        // separator
                         Container(
                           width: 1,
                           height: 20,
                           color: Theme.of(context)
                               .colorScheme
                               .outline
-                              .withOpacity(0.2),
+                              .withAlpha(51),
                         ),
-                        // 增加按钮
+                        // increase button
                         SizedBox(
                           width: 32,
                           height: 36,
@@ -400,7 +397,7 @@ class _ConvSettingState extends State<ConvSetting> {
 
               const SizedBox(height: 16),
 
-              // Max Loops 设置
+              // Max Loops settings
               Row(
                 children: [
                   Expanded(
@@ -417,14 +414,14 @@ class _ConvSettingState extends State<ConvSetting> {
                         color: Theme.of(context)
                             .colorScheme
                             .outline
-                            .withOpacity(0.3),
+                            .withAlpha(77),
                       ),
                       borderRadius: BorderRadius.circular(6),
                       color: Theme.of(context).colorScheme.surface,
                     ),
                     child: Row(
                       children: [
-                        // 减少按钮
+                        // decrease button
                         SizedBox(
                           width: 32,
                           height: 36,
@@ -461,16 +458,16 @@ class _ConvSettingState extends State<ConvSetting> {
                             ),
                           ),
                         ),
-                        // 分隔线
+                        // separator
                         Container(
                           width: 1,
                           height: 20,
                           color: Theme.of(context)
                               .colorScheme
                               .outline
-                              .withOpacity(0.2),
+                              .withAlpha(51),
                         ),
-                        // 数字输入框
+                        // number input
                         Expanded(
                           child: TextField(
                             controller: _maxLoopsController,
@@ -499,16 +496,16 @@ class _ConvSettingState extends State<ConvSetting> {
                             },
                           ),
                         ),
-                        // 分隔线
+                        // separator
                         Container(
                           width: 1,
                           height: 20,
                           color: Theme.of(context)
                               .colorScheme
                               .outline
-                              .withOpacity(0.2),
+                              .withAlpha(51),
                         ),
-                        // 增加按钮
+                        // increase button
                         SizedBox(
                           width: 32,
                           height: 36,
@@ -574,7 +571,7 @@ class _ConvSettingState extends State<ConvSetting> {
         Provider.of<McpServerProvider>(context, listen: false);
     final List<Widget> menuItems = [];
 
-    // 处理加载状态
+    // handle loading state
     if (_isLoading) {
       return [
         const SizedBox(
@@ -590,7 +587,7 @@ class _ConvSettingState extends State<ConvSetting> {
       ];
     }
 
-    // 处理错误状态
+    // handle error state
     if (_error != null) {
       return [
         SizedBox(
@@ -603,12 +600,12 @@ class _ConvSettingState extends State<ConvSetting> {
       ];
     }
 
-    // 处理无数据状态
+    // handle no data state
     if (_cachedServers == null || _cachedServers!.isEmpty) {
       return [];
     }
 
-    // 添加服务器标题
+    // add server title
     menuItems.add(
       Container(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -621,14 +618,14 @@ class _ConvSettingState extends State<ConvSetting> {
       ),
     );
 
-    // 使用缓存的服务器列表构建菜单项
+    // use cached server list to build menu items
     for (String serverName in _cachedServers!) {
-      // 添加分隔线
+      // add separator
       if (menuItems.length > 1) {
         menuItems.add(const Divider(height: 1));
       }
 
-      // 使用普通的 Container 替代 CustomPopupMenuWidget
+      // use normal Container instead of CustomPopupMenuWidget
       menuItems.add(
         Container(
           height: 40,
@@ -641,7 +638,7 @@ class _ConvSettingState extends State<ConvSetting> {
                 bool isRunning = stateProvider.isRunning(serverName);
                 bool isStarting = stateProvider.isStarting(serverName);
 
-                // 获取服务器工具数量
+                // get server tool count
                 List<Map<String, dynamic>>? serverTools =
                     provider.tools[serverName];
                 int toolCount = serverTools?.length ?? 0;

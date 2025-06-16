@@ -58,7 +58,7 @@ class _TabsState extends State<Tabs> {
                   ),
                 ),
                 selected: _selectedIndex == index,
-                selectedTileColor: Colors.blue.withOpacity(0.1),
+                selectedTileColor: Colors.blue.withAlpha(26),
                 selectedColor: Colors.blue,
                 onTap: () {
                   setState(() {
