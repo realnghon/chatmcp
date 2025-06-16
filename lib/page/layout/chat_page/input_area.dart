@@ -268,17 +268,9 @@ class _InputAreaState extends State<InputArea> {
                     return null;
                   },
                   textInputAction: Platform.isAndroid || Platform.isIOS
-                      ? TextInputAction.send
-                      : TextInputAction.newline,
-                  onSubmitted: Platform.isAndroid || Platform.isIOS
-                      ? (text) {
-                          if (widget.isComposing && text.trim().isNotEmpty) {
-                            widget
-                                .onSubmitted(SubmitData(text, _selectedFiles));
-                            _afterSubmitted();
-                          }
-                        }
-                      : null,
+                      ? TextInputAction.newline
+                      : TextInputAction.done,
+                  onSubmitted: null,
                   inputFormatters: [
                     TextInputFormatter.withFunction((oldValue, newValue) {
                       _isImeComposing = newValue.composing != TextRange.empty;
