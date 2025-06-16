@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' as http;
 import 'package:chatmcp/utils/platform.dart';
+import 'package:chatmcp/utils/io_utils.dart';
 import '../mcp/client/mcp_client_interface.dart';
 
 var defaultInMemoryServers = [
@@ -45,17 +46,19 @@ class McpServerProvider extends ChangeNotifier {
 
   // Check if current platform supports MCP Server
   bool get isSupported {
-    return !Platform.isIOS && !Platform.isAndroid;
+    return !kIsMobile && !kIsWeb;
   }
 
   // Get configuration file path
   Future<String> get _configFilePath async {
+    if (kIsWeb) return '';
     final directory = await getAppDir('ChatMcp');
     return '${directory.path}/$_configFileName';
   }
 
   // Check and create initial configuration file
   Future<void> _initConfigFile() async {
+    if (kIsWeb) return;
     final file = File(await _configFilePath);
 
     if (!await file.exists()) {
@@ -70,6 +73,7 @@ class McpServerProvider extends ChangeNotifier {
 
   // get installed servers count
   Future<int> get installedServersCount async {
+    if (kIsWeb) return 0;
     final allServerConfig = await _loadServers();
     final serverConfig = allServerConfig['mcpServers'] as Map<String, dynamic>;
     return serverConfig.length;
@@ -77,6 +81,7 @@ class McpServerProvider extends ChangeNotifier {
 
   // Read server configuration
   Future<Map<String, dynamic>> _loadServers() async {
+    if (kIsWeb) return {'mcpServers': <String, dynamic>{}};
     File? file; // Make file nullable or assign later
     try {
       await _initConfigFile();
@@ -191,6 +196,7 @@ class McpServerProvider extends ChangeNotifier {
 
   // Save server configuration
   Future<void> saveServers(Map<String, dynamic> servers) async {
+    if (kIsWeb) return;
     try {
       final file = File(await _configFilePath);
       final prettyContents =
@@ -206,6 +212,7 @@ class McpServerProvider extends ChangeNotifier {
 
   // Reinitialize clients
   Future<void> _reinitializeClients() async {
+    if (kIsWeb) return;
     // _servers.clear();
     await init();
     notifyListeners();
@@ -258,6 +265,10 @@ class McpServerProvider extends ChangeNotifier {
 
   Future<void> _initialize() async {
     if (_isInitialized) return;
+    if (kIsWeb) {
+      _isInitialized = true;
+      return;
+    }
     
     try {
       await _initConfigFile();
@@ -270,6 +281,10 @@ class McpServerProvider extends ChangeNotifier {
   Future<void> init() async {
     if (!_isInitialized) {
       await _initialize();
+    }
+
+    if (kIsWeb) {
+      return;
     }
 
     try {
@@ -342,6 +357,7 @@ class McpServerProvider extends ChangeNotifier {
 
   Future<Map<String, McpClient>> initializeAllMcpServers(
       String configPath, List<String> ignoreServers) async {
+    if (kIsWeb) return {};
     final file = File(configPath);
     final contents = await file.readAsString();
 
@@ -398,7 +414,7 @@ class McpServerProvider extends ChangeNotifier {
         var sseServers = <String, dynamic>{};
 
         // For mobile platforms, only keep servers with commands starting with http
-        if (Platform.isIOS || Platform.isAndroid) {
+        if (kIsMobile) {
           for (var server in servers.entries) {
             if (server.value['command'] != null &&
                 server.value['command'].toString().startsWith('http')) {

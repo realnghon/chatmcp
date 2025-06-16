@@ -1,6 +1,5 @@
-import 'dart:io' show Platform, Directory;
-import 'package:path/path.dart' show join;
-import 'package:path_provider/path_provider.dart';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 final bool kIsDebug = (() {
   bool isDebug = false;
@@ -11,40 +10,10 @@ final bool kIsDebug = (() {
   return isDebug;
 }());
 
-final bool kIsLinux = Platform.isLinux;
-
-final bool kIsWindows = Platform.isWindows;
-final bool kIsMacOS = Platform.isMacOS;
-
-final bool kIsDesktop =
-    Platform.isMacOS || Platform.isWindows || Platform.isLinux;
-
-final bool kIsMobile = Platform.isAndroid || Platform.isIOS;
-
-final bool kIsAndroid = Platform.isAndroid;
-
-Future<Directory> getAppDir(String appName) async {
-  if (kIsDesktop) {
-    final Directory appDir;
-    if (Platform.isMacOS) {
-      // macOS: ~/Library/Application Support/com.yourapp.name/
-      appDir = Directory(join(Platform.environment['HOME']!, 'Library',
-          'Application Support', appName));
-    } else if (Platform.isWindows) {
-      // Windows: %APPDATA%\ChatMcp
-      appDir = Directory(join(Platform.environment['APPDATA']!, appName));
-    } else {
-      // Linux: ~/.local/share/chatmcp/
-      appDir = Directory(
-          join(Platform.environment['HOME']!, '.local', 'share', appName));
-    }
-    // Ensure the directory exists
-    if (!appDir.existsSync()) {
-      appDir.createSync(recursive: true);
-    }
-    return appDir;
-  } else {
-    // Use getApplicationDocumentsDirectory for mobile platforms
-    return await getApplicationDocumentsDirectory();
-  }
-}
+final bool kIsLinux = !kIsWeb && Platform.isLinux;
+final bool kIsWindows = !kIsWeb && Platform.isWindows;
+final bool kIsMacOS = !kIsWeb && Platform.isMacOS;
+final bool kIsDesktop = !kIsWeb && (kIsLinux || kIsWindows || kIsMacOS);
+final bool kIsMobile = !kIsWeb && (Platform.isAndroid || Platform.isIOS);
+final bool kIsAndroid = !kIsWeb && Platform.isAndroid;
+final bool kIsIOS = !kIsWeb && Platform.isIOS;

@@ -45,15 +45,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get enableArtifacts => 'Artifact\'leri Etkinleştir';
 
   @override
-  String get enableArtifactsDescription =>
-      'Sohbette yapay zeka asistanının Artifact\'lerini etkinleştirir, bu özellik daha fazla token kullanır.';
+  String get enableArtifactsDescription => 'Sohbette yapay zeka asistanının Artifact\'lerini etkinleştirir, bu özellik daha fazla token kullanır.';
 
   @override
   String get enableToolUsage => 'Araç Kullanımını Etkinleştir';
 
   @override
-  String get enableToolUsageDescription =>
-      'Sohbette araçların kullanımını etkinleştirir, bu özellik daha fazla token kullanır.';
+  String get enableToolUsageDescription => 'Sohbette araçların kullanımını etkinleştirir, bu özellik daha fazla token kullanır.';
 
   @override
   String get themeSettings => 'Tema Ayarları';
@@ -74,22 +72,19 @@ class AppLocalizationsTr extends AppLocalizations {
   String get showAssistantAvatar => 'Asistan Avatarını Göster';
 
   @override
-  String get showAssistantAvatarDescription =>
-      'Sohbette yapay zeka asistanının avatarını gösterir.';
+  String get showAssistantAvatarDescription => 'Sohbette yapay zeka asistanının avatarını gösterir.';
 
   @override
   String get showUserAvatar => 'Kullanıcı Avatarını Göster';
 
   @override
-  String get showUserAvatarDescription =>
-      'Sohbette kullanıcının avatarını gösterir.';
+  String get showUserAvatarDescription => 'Sohbette kullanıcının avatarını gösterir.';
 
   @override
   String get systemPrompt => 'Sistem Prompt';
 
   @override
-  String get systemPromptDescription =>
-      'Bu, yapay zeka asistanının davranışını ve tarzını belirlemek için kullanılan sistem yönergesidir.';
+  String get systemPromptDescription => 'Bu, yapay zeka asistanının davranışını ve tarzını belirlemek için kullanılan sistem yönergesidir.';
 
   @override
   String get llmKey => 'LLM Anahtarı';
@@ -124,12 +119,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get enterApiVersion => 'API versiyonunu girin';
 
   @override
-  String get platformNotSupported =>
-      'Mevcut platform MCP Sunucusunu desteklemiyor.';
+  String get platformNotSupported => 'Mevcut platform MCP Sunucusunu desteklemiyor.';
 
   @override
-  String get mcpServerDesktopOnly =>
-      'MCP Sunucusu yalnızca masaüstü platformlarını (Windows, macOS, Linux) destekler.';
+  String get mcpServerDesktopOnly => 'MCP Sunucusu yalnızca masaüstü platformlarını (Windows, macOS, Linux) destekler.';
 
   @override
   String get searchServer => 'Sunucu ara...';
@@ -279,8 +272,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get earlier => 'Daha Eski';
 
   @override
-  String get confirmDeleteSelected =>
-      'Seçili sohbetleri silmek istediğinize emin misiniz?';
+  String get confirmDeleteSelected => 'Seçili sohbetleri silmek istediğinize emin misiniz?';
 
   @override
   String get ok => 'Tamam';
@@ -365,8 +357,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get functionCallAuth => 'Araç Kullanım İzni';
 
   @override
-  String get allowFunctionExecution =>
-      'Aşağıdaki aracın çalışmasına izin veriyor musunuz?';
+  String get allowFunctionExecution => 'Aşağıdaki aracın çalışmasına izin veriyor musunuz?';
 
   @override
   String parameters(Object params) {
@@ -377,8 +368,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get allow => 'İzin Ver';
 
   @override
-  String get loadDiagramFailed =>
-      'Diyagram yüklenemedi, lütfen tekrar deneyin.';
+  String get loadDiagramFailed => 'Diyagram yüklenemedi, lütfen tekrar deneyin.';
 
   @override
   String get copiedToClipboard => 'Panoya kopyalandı.';
@@ -529,8 +519,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get checkUpdate => 'Güncellemeleri Kontrol Et';
 
   @override
-  String get appDescription =>
-      'ChatMCP, yapay zekayı daha fazla insana ulaştırmayı hedefleyen, platformlar arası bir yapay zeka istemcisidir.';
+  String get appDescription => 'ChatMCP, yapay zekayı daha fazla insana ulaştırmayı hedefleyen, platformlar arası bir yapay zeka istemcisidir.';
 
   @override
   String get visitWebsite => 'Web Sitesi';
@@ -539,23 +528,19 @@ class AppLocalizationsTr extends AppLocalizations {
   String get aboutApp => 'Hakkında';
 
   @override
-  String get networkError =>
-      'Ağ bağlantı hatası. Lütfen internetinizi kontrol edip tekrar deneyin.';
+  String get networkError => 'Ağ bağlantı hatası. Lütfen internetinizi kontrol edip tekrar deneyin.';
 
   @override
-  String get noElementError =>
-      'Eşleşen içerik bulunamadı, lütfen tekrar deneyin.';
+  String get noElementError => 'Eşleşen içerik bulunamadı, lütfen tekrar deneyin.';
 
   @override
-  String get permissionError =>
-      'Yetersiz izin. Lütfen ayarlarınızı kontrol edin.';
+  String get permissionError => 'Yetersiz izin. Lütfen ayarlarınızı kontrol edin.';
 
   @override
   String get unknownError => 'Bilinmeyen bir hata oluştu.';
 
   @override
-  String get timeoutError =>
-      'İstek zaman aşımına uğradı. Lütfen bir süre sonra tekrar deneyin.';
+  String get timeoutError => 'İstek zaman aşımına uğradı. Lütfen bir süre sonra tekrar deneyin.';
 
   @override
   String get notFoundError => 'İstenen kaynak bulunamadı.';
@@ -564,8 +549,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get invalidError => 'Geçersiz istek veya parametre.';
 
   @override
-  String get unauthorizedError =>
-      'Yetkisiz erişim. Lütfen izinlerinizi kontrol edin.';
+  String get unauthorizedError => 'Yetkisiz erişim. Lütfen izinlerinizi kontrol edin.';
 
   @override
   String get minimize => 'Küçült';
@@ -580,15 +564,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get maxMessages => 'Maksimum Mesaj Sayısı';
 
   @override
-  String get maxMessagesDescription =>
-      'LLM\'e gönderilecek maksimum mesaj sayısını sınırlar (1-1000).';
+  String get maxMessagesDescription => 'LLM\'e gönderilecek maksimum mesaj sayısını sınırlar (1-1000).';
 
   @override
   String get maxLoops => 'Maksimum Döngü Sayısı';
 
   @override
-  String get maxLoopsDescription =>
-      'Sonsuz döngüleri önlemek için araç çağırma döngü sayısını sınırlar (1-1000).';
+  String get maxLoopsDescription => 'Sonsuz döngüleri önlemek için araç çağırma döngü sayısını sınırlar (1-1000).';
 
   @override
   String get mcpServers => 'MCP Sunucuları';

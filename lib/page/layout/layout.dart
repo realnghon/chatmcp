@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 
 import './chat_page/chat_page.dart';
@@ -95,7 +96,7 @@ class _LayoutPageState extends State<LayoutPage> {
       body: SafeArea(
         child: Row(
           children: [
-            if (kIsDesktop && !hideSidebar)
+            if ((kIsDesktop || kIsWeb) && !hideSidebar)
               Container(
                 width: 250,
                 color: AppColors.getSidebarBackgroundColor(context),
@@ -124,7 +125,7 @@ class _LayoutPageState extends State<LayoutPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (kIsDesktop) {
+    if (kIsDesktop || kIsWeb) {
       _handleWindowResize(context);
     }
 
