@@ -68,7 +68,7 @@ class BrowserViewState extends State<BrowserView> {
             urlRequest: URLRequest(
                 url: WebUri('http://google.com/search?q=${widget.url}')),
             settings: settings);
-        print(t.openingBrowser);
+        debugPrint(t.openingBrowser);
       },
     );
   }
@@ -82,8 +82,8 @@ class MyInAppBrowser extends InAppBrowser {
 
   @override
   Future onBrowserCreated() async {
-    print("Browser Created!");
-    // 初始化无头浏览器用于获取正文
+    debugPrint("Browser Created!");
+    // initialize headless browser for extracting content
     contentWebView = HeadlessInAppWebView(
       initialSettings: InAppWebViewSettings(
         userAgent:
@@ -93,20 +93,20 @@ class MyInAppBrowser extends InAppBrowser {
     );
     await contentWebView?.run();
 
-    // 加载 turndown.js 文件
+    // load turndown.js file
     turndownJs = await rootBundle.loadString('assets/js/turndown.js');
   }
 
   @override
   Future onLoadStart(url) async {
-    print("Started $url");
+    debugPrint("Started $url");
   }
 
   @override
   Future onLoadStop(url) async {
-    print("Stopped $url");
+    debugPrint("Stopped $url");
     final pageDataList = await extractSearchResults();
-    print('pageDataList: $pageDataList');
+    debugPrint('pageDataList: $pageDataList');
   }
 
   Future<String> extractContent(String url) async {
@@ -120,15 +120,15 @@ class MyInAppBrowser extends InAppBrowser {
 
       await Future.delayed(const Duration(seconds: 3));
 
-      // 检查页面内容
+      // check page content
       final pageContent = await controller.evaluateJavascript(
           source: 'document.documentElement.outerHTML');
 
       final md = html2md.convert(pageContent);
       return md;
     } catch (e) {
-      print('提取正文出错: $e');
-      print('错误堆栈: ${StackTrace.current}');
+      debugPrint('extract content error: $e');
+      debugPrint('error stack: ${StackTrace.current}');
       return '';
     }
   }
@@ -163,7 +163,7 @@ class MyInAppBrowser extends InAppBrowser {
             parsed.map((item) => SearchResult.fromJson(item)).toList();
 
         List<Map<String, String>> pageDataList = [];
-        // 遍历获取每个结果的正文
+        // iterate to get content of each result
         for (var result in searchResults) {
           Map<String, String> paegData = {
             'title': result.title,
@@ -176,7 +176,7 @@ class MyInAppBrowser extends InAppBrowser {
 
         return pageDataList;
       } catch (e) {
-        Logger.root.severe('解析搜索结果出错: $e');
+        Logger.root.severe('parse search results error: $e');
       }
     }
     return [];
@@ -184,17 +184,17 @@ class MyInAppBrowser extends InAppBrowser {
 
   @override
   void onReceivedError(WebResourceRequest request, WebResourceError error) {
-    print("Can't load ${request.url}.. Error: ${error.description}");
+    debugPrint("Can't load ${request.url}.. Error: ${error.description}");
   }
 
   @override
   void onProgressChanged(progress) {
-    print("Progress: $progress");
+    debugPrint("Progress: $progress");
   }
 
   @override
   Future<void> onExit() async {
-    print("Browser closed!");
+    debugPrint("Browser closed!");
     await contentWebView?.dispose();
   }
 }

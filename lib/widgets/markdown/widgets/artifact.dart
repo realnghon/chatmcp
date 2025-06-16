@@ -108,7 +108,7 @@ class _ArtifactAntArtifactWidgetState extends State<ArtifactAntArtifactWidget> {
 
     return InkWell(
       onTap: () {
-        print('onTap: $hash');
+        debugPrint('onTap: $hash');
         ProviderManager.chatProvider.setPreviewEvent(
           CodePreviewEvent(hash, widget.textContent, widget.attributes),
         );
