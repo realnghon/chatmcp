@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:chatmcp/llm/prompt.dart';
-import 'package:chatmcp/utils/platform.dart';
+import 'package:chatmcp/utils/platform.dart' hide File;
 import 'package:flutter/material.dart';
 import 'package:chatmcp/llm/model.dart';
 import 'package:chatmcp/llm/llm_factory.dart';

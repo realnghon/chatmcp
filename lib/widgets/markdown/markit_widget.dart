@@ -60,14 +60,13 @@ class _MarkitState extends State<Markit> {
     final currentBrightness = Theme.of(context).brightness;
     if (widget.data != _cachedData || _cachedMarkdown == null ||  _cachedBrightness != currentBrightness) {
 
-    _cachedData = widget.data;
-    _cachedBrightness = currentBrightness;
+      _cachedData = widget.data;
+      _cachedBrightness = currentBrightness;
 
-    final isDark = currentBrightness == Brightness.dark;
-    final textStyle= widget.textStyle;
-    final data = _cachedData;
-    _cachedMarkdown = SingleChildScrollView(
-      child: MarkdownBlock(
+      final isDark = currentBrightness == Brightness.dark;
+      final textStyle = widget.textStyle;
+      final data = _cachedData;
+      _cachedMarkdown = MarkdownBlock(
         data: data,
         config: MarkdownConfig(
           configs: [
@@ -131,13 +130,8 @@ class _MarkitState extends State<Markit> {
             FencedCodeBlockSyntax(),
           ],
         ),
-      ),
-    );
+      );
     }
-    return ConstrainedBox(
-        constraints: const BoxConstraints(
-          minHeight: 0,
-          maxHeight: double.infinity,),
-        child: _cachedMarkdown ?? const SizedBox());
+    return _cachedMarkdown ?? const SizedBox();
   }
 }

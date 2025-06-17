@@ -4,7 +4,10 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:path/path.dart';
 import 'package:logging/logging.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:flutter/foundation.dart';
 
 //TODO : need to refactor the database helper class
 // desktop app can use different database for persistent storage like sqlite, postgres, etc.
@@ -71,13 +74,41 @@ class DatabaseHelper {
     } else if (kIsMobile) {
       Logger.root.info('Step 1.1: Initializing SQLite for mobile platform');
       databaseFactory = sqflite.databaseFactory;
+    } else if (kIsWeb) {
+      Logger.root.info('Step 1.1: Initializing SQLite for web platform');
+      databaseFactory = databaseFactoryFfiWeb;
     }
 
-    final Directory appDataDir = await getAppDir('ChatMcp');
-    final dbPath = join(appDataDir.path, 'chatmcp.db');
+    String dbPath;
+    if (kIsWeb) {
+      dbPath = 'chatmcp.db';
+    } else {
+      final Directory appDir;
+      if (Platform.isMacOS) {
+        // macOS: ~/Library/Application Support/com.yourapp.name/
+        appDir = Directory(join(Platform.environment['HOME']!, 'Library',
+            'Application Support', 'ChatMcp'));
+      } else if (Platform.isWindows) {
+        // Windows: %APPDATA%\ChatMcp
+        appDir = Directory(join(Platform.environment['APPDATA']!, 'ChatMcp'));
+      } else if (Platform.isLinux) {
+        // Linux: ~/.local/share/chatmcp/
+        appDir = Directory(
+            join(Platform.environment['HOME']!, '.local', 'share', 'ChatMcp'));
+      } else {
+        appDir = await getApplicationDocumentsDirectory();
+      }
+
+      if (!appDir.existsSync()) {
+        appDir.createSync(recursive: true);
+      }
+      dbPath = join(appDir.path, 'chatmcp.db');
+    }
 
     Logger.root.info('Step 1.2: Database will be created at: $dbPath');
-    Logger.root.info('Step 1.3: Operating system: ${Platform.operatingSystem}');
+    if (!kIsWeb) {
+      Logger.root.info('Step 1.3: Operating system: ${Platform.operatingSystem}');
+    }
 
     final DatabaseSchemaManager schemaManager = DatabaseSchemaManager();
 

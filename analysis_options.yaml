@@ -9,14 +9,14 @@
 # packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
-# 添加 dart 格式化配置
+# add dart formatter configuration
 dart_code_metrics:
   rules:
-    - maximum-line-length: 150  # 设置行宽为 150 字符
+    - maximum-line-length: 150  # set line width to 150 characters
 
-# 设置 dart formatter 的行宽
+# set dart formatter line width
 formatter:
-  line_length: 150
+  page_width: 150
 
 linter:
   # The lint rules applied to this project can be customized in the

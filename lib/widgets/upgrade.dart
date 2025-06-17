@@ -1,6 +1,6 @@
-import 'dart:io' show Platform;
-
+import 'package:flutter/foundation.dart';
 import 'package:chatmcp/utils/color.dart';
+import 'package:chatmcp/utils/platform.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -229,19 +229,22 @@ class _UpgradeNoticeState extends State<UpgradeNotice> {
 
   @override
   Widget build(BuildContext context) {
-    if (Platform.isIOS && !widget.enablePlatforms.contains("ios")) {
+    if (kIsWeb && !widget.enablePlatforms.contains("web")) {
       return const SizedBox.shrink();
     }
-    if (Platform.isAndroid && !widget.enablePlatforms.contains("android")) {
+    if (kIsIOS && !widget.enablePlatforms.contains("ios")) {
       return const SizedBox.shrink();
     }
-    if (Platform.isMacOS && !widget.enablePlatforms.contains("macos")) {
+    if (kIsAndroid && !widget.enablePlatforms.contains("android")) {
       return const SizedBox.shrink();
     }
-    if (Platform.isWindows && !widget.enablePlatforms.contains("windows")) {
+    if (kIsMacOS && !widget.enablePlatforms.contains("macos")) {
       return const SizedBox.shrink();
     }
-    if (Platform.isLinux && !widget.enablePlatforms.contains("linux")) {
+    if (kIsWindows && !widget.enablePlatforms.contains("windows")) {
+      return const SizedBox.shrink();
+    }
+    if (kIsLinux && !widget.enablePlatforms.contains("linux")) {
       return const SizedBox.shrink();
     }
 

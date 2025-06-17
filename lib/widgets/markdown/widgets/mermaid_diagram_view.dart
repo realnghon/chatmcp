@@ -145,7 +145,7 @@ class _MermaidDiagramViewState extends State<MermaidDiagramView> {
       return const SizedBox(
         height: 100,
         child: Center(
-          child: Text('加载图表失败，请重试'),
+          child: Text('load diagram failed, please try again'),
         ),
       );
     }
@@ -170,7 +170,7 @@ class _MermaidDiagramViewState extends State<MermaidDiagramView> {
                     _height = (height as num).toDouble();
                     _isLoaded = true;
                   });
-                  print('takeScreenshot');
+                  debugPrint('takeScreenshot');
                   await takeScreenshot();
                 }
               } catch (e) {

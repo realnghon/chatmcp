@@ -1,5 +1,4 @@
 import 'package:chatmcp/dao/init_db.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart' as wm;
@@ -9,8 +8,7 @@ import './provider/provider_manager.dart';
 import 'package:logging/logging.dart';
 import 'utils/platform.dart';
 import 'package:chatmcp/provider/settings_provider.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'dart:io';
+import 'utils/init.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
 import 'package:bot_toast/bot_toast.dart';
@@ -26,38 +24,7 @@ void main() async {
 
   initializeLogger();
 
-  if (!kIsWeb) {
-    // Not supported on mobile
-    // if (!kIsDesktop) {
-    //   await InAppWebViewController.setWebContentsDebuggingEnabled(true);
-    // }
-
-    // Get an available port
-    final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
-    final port = server.port;
-    await server.close();
-
-    if (!kIsDesktop) {
-      final InAppLocalhostServer localhostServer =
-          InAppLocalhostServer(documentRoot: 'assets/sandbox', port: port);
-
-      ProviderManager.settingsProvider.updateSandboxServerPort(port: port);
-
-      // start the localhost server
-      await localhostServer.start();
-
-      Logger.root.info('Sandbox server started @ http://localhost:$port');
-    }
-  }
-
-  // if (kIsMobile) {
-  //   await FlutterStatusbarcolor.setStatusBarColor(Colors.green[400]!);
-  //   if (useWhiteForeground(Colors.green[400]!)) {
-  //     FlutterStatusbarcolor.setStatusBarWhiteForeground(true);
-  //   } else {
-  //     FlutterStatusbarcolor.setStatusBarWhiteForeground(false);
-  //   }
-  // }
+  await initNonWeb();
 
   if (kIsDesktop) {
     await wm.windowManager.ensureInitialized();
@@ -112,7 +79,7 @@ class MyApp extends StatelessWidget {
 
   // Get default font for current platform
   String getPlatformFontFamily() {
-    if (Platform.isWindows) {
+    if (kIsWindows) {
       return 'Microsoft YaHei'; // Microsoft YaHei font
     }
     return ''; // Use Flutter default font for other platforms

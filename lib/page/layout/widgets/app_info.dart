@@ -124,8 +124,7 @@ class AppInfo extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12,
-                    color:
-                        AppColors.getThemeTextColor(context).withOpacity(0.5),
+                    color: AppColors.getThemeTextColor(context).withAlpha(128)
                   ),
                 ),
               ],

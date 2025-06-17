@@ -2,7 +2,6 @@ import 'package:chatmcp/page/layout/widgets/mcp_tools.dart';
 import 'package:chatmcp/provider/provider_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:io' show Platform;
 import 'package:chatmcp/utils/platform.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:chatmcp/widgets/upload_menu.dart';
@@ -267,9 +266,8 @@ class _InputAreaState extends State<InputArea> {
                       {required currentLength, required isFocused, maxLength}) {
                     return null;
                   },
-                  textInputAction: Platform.isAndroid || Platform.isIOS
-                      ? TextInputAction.newline
-                      : TextInputAction.done,
+                  textInputAction:
+                      kIsMobile ? TextInputAction.newline : TextInputAction.done,
                   onSubmitted: null,
                   inputFormatters: [
                     TextInputFormatter.withFunction((oldValue, newValue) {

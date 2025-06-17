@@ -45,15 +45,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enableArtifacts => 'Enable Artifacts';
 
   @override
-  String get enableArtifactsDescription =>
-      'Enable the artifacts of the AI assistant in the conversation, will use more tokens';
+  String get enableArtifactsDescription => 'Enable the artifacts of the AI assistant in the conversation, will use more tokens';
 
   @override
   String get enableToolUsage => 'Enable Tool Usage';
 
   @override
-  String get enableToolUsageDescription =>
-      'Enable the usage of tools in the conversation, will use more tokens';
+  String get enableToolUsageDescription => 'Enable the usage of tools in the conversation, will use more tokens';
 
   @override
   String get themeSettings => 'Theme Settings';
@@ -74,15 +72,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get showAssistantAvatar => 'Show Assistant Avatar';
 
   @override
-  String get showAssistantAvatarDescription =>
-      'Show the avatar of the AI assistant in the conversation';
+  String get showAssistantAvatarDescription => 'Show the avatar of the AI assistant in the conversation';
 
   @override
   String get showUserAvatar => 'Show User Avatar';
 
   @override
-  String get showUserAvatarDescription =>
-      'Show the avatar of the user in the conversation';
+  String get showUserAvatarDescription => 'Show the avatar of the user in the conversation';
 
   @override
   String get systemPrompt => 'System Prompt';
@@ -124,12 +120,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterApiVersion => 'Enter API Version';
 
   @override
-  String get platformNotSupported =>
-      'Current platform does not support MCP Server';
+  String get platformNotSupported => 'Current platform does not support MCP Server';
 
   @override
-  String get mcpServerDesktopOnly =>
-      'MCP Server only supports desktop platforms (Windows, macOS, Linux)';
+  String get mcpServerDesktopOnly => 'MCP Server only supports desktop platforms (Windows, macOS, Linux)';
 
   @override
   String get searchServer => 'Search server...';
@@ -279,8 +273,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get earlier => 'Earlier';
 
   @override
-  String get confirmDeleteSelected =>
-      'Are you sure you want to delete the selected conversations?';
+  String get confirmDeleteSelected => 'Are you sure you want to delete the selected conversations?';
 
   @override
   String get ok => 'OK';
@@ -365,8 +358,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get functionCallAuth => 'Tool Call Authorization';
 
   @override
-  String get allowFunctionExecution =>
-      'Do you want to allow the following tool to execute:';
+  String get allowFunctionExecution => 'Do you want to allow the following tool to execute:';
 
   @override
   String parameters(Object params) {
@@ -528,8 +520,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checkUpdate => 'Update Check';
 
   @override
-  String get appDescription =>
-      'ChatMCP is a cross-platform AI client, dedicated to making AI accessible to more people.';
+  String get appDescription => 'ChatMCP is a cross-platform AI client, dedicated to making AI accessible to more people.';
 
   @override
   String get visitWebsite => 'website';
@@ -574,15 +565,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get maxMessages => 'Max Messages';
 
   @override
-  String get maxMessagesDescription =>
-      'Limit the maximum number of messages passed to LLM (1-1000)';
+  String get maxMessagesDescription => 'Limit the maximum number of messages passed to LLM (1-1000)';
 
   @override
   String get maxLoops => 'Max Loops';
 
   @override
-  String get maxLoopsDescription =>
-      'Limit the maximum number of tool call loops to prevent infinite loops (1-1000)';
+  String get maxLoopsDescription => 'Limit the maximum number of tool call loops to prevent infinite loops (1-1000)';
 
   @override
   String get mcpServers => 'MCP Servers';
