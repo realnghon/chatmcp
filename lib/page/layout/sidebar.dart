@@ -51,7 +51,7 @@ class _SidebarPanelState extends State<SidebarPanel> {
               padding: const EdgeInsets.all(8.0),
               child: Row(
                 children: [
-                  if (kIsWindows || kIsLinux || kIsMobile) ...[
+                  if (kIsWindows || kIsLinux || kIsMobile || kIsBrowser) ...[
                     Image.asset(
                       'assets/logo.png',
                       width: 24,
@@ -111,8 +111,7 @@ class _SidebarPanelState extends State<SidebarPanel> {
                         constraints: const BoxConstraints(),
                         visualDensity: VisualDensity.compact,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 8, horizontal: 12),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                       border: InputBorder.none,
                       isDense: true,
                       isCollapsed: true,
@@ -155,8 +154,7 @@ class ChatHistoryList extends StatelessWidget {
     this.searchText = '',
   });
 
-  Map<String, List<dynamic>> _groupChats(
-      BuildContext context, List<dynamic> chats) {
+  Map<String, List<dynamic>> _groupChats(BuildContext context, List<dynamic> chats) {
     // 过滤聊天记录
     final filteredChats = searchText.isEmpty
         ? chats
@@ -173,29 +171,23 @@ class ChatHistoryList extends StatelessWidget {
 
     return {
       l10n.today: filteredChats.where((chat) {
-        final chatDate = DateTime(
-            chat.updatedAt.year, chat.updatedAt.month, chat.updatedAt.day);
+        final chatDate = DateTime(chat.updatedAt.year, chat.updatedAt.month, chat.updatedAt.day);
         return chatDate.isAtSameMomentAs(today);
       }).toList(),
       l10n.yesterday: filteredChats.where((chat) {
-        final chatDate = DateTime(
-            chat.updatedAt.year, chat.updatedAt.month, chat.updatedAt.day);
+        final chatDate = DateTime(chat.updatedAt.year, chat.updatedAt.month, chat.updatedAt.day);
         return chatDate.isAtSameMomentAs(yesterday);
       }).toList(),
       l10n.last7Days: filteredChats.where((chat) {
-        final chatDate = DateTime(
-            chat.updatedAt.year, chat.updatedAt.month, chat.updatedAt.day);
+        final chatDate = DateTime(chat.updatedAt.year, chat.updatedAt.month, chat.updatedAt.day);
         return chatDate.isBefore(yesterday) && chatDate.isAfter(previous7Days);
       }).toList(),
       l10n.last30Days: filteredChats.where((chat) {
-        final chatDate = DateTime(
-            chat.updatedAt.year, chat.updatedAt.month, chat.updatedAt.day);
-        return chatDate.isBefore(previous7Days) &&
-            chatDate.isAfter(previous30Days);
+        final chatDate = DateTime(chat.updatedAt.year, chat.updatedAt.month, chat.updatedAt.day);
+        return chatDate.isBefore(previous7Days) && chatDate.isAfter(previous30Days);
       }).toList(),
       l10n.earlier: filteredChats.where((chat) {
-        final chatDate = DateTime(
-            chat.updatedAt.year, chat.updatedAt.month, chat.updatedAt.day);
+        final chatDate = DateTime(chat.updatedAt.year, chat.updatedAt.month, chat.updatedAt.day);
         return chatDate.isBefore(previous30Days);
       }).toList(),
     };
@@ -219,8 +211,7 @@ class ChatHistoryList extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 child: CText(
                   text: entry.key,
                   size: 10,
@@ -256,8 +247,7 @@ class ChatHistoryItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final isActive = chat.id == chatProvider.activeChat?.id;
     final l10n = AppLocalizations.of(context)!;
-    final backgroundColor = AppColors.getThemeColor(context,
-        lightColor: Colors.white, darkColor: Colors.grey[800]);
+    final backgroundColor = AppColors.getThemeColor(context, lightColor: Colors.white, darkColor: Colors.grey[800]);
 
     // 创建弹出菜单的内容
     Widget popupContent = Container(
@@ -274,8 +264,7 @@ class ChatHistoryItem extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Row(
                 children: [
-                  const Icon(CupertinoIcons.delete,
-                      size: 18, color: Colors.red),
+                  const Icon(CupertinoIcons.delete, size: 18, color: Colors.red),
                   const Gap(size: 8),
                   Text(l10n.delete, style: const TextStyle(color: Colors.red)),
                 ],
@@ -328,46 +317,37 @@ class ChatHistoryItem extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
-        color: isActive
-            ? AppColors.getSidebarActiveConversationColor(context)
-            : null,
+        color: isActive ? AppColors.getSidebarActiveConversationColor(context) : null,
         borderRadius: BorderRadius.circular(7),
       ),
       child: kIsDesktop
-          ? _buildDesktopChatItem(
-              context, chatItem, popupContent, backgroundColor)
-          : _buildMobileChatItem(
-              context, chatItem, popupContent, backgroundColor),
+          ? _buildDesktopChatItem(context, chatItem, popupContent, backgroundColor)
+          : _buildMobileChatItem(context, chatItem, popupContent, backgroundColor),
     );
   }
 
   // 桌面端构建方法：右键触发
-  Widget _buildDesktopChatItem(BuildContext context, Widget chatItem,
-      Widget popupContent, Color? backgroundColor) {
+  Widget _buildDesktopChatItem(BuildContext context, Widget chatItem, Widget popupContent, Color? backgroundColor) {
     return GestureDetector(
       onSecondaryTapDown: (TapDownDetails details) {
-        _showCustomPopup(
-            context, popupContent, backgroundColor, details.globalPosition);
+        _showCustomPopup(context, popupContent, backgroundColor, details.globalPosition);
       },
       child: chatItem,
     );
   }
 
   // 移动端构建方法：长按触发
-  Widget _buildMobileChatItem(BuildContext context, Widget chatItem,
-      Widget popupContent, Color? backgroundColor) {
+  Widget _buildMobileChatItem(BuildContext context, Widget chatItem, Widget popupContent, Color? backgroundColor) {
     return GestureDetector(
       onLongPressStart: (LongPressStartDetails details) {
-        _showCustomPopup(
-            context, popupContent, backgroundColor, details.globalPosition);
+        _showCustomPopup(context, popupContent, backgroundColor, details.globalPosition);
       },
       child: chatItem,
     );
   }
 
   // 显示自定义弹出窗口
-  void _showCustomPopup(BuildContext context, Widget content,
-      Color? backgroundColor, Offset position) {
+  void _showCustomPopup(BuildContext context, Widget content, Color? backgroundColor, Offset position) {
     // 估计弹出菜单的宽度
     const double estimatedPopupWidth = 150.0;
 
@@ -475,9 +455,7 @@ class SidebarToolbar extends StatelessWidget {
 
   Widget _buildSelectModeButton() {
     return InkIcon(
-      icon: chatProvider.isSelectMode
-          ? CupertinoIcons.clear
-          : CupertinoIcons.trash,
+      icon: chatProvider.isSelectMode ? CupertinoIcons.clear : CupertinoIcons.trash,
       onTap: () {
         if (chatProvider.isSelectMode) {
           chatProvider.exitSelectMode();
@@ -498,9 +476,7 @@ class SidebarToolbar extends StatelessWidget {
   Widget _buildDeleteButton(BuildContext context) {
     var t = AppLocalizations.of(context)!;
     return InkWell(
-      onTap: chatProvider.selectedChats.isNotEmpty
-          ? () => _showDeleteConfirmDialog(context)
-          : null,
+      onTap: chatProvider.selectedChats.isNotEmpty ? () => _showDeleteConfirmDialog(context) : null,
       child: CText(
         text: t.delete,
         size: 12,

@@ -17,6 +17,7 @@ final bool kIsDesktop = !kIsWeb && (kIsLinux || kIsWindows || kIsMacOS);
 final bool kIsMobile = !kIsWeb && (Platform.isAndroid || Platform.isIOS);
 final bool kIsAndroid = !kIsWeb && Platform.isAndroid;
 final bool kIsIOS = !kIsWeb && Platform.isIOS;
+final bool kIsBrowser = kIsWeb;
 
 String? getPlatformPath() {
   if (kIsWeb) {
