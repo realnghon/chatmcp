@@ -4,12 +4,12 @@ import 'package:chatmcp/components/widgets/base.dart';
 import 'package:chatmcp/page/setting/mcp_info.dart';
 import 'package:chatmcp/provider/provider_manager.dart';
 import 'package:chatmcp/utils/platform.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import '../../provider/mcp_server_provider.dart';
 import 'package:logging/logging.dart';
-import 'dart:io';
 import 'package:chatmcp/utils/process.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -411,8 +411,8 @@ class _McpServerState extends State<McpServer> {
                   if (!cmdExists) {
                     showErrorDialog(
                       context,
-                      l10n.commandNotExist(serverConfig['command'],
-                          Platform.environment['PATH'] ?? ''),
+                      l10n.commandNotExist(
+                          serverConfig['command'], getPlatformPath() ?? ''),
                     );
                   } else {
                     Logger.root.info(
@@ -951,11 +951,10 @@ class _McpServerState extends State<McpServer> {
 
                   final envStr = values['env'] as String;
 
-                  bool isMobile = Platform.isIOS || Platform.isAndroid;
                   bool isRemote = type == 'sse' || type == 'streamable';
                   bool isUrl = isValidUrl(command.trim());
 
-                  if (isMobile) {
+                  if (kIsMobile && kIsWeb) {
                     if (type == "stdio") {
                       showErrorDialog(dialogContext,
                           'Mobile only supports mcp sse and streamable servers');

@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:chatmcp/utils/platform.dart';
 import 'package:chatmcp/utils/io_utils.dart';
 import '../mcp/client/mcp_client_interface.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 var defaultInMemoryServers = [
   {
@@ -59,6 +60,7 @@ class McpServerProvider extends ChangeNotifier {
   // Check and create initial configuration file
   Future<void> _initConfigFile() async {
     if (kIsWeb) return;
+
     final file = File(await _configFilePath);
 
     if (!await file.exists()) {
@@ -81,7 +83,23 @@ class McpServerProvider extends ChangeNotifier {
 
   // Read server configuration
   Future<Map<String, dynamic>> _loadServers() async {
-    if (kIsWeb) return {'mcpServers': <String, dynamic>{}};
+    if (kIsWeb) {
+      final prefs = await SharedPreferences.getInstance();
+      var configString = prefs.getString('mcp_servers_json');
+      if (configString == null || configString.isEmpty) {
+        configString = await rootBundle.loadString('assets/mcp_server.json');
+        await prefs.setString('mcp_servers_json', configString);
+      }
+      final Map<String, dynamic> data = json.decode(configString);
+      if (data['mcpServers'] == null) {
+        data['mcpServers'] = <String, dynamic>{};
+      }
+      for (var server in data['mcpServers'].entries) {
+        server.value['installed'] = true;
+      }
+      return data;
+    }
+
     File? file; // Make file nullable or assign later
     try {
       await _initConfigFile();
@@ -196,7 +214,13 @@ class McpServerProvider extends ChangeNotifier {
 
   // Save server configuration
   Future<void> saveServers(Map<String, dynamic> servers) async {
-    if (kIsWeb) return;
+    if (kIsWeb) {
+      final prefs = await SharedPreferences.getInstance();
+      final prettyContents = const JsonEncoder.withIndent('  ').convert(servers);
+      await prefs.setString('mcp_servers_json', prettyContents);
+      await _reinitializeClients();
+      return;
+    }
     try {
       final file = File(await _configFilePath);
       final prettyContents =
