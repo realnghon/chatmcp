@@ -2,7 +2,7 @@
 <img src="./assets/logo.png" alt="logo" width="120" height="120">
 <h1>chatmcp</h1>
 
-Cross-platform `Macos | Windows | Linux | iOS | Android` AI Chat Client
+Cross-platform `Macos | Windows | Linux | iOS | Android | Web` AI Chat Client
 
 [English](./README.md) | [简体中文](./README_ZH.md) | [Türkçe](./README_TR.md)
 
@@ -10,15 +10,17 @@ Cross-platform `Macos | Windows | Linux | iOS | Android` AI Chat Client
 
 ## Install
 
-| macOS                                                   | Windows                                                 | Linux                                                     | iOS                                                      | Android                                                 |
-|---------------------------------------------------------|---------------------------------------------------------|-----------------------------------------------------------|----------------------------------------------------------|---------------------------------------------------------|
-| [Release](https://github.com/daodao97/chatmcp/releases) | [Release](https://github.com/daodao97/chatmcp/releases) | [Release](https://github.com/daodao97/chatmcp/releases) ¹ | [TestFlight](https://testflight.apple.com/join/dCXksFJV) | [Release](https://github.com/daodao97/chatmcp/releases) |
+| macOS                                                   | Windows                                                 | Linux                                                     | iOS                                                      | Android                                                 | Web                                                    |
+|---------------------------------------------------------|---------------------------------------------------------|-----------------------------------------------------------|----------------------------------------------------------|---------------------------------------------------------|--------------------------------------------------------|
+| [Release](https://github.com/daodao97/chatmcp/releases) | [Release](https://github.com/daodao97/chatmcp/releases) | [Release](https://github.com/daodao97/chatmcp/releases) ¹ | [TestFlight](https://testflight.apple.com/join/dCXksFJV) | [Release](https://github.com/daodao97/chatmcp/releases) | [GitHub Pages](https://daodao97.github.io/chatmcp) ² |
 
 ¹ Note: On Linux you need to install `libsqlite3-0` and `libsqlite3-dev`, as this dependency needs it https://pub.dev/packages/sqflite_common_ffi
 
 ```bash
 sudo apt-get install libsqlite3-0 libsqlite3-dev
 ```
+
+² Note: Web version runs entirely in your browser with local storage for chat history and settings.
 
 ## Documentation
 
@@ -129,6 +131,39 @@ rm -rf ~/.local/share/ChatMcp
 flutter pub get
 flutter run -d macos
 ```
+
+### Web Version
+
+#### Local Development
+```bash
+# Install dependencies
+flutter pub get
+
+# Run Web version locally
+flutter run -d chrome
+# Or specify port
+flutter run -d chrome --web-port 8080
+```
+
+#### Build Web Version
+```bash
+# Build production version
+flutter build web
+
+# Build with base path (for deploying to subdirectory)
+flutter build web --base-href /chatmcp/
+```
+
+#### Deploy to GitHub Pages
+```bash
+# 1. Build Web version
+flutter build web --base-href /chatmcp/
+
+# 2. Push build/web directory contents to gh-pages branch
+# Or use GitHub Actions for automatic deployment
+```
+
+After building, files will be in the `build/web` directory and can be deployed to any static website hosting service.
 
 ## Features
 

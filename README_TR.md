@@ -2,7 +2,7 @@
 <img src="./assets/logo.png" alt="logo" width="120" height="120">
 <h1>chatmcp</h1>
 
-Platformlar Arası <code>MacOS | Windows | Linux | iOS | Android</code> Yapay Zeka Sohbet İstemcisi
+Platformlar Arası <code>MacOS | Windows | Linux | iOS | Android | Web</code> Yapay Zeka Sohbet İstemcisi
 
 [English](./README.md) | [简体中文](./README_ZH.md) | Türkçe
 
@@ -10,9 +10,9 @@ Platformlar Arası <code>MacOS | Windows | Linux | iOS | Android</code> Yapay Ze
 
 ## Kurulum
 
-| macOS                                                 | Windows                                               | Linux                                                   | iOS                                                      | Android                                               |
-|-------------------------------------------------------|-------------------------------------------------------|---------------------------------------------------------|----------------------------------------------------------|-------------------------------------------------------|
-| [İndir](https://github.com/daodao97/chatmcp/releases) | [İndir](https://github.com/daodao97/chatmcp/releases) | [İndir](https://github.com/daodao97/chatmcp/releases) ¹ | [TestFlight](https://testflight.apple.com/join/dCXksFJV) | [İndir](https://github.com/daodao97/chatmcp/releases) |
+| macOS                                                 | Windows                                               | Linux                                                   | iOS                                                      | Android                                               | Web                                                    |
+|-------------------------------------------------------|-------------------------------------------------------|---------------------------------------------------------|----------------------------------------------------------|-------------------------------------------------------|--------------------------------------------------------|
+| [İndir](https://github.com/daodao97/chatmcp/releases) | [İndir](https://github.com/daodao97/chatmcp/releases) | [İndir](https://github.com/daodao97/chatmcp/releases) ¹ | [TestFlight](https://testflight.apple.com/join/dCXksFJV) | [İndir](https://github.com/daodao97/chatmcp/releases) | [GitHub Pages](https://daodao97.github.io/chatmcp) ² |
 
 ¹ Not: Linux'ta, `sqflite_common_ffi` paketinin çalışması için `libsqlite3-0` ve `libsqlite3-dev` kütüphanelerini kurmanız
 gerekir: https://pub.dev/packages/sqflite_common_ffi
@@ -20,6 +20,8 @@ gerekir: https://pub.dev/packages/sqflite_common_ffi
 ```bash
 sudo apt-get install libsqlite3-0 libsqlite3-dev
 ```
+
+² Not: Web sürümü tamamen tarayıcınızda çalışır ve sohbet geçmişi ile ayarlar için yerel depolama kullanır.
 
 ## Dokümantasyon
 
@@ -139,22 +141,38 @@ flutter run -d macos
 flutter run -d "Pixel ..."
 ```
 
+### Web Sürümü Geliştirme ve Dağıtım
 
-### Android İmza Yapılandırması
-Android uygulamasının yayın sürümünü oluşturmanız gerekiyorsa, imzalama yapılandırmasını yapmalısınız:
-- İmza anahtarı oluşturma  
-./scripts/create_keystore.sh
+#### Yerel Geliştirme
+```bash
+# Bağımlılıkları yükle
+flutter pub get
 
-- İmza yapılandırmasını doğrulama  
-./scripts/verify_signing.sh
+# Web sürümünü yerel olarak çalıştır
+flutter run -d chrome
+# veya port belirterek
+flutter run -d chrome --web-port 8080
+```
 
-- İmzalı APK oluşturma  
-flutter build apk --release
+#### Web Sürümünü Oluşturma
+```bash
+# Üretim sürümünü oluştur
+flutter build web
 
-- İmzalı App Bundle oluşturma (Google Play için önerilir)  
-flutter build appbundle --release
+# Alt dizin için temel yol belirterek oluştur
+flutter build web --base-href /chatmcp/
+```
 
-Detaylı imzalama yapılandırması talimatları için bakınız: [Android İmza Yapılandırma Rehberi](https://docs.flutter.dev/deployment/android#sign-the-app).
+#### GitHub Pages'e Dağıtım
+```bash
+# 1. Web sürümünü oluştur
+flutter build web --base-href /chatmcp/
+
+# 2. build/web dizininin içeriğini gh-pages dalına gönder
+# veya GitHub Actions ile otomatik dağıtım kullan
+```
+
+Oluşturma tamamlandıktan sonra, dosyalar `build/web` dizininde olacak ve herhangi bir statik web site barındırma hizmetine dağıtılabilir.
 
 ## Uygulamanın Temel Özellikleri
 * MCP Sunucusu ile Sohbet

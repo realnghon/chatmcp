@@ -2,7 +2,7 @@
 <img src="./assets/logo.png" alt="logo" width="120" height="120">
 <h1>chatmcp</h1>
 
-跨平台 `MacOS | Windows | Linux | iOS | Android` AI 聊天客户端
+跨平台 `MacOS | Windows | Linux | iOS | Android | Web` AI 聊天客户端
 
 [English](./README.md) | 简体中文 | [Türkçe](./README_TR.md)
 
@@ -10,17 +10,22 @@
 
 ## 安装
 
-桌面端：MacOS | Windows | Linux [release](https://github.com/daodao97/chatmcp/releases)
+| 平台                                                       | 链接                                                          | 说明                                                           |
+|-----------------------------------------------------------|---------------------------------------------------------------|---------------------------------------------------------------|
+| macOS                                                     | [Release](https://github.com/daodao97/chatmcp/releases)       |                                                               |
+| Windows                                                   | [Release](https://github.com/daodao97/chatmcp/releases)       |                                                               |
+| Linux                                                     | [Release](https://github.com/daodao97/chatmcp/releases)       | 需要安装 `libsqlite3-0` 和 `libsqlite3-dev` ¹                |
+| iOS                                                       | [TestFlight](https://testflight.apple.com/join/dCXksFJV)      |                                                               |
+| Android                                                   | [Release](https://github.com/daodao97/chatmcp/releases)       |                                                               |
+| Web                                                       | [GitHub Pages](https://daodao97.github.io/chatmcp)           | 完全在浏览器中运行，使用本地存储保存聊天记录和设置 ²            |
 
-  注意：在 Linux 系统上，您需要安装 libsqlite3-0 和 libsqlite3-dev，因为依赖包 https://pub.dev/packages/sqflite_common_ffi 需要这些库
+¹ 注意：在 Linux 系统上，您需要安装 `libsqlite3-0` 和 `libsqlite3-dev`，因为依赖包需要这些库：
 
-  ```bash
-  sudo apt-get install libsqlite3-0 libsqlite3-dev
-  ```
+```bash
+sudo apt-get install libsqlite3-0 libsqlite3-dev
+```
 
-iOS：[TestFlight](https://testflight.apple.com/join/dCXksFJV)
-
-Android：[release](https://github.com/daodao97/chatmcp/releases)
+² 注意：Web 版本完全在您的浏览器中运行，使用本地存储保存聊天记录和设置。
 
 ## 预览
 
@@ -106,6 +111,39 @@ rm -rf ~/.local/share/ChatMcp
 flutter pub get
 flutter run -d macos
 ```
+
+### Web版本开发和部署
+
+#### 本地开发
+```bash
+# 安装依赖
+flutter pub get
+
+# 本地运行Web版本
+flutter run -d chrome
+# 或者指定端口
+flutter run -d chrome --web-port 8080
+```
+
+#### 构建Web版本
+```bash
+# 构建生产版本
+flutter build web
+
+# 构建并指定基础路径（用于部署到子目录）
+flutter build web --base-href /chatmcp/
+```
+
+#### 部署到GitHub Pages
+```bash
+# 1. 构建Web版本
+flutter build web --base-href /chatmcp/
+
+# 2. 将build/web目录的内容推送到gh-pages分支
+# 或者使用GitHub Actions自动部署
+```
+
+构建完成后，文件将在 `build/web` 目录中，可以部署到任何静态网站托管服务。
 
 ### Android 签名配置
 
