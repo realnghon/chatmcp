@@ -180,5 +180,20 @@
     "maxLoops": "Max Loops",
     "maxLoopsDescription": "Limit the maximum number of tool call loops to prevent infinite loops (1-1000)",
     "mcpServers": "MCP Servers",
-    "getApiKey": "Get API Key"
+    "getApiKey": "Get API Key",
+    "proxySettings": "Proxy Settings",
+    "enableProxy": "Enable Proxy",
+    "enableProxyDescription": "When enabled, network requests will go through the configured proxy server",
+    "proxyType": "Proxy Type",
+    "proxyHost": "Proxy Host",
+    "proxyPort": "Proxy Port",
+    "proxyUsername": "Username",
+    "proxyPassword": "Password",
+    "enterProxyHost": "Enter proxy server address",
+    "enterProxyPort": "Enter proxy port",
+    "enterProxyUsername": "Enter username (optional)",
+    "enterProxyPassword": "Enter password (optional)",
+    "proxyHostRequired": "Proxy host is required",
+    "proxyPortInvalid": "Proxy port must be between 1-65535",
+    "saved": "Saved"
 }

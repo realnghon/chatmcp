@@ -578,4 +578,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get getApiKey => 'Get API Key';
+
+  @override
+  String get proxySettings => 'Proxy Settings';
+
+  @override
+  String get enableProxy => 'Enable Proxy';
+
+  @override
+  String get enableProxyDescription => 'When enabled, network requests will go through the configured proxy server';
+
+  @override
+  String get proxyType => 'Proxy Type';
+
+  @override
+  String get proxyHost => 'Proxy Host';
+
+  @override
+  String get proxyPort => 'Proxy Port';
+
+  @override
+  String get proxyUsername => 'Username';
+
+  @override
+  String get proxyPassword => 'Password';
+
+  @override
+  String get enterProxyHost => 'Enter proxy server address';
+
+  @override
+  String get enterProxyPort => 'Enter proxy port';
+
+  @override
+  String get enterProxyUsername => 'Enter username (optional)';
+
+  @override
+  String get enterProxyPassword => 'Enter password (optional)';
+
+  @override
+  String get proxyHostRequired => 'Proxy host is required';
+
+  @override
+  String get proxyPortInvalid => 'Proxy port must be between 1-65535';
+
+  @override
+  String get saved => 'Saved';
 }

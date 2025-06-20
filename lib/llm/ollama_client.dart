@@ -10,9 +10,7 @@ class OllamaClient extends BaseLLMClient {
 
   OllamaClient({
     String? baseUrl,
-  })  : baseUrl = (baseUrl == null || baseUrl.isEmpty)
-            ? 'http://localhost:11434'
-            : baseUrl,
+  })  : baseUrl = (baseUrl == null || baseUrl.isEmpty) ? 'http://localhost:11434' : baseUrl,
         _headers = {
           'Content-Type': 'application/json',
         };
@@ -20,7 +18,8 @@ class OllamaClient extends BaseLLMClient {
   @override
   Future<List<String>> models() async {
     try {
-      final response = await http.get(
+      final httpClient = BaseLLMClient.createHttpClient();
+      final response = await httpClient.get(
         Uri.parse("$baseUrl/api/tags"),
         headers: _headers,
       );
@@ -61,7 +60,8 @@ class OllamaClient extends BaseLLMClient {
     final bodyStr = jsonEncode(body);
 
     try {
-      final response = await http.post(
+      final httpClient = BaseLLMClient.createHttpClient();
+      final response = await httpClient.post(
         Uri.parse("$baseUrl/v1/chat/completions"),
         headers: _headers,
         body: bodyStr,
@@ -96,8 +96,7 @@ class OllamaClient extends BaseLLMClient {
         toolCalls: toolCalls,
       );
     } catch (e) {
-      throw await handleError(
-          e, 'Ollama', '$baseUrl/v1/chat/completions', bodyStr);
+      throw await handleError(e, 'Ollama', '$baseUrl/v1/chat/completions', bodyStr);
     }
   }
 
@@ -123,12 +122,12 @@ class OllamaClient extends BaseLLMClient {
     }
 
     try {
-      final request =
-          http.Request('POST', Uri.parse("$baseUrl/v1/chat/completions"));
+      final request = http.Request('POST', Uri.parse("$baseUrl/v1/chat/completions"));
       request.headers.addAll(_headers);
       request.body = jsonEncode(body);
 
-      final response = await http.Client().send(request);
+      final httpClient = BaseLLMClient.createHttpClient();
+      final response = await httpClient.send(request);
 
       if (response.statusCode >= 400) {
         final responseBody = await response.stream.bytesToString();
@@ -137,9 +136,7 @@ class OllamaClient extends BaseLLMClient {
         throw Exception('HTTP ${response.statusCode}: $responseBody');
       }
 
-      final stream = response.stream
-          .transform(utf8.decoder)
-          .transform(const LineSplitter());
+      final stream = response.stream.transform(utf8.decoder).transform(const LineSplitter());
 
       await for (final line in stream) {
         if (!line.startsWith('data: ')) continue;
@@ -182,8 +179,7 @@ class OllamaClient extends BaseLLMClient {
         }
       }
     } catch (e) {
-      throw await handleError(
-          e, 'Ollama', "$baseUrl/v1/chat/completions", jsonEncode(body));
+      throw await handleError(e, 'Ollama', "$baseUrl/v1/chat/completions", jsonEncode(body));
     }
   }
 }

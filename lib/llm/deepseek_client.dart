@@ -7,38 +7,38 @@ import './openai_client.dart';
 
 class DeepSeekClient extends BaseLLMClient {
   final String apiKey;
-  String baseUrl;
+  final String baseUrl;
   final Map<String, String> _headers;
 
   DeepSeekClient({
     required this.apiKey,
     String? baseUrl,
-  })  : baseUrl = (baseUrl == null || baseUrl.isEmpty)
-            ? 'https://api.deepseek.com/v1'
-            : baseUrl,
+  })  : baseUrl = (baseUrl == null || baseUrl.isEmpty) ? 'https://api.deepseek.com' : baseUrl,
         _headers = {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json; charset=utf-8',
           'Authorization': 'Bearer $apiKey',
         };
 
   @override
   Future<LLMResponse> chatCompletion(CompletionRequest request) async {
-    final body = <String, dynamic>{
-      'model': request.model,
-      'messages': chatMessageToOpenAIMessage(request.messages),
-    };
-    addModelSettingsToBody(body, request.modelSetting);
-
-    if (request.tools != null && request.tools!.isNotEmpty) {
-      body['tools'] = request.tools!;
-      body['tool_choice'] = 'auto';
-    }
-
-    final bodyStr = jsonEncode(body);
+    final httpClient = BaseLLMClient.createHttpClient();
 
     try {
-      final response = await http.post(
-        Uri.parse("$baseUrl/chat/completions"),
+      final body = <String, dynamic>{
+        'model': request.model,
+        'messages': chatMessageToOpenAIMessage(request.messages),
+      };
+      addModelSettingsToBody(body, request.modelSetting);
+
+      if (request.tools != null && request.tools!.isNotEmpty) {
+        body['tools'] = request.tools!;
+        body['tool_choice'] = 'auto';
+      }
+
+      final bodyStr = jsonEncode(body);
+
+      final response = await httpClient.post(
+        Uri.parse("$baseUrl/v1/chat/completions"),
         headers: _headers,
         body: bodyStr,
       );
@@ -70,8 +70,9 @@ class DeepSeekClient extends BaseLLMClient {
         toolCalls: toolCalls,
       );
     } catch (e) {
-      throw await handleError(
-          e, 'DeepSeek', '$baseUrl/chat/completions', jsonEncode(body));
+      throw await handleError(e, 'DeepSeek', '$baseUrl/v1/chat/completions', jsonEncode({}));
+    } finally {
+      httpClient.close();
     }
   }
 
@@ -86,13 +87,13 @@ class DeepSeekClient extends BaseLLMClient {
 
     try {
       final bodyStr = jsonEncode(body);
-      final request =
-          http.Request('POST', Uri.parse('$baseUrl/chat/completions'));
+      final request = http.Request('POST', Uri.parse('$baseUrl/chat/completions'));
       request.headers.addAll(_headers);
       request.body = bodyStr;
       Logger.root.info('deepseek request chat stream completion: $bodyStr');
 
-      final response = await http.Client().send(request);
+      final httpClient = BaseLLMClient.createHttpClient();
+      final response = await httpClient.send(request);
 
       if (response.statusCode >= 400) {
         final responseBody = await response.stream.bytesToString();
@@ -101,9 +102,7 @@ class DeepSeekClient extends BaseLLMClient {
         throw Exception('HTTP ${response.statusCode}: $responseBody');
       }
 
-      final stream = response.stream
-          .transform(utf8.decoder)
-          .transform(const LineSplitter());
+      final stream = response.stream.transform(utf8.decoder).transform(const LineSplitter());
 
       Logger.root.info('deepseek start stream response');
       String buffer = '';
@@ -120,9 +119,7 @@ class DeepSeekClient extends BaseLLMClient {
           final json = jsonDecode(jsonStr);
 
           // Check if choices array is empty
-          if (json['choices'] == null ||
-              json['choices'].isEmpty ||
-              json['choices'].length < 1) {
+          if (json['choices'] == null || json['choices'].isEmpty || json['choices'].length < 1) {
             continue;
           }
 
@@ -141,16 +138,14 @@ class DeepSeekClient extends BaseLLMClient {
                   ))
               ?.toList();
 
-          final reasoningContent =
-              delta != null ? (delta['reasoning_content'] ?? '') : '';
+          final reasoningContent = delta != null ? (delta['reasoning_content'] ?? '') : '';
 
           if (reasoningContent.isNotEmpty) {
             reasoningStyle = true;
             if (!reasoningContentStart) {
               reasoningContentStart = true;
               yield LLMResponse(
-                content:
-                    '\n<think start-time="${DateTime.now().toIso8601String()}">\n$reasoningContent',
+                content: '\n<think start-time="${DateTime.now().toIso8601String()}">\n$reasoningContent',
                 toolCalls: toolCalls,
               );
             } else {
@@ -167,8 +162,7 @@ class DeepSeekClient extends BaseLLMClient {
               if (!reasoningContentEnd) {
                 reasoningContentEnd = true;
                 yield LLMResponse(
-                  content:
-                      '\n</think end-time="${DateTime.now().toIso8601String()}">\n$content',
+                  content: '\n</think end-time="${DateTime.now().toIso8601String()}">\n$content',
                   toolCalls: toolCalls,
                 );
               } else {
@@ -183,12 +177,10 @@ class DeepSeekClient extends BaseLLMClient {
             if (delta != null && delta['content'] != null) {
               String content = delta != null ? (delta['content'] ?? '') : '';
               if (content.isNotEmpty && content.contains('<think>')) {
-                content = content.replaceAll('<think>',
-                    '<think start-time="${DateTime.now().toIso8601String()}">');
+                content = content.replaceAll('<think>', '<think start-time="${DateTime.now().toIso8601String()}">');
               }
               if (content.isNotEmpty && content.contains('</think>')) {
-                content = content.replaceAll('</think>',
-                    '</think end-time="${DateTime.now().toIso8601String()}">');
+                content = content.replaceAll('</think>', '</think end-time="${DateTime.now().toIso8601String()}">');
               }
 
               yield LLMResponse(
@@ -198,29 +190,28 @@ class DeepSeekClient extends BaseLLMClient {
             }
           }
         } catch (e, trace) {
-          Logger.root.severe(
-              'Failed to parse chunk: $jsonStr, error: $e, trace: $trace');
+          Logger.root.severe('Failed to parse chunk: $jsonStr, error: $e, trace: $trace');
           continue;
         }
       }
     } catch (e, trace) {
       Logger.root.severe('DeepSeek stream completion error: $e, trace: $trace');
-      throw await handleError(
-          e, 'DeepSeek', '$baseUrl/chat/completions', jsonEncode(body));
+      throw await handleError(e, 'DeepSeek', '$baseUrl/chat/completions', jsonEncode(body));
     }
   }
 
   @override
   Future<List<String>> models() async {
     if (apiKey.isEmpty) {
-      Logger.root
-          .info('DeepSeek API key not set, skipping model list retrieval');
+      Logger.root.info('DeepSeek API key not set, skipping model list retrieval');
       return [];
     }
 
+    final httpClient = BaseLLMClient.createHttpClient();
+
     try {
-      final response = await http.get(
-        Uri.parse("$baseUrl/models"),
+      final response = await httpClient.get(
+        Uri.parse("$baseUrl/v1/models"),
         headers: _headers,
       );
 
@@ -229,10 +220,7 @@ class DeepSeekClient extends BaseLLMClient {
       }
 
       final data = jsonDecode(response.body);
-      final models = (data['data'] as List)
-          .map((m) => m['id'].toString())
-          .where((id) => id.contains('deepseek'))
-          .toList();
+      final models = (data['data'] as List).map((m) => m['id'].toString()).where((id) => id.contains('deepseek')).toList();
 
       return models;
     } catch (e, trace) {

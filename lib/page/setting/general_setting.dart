@@ -4,6 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import '../../provider/settings_provider.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
+import 'package:chatmcp/utils/platform.dart';
+import 'package:chatmcp/utils/toast.dart';
 
 import 'setting_switch.dart';
 
@@ -34,6 +36,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                       _buildThemeCard(context),
                       _buildLocaleCard(context),
                       _buildAvatarCard(context),
+                      if (!kIsBrowser) _buildProxyCard(context),
                       _buildSystemPromptCard(context),
                       const SizedBox(height: 20),
                     ],
@@ -78,8 +81,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionTitle(
-                context, l10n.languageSettings, CupertinoIcons.globe),
+            _buildSectionTitle(context, l10n.languageSettings, CupertinoIcons.globe),
             Card(
               elevation: 0,
               color: Theme.of(context).colorScheme.surface,
@@ -97,8 +99,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                   icon: Icon(
                     CupertinoIcons.chevron_right,
                     size: 16,
-                    color:
-                        Theme.of(context).colorScheme.onSurface.withAlpha(50),
+                    color: Theme.of(context).colorScheme.onSurface.withAlpha(50),
                   ),
                   items: const [
                     DropdownMenuItem(
@@ -135,8 +136,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionTitle(
-                context, l10n.themeSettings, CupertinoIcons.paintbrush),
+            _buildSectionTitle(context, l10n.themeSettings, CupertinoIcons.paintbrush),
             Card(
               elevation: 0,
               color: Theme.of(context).colorScheme.surface,
@@ -147,8 +147,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                 ),
               ),
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12.0, vertical: 1.0),
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 1.0),
                 child: DropdownButtonFormField<String>(
                   value: settings.generalSetting.theme,
                   decoration: InputDecoration(
@@ -158,8 +157,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                   icon: Icon(
                     CupertinoIcons.chevron_right,
                     size: 16,
-                    color:
-                        Theme.of(context).colorScheme.onSurface.withAlpha(50),
+                    color: Theme.of(context).colorScheme.onSurface.withAlpha(50),
                   ),
                   items: [
                     DropdownMenuItem(
@@ -198,8 +196,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionTitle(
-                context, l10n.showAvatar, CupertinoIcons.person_crop_circle),
+            _buildSectionTitle(context, l10n.showAvatar, CupertinoIcons.person_crop_circle),
             Card(
               elevation: 0,
               color: Theme.of(context).colorScheme.surface,
@@ -218,8 +215,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                     titleFontSize: 14,
                     subtitleFontSize: 12,
                     onChanged: (bool value) {
-                      settings.updateGeneralSettingsPartially(
-                          showAssistantAvatar: value);
+                      settings.updateGeneralSettingsPartially(showAssistantAvatar: value);
                     },
                   ),
                   Divider(
@@ -235,11 +231,233 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                     titleFontSize: 14,
                     subtitleFontSize: 12,
                     onChanged: (bool value) {
-                      settings.updateGeneralSettingsPartially(
-                          showUserAvatar: value);
+                      settings.updateGeneralSettingsPartially(showUserAvatar: value);
                     },
                   ),
                 ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildProxyCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Consumer<SettingsProvider>(
+      builder: (context, settings, child) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionTitle(context, l10n.proxySettings, CupertinoIcons.globe),
+            Card(
+              elevation: 0,
+              color: Theme.of(context).colorScheme.surface,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(
+                  color: Theme.of(context).colorScheme.outline.withAlpha(50),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 启用代理开关
+                    SettingSwitch(
+                      title: l10n.enableProxy,
+                      subtitle: l10n.enableProxyDescription,
+                      value: settings.generalSetting.enableProxy,
+                      titleFontSize: 14,
+                      subtitleFontSize: 12,
+                      onChanged: (bool value) {
+                        settings.updateGeneralSettingsPartially(enableProxy: value);
+                        ToastUtils.success(l10n.saved);
+                      },
+                    ),
+
+                    // 如果启用代理，显示代理配置选项
+                    if (settings.generalSetting.enableProxy) ...[
+                      const SizedBox(height: 16),
+                      Divider(
+                        height: 1,
+                        color: Theme.of(context).colorScheme.outline.withAlpha(50),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // 代理类型选择
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              l10n.proxyType,
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 3,
+                            child: DropdownButtonFormField<String>(
+                              value: settings.generalSetting.proxyType,
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                  borderSide: BorderSide(
+                                    color: Theme.of(context).colorScheme.outline.withAlpha(20),
+                                  ),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              ),
+                              items: const [
+                                DropdownMenuItem(value: 'HTTP', child: CText(text: 'HTTP')),
+                                DropdownMenuItem(value: 'HTTPS', child: CText(text: 'HTTPS')),
+                                DropdownMenuItem(value: 'SOCKS4', child: CText(text: 'SOCKS4')),
+                                DropdownMenuItem(value: 'SOCKS5', child: CText(text: 'SOCKS5')),
+                              ],
+                              onChanged: (value) {
+                                if (value != null) {
+                                  settings.updateGeneralSettingsPartially(proxyType: value);
+                                  ToastUtils.success(l10n.saved);
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
+                      // 代理地址和端口
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            child: TextFormField(
+                              initialValue: settings.generalSetting.proxyHost,
+                              decoration: InputDecoration(
+                                labelText: l10n.proxyHost,
+                                hintText: l10n.enterProxyHost,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              ),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                              validator: (value) {
+                                if (settings.generalSetting.enableProxy && (value == null || value.isEmpty)) {
+                                  return l10n.proxyHostRequired;
+                                }
+                                return null;
+                              },
+                              onChanged: (value) {
+                                settings.updateGeneralSettingsPartially(proxyHost: value);
+                                if (value.isNotEmpty) {
+                                  ToastUtils.success(l10n.saved);
+                                }
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            flex: 1,
+                            child: TextFormField(
+                              initialValue: settings.generalSetting.proxyPort.toString(),
+                              decoration: InputDecoration(
+                                labelText: l10n.proxyPort,
+                                hintText: l10n.enterProxyPort,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              ),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                              keyboardType: TextInputType.number,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return null;
+                                }
+                                final port = int.tryParse(value);
+                                if (port == null || port < 1 || port > 65535) {
+                                  return l10n.proxyPortInvalid;
+                                }
+                                return null;
+                              },
+                              onChanged: (value) {
+                                final port = int.tryParse(value);
+                                if (port != null && port >= 1 && port <= 65535) {
+                                  settings.updateGeneralSettingsPartially(proxyPort: port);
+                                  ToastUtils.success(l10n.saved);
+                                }
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+
+                      // 用户名和密码（可选）
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              initialValue: settings.generalSetting.proxyUsername,
+                              decoration: InputDecoration(
+                                labelText: l10n.proxyUsername,
+                                hintText: l10n.enterProxyUsername,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              ),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                              onChanged: (value) {
+                                settings.updateGeneralSettingsPartially(proxyUsername: value);
+                                ToastUtils.success(l10n.saved);
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TextFormField(
+                              initialValue: settings.generalSetting.proxyPassword,
+                              decoration: InputDecoration(
+                                labelText: l10n.proxyPassword,
+                                hintText: l10n.enterProxyPassword,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              ),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                              obscureText: true,
+                              onChanged: (value) {
+                                settings.updateGeneralSettingsPartially(proxyPassword: value);
+                                ToastUtils.success(l10n.saved);
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
               ),
             ),
           ],
@@ -255,8 +473,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionTitle(
-                context, l10n.systemPrompt, CupertinoIcons.text_quote),
+            _buildSectionTitle(context, l10n.systemPrompt, CupertinoIcons.text_quote),
             Card(
               elevation: 0,
               color: Theme.of(context).colorScheme.surface,
@@ -277,19 +494,13 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                           borderSide: BorderSide(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .outline
-                                .withAlpha(20),
+                            color: Theme.of(context).colorScheme.outline.withAlpha(20),
                           ),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                           borderSide: BorderSide(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .outline
-                                .withAlpha(20),
+                            color: Theme.of(context).colorScheme.outline.withAlpha(20),
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
@@ -316,10 +527,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                       l10n.systemPromptDescription,
                       style: TextStyle(
                         fontSize: 13,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withAlpha(60),
+                        color: Theme.of(context).colorScheme.onSurface.withAlpha(60),
                       ),
                     ),
                   ],

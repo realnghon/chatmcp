@@ -7,17 +7,11 @@ import 'package:logging/logging.dart';
 class GeminiClient extends BaseLLMClient {
   final String apiKey;
   final String baseUrl;
-  final Map<String, String> _headers;
 
   GeminiClient({
     required this.apiKey,
     String? baseUrl,
-  })  : baseUrl = (baseUrl == null || baseUrl.isEmpty)
-            ? 'https://generativelanguage.googleapis.com/v1beta'
-            : baseUrl,
-        _headers = {
-          'Content-Type': 'application/json',
-        };
+  }) : baseUrl = (baseUrl == null || baseUrl.isEmpty) ? 'https://generativelanguage.googleapis.com' : baseUrl;
 
   @override
   Future<LLMResponse> chatCompletion(CompletionRequest request) async {
@@ -29,15 +23,17 @@ class GeminiClient extends BaseLLMClient {
         'generationConfig': {
           'temperature': request.modelSetting!.temperature,
           'topP': request.modelSetting!.topP,
-          if (request.modelSetting!.maxTokens != null)
-            'maxOutputTokens': request.modelSetting!.maxTokens,
+          if (request.modelSetting!.maxTokens != null) 'maxOutputTokens': request.modelSetting!.maxTokens,
         }
     };
 
     try {
-      final response = await http.post(
+      final httpClient = BaseLLMClient.createHttpClient();
+      final response = await httpClient.post(
         Uri.parse("$baseUrl/models/$modelName:generateContent?key=$apiKey"),
-        headers: _headers,
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: jsonEncode(body),
       );
 
@@ -60,8 +56,7 @@ class GeminiClient extends BaseLLMClient {
         content: text,
       );
     } catch (e) {
-      throw await handleError(e, 'Gemini',
-          '$baseUrl/models/$modelName:generateContent', jsonEncode(body));
+      throw await handleError(e, 'Gemini', '$baseUrl/models/$modelName:generateContent', jsonEncode(body));
     }
   }
 
@@ -77,20 +72,19 @@ class GeminiClient extends BaseLLMClient {
       body['generationConfig'] = {
         'temperature': request.modelSetting!.temperature,
         'topP': request.modelSetting!.topP,
-        if (request.modelSetting!.maxTokens != null)
-          'maxOutputTokens': request.modelSetting!.maxTokens,
+        if (request.modelSetting!.maxTokens != null) 'maxOutputTokens': request.modelSetting!.maxTokens,
       };
     }
 
     try {
-      final request = http.Request(
-          'POST',
-          Uri.parse(
-              "$baseUrl/models/$modelName:streamGenerateContent?key=$apiKey&alt=sse"));
-      request.headers.addAll(_headers);
+      final request = http.Request('POST', Uri.parse("$baseUrl/models/$modelName:streamGenerateContent?key=$apiKey&alt=sse"));
+      request.headers.addAll({
+        'Content-Type': 'application/json',
+      });
       request.body = jsonEncode(body);
 
-      final response = await http.Client().send(request);
+      final httpClient = BaseLLMClient.createHttpClient();
+      final response = await httpClient.send(request);
 
       if (response.statusCode >= 400) {
         final responseBody = await response.stream.bytesToString();
@@ -99,9 +93,7 @@ class GeminiClient extends BaseLLMClient {
         throw Exception('HTTP ${response.statusCode}: $responseBody');
       }
 
-      final stream = response.stream
-          .transform(utf8.decoder)
-          .transform(const LineSplitter());
+      final stream = response.stream.transform(utf8.decoder).transform(const LineSplitter());
 
       await for (final line in stream) {
         if (line.isEmpty || !line.startsWith('data: ')) continue;
@@ -124,8 +116,7 @@ class GeminiClient extends BaseLLMClient {
         }
       }
     } catch (e) {
-      throw await handleError(e, 'Gemini',
-          '$baseUrl/models/$modelName:streamGenerateContent', jsonEncode(body));
+      throw await handleError(e, 'Gemini', '$baseUrl/models/$modelName:streamGenerateContent', jsonEncode(body));
     }
   }
 
@@ -137,9 +128,12 @@ class GeminiClient extends BaseLLMClient {
     }
 
     try {
-      final response = await http.get(
+      final httpClient = BaseLLMClient.createHttpClient();
+      final response = await httpClient.get(
         Uri.parse("$baseUrl/models?key=$apiKey"),
-        headers: _headers,
+        headers: {
+          'Content-Type': 'application/json',
+        },
       );
 
       if (response.statusCode != 200) {
@@ -147,10 +141,8 @@ class GeminiClient extends BaseLLMClient {
       }
 
       final data = jsonDecode(response.body);
-      final models = (data['models'] as List)
-          .map((m) => m['name'].toString().replaceAll('models/', ''))
-          .where((name) => name.startsWith('gemini-'))
-          .toList();
+      final models =
+          (data['models'] as List).map((m) => m['name'].toString().replaceAll('models/', '')).where((name) => name.startsWith('gemini-')).toList();
 
       return models;
     } catch (e, trace) {
@@ -160,8 +152,7 @@ class GeminiClient extends BaseLLMClient {
   }
 }
 
-List<Map<String, dynamic>> chatMessageToGeminiMessage(
-    List<ChatMessage> messages) {
+List<Map<String, dynamic>> chatMessageToGeminiMessage(List<ChatMessage> messages) {
   return messages.map((message) {
     final parts = <Map<String, dynamic>>[];
 

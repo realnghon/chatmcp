@@ -33,17 +33,13 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   Chat? _chat;
   List<ChatMessage> _messages = [];
-  bool _isComposing =
-      false; // Indicates if the user is currently composing a message
+  bool _isComposing = false; // Indicates if the user is currently composing a message
   BaseLLMClient? _llmClient;
   String _currentResponse = '';
-  bool _isLoading =
-      false; // Indicates if the chat is currently loading or processing a response
+  bool _isLoading = false; // Indicates if the chat is currently loading or processing a response
   String _parentMessageId = ''; // Parent message ID
-  bool _isCancelled =
-      false; // Indicates if the current operation has been cancelled by the user
-  bool _isWaiting =
-      false; // Indicates if the system is waiting for a response from the LLM
+  bool _isCancelled = false; // Indicates if the current operation has been cancelled by the user
+  bool _isWaiting = false; // Indicates if the system is waiting for a response from the LLM
 
   // Stores image bytes of the widget for sharing functionality
   Uint8List? bytes;
@@ -107,12 +103,10 @@ class _ChatPageState extends State<ChatPage> {
 
   Future<bool> _showFunctionApprovalDialog(RunFunctionEvent event) async {
     // Determines which MCP server's tool the function belongs to
-    final clientName =
-        _findClientName(ProviderManager.mcpServerProvider.tools, event.name);
+    final clientName = _findClientName(ProviderManager.mcpServerProvider.tools, event.name);
     if (clientName == null) return false;
 
-    final serverConfig =
-        await ProviderManager.mcpServerProvider.loadServersAll();
+    final serverConfig = await ProviderManager.mcpServerProvider.loadServersAll();
     final servers = serverConfig['mcpServers'] as Map<String, dynamic>? ?? {};
 
     if (servers.containsKey(clientName)) {
@@ -183,16 +177,13 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   void _initializeLLMClient() {
-    _llmClient = LLMFactoryHelper.createFromModel(
-        ProviderManager.chatModelProvider.currentModel);
+    _llmClient = LLMFactoryHelper.createFromModel(ProviderManager.chatModelProvider.currentModel);
     setState(() {});
   }
 
   void _onChatProviderChanged() {
     _initializeHistoryMessages();
-    if (_isMobile() &&
-        ProviderManager.chatProvider.showCodePreview &&
-        ProviderManager.chatProvider.artifactEvent != null) {
+    if (_isMobile() && ProviderManager.chatProvider.showCodePreview && ProviderManager.chatProvider.artifactEvent != null) {
       _showMobileCodePreview();
     } else {
       setState(() {
@@ -228,8 +219,7 @@ class _ChatPageState extends State<ChatPage> {
       final brotherIds = messageMap[message.messageId] ?? [];
 
       if (brotherIds.length > 1) {
-        int index =
-            messages.indexWhere((m) => m.messageId == message.messageId);
+        int index = messages.indexWhere((m) => m.messageId == message.messageId);
         if (index != -1) {
           messages[index].childMessageIds ??= brotherIds;
         }
@@ -255,8 +245,7 @@ class _ChatPageState extends State<ChatPage> {
     return _getTreeMessages(lastMessage.messageId, messages);
   }
 
-  List<ChatMessage> _getTreeMessages(
-      String messageId, List<ChatMessage> messages) {
+  List<ChatMessage> _getTreeMessages(String messageId, List<ChatMessage> messages) {
     final lastMessage = messages.firstWhere((m) => m.messageId == messageId);
     List<ChatMessage> treeMessages = [];
 
@@ -270,8 +259,7 @@ class _ChatPageState extends State<ChatPage> {
               (m) => m.messageId == childId,
               orElse: () => ChatMessage(content: '', role: MessageRole.user),
             );
-            if (treeMessages
-                .any((m) => m.messageId == childMessage.messageId)) {
+            if (treeMessages.any((m) => m.messageId == childMessage.messageId)) {
               continue;
             }
             treeMessages.insert(0, childMessage);
@@ -297,12 +285,9 @@ class _ChatPageState extends State<ChatPage> {
       if (currentMessage.messageId.isEmpty) break;
     }
 
-    ChatMessage? nextMessage = messages
-        .where((m) => m.role == MessageRole.user)
-        .firstWhere(
+    ChatMessage? nextMessage = messages.where((m) => m.role == MessageRole.user).firstWhere(
           (m) => m.parentMessageId == lastMessage.messageId,
-          orElse: () =>
-              ChatMessage(messageId: '', content: '', role: MessageRole.user),
+          orElse: () => ChatMessage(messageId: '', content: '', role: MessageRole.user),
         );
 
     while (nextMessage != null && nextMessage.messageId.isNotEmpty) {
@@ -314,8 +299,7 @@ class _ChatPageState extends State<ChatPage> {
         for (var childId in childMessageIds) {
           final childMessage = messages.firstWhere(
             (m) => m.messageId == childId,
-            orElse: () =>
-                ChatMessage(messageId: '', content: '', role: MessageRole.user),
+            orElse: () => ChatMessage(messageId: '', content: '', role: MessageRole.user),
           );
           if (treeMessages.any((m) => m.messageId == childMessage.messageId)) {
             continue;
@@ -326,8 +310,7 @@ class _ChatPageState extends State<ChatPage> {
 
       nextMessage = messages.firstWhere(
         (m) => m.parentMessageId == nextMessage!.messageId,
-        orElse: () =>
-            ChatMessage(messageId: '', content: '', role: MessageRole.user),
+        orElse: () => ChatMessage(messageId: '', content: '', role: MessageRole.user),
       );
     }
 
@@ -349,8 +332,7 @@ class _ChatPageState extends State<ChatPage> {
     if (_chat?.id != activeChat?.id) {
       final messages = await _getHistoryTreeMessages();
       // Find the index of the last user message
-      final lastUserIndex =
-          messages.lastIndexWhere((m) => m.role == MessageRole.user);
+      final lastUserIndex = messages.lastIndexWhere((m) => m.role == MessageRole.user);
       String parentId = '';
 
       // If a user message is found, and there is an assistant message after it, use the ID of the assistant message
@@ -394,24 +376,16 @@ class _ChatPageState extends State<ChatPage> {
 
     final parentMsgIndex = _messages.length - 1;
     for (var i = 0; i < parentMsgIndex; i++) {
-      if (_messages[i].content?.contains('<function') == true &&
-          _messages[i].content?.contains('<function done="true"') == false) {
+      if (_messages[i].content?.contains('<function') == true && _messages[i].content?.contains('<function done="true"') == false) {
         _messages[i] = _messages[i].copyWith(
-          content: _messages[i]
-              .content
-              ?.replaceAll("<function ", "<function done=\"true\" "),
+          content: _messages[i].content?.replaceAll("<function ", "<function done=\"true\" "),
         );
       }
     }
 
     return Expanded(
       child: MessageList(
-        messages: _isWaiting
-            ? [
-                ..._messages,
-                ChatMessage(content: '', role: MessageRole.loading)
-              ]
-            : _messages.toList(),
+        messages: _isWaiting ? [..._messages, ChatMessage(content: '', role: MessageRole.loading)] : _messages.toList(),
         onRetry: _onRetry,
         onSwitch: _onSwitch,
       ),
@@ -432,8 +406,7 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
-  String? _findClientName(
-      Map<String, List<Map<String, dynamic>>> tools, String toolName) {
+  String? _findClientName(Map<String, List<Map<String, dynamic>>> tools, String toolName) {
     for (var entry in tools.entries) {
       final clientTools = entry.value;
       if (clientTools.any((tool) => tool['name'] == toolName)) {
@@ -443,10 +416,8 @@ class _ChatPageState extends State<ChatPage> {
     return null;
   }
 
-  Future<void> _sendToolCallAndProcessResponse(
-      String toolName, Map<String, dynamic> toolArguments) async {
-    final clientName =
-        _findClientName(ProviderManager.mcpServerProvider.tools, toolName);
+  Future<void> _sendToolCallAndProcessResponse(String toolName, Map<String, dynamic> toolArguments) async {
+    final clientName = _findClientName(ProviderManager.mcpServerProvider.tools, toolName);
     if (clientName == null) {
       Logger.root.severe('No MCP server found for tool: $toolName');
       return;
@@ -467,8 +438,7 @@ class _ChatPageState extends State<ChatPage> {
 
     for (int attempt = 0; attempt < maxRetries; attempt++) {
       try {
-        Logger.root.info(
-            'send tool call attempt ${attempt + 1}/$maxRetries - name: $toolName arguments: $toolArguments');
+        Logger.root.info('send tool call attempt ${attempt + 1}/$maxRetries - name: $toolName arguments: $toolArguments');
 
         response = await mcpClient
             .sendToolCall(
@@ -481,13 +451,11 @@ class _ChatPageState extends State<ChatPage> {
         break;
       } catch (e) {
         lastError = e.toString();
-        Logger.root
-            .warning('tool call attempt ${attempt + 1}/$maxRetries failed: $e');
+        Logger.root.warning('tool call attempt ${attempt + 1}/$maxRetries failed: $e');
 
         // Implements exponential backoff before next retry attempt
         if (attempt < maxRetries - 1) {
-          final delay =
-              Duration(seconds: (attempt + 1) * 2); // Incremental delay
+          final delay = Duration(seconds: (attempt + 1) * 2); // Incremental delay
           Logger.root.info('waiting ${delay.inSeconds}s before retry...');
           await Future.delayed(delay);
         }
@@ -496,15 +464,13 @@ class _ChatPageState extends State<ChatPage> {
 
     // Logs error and updates UI when all retry attempts fail
     if (response == null) {
-      Logger.root
-          .severe('Tool call failed after $maxRetries attempts: $lastError');
+      Logger.root.severe('Tool call failed after $maxRetries attempts: $lastError');
       setState(() {
         _parentMessageId = _messages.last.messageId;
         final msgId = Uuid().v4();
         _messages.add(ChatMessage(
           messageId: msgId,
-          content:
-              '<call_function_result name="$toolName">\n failed to call function: $lastError\n</call_function_result>',
+          content: '<call_function_result name="$toolName">\n failed to call function: $lastError\n</call_function_result>',
           role: MessageRole.assistant,
           name: toolName,
           parentMessageId: _parentMessageId,
@@ -514,8 +480,7 @@ class _ChatPageState extends State<ChatPage> {
       return;
     }
 
-    Logger.root.info(
-        'Tool call success - name: $toolName arguments: $toolArguments response: $response');
+    Logger.root.info('Tool call success - name: $toolName arguments: $toolArguments response: $response');
 
     setState(() {
       _currentResponse = response!.result['content'].toString();
@@ -525,8 +490,7 @@ class _ChatPageState extends State<ChatPage> {
         _messages.add(
           ChatMessage(
             messageId: msgId,
-            content:
-                '<call_function_result name="$toolName">\n$_currentResponse\n</call_function_result>',
+            content: '<call_function_result name="$toolName">\n$_currentResponse\n</call_function_result>',
             role: MessageRole.assistant,
             name: toolName,
             parentMessageId: _parentMessageId,
@@ -540,8 +504,7 @@ class _ChatPageState extends State<ChatPage> {
   ChatMessage? _findUserMessage(ChatMessage message) {
     final parentMessage = _messages.firstWhere(
       (m) => m.messageId == message.parentMessageId,
-      orElse: () =>
-          ChatMessage(messageId: '', content: '', role: MessageRole.user),
+      orElse: () => ChatMessage(messageId: '', content: '', role: MessageRole.user),
     );
 
     if (parentMessage.messageId.isEmpty) return null;
@@ -616,8 +579,7 @@ class _ChatPageState extends State<ChatPage> {
       _runFunctionEvents.add(functionEvent);
 
       _messages.add(ChatMessage(
-        content:
-            "<function name=\"${functionEvent.name}\">\n${jsonEncode(functionEvent.arguments)}\n</function>",
+        content: "<function name=\"${functionEvent.name}\">\n${jsonEncode(functionEvent.arguments)}\n</function>",
         role: MessageRole.assistant,
         parentMessageId: _parentMessageId,
       ));
@@ -639,9 +601,7 @@ class _ChatPageState extends State<ChatPage> {
     if (content.isEmpty) return false;
 
     // Parses function call tags in format <function name="toolName">args</function>
-    final RegExp functionTagRegex = RegExp(
-        '<function\\s+name=["\']([^"\']*)["\']\\s*>(.*?)</function>',
-        dotAll: true);
+    final RegExp functionTagRegex = RegExp('<function\\s+name=["\']([^"\']*)["\']\\s*>(.*?)</function>', dotAll: true);
     final matches = functionTagRegex.allMatches(content);
 
     if (matches.isEmpty) return false;
@@ -654,10 +614,7 @@ class _ChatPageState extends State<ChatPage> {
 
       try {
         // Cleans and parses tool arguments by removing whitespace and newlines
-        final cleanedToolArguments = toolArguments
-            .replaceAll('\n', ' ')
-            .replaceAll(RegExp(r'\s+'), ' ')
-            .trim();
+        final cleanedToolArguments = toolArguments.replaceAll('\n', ' ').replaceAll(RegExp(r'\s+'), ' ').trim();
         final toolArgumentsMap = jsonDecode(cleanedToolArguments);
         _onRunFunction(RunFunctionEvent(toolName, toolArgumentsMap));
       } catch (e) {
@@ -673,8 +630,7 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   // Message submission processing
-  Future<void> _handleSubmitted(SubmitData data,
-      {bool addUserMessage = true}) async {
+  Future<void> _handleSubmitted(SubmitData data, {bool addUserMessage = true}) async {
     setState(() {
       _isCancelled = false;
     });
@@ -707,8 +663,7 @@ class _ChatPageState extends State<ChatPage> {
                 _isRunningFunction = true;
               });
 
-              await _sendToolCallAndProcessResponse(
-                  event.name, event.arguments);
+              await _sendToolCallAndProcessResponse(event.name, event.arguments);
               setState(() {
                 _isRunningFunction = false;
               });
@@ -798,14 +753,12 @@ class _ChatPageState extends State<ChatPage> {
 
     // Converts assistant's function call results to user role for proper context
     for (var message in messageList) {
-      if (message.role == MessageRole.assistant &&
-          message.content?.contains('done="true"') == true) {
+      if (message.role == MessageRole.assistant && message.content?.contains('done="true"') == true) {
         messageList[messageList.indexOf(message)] = message.copyWith(
           content: message.content?.replaceAll('done="true"', ''),
         );
       }
-      if (message.role == MessageRole.assistant &&
-          message.content?.startsWith('<call_function_result') == true) {
+      if (message.role == MessageRole.assistant && message.content?.startsWith('<call_function_result') == true) {
         messageList[messageList.indexOf(message)] = message.copyWith(
           role: MessageRole.user,
           content: message.content
@@ -818,8 +771,7 @@ class _ChatPageState extends State<ChatPage> {
 
     var messageList0 = messageMerge(messageList);
 
-    if (messageList0.isNotEmpty &&
-        messageList0.last.role == MessageRole.assistant) {
+    if (messageList0.isNotEmpty && messageList0.last.role == MessageRole.assistant) {
       messageList0.add(ChatMessage(
         content: 'continue',
         role: MessageRole.user,
@@ -892,8 +844,7 @@ class _ChatPageState extends State<ChatPage> {
 
   void _reorderMessages(List<ChatMessage> messageList) {
     for (int i = 0; i < messageList.length - 1; i++) {
-      if (messageList[i].role == MessageRole.user &&
-          messageList[i + 1].role == MessageRole.tool) {
+      if (messageList[i].role == MessageRole.user && messageList[i + 1].role == MessageRole.tool) {
         final temp = messageList[i];
         messageList[i] = messageList[i + 1];
         messageList[i + 1] = temp;
@@ -968,13 +919,11 @@ class _ChatPageState extends State<ChatPage> {
     } catch (e) {
       Logger.root.warning('Failed to generate title: $e');
       // Creates fallback title from user message if title generation fails
-      final userMessage =
-          _messages.isNotEmpty ? _messages.first.content ?? '' : '';
+      final userMessage = _messages.isNotEmpty ? _messages.first.content ?? '' : '';
       title = _generateFallbackTitle(userMessage);
     }
 
-    await ProviderManager.chatProvider
-        .createChat(Chat(title: title), _handleParentMessageId(_messages));
+    await ProviderManager.chatProvider.createChat(Chat(title: title), _handleParentMessageId(_messages));
     Logger.root.info('Created new chat: $title');
   }
 
@@ -997,8 +946,7 @@ class _ChatPageState extends State<ChatPage> {
     if (messages.isEmpty) return [];
 
     // Locates the last user message to establish conversation thread
-    int lastUserIndex =
-        messages.lastIndexWhere((m) => m.role == MessageRole.user);
+    int lastUserIndex = messages.lastIndexWhere((m) => m.role == MessageRole.user);
     if (lastUserIndex == -1) return messages;
 
     // Retrieves conversation thread starting from last user message
@@ -1026,8 +974,7 @@ class _ChatPageState extends State<ChatPage> {
       updatedAt: DateTime.now(),
     ));
 
-    await ProviderManager.chatProvider
-        .addChatMessage(activeChat.id!, _handleParentMessageId(_messages));
+    await ProviderManager.chatProvider.addChatMessage(activeChat.id!, _handleParentMessageId(_messages));
   }
 
   void _handleError(dynamic error, StackTrace stackTrace) {
@@ -1079,7 +1026,7 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                   if (error is LLMException)
                     Text(
-                      'error: ${error.responseData}',
+                      error.toString(),
                       style: TextStyle(
                         fontSize: 12,
                         color: AppColors.getErrorTextColor().withAlpha(128),
@@ -1175,8 +1122,7 @@ class _ChatPageState extends State<ChatPage> {
       showModalCodePreview = true;
     });
 
-    const txtNoCodePreview = Text('No code preview',
-        style: TextStyle(fontSize: 14, color: Colors.grey));
+    const txtNoCodePreview = Text('No code preview', style: TextStyle(fontSize: 14, color: Colors.grey));
 
     showModalBottomSheet(
       context: context,
@@ -1208,9 +1154,7 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                   Expanded(
                     child: ProviderManager.chatProvider.artifactEvent != null
-                        ? ChatCodePreview(
-                            codePreviewEvent:
-                                ProviderManager.chatProvider.artifactEvent!)
+                        ? ChatCodePreview(codePreviewEvent: ProviderManager.chatProvider.artifactEvent!)
                         : Center(child: txtNoCodePreview),
                   ),
                 ],
@@ -1249,11 +1193,7 @@ class _ChatPageState extends State<ChatPage> {
               AppLocalizations.of(context)!.functionRunning,
               style: TextStyle(
                 fontSize: 14,
-                color: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.color
-                    ?.withAlpha((0.7 * 255).round()),
+                color: Theme.of(context).textTheme.bodyMedium?.color?.withAlpha((0.7 * 255).round()),
               ),
             ),
           ],
@@ -1299,9 +1239,7 @@ class _ChatPageState extends State<ChatPage> {
             ],
           ),
         ),
-        if (!mobile &&
-            _showCodePreview &&
-            ProviderManager.chatProvider.artifactEvent != null)
+        if (!mobile && _showCodePreview && ProviderManager.chatProvider.artifactEvent != null)
           Expanded(
             flex: 2,
             child: ChatCodePreview(

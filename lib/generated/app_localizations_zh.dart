@@ -571,4 +571,49 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get getApiKey => '获取 API 秘钥';
+
+  @override
+  String get proxySettings => '代理设置';
+
+  @override
+  String get enableProxy => '启用代理';
+
+  @override
+  String get enableProxyDescription => '启用代理后，网络请求将通过配置的代理服务器';
+
+  @override
+  String get proxyType => '代理类型';
+
+  @override
+  String get proxyHost => '代理地址';
+
+  @override
+  String get proxyPort => '代理端口';
+
+  @override
+  String get proxyUsername => '用户名';
+
+  @override
+  String get proxyPassword => '密码';
+
+  @override
+  String get enterProxyHost => '请输入代理服务器地址';
+
+  @override
+  String get enterProxyPort => '请输入代理端口';
+
+  @override
+  String get enterProxyUsername => '请输入用户名（可选）';
+
+  @override
+  String get enterProxyPassword => '请输入密码（可选）';
+
+  @override
+  String get proxyHostRequired => '代理地址为必填项';
+
+  @override
+  String get proxyPortInvalid => '代理端口必须在 1-65535 之间';
+
+  @override
+  String get saved => '已保存';
 }

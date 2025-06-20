@@ -65,9 +65,7 @@ class LLMProviderSetting {
       apiStyle: json['apiStyle'] as String? ?? 'openai',
       providerName: json['providerName'] as String,
       models: json['models'] != null ? List<String>.from(json['models']) : [],
-      enabledModels: json['enabledModels'] != null
-          ? List<String>.from(json['enabledModels'])
-          : [],
+      enabledModels: json['enabledModels'] != null ? List<String>.from(json['enabledModels']) : [],
       providerId: json['provider'] as String? ?? '',
       icon: json['icon'] as String? ?? '',
       custom: json['custom'] as bool? ?? false,
@@ -79,8 +77,7 @@ class LLMProviderSetting {
   }
 }
 
-var defaultSystemPrompt =
-    '''You are an intelligent and helpful AI assistant. Please:
+var defaultSystemPrompt = '''You are an intelligent and helpful AI assistant. Please:
 1. Provide clear and concise responses
 2. If you're not sure about something, please say so
 3. When appropriate, provide examples to illustrate your points
@@ -97,6 +94,14 @@ class GeneralSetting {
   int maxMessages;
   int maxLoops;
 
+  // 代理设置
+  bool enableProxy = false;
+  String proxyType = 'HTTP'; // HTTP, HTTPS, SOCKS4, SOCKS5
+  String proxyHost = '';
+  int proxyPort = 8080;
+  String proxyUsername = '';
+  String proxyPassword = '';
+
   GeneralSetting({
     required this.theme,
     this.showAssistantAvatar = false,
@@ -105,6 +110,12 @@ class GeneralSetting {
     this.locale = 'en',
     this.maxMessages = 50,
     this.maxLoops = 100,
+    this.enableProxy = false,
+    this.proxyType = 'HTTP',
+    this.proxyHost = '',
+    this.proxyPort = 8080,
+    this.proxyUsername = '',
+    this.proxyPassword = '',
   });
 
   Map<String, dynamic> toJson() {
@@ -116,6 +127,12 @@ class GeneralSetting {
       'locale': locale,
       'maxMessages': maxMessages,
       'maxLoops': maxLoops,
+      'enableProxy': enableProxy,
+      'proxyType': proxyType,
+      'proxyHost': proxyHost,
+      'proxyPort': proxyPort,
+      'proxyUsername': proxyUsername,
+      'proxyPassword': proxyPassword,
     };
   }
 
@@ -128,6 +145,12 @@ class GeneralSetting {
       locale: json['locale'] as String? ?? 'en',
       maxMessages: json['maxMessages'] as int? ?? 50,
       maxLoops: json['maxLoops'] as int? ?? 100,
+      enableProxy: json['enableProxy'] as bool? ?? false,
+      proxyType: json['proxyType'] as String? ?? 'HTTP',
+      proxyHost: json['proxyHost'] as String? ?? '',
+      proxyPort: json['proxyPort'] as int? ?? 8080,
+      proxyUsername: json['proxyUsername'] as String? ?? '',
+      proxyPassword: json['proxyPassword'] as String? ?? '',
     );
   }
 }
@@ -264,8 +287,7 @@ class SettingsProvider extends ChangeNotifier {
 
   List<LLMProviderSetting> get apiSettings => _apiSettings;
 
-  LLMProviderSetting getProviderSetting(String providerId) =>
-      _apiSettings.firstWhere(
+  LLMProviderSetting getProviderSetting(String providerId) => _apiSettings.firstWhere(
         (element) => element.providerId == providerId,
       );
 
@@ -284,8 +306,7 @@ class SettingsProvider extends ChangeNotifier {
 
   List<llm_model.Model> get availableModels => _availableModels;
 
-  Future<void> updateAvailableModels(
-      {required List<llm_model.Model> models}) async {
+  Future<void> updateAvailableModels({required List<llm_model.Model> models}) async {
     _availableModels = models;
     notifyListeners();
   }
@@ -324,10 +345,7 @@ class SettingsProvider extends ChangeNotifier {
     if (settingsJson != null) {
       try {
         final List<dynamic> decoded = jsonDecode(settingsJson);
-        settings = decoded
-            .map((value) =>
-                LLMProviderSetting.fromJson(value as Map<String, dynamic>))
-            .toList();
+        settings = decoded.map((value) => LLMProviderSetting.fromJson(value as Map<String, dynamic>)).toList();
       } catch (e) {
         Logger.root.severe('Error parsing $apiSettingsKey: $e');
         settings = [..._apiSettings];
@@ -335,8 +353,7 @@ class SettingsProvider extends ChangeNotifier {
     }
 
     for (var setting in defaultApiSettings) {
-      if (!settings
-          .any((element) => element.providerId == setting.providerId)) {
+      if (!settings.any((element) => element.providerId == setting.providerId)) {
         settings = [...settings, setting];
       }
     }
@@ -393,20 +410,32 @@ class SettingsProvider extends ChangeNotifier {
     String? locale,
     int? maxMessages,
     int? maxLoops,
+    bool? enableProxy,
+    String? proxyType,
+    String? proxyHost,
+    int? proxyPort,
+    String? proxyUsername,
+    String? proxyPassword,
   }) async {
     final prefs = await SharedPreferences.getInstance();
+
     _generalSetting = GeneralSetting(
       theme: theme ?? _generalSetting.theme,
-      showAssistantAvatar:
-          showAssistantAvatar ?? _generalSetting.showAssistantAvatar,
+      showAssistantAvatar: showAssistantAvatar ?? _generalSetting.showAssistantAvatar,
       showUserAvatar: showUserAvatar ?? _generalSetting.showUserAvatar,
       systemPrompt: systemPrompt ?? _generalSetting.systemPrompt,
       locale: locale ?? _generalSetting.locale,
       maxMessages: maxMessages ?? _generalSetting.maxMessages,
       maxLoops: maxLoops ?? _generalSetting.maxLoops,
+      enableProxy: enableProxy ?? _generalSetting.enableProxy,
+      proxyType: proxyType ?? _generalSetting.proxyType,
+      proxyHost: proxyHost ?? _generalSetting.proxyHost,
+      proxyPort: proxyPort ?? _generalSetting.proxyPort,
+      proxyUsername: proxyUsername ?? _generalSetting.proxyUsername,
+      proxyPassword: proxyPassword ?? _generalSetting.proxyPassword,
     );
-    await prefs.setString(
-        'generalSettings', jsonEncode(_generalSetting.toJson()));
+    await prefs.setString('generalSettings', jsonEncode(_generalSetting.toJson()));
+
     notifyListeners();
   }
 
@@ -429,8 +458,7 @@ class SettingsProvider extends ChangeNotifier {
       maxMessages: maxMessages ?? _generalSetting.maxMessages,
       maxLoops: maxLoops ?? _generalSetting.maxLoops,
     );
-    await prefs.setString(
-        'generalSettings', jsonEncode(_generalSetting.toJson()));
+    await prefs.setString('generalSettings', jsonEncode(_generalSetting.toJson()));
     notifyListeners();
   }
 

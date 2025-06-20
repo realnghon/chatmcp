@@ -14,9 +14,7 @@ class OpenAIClient extends BaseLLMClient {
   OpenAIClient({
     required this.apiKey,
     String? baseUrl,
-  })  : baseUrl = (baseUrl == null || baseUrl.isEmpty)
-            ? 'https://api.openai.com/v1'
-            : baseUrl,
+  })  : baseUrl = (baseUrl == null || baseUrl.isEmpty) ? 'https://api.openai.com/v1' : baseUrl,
         _headers = {
           'Content-Type': 'application/json; charset=utf-8',
           'Authorization': 'Bearer $apiKey',
@@ -24,6 +22,8 @@ class OpenAIClient extends BaseLLMClient {
 
   @override
   Future<LLMResponse> chatCompletion(CompletionRequest request) async {
+    final httpClient = BaseLLMClient.createHttpClient();
+
     final body = {
       'model': request.model,
       'messages': chatMessageToOpenAIMessage(request.messages),
@@ -42,10 +42,10 @@ class OpenAIClient extends BaseLLMClient {
     final endpoint = getEndpoint(baseUrl, "/chat/completions");
 
     try {
-      final response = await http.post(
+      final response = await httpClient.post(
         Uri.parse(endpoint),
         headers: _headers,
-        body: jsonEncode(body),
+        body: bodyStr,
       );
 
       final responseBody = utf8.decode(response.bodyBytes);
@@ -77,11 +77,15 @@ class OpenAIClient extends BaseLLMClient {
       );
     } catch (e) {
       throw await handleError(e, 'OpenAI', endpoint, bodyStr);
+    } finally {
+      httpClient.close();
     }
   }
 
   @override
   Stream<LLMResponse> chatStreamCompletion(CompletionRequest request) async* {
+    final httpClient = BaseLLMClient.createHttpClient();
+
     final body = {
       'model': request.model,
       'messages': chatMessageToOpenAIMessage(request.messages),
@@ -95,11 +99,11 @@ class OpenAIClient extends BaseLLMClient {
     final endpoint = getEndpoint(baseUrl, "/chat/completions");
 
     try {
-      final request = http.Request('POST', Uri.parse(endpoint));
-      request.headers.addAll(_headers);
-      request.body = jsonEncode(body);
+      final httpRequest = http.Request('POST', Uri.parse(endpoint));
+      httpRequest.headers.addAll(_headers);
+      httpRequest.body = jsonEncode(body);
 
-      final response = await http.Client().send(request);
+      final response = await httpClient.send(httpRequest);
 
       if (response.statusCode >= 400) {
         final responseBody = await response.stream.bytesToString();
@@ -108,9 +112,7 @@ class OpenAIClient extends BaseLLMClient {
         throw Exception('HTTP ${response.statusCode}: $responseBody');
       }
 
-      final stream = response.stream
-          .transform(utf8.decoder)
-          .transform(const LineSplitter());
+      final stream = response.stream.transform(utf8.decoder).transform(const LineSplitter());
 
       await for (final line in stream) {
         if (!line.startsWith('data: ')) continue;
@@ -151,6 +153,8 @@ class OpenAIClient extends BaseLLMClient {
       }
     } catch (e) {
       throw await handleError(e, 'OpenAI', endpoint, jsonEncode(body));
+    } finally {
+      httpClient.close();
     }
   }
 
@@ -161,8 +165,10 @@ class OpenAIClient extends BaseLLMClient {
       return [];
     }
 
+    final httpClient = BaseLLMClient.createHttpClient();
+
     try {
-      final response = await http.get(
+      final response = await httpClient.get(
         Uri.parse(getEndpoint(baseUrl, "/models")),
         headers: _headers,
       );
@@ -172,8 +178,7 @@ class OpenAIClient extends BaseLLMClient {
       }
 
       final data = jsonDecode(response.body);
-      final models =
-          (data['data'] as List).map((m) => m['id'].toString()).toList();
+      final models = (data['data'] as List).map((m) => m['id'].toString()).toList();
 
       return models;
     } catch (e, trace) {
@@ -184,12 +189,13 @@ class OpenAIClient extends BaseLLMClient {
         requestBody: '',
         originalError: e,
       );
+    } finally {
+      httpClient.close();
     }
   }
 }
 
-List<Map<String, dynamic>> chatMessageToOpenAIMessage(
-    List<ChatMessage> messages) {
+List<Map<String, dynamic>> chatMessageToOpenAIMessage(List<ChatMessage> messages) {
   return messages.map((message) {
     final json = <String, dynamic>{
       'role': message.role.value,
@@ -236,9 +242,7 @@ List<Map<String, dynamic>> chatMessageToOpenAIMessage(
     }
 
     // Add tool call related fields
-    if (message.role == MessageRole.tool &&
-        message.name != null &&
-        message.toolCallId != null) {
+    if (message.role == MessageRole.tool && message.name != null && message.toolCallId != null) {
       json['name'] = message.name!;
       json['tool_call_id'] = message.toolCallId!;
     }

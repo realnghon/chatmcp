@@ -577,4 +577,49 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get getApiKey => 'API Anahtarı Al';
+
+  @override
+  String get proxySettings => 'Proxy Ayarları';
+
+  @override
+  String get enableProxy => 'Proxy\'yi Etkinleştir';
+
+  @override
+  String get enableProxyDescription => 'Etkinleştirildiğinde, ağ istekleri yapılandırılan proxy sunucu üzerinden gidecektir';
+
+  @override
+  String get proxyType => 'Proxy Türü';
+
+  @override
+  String get proxyHost => 'Proxy Adresi';
+
+  @override
+  String get proxyPort => 'Proxy Portu';
+
+  @override
+  String get proxyUsername => 'Kullanıcı Adı';
+
+  @override
+  String get proxyPassword => 'Şifre';
+
+  @override
+  String get enterProxyHost => 'Proxy sunucu adresini girin';
+
+  @override
+  String get enterProxyPort => 'Proxy portunu girin';
+
+  @override
+  String get enterProxyUsername => 'Kullanıcı adını girin (isteğe bağlı)';
+
+  @override
+  String get enterProxyPassword => 'Şifreyi girin (isteğe bağlı)';
+
+  @override
+  String get proxyHostRequired => 'Proxy adresi zorunludur';
+
+  @override
+  String get proxyPortInvalid => 'Proxy portu 1-65535 arasında olmalıdır';
+
+  @override
+  String get saved => 'Saved';
 }

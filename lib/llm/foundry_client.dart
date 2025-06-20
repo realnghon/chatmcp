@@ -17,9 +17,7 @@ class FoundryClient extends BaseLLMClient {
     required this.apiKey,
     String? apiVersion,
     String? baseUrl,
-  })  : baseUrl = (baseUrl == null || baseUrl.isEmpty)
-            ? 'https://YOUR_RESOURCE_NAME.openai.azure.com'
-            : baseUrl,
+  })  : baseUrl = (baseUrl == null || baseUrl.isEmpty) ? 'https://YOUR_RESOURCE_NAME.openai.azure.com' : baseUrl,
         apiVersion = apiVersion ?? 'preview',
         _headers = {
           'Content-Type': 'application/json; charset=utf-8',
@@ -43,11 +41,13 @@ class FoundryClient extends BaseLLMClient {
     final bodyStr = jsonEncode(body);
     Logger.root.fine('OpenAI request: $bodyStr');
 
-    final endpoint = apiVersion == "preview" ? "${getEndpoint(baseUrl, '/openai/v1/chat/completions')}?api-version=$apiVersion" : 
-        "${getEndpoint(baseUrl, '/openai/deployments/${request.model}/chat/completions')}?api-version=$apiVersion";
+    final endpoint = apiVersion == "preview"
+        ? "${getEndpoint(baseUrl, '/openai/v1/chat/completions')}?api-version=$apiVersion"
+        : "${getEndpoint(baseUrl, '/openai/deployments/${request.model}/chat/completions')}?api-version=$apiVersion";
 
     try {
-      final response = await http.post(
+      final httpClient = BaseLLMClient.createHttpClient();
+      final response = await httpClient.post(
         Uri.parse(endpoint),
         headers: _headers,
         body: jsonEncode(body),
@@ -97,15 +97,17 @@ class FoundryClient extends BaseLLMClient {
 
     Logger.root.fine("debug log:openai stream body: ${jsonEncode(body)}");
 
-    final endpoint = apiVersion == "preview" ? "${getEndpoint(baseUrl, '/openai/v1/chat/completions')}?api-version=$apiVersion" : 
-        "${getEndpoint(baseUrl, '/openai/deployments/${request.model}/chat/completions')}?api-version=$apiVersion";
+    final endpoint = apiVersion == "preview"
+        ? "${getEndpoint(baseUrl, '/openai/v1/chat/completions')}?api-version=$apiVersion"
+        : "${getEndpoint(baseUrl, '/openai/deployments/${request.model}/chat/completions')}?api-version=$apiVersion";
 
     try {
       final request = http.Request('POST', Uri.parse(endpoint));
       request.headers.addAll(_headers);
       request.body = jsonEncode(body);
 
-      final response = await http.Client().send(request);
+      final httpClient = BaseLLMClient.createHttpClient();
+      final response = await httpClient.send(request);
 
       if (response.statusCode >= 400) {
         final responseBody = await response.stream.bytesToString();
@@ -114,9 +116,7 @@ class FoundryClient extends BaseLLMClient {
         throw Exception('HTTP ${response.statusCode}: $responseBody');
       }
 
-      final stream = response.stream
-          .transform(utf8.decoder)
-          .transform(const LineSplitter());
+      final stream = response.stream.transform(utf8.decoder).transform(const LineSplitter());
 
       await for (final line in stream) {
         if (!line.startsWith('data: ')) continue;
@@ -168,7 +168,8 @@ class FoundryClient extends BaseLLMClient {
     }
 
     try {
-      final response = await http.get(
+      final httpClient = BaseLLMClient.createHttpClient();
+      final response = await httpClient.get(
         Uri.parse("${getEndpoint(baseUrl, "/openai/deployments")}?api-version=$modelVersion"),
         headers: _headers,
       );
@@ -180,7 +181,10 @@ class FoundryClient extends BaseLLMClient {
       final data = jsonDecode(response.body);
 
       // Filter out models o1-mini and o1-preview, because of unsupported system message
-      final models = (data['data'] as List).where((m) => m['status'] == 'succeeded' && m['model'] != 'o1-mini' && m['model'] != 'o1-preview').map((m) => m['id'].toString()).toList();
+      final models = (data['data'] as List)
+          .where((m) => m['status'] == 'succeeded' && m['model'] != 'o1-mini' && m['model'] != 'o1-preview')
+          .map((m) => m['id'].toString())
+          .toList();
 
       return models;
     } catch (e, trace) {
@@ -195,8 +199,7 @@ class FoundryClient extends BaseLLMClient {
   }
 }
 
-List<Map<String, dynamic>> chatMessageToOpenAIMessage(
-    List<ChatMessage> messages) {
+List<Map<String, dynamic>> chatMessageToOpenAIMessage(List<ChatMessage> messages) {
   return messages.map((message) {
     final json = <String, dynamic>{
       'role': message.role.value,
@@ -243,9 +246,7 @@ List<Map<String, dynamic>> chatMessageToOpenAIMessage(
     }
 
     // Add tool call related fields
-    if (message.role == MessageRole.tool &&
-        message.name != null &&
-        message.toolCallId != null) {
+    if (message.role == MessageRole.tool && message.name != null && message.toolCallId != null) {
       json['name'] = message.name!;
       json['tool_call_id'] = message.toolCallId!;
     }

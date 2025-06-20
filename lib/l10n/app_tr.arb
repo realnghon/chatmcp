@@ -180,5 +180,20 @@
     "on": "AÇIK",
     "off": "KAPALI",
     "apiUrl": "API Adresi",
-    "selectApiStyle": "Lütfen bir API tarzı seçin"
+    "selectApiStyle": "Lütfen bir API tarzı seçin",
+    "proxySettings": "Proxy Ayarları",
+    "enableProxy": "Proxy'yi Etkinleştir",
+    "enableProxyDescription": "Etkinleştirildiğinde, ağ istekleri yapılandırılan proxy sunucu üzerinden gidecektir",
+    "proxyType": "Proxy Türü",
+    "proxyHost": "Proxy Adresi",
+    "proxyPort": "Proxy Portu",
+    "proxyUsername": "Kullanıcı Adı",
+    "proxyPassword": "Şifre",
+    "enterProxyHost": "Proxy sunucu adresini girin",
+    "enterProxyPort": "Proxy portunu girin",
+    "enterProxyUsername": "Kullanıcı adını girin (isteğe bağlı)",
+    "enterProxyPassword": "Şifreyi girin (isteğe bağlı)",
+    "proxyHostRequired": "Proxy adresi zorunludur",
+    "proxyPortInvalid": "Proxy portu 1-65535 arasında olmalıdır",
+    "saved": "Saved"
 }

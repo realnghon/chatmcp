@@ -1172,6 +1172,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Get API Key'**
   String get getApiKey;
+
+  /// No description provided for @proxySettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy Settings'**
+  String get proxySettings;
+
+  /// No description provided for @enableProxy.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Proxy'**
+  String get enableProxy;
+
+  /// No description provided for @enableProxyDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'When enabled, network requests will go through the configured proxy server'**
+  String get enableProxyDescription;
+
+  /// No description provided for @proxyType.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy Type'**
+  String get proxyType;
+
+  /// No description provided for @proxyHost.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy Host'**
+  String get proxyHost;
+
+  /// No description provided for @proxyPort.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy Port'**
+  String get proxyPort;
+
+  /// No description provided for @proxyUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get proxyUsername;
+
+  /// No description provided for @proxyPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get proxyPassword;
+
+  /// No description provided for @enterProxyHost.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter proxy server address'**
+  String get enterProxyHost;
+
+  /// No description provided for @enterProxyPort.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter proxy port'**
+  String get enterProxyPort;
+
+  /// No description provided for @enterProxyUsername.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter username (optional)'**
+  String get enterProxyUsername;
+
+  /// No description provided for @enterProxyPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter password (optional)'**
+  String get enterProxyPassword;
+
+  /// No description provided for @proxyHostRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy host is required'**
+  String get proxyHostRequired;
+
+  /// No description provided for @proxyPortInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Proxy port must be between 1-65535'**
+  String get proxyPortInvalid;
+
+  /// No description provided for @saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved'**
+  String get saved;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

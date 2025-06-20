@@ -37,7 +37,6 @@ class DatabaseHelper {
   /// If no initialization has started, begins new initialization
   Future<Database> get database async {
     if (_database != null) {
-      Logger.root.fine('Database instance already exists, returning cached instance');
       return _database!;
     }
 
@@ -50,7 +49,7 @@ class DatabaseHelper {
     // Start new initialization
     Logger.root.info('Starting new database initialization process');
     _initializationCompleter = Completer<Database>();
-    
+
     try {
       Logger.root.info('Step 1: Initializing SQLite database...');
       _database = await _initializeSqlite();
@@ -67,7 +66,7 @@ class DatabaseHelper {
   }
 
   Future<Database> _initializeSqlite() async {
-    if (kIsDesktop) { 
+    if (kIsDesktop) {
       Logger.root.info('Step 1.1: Initializing SQLite for desktop platform');
       sqfliteFfiInit();
       databaseFactory = databaseFactoryFfi;
@@ -86,15 +85,13 @@ class DatabaseHelper {
       final Directory appDir;
       if (Platform.isMacOS) {
         // macOS: ~/Library/Application Support/com.yourapp.name/
-        appDir = Directory(join(Platform.environment['HOME']!, 'Library',
-            'Application Support', 'ChatMcp'));
+        appDir = Directory(join(Platform.environment['HOME']!, 'Library', 'Application Support', 'ChatMcp'));
       } else if (Platform.isWindows) {
         // Windows: %APPDATA%\ChatMcp
         appDir = Directory(join(Platform.environment['APPDATA']!, 'ChatMcp'));
       } else if (Platform.isLinux) {
         // Linux: ~/.local/share/chatmcp/
-        appDir = Directory(
-            join(Platform.environment['HOME']!, '.local', 'share', 'ChatMcp'));
+        appDir = Directory(join(Platform.environment['HOME']!, '.local', 'share', 'ChatMcp'));
       } else {
         appDir = await getApplicationDocumentsDirectory();
       }

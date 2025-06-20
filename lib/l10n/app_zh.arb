@@ -180,5 +180,20 @@
     "on": "开启",
     "off": "关闭",
     "apiUrl": "API 地址",
-    "selectApiStyle": "请选择 API 风格"
+    "selectApiStyle": "请选择 API 风格",
+    "proxySettings": "代理设置",
+    "enableProxy": "启用代理",
+    "enableProxyDescription": "启用代理后，网络请求将通过配置的代理服务器",
+    "proxyType": "代理类型",
+    "proxyHost": "代理地址",
+    "proxyPort": "代理端口",
+    "proxyUsername": "用户名",
+    "proxyPassword": "密码",
+    "enterProxyHost": "请输入代理服务器地址",
+    "enterProxyPort": "请输入代理端口",
+    "enterProxyUsername": "请输入用户名（可选）",
+    "enterProxyPassword": "请输入密码（可选）",
+    "proxyHostRequired": "代理地址为必填项",
+    "proxyPortInvalid": "代理端口必须在 1-65535 之间",
+    "saved": "已保存"
 }
