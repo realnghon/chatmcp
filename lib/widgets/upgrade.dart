@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
+import 'package:chatmcp/widgets/markdown/markit_widget.dart';
 
 class UpgradeNotice extends StatefulWidget {
   final Duration checkInterval;
@@ -53,8 +54,7 @@ class _UpgradeNoticeState extends State<UpgradeNotice> {
           _checkForUpdates();
         }
       });
-      _checkTimer =
-          Timer.periodic(widget.checkInterval, (_) => _checkForUpdates());
+      _checkTimer = Timer.periodic(widget.checkInterval, (_) => _checkForUpdates());
     }
   }
 
@@ -83,9 +83,7 @@ class _UpgradeNoticeState extends State<UpgradeNotice> {
 
       // 检查是否已经通知过用户
       final lastNotifiedVersion = prefs.getString('last_shown_version');
-      if (widget.showOnlyOnce &&
-          lastNotifiedVersion != null &&
-          prefs.getBool('$_dismissPrefix$lastNotifiedVersion') == true) {
+      if (widget.showOnlyOnce && lastNotifiedVersion != null && prefs.getBool('$_dismissPrefix$lastNotifiedVersion') == true) {
         setState(() {
           _isChecking = false;
         });
@@ -93,8 +91,7 @@ class _UpgradeNoticeState extends State<UpgradeNotice> {
       }
 
       // 获取GitHub最新release版本
-      final apiUrl =
-          'https://api.github.com/repos/${widget.owner}/${widget.repo}/releases/latest';
+      final apiUrl = 'https://api.github.com/repos/${widget.owner}/${widget.repo}/releases/latest';
 
       final response = await http.get(
         Uri.parse(apiUrl),
@@ -103,8 +100,7 @@ class _UpgradeNoticeState extends State<UpgradeNotice> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final latestVersion =
-            data['tag_name'].toString().replaceAll(RegExp(r'[^0-9.]'), '');
+        final latestVersion = data['tag_name'].toString().replaceAll(RegExp(r'[^0-9.]'), '');
         final htmlUrl = data['html_url'] as String;
         final body = data['body'] as String?;
 
@@ -199,8 +195,7 @@ class _UpgradeNoticeState extends State<UpgradeNotice> {
         } else {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                  content: Text(AppLocalizations.of(context)!.openUrlFailed)),
+              SnackBar(content: Text(AppLocalizations.of(context)!.openUrlFailed)),
             );
           }
         }
@@ -208,8 +203,7 @@ class _UpgradeNoticeState extends State<UpgradeNotice> {
         debugPrint('打开URL错误: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(AppLocalizations.of(context)!.openUrlFailed)),
+            SnackBar(content: Text(AppLocalizations.of(context)!.openUrlFailed)),
           );
         }
       }
@@ -363,17 +357,20 @@ class _UpgradeNoticeState extends State<UpgradeNotice> {
                 Text(l10n.newVersionAvailable),
                 if (_releaseNotes.isNotEmpty) ...[
                   const SizedBox(height: 16),
-                  Text(l10n.releaseNotes,
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  Text(l10n.releaseNotes, style: const TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.grey[100],
                       borderRadius: BorderRadius.circular(4),
+                      border: Border.all(
+                        color: Theme.of(context).dividerColor,
+                      ),
                     ),
-                    child: Text(_releaseNotes,
-                        style: const TextStyle(fontSize: 12)),
+                    child: Markit(
+                      data: _releaseNotes,
+                      textStyle: const TextStyle(fontSize: 12),
+                    ),
                   ),
                 ],
               ],
