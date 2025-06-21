@@ -43,6 +43,12 @@ clear explanations, interactive diagrams, and even allows for real-time Q&A with
 ![MCP Stdio](./docs/preview/mcp-stdio.webp)
 ![MCP SSE](./docs/preview/mcp-sse.webp)
 
+### Data Sync
+
+ChatMCP applications can sync data within the same local area network
+
+![Data sync](./docs/data-sync.webp)
+
 ## Usage
 
 Make sure you have installed `uvx` or `npx` in your system

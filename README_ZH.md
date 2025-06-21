@@ -42,6 +42,12 @@ sudo apt-get install libsqlite3-0 libsqlite3-dev
 ![MCP Stdio](./docs/preview/mcp-stdio.webp)
 ![MCP SSE](./docs/preview/mcp-sse.webp)
 
+### 数据同步
+
+ChatMCP 应用程序可以在同一局域网内同步数据
+
+![Data sync](./docs/data-sync.webp)
+
 
 ## 使用方法
 
