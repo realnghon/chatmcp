@@ -82,6 +82,10 @@ jobs:
             echo "⚠️  未找到签名配置，将使用 debug 签名"
           fi
       
+      - name: Activate FastForge
+        if: matrix.os == 'ubuntu-latest'
+        run: dart pub global activate fastforge
+
       - name: Build ${{ matrix.build_target }}
         shell: bash
         run: |
@@ -91,7 +95,12 @@ jobs:
             flutter build appbundle --release
           fi
           flutter build ${{ matrix.build_target }} --release
-      
+
+      - name: Build deb package
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          fastforge release --name=dev --jobs=linux-deb
+        
       - name: Package Linux App
         if: matrix.os == 'ubuntu-latest'
         run: |
@@ -142,7 +151,8 @@ jobs:
           path: |
             ${{ matrix.asset_name }}
             ${{ matrix.apk_build && 'android-artifacts/*' || '' }}
-      
+            dist/*/chatmcp-*-linux.deb
+
       - name: Create Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
@@ -150,5 +160,6 @@ jobs:
           files: |
             ${{ matrix.asset_name }}
             ${{ matrix.apk_build && 'android-artifacts/*' || '' }}
+            dist/*/chatmcp-*-linux.deb
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
