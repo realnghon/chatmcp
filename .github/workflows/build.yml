@@ -13,18 +13,12 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
         include:
           - os: ubuntu-latest
-            output_path: build/linux/x64/release/bundle
-            asset_name: chatmcp-linux-x64.tar.gz
             build_target: linux
             apk_build: true
           - os: macos-latest
-            output_path: build/macos/Build/Products/Release/chatmcp.app
-            asset_name: chatmcp-macos.dmg
             build_target: macos
             apk_build: false
           - os: windows-latest
-            output_path: build/windows/x64/Runner/Release
-            asset_name: chatmcp-windows-x64.zip
             build_target: windows
             apk_build: false
     runs-on: ${{ matrix.os }}
@@ -83,83 +77,115 @@ jobs:
           fi
       
       - name: Activate FastForge
-        if: matrix.os == 'ubuntu-latest'
         run: dart pub global activate fastforge
 
-      - name: Build ${{ matrix.build_target }}
+      - name: Build with FastForge
         shell: bash
         run: |
-          echo "apk_build: ${{ matrix.apk_build }}"
+          echo "Building for ${{ matrix.build_target }}"
+          case "${{ matrix.build_target }}" in
+            "linux")
+              # 使用 fastforge 构建 Linux 平台的多种格式
+              fastforge release --name=dev --jobs=linux-deb,linux-rpm,linux-appimage
+              ;;
+            "windows")
+              # 使用 fastforge 构建 Windows 平台
+              fastforge release --name=all --jobs=windows-exe,windows-zip
+              ;;
+            "macos")
+              # 使用 fastforge 构建 macOS 平台
+              fastforge release --name=all --jobs=macos-dmg,macos-zip
+              ;;
+          esac
+          
+          # 如果需要构建 Android
           if [ "${{ matrix.apk_build }}" == "true" ]; then
-            flutter build apk --release
-            flutter build appbundle --release
+            fastforge release --name=all --jobs=android-apk,android-aab
           fi
-          flutter build ${{ matrix.build_target }} --release
-
-      - name: Build deb package
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          fastforge release --name=dev --jobs=linux-deb
         
-      - name: Package Linux App
-        if: matrix.os == 'ubuntu-latest'
+      - name: List FastForge Output
         run: |
-          cd build/linux/x64/release/bundle
-          tar -czf "${GITHUB_WORKSPACE}/${{ matrix.asset_name }}" *
-      
-      - name: Package macOS App
-        if: matrix.os == 'macos-latest'
-        run: |
-          brew install create-dmg
-          create-dmg \
-            --volname "ChatMcp" \
-            --window-pos 200 120 \
-            --window-size 800 400 \
-            --icon-size 100 \
-            --icon "chatmcp.app" 200 190 \
-            --hide-extension "chatmcp.app" \
-            --app-drop-link 600 185 \
-            "${{ matrix.asset_name }}" \
-            "${{ matrix.output_path }}"
-      
-      - name: Package Windows App
-        if: matrix.os == 'windows-latest'
-        run: |
-          Copy-Item -Path "windows/sqlite3.dll" -Destination "${{ matrix.output_path }}" -Force
-          Compress-Archive -Path "${{ matrix.output_path }}/*" -DestinationPath "${{ matrix.asset_name }}" -Force
-
-      - name: Package Android APK and AAB
-        if: matrix.apk_build
-        run: |
-          mkdir -p android-artifacts
+          echo "FastForge 构建输出:"
+          ls -la dist/ || echo "没有找到 dist 目录"
+          find . -name "*.deb" -o -name "*.rpm" -o -name "*.appimage" -o -name "*.exe" -o -name "*.zip" -o -name "*.dmg" -o -name "*.apk" -o -name "*.aab" | head -20
           
-          if [ -f "build/app/outputs/flutter-apk/app-release.apk" ]; then
-            cp build/app/outputs/flutter-apk/app-release.apk android-artifacts/chatmcp-universal.apk
+      - name: Organize Build Artifacts
+        run: |
+          mkdir -p release-artifacts
+          
+          # 复制 FastForge 构建的文件
+          if [ -d "dist" ]; then
+            cp -r dist/* release-artifacts/ 2>/dev/null || true
           fi
           
-          if [ -f "build/app/outputs/bundle/release/app-release.aab" ]; then
-            cp build/app/outputs/bundle/release/app-release.aab android-artifacts/chatmcp-release.aab
-          fi
+          # 查找并复制其他构建产物
+          find . -name "*.deb" -exec cp {} release-artifacts/ \; 2>/dev/null || true
+          find . -name "*.rpm" -exec cp {} release-artifacts/ \; 2>/dev/null || true
+          find . -name "*.appimage" -exec cp {} release-artifacts/ \; 2>/dev/null || true
+          find . -name "*.exe" -exec cp {} release-artifacts/ \; 2>/dev/null || true
+          find . -name "*.dmg" -exec cp {} release-artifacts/ \; 2>/dev/null || true
+          find . -name "*-release.apk" -exec cp {} release-artifacts/ \; 2>/dev/null || true
+          find . -name "*-release.aab" -exec cp {} release-artifacts/ \; 2>/dev/null || true
           
-          echo "生成的 Android 文件:"
-          ls -la android-artifacts/
+          echo "整理后的构建产物:"
+          ls -la release-artifacts/
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.apk_build && 'chatmcp-android' || matrix.build_target }}
+          name: chatmcp-${{ matrix.build_target }}${{ matrix.apk_build && '-android' || '' }}
           path: |
-            ${{ matrix.asset_name }}
-            ${{ matrix.apk_build && 'android-artifacts/*' || '' }}
-            dist/*/chatmcp-*-linux.deb
+            release-artifacts/
+            dist/
+        continue-on-error: true
 
       - name: Create Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            ${{ matrix.asset_name }}
-            ${{ matrix.apk_build && 'android-artifacts/*' || '' }}
-            dist/*/chatmcp-*-linux.deb
+            release-artifacts/*
+            dist/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
+
+  build-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: '3.32.1'
+
+      - name: Create empty .env file
+        run: touch .env
+      
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Activate FastForge
+        run: dart pub global activate fastforge
+
+      - name: Build Web with FastForge
+        run: |
+          fastforge release --name=all --jobs=web-tar-gz
+
+      - name: Upload Web Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: chatmcp-web
+          path: |
+            dist/
+        continue-on-error: true
+
+      - name: Create Web Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist/**/*
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
