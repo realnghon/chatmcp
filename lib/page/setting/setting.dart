@@ -37,7 +37,7 @@ class _SettingPageState extends State<SettingPage> {
           bottom: TabBar(
             indicatorSize: TabBarIndicatorSize.tab,
             indicatorWeight: 5,
-            labelStyle: TextStyle(fontSize: kIsMobile ? 10 : 16),
+            labelStyle: TextStyle(fontSize: kIsMobile ? 10 : 14),
             tabs: tabs
                 .map((tab) => Tab(
                       icon: Icon(tab.icon),

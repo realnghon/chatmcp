@@ -76,8 +76,7 @@ class TopToolbar extends StatelessWidget {
                 Navigator.of(context).pop();
               },
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Row(
                   children: [
                     const Icon(CupertinoIcons.share, size: 18),
@@ -128,8 +127,7 @@ class TopToolbar extends StatelessWidget {
                 );
               },
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Row(
                   children: [
                     const Icon(CupertinoIcons.ant, size: 18),
@@ -154,15 +152,12 @@ class TopToolbar extends StatelessWidget {
                 }
               },
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 child: Row(
                   children: [
                     const Icon(CupertinoIcons.delete, size: 18),
                     const SizedBox(width: 12),
-                    Text(l10n.delete,
-                        style: TextStyle(
-                            color: AppColors.getThemeTextColor(context))),
+                    Text(l10n.delete, style: TextStyle(color: AppColors.getThemeTextColor(context))),
                   ],
                 ),
               ),
@@ -210,9 +205,7 @@ class TopToolbar extends StatelessWidget {
                       ),
                     ),
                   ),
-                  padding: kIsDesktop
-                      ? EdgeInsets.only(left: hideSidebar ? 70 : 0, top: 2)
-                      : null,
+                  padding: kIsDesktop ? EdgeInsets.only(left: hideSidebar ? 70 : 0, top: 2) : null,
                   child: kIsDesktop
                       ? wm.DragToMoveArea(
                           child: _buildToolbarContent(context),
@@ -262,31 +255,35 @@ class TopToolbar extends StatelessWidget {
             ],
           ),
         ),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width < 400 ? 30 : 120,
-              ),
-              child: UpgradeNotice(),
-            ),
-            if (ProviderManager.chatProvider.activeChat != null) ...[
-              Gap(size: 8),
-              InkIcon(
-                icon: CupertinoIcons.add,
-                onTap: () {
-                  ProviderManager.chatProvider.clearActiveChat();
-                },
-              ),
-            ],
-            if (kIsDesktop) ...[
-              const Gap(size: 8),
-              const WindowControls(),
-            ],
-            _buildMoreMenu(context),
-          ],
+        _buildDefaultToolbarActions(context),
+      ],
+    );
+  }
+
+  Widget _buildDefaultToolbarActions(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width < 400 ? 30 : 120,
+          ),
+          child: UpgradeNotice(),
         ),
+        if (ProviderManager.chatProvider.activeChat != null) ...[
+          Gap(size: 8),
+          InkIcon(
+            icon: CupertinoIcons.add,
+            onTap: () {
+              ProviderManager.chatProvider.clearActiveChat();
+            },
+          ),
+        ],
+        if (kIsWindows || kIsLinux) ...[
+          const Gap(size: 8),
+          const WindowControls(),
+        ],
+        _buildMoreMenu(context),
       ],
     );
   }

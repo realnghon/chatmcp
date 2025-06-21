@@ -630,6 +630,27 @@ class AppLocalizationsTr extends AppLocalizations {
   String get syncServerRunning => 'Senkronizasyon sunucusu çalışıyor';
 
   @override
+  String get maintenance => 'Bakım';
+
+  @override
+  String get cleanupLogs => 'Eski Günlükleri Temizle';
+
+  @override
+  String get cleanupLogsDescription => 'Günlük dosyalarını temizle';
+
+  @override
+  String get confirmCleanup => 'Temizlemeyi Onayla';
+
+  @override
+  String get confirmCleanupMessage => 'Günlük dosyalarını silmek istediğinize emin misiniz? Bu işlem geri alınamaz.';
+
+  @override
+  String get cleanupSuccess => 'Eski günlükler temizlendi';
+
+  @override
+  String get cleanupFailed => 'Temizleme başarısız';
+
+  @override
   String get syncServerStopped => 'Senkronizasyon sunucusu durduruldu';
 
   @override

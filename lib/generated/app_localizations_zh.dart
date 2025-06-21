@@ -624,6 +624,27 @@ class AppLocalizationsZh extends AppLocalizations {
   String get syncServerRunning => '同步服务器运行中';
 
   @override
+  String get maintenance => '维护';
+
+  @override
+  String get cleanupLogs => '清理旧日志';
+
+  @override
+  String get cleanupLogsDescription => '清理日志文件';
+
+  @override
+  String get confirmCleanup => '确认清理';
+
+  @override
+  String get confirmCleanupMessage => '确定要删除日志文件吗？此操作不可撤销。';
+
+  @override
+  String get cleanupSuccess => '旧日志清理完成';
+
+  @override
+  String get cleanupFailed => '清理失败';
+
+  @override
   String get syncServerStopped => '同步服务器已停止';
 
   @override

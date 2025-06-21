@@ -1275,6 +1275,48 @@ abstract class AppLocalizations {
   /// **'Sync server is running'**
   String get syncServerRunning;
 
+  /// No description provided for @maintenance.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance'**
+  String get maintenance;
+
+  /// No description provided for @cleanupLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleanup Old Logs'**
+  String get cleanupLogs;
+
+  /// No description provided for @cleanupLogsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleanup log files'**
+  String get cleanupLogsDescription;
+
+  /// No description provided for @confirmCleanup.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Cleanup'**
+  String get confirmCleanup;
+
+  /// No description provided for @confirmCleanupMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete log files? This action cannot be undone.'**
+  String get confirmCleanupMessage;
+
+  /// No description provided for @cleanupSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Old logs cleanup completed'**
+  String get cleanupSuccess;
+
+  /// No description provided for @cleanupFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleanup failed'**
+  String get cleanupFailed;
+
   /// No description provided for @syncServerStopped.
   ///
   /// In en, this message translates to:

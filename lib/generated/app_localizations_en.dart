@@ -631,6 +631,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get syncServerRunning => 'Sync server is running';
 
   @override
+  String get maintenance => 'Maintenance';
+
+  @override
+  String get cleanupLogs => 'Cleanup Old Logs';
+
+  @override
+  String get cleanupLogsDescription => 'Cleanup log files';
+
+  @override
+  String get confirmCleanup => 'Confirm Cleanup';
+
+  @override
+  String get confirmCleanupMessage => 'Are you sure you want to delete log files? This action cannot be undone.';
+
+  @override
+  String get cleanupSuccess => 'Old logs cleanup completed';
+
+  @override
+  String get cleanupFailed => 'Cleanup failed';
+
+  @override
   String get syncServerStopped => 'Sync server stopped';
 
   @override

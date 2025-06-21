@@ -10,4 +10,8 @@ class FileLogger {
   static void writeToFile(String message) {
     // Do nothing on the web.
   }
-} 
+
+  static Future<void> cleanupOldLogs({int days = 3}) async {
+    // Do nothing on the web.
+  }
+}

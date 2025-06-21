@@ -6,6 +6,7 @@ import '../../provider/settings_provider.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
 import 'package:chatmcp/utils/platform.dart';
 import 'package:chatmcp/utils/toast.dart';
+import 'package:chatmcp/file_logger.dart';
 
 import 'setting_switch.dart';
 
@@ -38,6 +39,7 @@ class _GeneralSettingsState extends State<GeneralSettings> {
                       _buildAvatarCard(context),
                       if (!kIsBrowser) _buildProxyCard(context),
                       _buildSystemPromptCard(context),
+                      if (!kIsBrowser) _buildMaintenanceCard(context),
                       const SizedBox(height: 20),
                     ],
                   ),
@@ -537,6 +539,71 @@ class _GeneralSettingsState extends State<GeneralSettings> {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildMaintenanceCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionTitle(context, l10n.maintenance, CupertinoIcons.wrench),
+        Card(
+          elevation: 0,
+          color: Theme.of(context).colorScheme.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(
+              color: Theme.of(context).colorScheme.outline.withAlpha(50),
+            ),
+          ),
+          child: ListTile(
+            leading: Icon(
+              CupertinoIcons.delete,
+              color: Theme.of(context).colorScheme.onSurface.withAlpha(200),
+            ),
+            title: CText(text: l10n.cleanupLogs),
+            subtitle: CText(text: l10n.cleanupLogsDescription),
+            trailing: Icon(
+              CupertinoIcons.chevron_right,
+              size: 16,
+              color: Theme.of(context).colorScheme.onSurface.withAlpha(50),
+            ),
+            onTap: () async {
+              final confirmed = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: CText(text: l10n.confirmCleanup),
+                  content: CText(text: l10n.confirmCleanupMessage),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: CText(text: l10n.cancel),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: CText(text: l10n.confirm),
+                    ),
+                  ],
+                ),
+              );
+
+              if (confirmed == true) {
+                try {
+                  await FileLogger.cleanupOldLogs(days: 0);
+                  if (mounted) {
+                    ToastUtils.success(l10n.cleanupSuccess);
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ToastUtils.error('${l10n.cleanupFailed}: $e');
+                  }
+                }
+              }
+            },
+          ),
+        ),
+      ],
     );
   }
 }

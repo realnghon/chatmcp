@@ -2,7 +2,6 @@ import 'package:chatmcp/components/widgets/base.dart';
 import 'package:chatmcp/widgets/ink_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart' as wm;
-import 'package:chatmcp/utils/platform.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
 
 class WindowControls extends StatelessWidget {
@@ -10,11 +9,6 @@ class WindowControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 只在Linux和Windows平台显示
-    if (!kIsLinux && !kIsWindows) {
-      return const SizedBox.shrink();
-    }
-
     final l10n = AppLocalizations.of(context)!;
 
     return Row(
@@ -79,9 +73,7 @@ class _WindowButtonState extends State<_WindowButton> {
 
     Color backgroundColor = Colors.transparent;
 
-    backgroundColor = widget.isCloseButton
-        ? Colors.red
-        : (isDark ? Colors.white24 : Colors.black12);
+    backgroundColor = widget.isCloseButton ? Colors.red : (isDark ? Colors.white24 : Colors.black12);
 
     return InkIcon(
       icon: widget.icon,

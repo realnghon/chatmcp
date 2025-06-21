@@ -6,7 +6,7 @@ import 'package:logging/logging.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' as http;
 import 'package:chatmcp/utils/platform.dart';
-import 'package:chatmcp/utils/io_utils.dart';
+import 'package:chatmcp/utils/storage_manager.dart';
 import '../mcp/client/mcp_client_interface.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -32,9 +32,9 @@ var defaultInMemoryServers = [
 class McpServerProvider extends ChangeNotifier {
   static final McpServerProvider _instance = McpServerProvider._internal();
   factory McpServerProvider() => _instance;
-  
+
   bool _isInitialized = false;
-  
+
   McpServerProvider._internal() {
     _initialize();
   }
@@ -53,8 +53,8 @@ class McpServerProvider extends ChangeNotifier {
   // Get configuration file path
   Future<String> get _configFilePath async {
     if (kIsWeb) return '';
-    final directory = await getAppDir('ChatMcp');
-    return '${directory.path}/$_configFileName';
+    final directoryPath = await StorageManager.getAppDataDirectory();
+    return '$directoryPath/$_configFileName';
   }
 
   // Check and create initial configuration file
@@ -65,8 +65,7 @@ class McpServerProvider extends ChangeNotifier {
 
     if (!await file.exists()) {
       // Load default configuration from assets
-      final defaultConfig =
-          await rootBundle.loadString('assets/mcp_server.json');
+      final defaultConfig = await rootBundle.loadString('assets/mcp_server.json');
       // Write default configuration to file
       await file.writeAsString(defaultConfig);
       Logger.root.info('Default configuration file initialized from assets');
@@ -109,8 +108,7 @@ class McpServerProvider extends ChangeNotifier {
 
       // Check if contents are empty before attempting to decode
       if (contents.trim().isEmpty) {
-        Logger.root.warning(
-            'Configuration file ($configPath) is empty. Returning default configuration.');
+        Logger.root.warning('Configuration file ($configPath) is empty. Returning default configuration.');
         return {'mcpServers': <String, dynamic>{}};
       }
 
@@ -126,28 +124,21 @@ class McpServerProvider extends ChangeNotifier {
     } on FormatException catch (e, stackTrace) {
       // Catch specific exception
       final configPath = await _configFilePath;
-      Logger.root.severe(
-          'Failed to parse configuration file ($configPath): $e, stackTrace: $stackTrace');
+      Logger.root.severe('Failed to parse configuration file ($configPath): $e, stackTrace: $stackTrace');
       // Log the problematic content if possible and file is not null
       if (file != null) {
         try {
-          final String errorContents = await file
-              .readAsString(); // Read again or use already read contents if file was assigned earlier
-          Logger.root.severe(
-              'Problematic configuration file content: "$errorContents"');
+          final String errorContents = await file.readAsString(); // Read again or use already read contents if file was assigned earlier
+          Logger.root.severe('Problematic configuration file content: "$errorContents"');
         } catch (readError) {
-          Logger.root.severe(
-              'Could not read configuration file content after format error: $readError');
+          Logger.root.severe('Could not read configuration file content after format error: $readError');
         }
       }
-      return {
-        'mcpServers': <String, dynamic>{}
-      }; // Return default on format error
+      return {'mcpServers': <String, dynamic>{}}; // Return default on format error
     } catch (e, stackTrace) {
       // Catch other potential errors
       final configPath = await _configFilePath;
-      Logger.root.severe(
-          'Failed to read configuration file ($configPath): $e, stackTrace: $stackTrace');
+      Logger.root.severe('Failed to read configuration file ($configPath): $e, stackTrace: $stackTrace');
       return {'mcpServers': <String, dynamic>{}};
     }
   }
@@ -160,8 +151,7 @@ class McpServerProvider extends ChangeNotifier {
   Future<Map<String, dynamic>> loadServers() async {
     final allServerConfig = await _loadServers();
     final serverConfig = allServerConfig['mcpServers'] as Map<String, dynamic>;
-    final servers = Map.fromEntries(serverConfig.entries
-        .where((entry) => entry.value['type'] != 'inmemory'));
+    final servers = Map.fromEntries(serverConfig.entries.where((entry) => entry.value['type'] != 'inmemory'));
     return {
       'mcpServers': servers,
     };
@@ -186,8 +176,7 @@ class McpServerProvider extends ChangeNotifier {
     }
 
     // 过滤得到所有内存类型服务器
-    final servers = Map.fromEntries(serverConfig.entries
-        .where((entry) => entry.value['type'] == 'inmemory'));
+    final servers = Map.fromEntries(serverConfig.entries.where((entry) => entry.value['type'] == 'inmemory'));
 
     return {
       'mcpServers': servers,
@@ -223,14 +212,12 @@ class McpServerProvider extends ChangeNotifier {
     }
     try {
       final file = File(await _configFilePath);
-      final prettyContents =
-          const JsonEncoder.withIndent('  ').convert(servers);
+      final prettyContents = const JsonEncoder.withIndent('  ').convert(servers);
       await file.writeAsString(prettyContents);
       // Reinitialize clients after saving
       await _reinitializeClients();
     } catch (e, stackTrace) {
-      Logger.root.severe(
-          'Failed to save configuration file: $e, stackTrace: $stackTrace');
+      Logger.root.severe('Failed to save configuration file: $e, stackTrace: $stackTrace');
     }
   }
 
@@ -278,8 +265,7 @@ class McpServerProvider extends ChangeNotifier {
 
   bool loadingServerTools = false;
 
-  Future<List<Map<String, dynamic>>> getServerTools(
-      String serverName, McpClient client) async {
+  Future<List<Map<String, dynamic>>> getServerTools(String serverName, McpClient client) async {
     final tools = <Map<String, dynamic>>[];
     final response = await client.sendToolList();
     final toolsList = response.toJson()['result']['tools'] as List<dynamic>;
@@ -293,7 +279,7 @@ class McpServerProvider extends ChangeNotifier {
       _isInitialized = true;
       return;
     }
-    
+
     try {
       await _initConfigFile();
       _isInitialized = true;
@@ -379,14 +365,12 @@ class McpServerProvider extends ChangeNotifier {
     return client;
   }
 
-  Future<Map<String, McpClient>> initializeAllMcpServers(
-      String configPath, List<String> ignoreServers) async {
+  Future<Map<String, McpClient>> initializeAllMcpServers(String configPath, List<String> ignoreServers) async {
     if (kIsWeb) return {};
     final file = File(configPath);
     final contents = await file.readAsString();
 
-    final Map<String, dynamic> config =
-        json.decode(contents) as Map<String, dynamic>? ?? {};
+    final Map<String, dynamic> config = json.decode(contents) as Map<String, dynamic>? ?? {};
 
     final mcpServers = config['mcpServers'] as Map<String, dynamic>;
 
@@ -413,35 +397,30 @@ class McpServerProvider extends ChangeNotifier {
           notifyListeners();
         }
       } catch (e, stackTrace) {
-        Logger.root.severe(
-            'Failed to initialize MCP server: $serverName, $e, stackTrace: $stackTrace');
+        Logger.root.severe('Failed to initialize MCP server: $serverName, $e, stackTrace: $stackTrace');
       }
     }
 
     return clients;
   }
 
-  String mcpServerMarket =
-      "https://raw.githubusercontent.com/daodao97/chatmcp/refs/heads/main/assets/mcp_server_market.json";
+  String mcpServerMarket = "https://raw.githubusercontent.com/daodao97/chatmcp/refs/heads/main/assets/mcp_server_market.json";
 
   Future<Map<String, dynamic>> loadMarketServers() async {
     try {
       final response = await http.get(Uri.parse(mcpServerMarket));
       if (response.statusCode == 200) {
-        Logger.root
-            .info('Successfully loaded market servers: ${response.body}');
+        Logger.root.info('Successfully loaded market servers: ${response.body}');
         final Map<String, dynamic> jsonData = json.decode(response.body);
 
-        final Map<String, dynamic> servers =
-            jsonData['mcpServers'] as Map<String, dynamic>;
+        final Map<String, dynamic> servers = jsonData['mcpServers'] as Map<String, dynamic>;
 
         var sseServers = <String, dynamic>{};
 
         // For mobile platforms, only keep servers with commands starting with http
         if (kIsMobile) {
           for (var server in servers.entries) {
-            if (server.value['command'] != null &&
-                server.value['command'].toString().startsWith('http')) {
+            if (server.value['command'] != null && server.value['command'].toString().startsWith('http')) {
               sseServers[server.key] = server.value;
             }
           }
@@ -466,8 +445,7 @@ class McpServerProvider extends ChangeNotifier {
       }
       throw Exception('Failed to load market servers: ${response.statusCode}');
     } catch (e, stackTrace) {
-      Logger.root
-          .severe('Failed to load market servers: $e, stackTrace: $stackTrace');
+      Logger.root.severe('Failed to load market servers: $e, stackTrace: $stackTrace');
       throw Exception('Failed to load market servers: $e');
     }
   }
