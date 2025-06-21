@@ -47,7 +47,7 @@ clear explanations, interactive diagrams, and even allows for real-time Q&A with
 
 ChatMCP applications can sync data within the same local area network
 
-![Data sync](./docs/data-sync.webp)
+![Data sync](./docs/preview/data-sync.webp)
 
 ## Usage
 
