@@ -616,4 +616,208 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get saved => '已保存';
+
+  @override
+  String get dataSync => '数据同步：';
+
+  @override
+  String get syncServerRunning => '同步服务器运行中';
+
+  @override
+  String get syncServerStopped => '同步服务器已停止';
+
+  @override
+  String get scanQRToConnect => '其他设备扫描此二维码连接：';
+
+  @override
+  String get addressCopied => '地址已复制到剪贴板';
+
+  @override
+  String get otherDevicesCanScan => '其他设备可以扫描此二维码快速连接';
+
+  @override
+  String get startServer => '启动服务器';
+
+  @override
+  String get stopServer => '停止服务器';
+
+  @override
+  String get connectToOtherDevices => '连接到其他设备';
+
+  @override
+  String get scanQRCode => '扫描二维码连接';
+
+  @override
+  String get connectionHistory => '连接历史：';
+
+  @override
+  String get connect => '连接';
+
+  @override
+  String get manualInputAddress => '或手动输入服务器地址：';
+
+  @override
+  String get serverAddress => '服务器地址';
+
+  @override
+  String get syncFromServer => '从服务器同步';
+
+  @override
+  String get pushToServer => '推送到服务器';
+
+  @override
+  String get usageInstructions => '使用说明';
+
+  @override
+  String get desktopAsServer => '桌面端作为服务器：';
+
+  @override
+  String get desktopStep1 => '1. 点击\"启动服务器\"按钮';
+
+  @override
+  String get desktopStep2 => '2. 显示二维码给手机扫描';
+
+  @override
+  String get desktopStep3 => '3. 手机扫码后可进行数据同步';
+
+  @override
+  String get mobileConnect => '手机端连接：';
+
+  @override
+  String get mobileStep1 => '1. 点击\"扫描二维码连接\"';
+
+  @override
+  String get mobileStep2 => '2. 扫描桌面端显示的二维码';
+
+  @override
+  String get mobileStep3 => '3. 选择同步方向（上传/下载）';
+
+  @override
+  String get uploadDescription => '• 上传：将本设备数据推送到服务器';
+
+  @override
+  String get downloadDescription => '• 下载：从服务器获取数据到本设备';
+
+  @override
+  String get syncContent => '• 同步内容：聊天记录、设置、MCP配置';
+
+  @override
+  String get syncServerStarted => '同步服务器已启动';
+
+  @override
+  String get syncServerStartFailed => '启动服务器失败';
+
+  @override
+  String get syncServerStopFailed => '停止服务器失败';
+
+  @override
+  String get scanQRCodeTitle => '扫描二维码';
+
+  @override
+  String get flashOn => '开启闪光灯';
+
+  @override
+  String get flashOff => '关闭闪光灯';
+
+  @override
+  String get aimQRCode => '将二维码对准扫描框';
+
+  @override
+  String get scanSyncQRCode => '扫描桌面端显示的同步二维码';
+
+  @override
+  String get manualInputAddressButton => '手动输入地址';
+
+  @override
+  String get manualInputServerAddress => '手动输入服务器地址';
+
+  @override
+  String get enterValidServerAddress => '请输入有效的服务器地址';
+
+  @override
+  String scanSuccessConnectTo(Object deviceName) {
+    return '扫描成功，连接到: $deviceName';
+  }
+
+  @override
+  String get scanSuccessAddressFilled => '扫描成功，已填入服务器地址';
+
+  @override
+  String get scannerOpenFailed => '打开扫码器失败';
+
+  @override
+  String get pleaseInputServerAddress => '请先扫码或输入服务器地址';
+
+  @override
+  String get connectingToServer => '正在连接服务器...';
+
+  @override
+  String get downloadingData => '正在下载数据...';
+
+  @override
+  String get importingData => '正在导入数据...';
+
+  @override
+  String get reinitializingData => '正在重新初始化应用数据...';
+
+  @override
+  String get dataSyncSuccess => '数据同步成功';
+
+  @override
+  String get preparingData => '正在准备数据...';
+
+  @override
+  String get uploadingData => '正在上传数据...';
+
+  @override
+  String get dataPushSuccess => '数据推送成功';
+
+  @override
+  String get syncFailed => '同步失败';
+
+  @override
+  String get pushFailed => '推送失败';
+
+  @override
+  String get justNow => '刚刚';
+
+  @override
+  String minutesAgo(Object minutes) {
+    return '$minutes分钟前';
+  }
+
+  @override
+  String hoursAgo(Object hours) {
+    return '$hours小时前';
+  }
+
+  @override
+  String daysAgo(Object days) {
+    return '$days天前';
+  }
+
+  @override
+  String serverSelected(Object deviceName) {
+    return '已选择服务器: $deviceName';
+  }
+
+  @override
+  String get connectionRecordDeleted => '已删除连接记录';
+
+  @override
+  String viewAllConnections(Object count) {
+    return '查看全部 $count 个连接';
+  }
+
+  @override
+  String get clearAllHistory => '清空所有';
+
+  @override
+  String get clearAllConnectionHistory => '已清空所有连接历史';
+
+  @override
+  String get unknownDevice => '未知设备';
+
+  @override
+  String get unknownPlatform => '未知平台';
 }

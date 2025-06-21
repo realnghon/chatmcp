@@ -623,4 +623,208 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saved => 'Saved';
+
+  @override
+  String get dataSync => 'Data Sync';
+
+  @override
+  String get syncServerRunning => 'Sync server is running';
+
+  @override
+  String get syncServerStopped => 'Sync server stopped';
+
+  @override
+  String get scanQRToConnect => 'Other devices scan this QR code to connect:';
+
+  @override
+  String get addressCopied => 'Address copied to clipboard';
+
+  @override
+  String get otherDevicesCanScan => 'Other devices can scan this QR code to connect quickly';
+
+  @override
+  String get startServer => 'Start Server';
+
+  @override
+  String get stopServer => 'Stop Server';
+
+  @override
+  String get connectToOtherDevices => 'Connect to Other Devices';
+
+  @override
+  String get scanQRCode => 'Scan QR Code to Connect';
+
+  @override
+  String get connectionHistory => 'Connection History:';
+
+  @override
+  String get connect => 'Connect';
+
+  @override
+  String get manualInputAddress => 'Or manually enter server address:';
+
+  @override
+  String get serverAddress => 'Server Address';
+
+  @override
+  String get syncFromServer => 'Sync from Server';
+
+  @override
+  String get pushToServer => 'Push to Server';
+
+  @override
+  String get usageInstructions => 'Usage Instructions';
+
+  @override
+  String get desktopAsServer => 'Desktop as Server:';
+
+  @override
+  String get desktopStep1 => '1. Click \"Start Server\" button';
+
+  @override
+  String get desktopStep2 => '2. Show QR code for mobile to scan';
+
+  @override
+  String get desktopStep3 => '3. Mobile can sync data after scanning';
+
+  @override
+  String get mobileConnect => 'Mobile Connection:';
+
+  @override
+  String get mobileStep1 => '1. Click \"Scan QR Code to Connect\"';
+
+  @override
+  String get mobileStep2 => '2. Scan the QR code displayed on desktop';
+
+  @override
+  String get mobileStep3 => '3. Choose sync direction (upload/download)';
+
+  @override
+  String get uploadDescription => '• Upload: Push local device data to server';
+
+  @override
+  String get downloadDescription => '• Download: Get data from server to local device';
+
+  @override
+  String get syncContent => '• Sync Content: Chat history, settings, MCP configs';
+
+  @override
+  String get syncServerStarted => 'Sync server started';
+
+  @override
+  String get syncServerStartFailed => 'Failed to start server';
+
+  @override
+  String get syncServerStopFailed => 'Failed to stop server';
+
+  @override
+  String get scanQRCodeTitle => 'Scan QR Code';
+
+  @override
+  String get flashOn => 'Flash On';
+
+  @override
+  String get flashOff => 'Flash Off';
+
+  @override
+  String get aimQRCode => 'Aim the QR code at the scanning frame';
+
+  @override
+  String get scanSyncQRCode => 'Scan the sync QR code displayed on desktop';
+
+  @override
+  String get manualInputAddressButton => 'Manual Input Address';
+
+  @override
+  String get manualInputServerAddress => 'Manually Input Server Address';
+
+  @override
+  String get enterValidServerAddress => 'Please enter a valid server address';
+
+  @override
+  String scanSuccessConnectTo(Object deviceName) {
+    return 'Scan successful, connected to: $deviceName';
+  }
+
+  @override
+  String get scanSuccessAddressFilled => 'Scan successful, server address filled';
+
+  @override
+  String get scannerOpenFailed => 'Failed to open scanner';
+
+  @override
+  String get pleaseInputServerAddress => 'Please scan QR code or input server address first';
+
+  @override
+  String get connectingToServer => 'Connecting to server...';
+
+  @override
+  String get downloadingData => 'Downloading data...';
+
+  @override
+  String get importingData => 'Importing data...';
+
+  @override
+  String get reinitializingData => 'Reinitializing app data...';
+
+  @override
+  String get dataSyncSuccess => 'Data sync successful';
+
+  @override
+  String get preparingData => 'Preparing data...';
+
+  @override
+  String get uploadingData => 'Uploading data...';
+
+  @override
+  String get dataPushSuccess => 'Data push successful';
+
+  @override
+  String get syncFailed => 'Sync failed';
+
+  @override
+  String get pushFailed => 'Push failed';
+
+  @override
+  String get justNow => 'Just now';
+
+  @override
+  String minutesAgo(Object minutes) {
+    return '$minutes minutes ago';
+  }
+
+  @override
+  String hoursAgo(Object hours) {
+    return '$hours hours ago';
+  }
+
+  @override
+  String daysAgo(Object days) {
+    return '$days days ago';
+  }
+
+  @override
+  String serverSelected(Object deviceName) {
+    return 'Server selected: $deviceName';
+  }
+
+  @override
+  String get connectionRecordDeleted => 'Connection record deleted';
+
+  @override
+  String viewAllConnections(Object count) {
+    return 'View all $count connections';
+  }
+
+  @override
+  String get clearAllHistory => 'Clear All';
+
+  @override
+  String get clearAllConnectionHistory => 'All connection history cleared';
+
+  @override
+  String get unknownDevice => 'Unknown Device';
+
+  @override
+  String get unknownPlatform => 'Unknown Platform';
 }

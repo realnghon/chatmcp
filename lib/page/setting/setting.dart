@@ -1,9 +1,11 @@
+import 'package:chatmcp/utils/platform.dart';
 import 'package:flutter/material.dart';
 import 'llm_setting.dart';
 import 'mcp_server.dart';
 import 'general_setting.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
+import 'network_sync_setting.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -16,18 +18,10 @@ class _SettingPageState extends State<SettingPage> {
   List<SettingTab> _getTabs(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return [
-      SettingTab(
-          title: l10n.general,
-          icon: CupertinoIcons.settings,
-          content: GeneralSettings()),
-      SettingTab(
-          title: l10n.providers,
-          icon: CupertinoIcons.cube,
-          content: KeysSettings()),
-      SettingTab(
-          title: l10n.mcpServer,
-          icon: CupertinoIcons.hammer,
-          content: McpServer()),
+      SettingTab(title: l10n.general, icon: CupertinoIcons.settings, content: GeneralSettings()),
+      SettingTab(title: l10n.providers, icon: CupertinoIcons.cube, content: KeysSettings()),
+      SettingTab(title: l10n.mcpServer, icon: CupertinoIcons.hammer, content: McpServer()),
+      if (!kIsBrowser) SettingTab(title: l10n.dataSync, icon: CupertinoIcons.cloud_download, content: NetworkSyncSetting()),
     ];
   }
 
@@ -43,7 +37,7 @@ class _SettingPageState extends State<SettingPage> {
           bottom: TabBar(
             indicatorSize: TabBarIndicatorSize.tab,
             indicatorWeight: 5,
-            labelStyle: const TextStyle(fontSize: 12),
+            labelStyle: TextStyle(fontSize: kIsMobile ? 10 : 16),
             tabs: tabs
                 .map((tab) => Tab(
                       icon: Icon(tab.icon),

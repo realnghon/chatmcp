@@ -621,5 +621,209 @@ class AppLocalizationsTr extends AppLocalizations {
   String get proxyPortInvalid => 'Proxy portu 1-65535 arasında olmalıdır';
 
   @override
-  String get saved => 'Saved';
+  String get saved => 'Kaydedildi';
+
+  @override
+  String get dataSync => 'Veri Senkronizasyonu:';
+
+  @override
+  String get syncServerRunning => 'Senkronizasyon sunucusu çalışıyor';
+
+  @override
+  String get syncServerStopped => 'Senkronizasyon sunucusu durduruldu';
+
+  @override
+  String get scanQRToConnect => 'Diğer cihazlar bağlanmak için bu QR kodu tarayabilir:';
+
+  @override
+  String get addressCopied => 'Adres panoya kopyalandı';
+
+  @override
+  String get otherDevicesCanScan => 'Diğer cihazlar hızlı bağlantı için bu QR kodu tarayabilir';
+
+  @override
+  String get startServer => 'Sunucuyu Başlat';
+
+  @override
+  String get stopServer => 'Sunucuyu Durdur';
+
+  @override
+  String get connectToOtherDevices => 'Diğer Cihazlara Bağlan';
+
+  @override
+  String get scanQRCode => 'QR Kod Tarayarak Bağlan';
+
+  @override
+  String get connectionHistory => 'Bağlantı Geçmişi:';
+
+  @override
+  String get connect => 'Bağlan';
+
+  @override
+  String get manualInputAddress => 'Veya sunucu adresini manuel olarak girin:';
+
+  @override
+  String get serverAddress => 'Sunucu Adresi';
+
+  @override
+  String get syncFromServer => 'Sunucudan Senkronize Et';
+
+  @override
+  String get pushToServer => 'Sunucuya Gönder';
+
+  @override
+  String get usageInstructions => 'Kullanım Talimatları';
+
+  @override
+  String get desktopAsServer => 'Masaüstü Sunucu Olarak:';
+
+  @override
+  String get desktopStep1 => '1. \"Sunucuyu Başlat\" düğmesine tıklayın';
+
+  @override
+  String get desktopStep2 => '2. Mobil cihazın taraması için QR kodu gösterin';
+
+  @override
+  String get desktopStep3 => '3. Mobil cihaz tarama sonrası veri senkronizasyonu yapabilir';
+
+  @override
+  String get mobileConnect => 'Mobil Bağlantı:';
+
+  @override
+  String get mobileStep1 => '1. \"QR Kod Tarayarak Bağlan\" düğmesine tıklayın';
+
+  @override
+  String get mobileStep2 => '2. Masaüstünde gösterilen QR kodu tarayın';
+
+  @override
+  String get mobileStep3 => '3. Senkronizasyon yönünü seçin (yükleme/indirme)';
+
+  @override
+  String get uploadDescription => '• Yükleme: Yerel cihaz verilerini sunucuya gönder';
+
+  @override
+  String get downloadDescription => '• İndirme: Sunucudan yerel cihaza veri al';
+
+  @override
+  String get syncContent => '• Senkronizasyon İçeriği: Sohbet geçmişi, ayarlar, MCP yapılandırmaları';
+
+  @override
+  String get syncServerStarted => 'Senkronizasyon sunucusu başlatıldı';
+
+  @override
+  String get syncServerStartFailed => 'Sunucu başlatılamadı';
+
+  @override
+  String get syncServerStopFailed => 'Sunucu durdurulamadı';
+
+  @override
+  String get scanQRCodeTitle => 'QR Kod Tarama';
+
+  @override
+  String get flashOn => 'Flaş Açık';
+
+  @override
+  String get flashOff => 'Flaş Kapalı';
+
+  @override
+  String get aimQRCode => 'QR kodu tarama çerçevesine hizalayın';
+
+  @override
+  String get scanSyncQRCode => 'Masaüstünde gösterilen senkronizasyon QR kodunu tarayın';
+
+  @override
+  String get manualInputAddressButton => 'Manuel Adres Girişi';
+
+  @override
+  String get manualInputServerAddress => 'Sunucu Adresini Manuel Olarak Girin';
+
+  @override
+  String get enterValidServerAddress => 'Lütfen geçerli bir sunucu adresi girin';
+
+  @override
+  String scanSuccessConnectTo(Object deviceName) {
+    return 'Tarama başarılı, bağlanıldı: $deviceName';
+  }
+
+  @override
+  String get scanSuccessAddressFilled => 'Tarama başarılı, sunucu adresi dolduruldu';
+
+  @override
+  String get scannerOpenFailed => 'Tarayıcı açılamadı';
+
+  @override
+  String get pleaseInputServerAddress => 'Lütfen önce QR kodu tarayın veya sunucu adresi girin';
+
+  @override
+  String get connectingToServer => 'Sunucuya bağlanıyor...';
+
+  @override
+  String get downloadingData => 'Veri indiriliyor...';
+
+  @override
+  String get importingData => 'Veri içe aktarılıyor...';
+
+  @override
+  String get reinitializingData => 'Uygulama verileri yeniden başlatılıyor...';
+
+  @override
+  String get dataSyncSuccess => 'Veri senkronizasyonu başarılı';
+
+  @override
+  String get preparingData => 'Veri hazırlanıyor...';
+
+  @override
+  String get uploadingData => 'Veri yükleniyor...';
+
+  @override
+  String get dataPushSuccess => 'Veri gönderimi başarılı';
+
+  @override
+  String get syncFailed => 'Senkronizasyon başarısız';
+
+  @override
+  String get pushFailed => 'Gönderim başarısız';
+
+  @override
+  String get justNow => 'Az önce';
+
+  @override
+  String minutesAgo(Object minutes) {
+    return '$minutes dakika önce';
+  }
+
+  @override
+  String hoursAgo(Object hours) {
+    return '$hours saat önce';
+  }
+
+  @override
+  String daysAgo(Object days) {
+    return '$days gün önce';
+  }
+
+  @override
+  String serverSelected(Object deviceName) {
+    return 'Sunucu seçildi: $deviceName';
+  }
+
+  @override
+  String get connectionRecordDeleted => 'Bağlantı kaydı silindi';
+
+  @override
+  String viewAllConnections(Object count) {
+    return 'Tüm $count bağlantıyı görüntüle';
+  }
+
+  @override
+  String get clearAllHistory => 'Tümünü Temizle';
+
+  @override
+  String get clearAllConnectionHistory => 'Tüm bağlantı geçmişi temizlendi';
+
+  @override
+  String get unknownDevice => 'Bilinmeyen Cihaz';
+
+  @override
+  String get unknownPlatform => 'Bilinmeyen Platform';
 }

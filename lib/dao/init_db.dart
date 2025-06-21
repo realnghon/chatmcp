@@ -18,7 +18,7 @@ import 'package:flutter/foundation.dart';
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
   static const List<String> requiredTables = ['chat', 'chat_message'];
-  static const int currentVersion = 2;
+  static const int currentVersion = 3;
 
   DatabaseHelper._init();
 
@@ -169,7 +169,7 @@ class CommandScriptV1 extends CommandScript {
       CREATE TABLE IF NOT EXISTS chat(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT,
-        modelTEXT,
+        model TEXT,
         createdAt datetime,
         updatedAt datetime
       )
@@ -190,6 +190,70 @@ class CommandScriptV1 extends CommandScript {
   }
 }
 
+/// Database migration for v2 (placeholder for future changes)
+class CommandScriptV2 extends CommandScript {
+  @override
+  Future<void> execute(Batch batch) async {
+    Logger.root.info('Applying database migration v2 (placeholder)');
+    // Placeholder for future migrations
+  }
+}
+
+/// Database migration for v3 - Fix model column issue
+class CommandScriptV3 extends CommandScript {
+  @override
+  Future<void> execute(Batch batch) async {
+    Logger.root.info('Applying database migration v3 - fixing model column');
+
+    // Use a completely different approach that's safer
+    // Instead of trying to detect columns, we'll backup, recreate, and restore
+
+    // Step 1: Create backup table with only columns we know exist
+    batch.execute('''
+      CREATE TABLE IF NOT EXISTS chat_backup(
+        id INTEGER PRIMARY KEY,
+        title TEXT,
+        createdAt datetime,
+        updatedAt datetime
+      )
+    ''');
+
+    // Step 2: Backup existing data (only safe columns)
+    batch.execute('''
+      INSERT OR IGNORE INTO chat_backup (id, title, createdAt, updatedAt)
+      SELECT id, title, createdAt, updatedAt 
+      FROM chat 
+      WHERE id IS NOT NULL
+    ''');
+
+    // Step 3: Drop the existing table
+    batch.execute('DROP TABLE IF EXISTS chat');
+
+    // Step 4: Create new table with correct schema
+    batch.execute('''
+      CREATE TABLE chat(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT,
+        model TEXT,
+        createdAt datetime,
+        updatedAt datetime
+      )
+    ''');
+
+    // Step 5: Restore data from backup (model will be NULL)
+    batch.execute('''
+      INSERT INTO chat (id, title, model, createdAt, updatedAt)
+      SELECT id, title, NULL as model, createdAt, updatedAt 
+      FROM chat_backup
+    ''');
+
+    // Step 6: Clean up backup table
+    batch.execute('DROP TABLE IF EXISTS chat_backup');
+
+    Logger.root.info('Database migration v3 completed successfully');
+  }
+}
+
 /// Management class to organize multiple version migration scripts
 class DatabaseSchemaManager {
   /// Map versions to corresponding CommandScript
@@ -198,6 +262,8 @@ class DatabaseSchemaManager {
   DatabaseSchemaManager() {
     Logger.root.info('Initializing database schema manager');
     _commands[1] = CommandScriptV1();
+    _commands[2] = CommandScriptV2();
+    _commands[3] = CommandScriptV3();
   }
 
   /// On database creation: create tables (version=1)

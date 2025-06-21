@@ -1262,6 +1262,390 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Saved'**
   String get saved;
+
+  /// No description provided for @dataSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Data Sync'**
+  String get dataSync;
+
+  /// No description provided for @syncServerRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync server is running'**
+  String get syncServerRunning;
+
+  /// No description provided for @syncServerStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync server stopped'**
+  String get syncServerStopped;
+
+  /// No description provided for @scanQRToConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Other devices scan this QR code to connect:'**
+  String get scanQRToConnect;
+
+  /// No description provided for @addressCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Address copied to clipboard'**
+  String get addressCopied;
+
+  /// No description provided for @otherDevicesCanScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Other devices can scan this QR code to connect quickly'**
+  String get otherDevicesCanScan;
+
+  /// No description provided for @startServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Server'**
+  String get startServer;
+
+  /// No description provided for @stopServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop Server'**
+  String get stopServer;
+
+  /// No description provided for @connectToOtherDevices.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to Other Devices'**
+  String get connectToOtherDevices;
+
+  /// No description provided for @scanQRCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan QR Code to Connect'**
+  String get scanQRCode;
+
+  /// No description provided for @connectionHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection History:'**
+  String get connectionHistory;
+
+  /// No description provided for @connect.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect'**
+  String get connect;
+
+  /// No description provided for @manualInputAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Or manually enter server address:'**
+  String get manualInputAddress;
+
+  /// No description provided for @serverAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Server Address'**
+  String get serverAddress;
+
+  /// No description provided for @syncFromServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync from Server'**
+  String get syncFromServer;
+
+  /// No description provided for @pushToServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Push to Server'**
+  String get pushToServer;
+
+  /// No description provided for @usageInstructions.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage Instructions'**
+  String get usageInstructions;
+
+  /// No description provided for @desktopAsServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Desktop as Server:'**
+  String get desktopAsServer;
+
+  /// No description provided for @desktopStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Click \"Start Server\" button'**
+  String get desktopStep1;
+
+  /// No description provided for @desktopStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'2. Show QR code for mobile to scan'**
+  String get desktopStep2;
+
+  /// No description provided for @desktopStep3.
+  ///
+  /// In en, this message translates to:
+  /// **'3. Mobile can sync data after scanning'**
+  String get desktopStep3;
+
+  /// No description provided for @mobileConnect.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile Connection:'**
+  String get mobileConnect;
+
+  /// No description provided for @mobileStep1.
+  ///
+  /// In en, this message translates to:
+  /// **'1. Click \"Scan QR Code to Connect\"'**
+  String get mobileStep1;
+
+  /// No description provided for @mobileStep2.
+  ///
+  /// In en, this message translates to:
+  /// **'2. Scan the QR code displayed on desktop'**
+  String get mobileStep2;
+
+  /// No description provided for @mobileStep3.
+  ///
+  /// In en, this message translates to:
+  /// **'3. Choose sync direction (upload/download)'**
+  String get mobileStep3;
+
+  /// No description provided for @uploadDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'• Upload: Push local device data to server'**
+  String get uploadDescription;
+
+  /// No description provided for @downloadDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'• Download: Get data from server to local device'**
+  String get downloadDescription;
+
+  /// No description provided for @syncContent.
+  ///
+  /// In en, this message translates to:
+  /// **'• Sync Content: Chat history, settings, MCP configs'**
+  String get syncContent;
+
+  /// No description provided for @syncServerStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync server started'**
+  String get syncServerStarted;
+
+  /// No description provided for @syncServerStartFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to start server'**
+  String get syncServerStartFailed;
+
+  /// No description provided for @syncServerStopFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to stop server'**
+  String get syncServerStopFailed;
+
+  /// No description provided for @scanQRCodeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan QR Code'**
+  String get scanQRCodeTitle;
+
+  /// No description provided for @flashOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Flash On'**
+  String get flashOn;
+
+  /// No description provided for @flashOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Flash Off'**
+  String get flashOff;
+
+  /// No description provided for @aimQRCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Aim the QR code at the scanning frame'**
+  String get aimQRCode;
+
+  /// No description provided for @scanSyncQRCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan the sync QR code displayed on desktop'**
+  String get scanSyncQRCode;
+
+  /// No description provided for @manualInputAddressButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual Input Address'**
+  String get manualInputAddressButton;
+
+  /// No description provided for @manualInputServerAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Manually Input Server Address'**
+  String get manualInputServerAddress;
+
+  /// No description provided for @enterValidServerAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid server address'**
+  String get enterValidServerAddress;
+
+  /// No description provided for @scanSuccessConnectTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan successful, connected to: {deviceName}'**
+  String scanSuccessConnectTo(Object deviceName);
+
+  /// No description provided for @scanSuccessAddressFilled.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan successful, server address filled'**
+  String get scanSuccessAddressFilled;
+
+  /// No description provided for @scannerOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to open scanner'**
+  String get scannerOpenFailed;
+
+  /// No description provided for @pleaseInputServerAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Please scan QR code or input server address first'**
+  String get pleaseInputServerAddress;
+
+  /// No description provided for @connectingToServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting to server...'**
+  String get connectingToServer;
+
+  /// No description provided for @downloadingData.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading data...'**
+  String get downloadingData;
+
+  /// No description provided for @importingData.
+  ///
+  /// In en, this message translates to:
+  /// **'Importing data...'**
+  String get importingData;
+
+  /// No description provided for @reinitializingData.
+  ///
+  /// In en, this message translates to:
+  /// **'Reinitializing app data...'**
+  String get reinitializingData;
+
+  /// No description provided for @dataSyncSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Data sync successful'**
+  String get dataSyncSuccess;
+
+  /// No description provided for @preparingData.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing data...'**
+  String get preparingData;
+
+  /// No description provided for @uploadingData.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading data...'**
+  String get uploadingData;
+
+  /// No description provided for @dataPushSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Data push successful'**
+  String get dataPushSuccess;
+
+  /// No description provided for @syncFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync failed'**
+  String get syncFailed;
+
+  /// No description provided for @pushFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Push failed'**
+  String get pushFailed;
+
+  /// No description provided for @justNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get justNow;
+
+  /// No description provided for @minutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} minutes ago'**
+  String minutesAgo(Object minutes);
+
+  /// No description provided for @hoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours} hours ago'**
+  String hoursAgo(Object hours);
+
+  /// No description provided for @daysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days ago'**
+  String daysAgo(Object days);
+
+  /// No description provided for @serverSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Server selected: {deviceName}'**
+  String serverSelected(Object deviceName);
+
+  /// No description provided for @connectionRecordDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Connection record deleted'**
+  String get connectionRecordDeleted;
+
+  /// No description provided for @viewAllConnections.
+  ///
+  /// In en, this message translates to:
+  /// **'View all {count} connections'**
+  String viewAllConnections(Object count);
+
+  /// No description provided for @clearAllHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear All'**
+  String get clearAllHistory;
+
+  /// No description provided for @clearAllConnectionHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'All connection history cleared'**
+  String get clearAllConnectionHistory;
+
+  /// No description provided for @unknownDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Device'**
+  String get unknownDevice;
+
+  /// No description provided for @unknownPlatform.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Platform'**
+  String get unknownPlatform;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
