@@ -1,13 +1,10 @@
-# build command
-# `flutter_distributor release --name=dev --jobs=linux-deb`
-# `flutter_distributor release --name=dev --jobs=linux-rpm`
-#
-# in detail, see examples
-# https://github.com/leanflutter/flutter_distributor/blob/main/examples/hello_world/distribute_options.yaml
+# Fastforge 配置文件
+# 使用命令: fastforge release --name=dev 或 fastforge release --name=all
 output: dist/
 releases:
-  - name: dev
+  - name: all
     jobs:
+      # Linux 构建
       - name: linux-deb
         package:
           platform: linux
@@ -16,3 +13,43 @@ releases:
         package:
           platform: linux
           target: rpm
+      - name: linux-appimage
+        package:
+          platform: linux
+          target: appimage
+      # Windows 构建
+      - name: windows-exe
+        package:
+          platform: windows
+          target: exe
+      - name: windows-zip
+        package:
+          platform: windows
+          target: zip
+      # macOS 构建
+      - name: macos-dmg
+        package:
+          platform: macos
+          target: dmg
+      - name: macos-pkg
+        package:
+          platform: macos
+          target: pkg
+      # Android 构建
+      - name: android-apk
+        package:
+          platform: android
+          target: apk
+          build_args:
+            target-platform: android-arm,android-arm64
+      - name: android-aab
+        package:
+          platform: android
+          target: aab
+          build_args:
+            target-platform: android-arm,android-arm64
+      # Web 构建
+      - name: web-tar-gz
+        package:
+          platform: web
+          target: tar.gz

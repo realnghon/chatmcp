@@ -86,7 +86,7 @@ jobs:
           case "${{ matrix.build_target }}" in
             "linux")
               # 使用 fastforge 构建 Linux 平台的多种格式
-              fastforge release --name=dev --jobs=linux-deb,linux-rpm,linux-appimage
+              fastforge release --name=dev
               ;;
             "windows")
               # 使用 fastforge 构建 Windows 平台
@@ -94,7 +94,7 @@ jobs:
               ;;
             "macos")
               # 使用 fastforge 构建 macOS 平台
-              fastforge release --name=all --jobs=macos-dmg,macos-zip
+              fastforge release --name=all --jobs=macos-dmg,macos-pkg
               ;;
           esac
           
