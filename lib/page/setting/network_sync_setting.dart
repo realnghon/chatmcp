@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:chatmcp/services/network_sync_service.dart';
 import 'package:chatmcp/utils/toast.dart';
 import 'package:chatmcp/generated/app_localizations.dart';
@@ -747,14 +747,13 @@ class QRScannerPage extends StatefulWidget {
 }
 
 class _QRScannerPageState extends State<QRScannerPage> {
-  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-  QRViewController? controller;
+  final MobileScannerController controller = MobileScannerController();
   bool _isFlashOn = false;
   bool _hasScanned = false; // 防止重复扫描
 
   @override
   void dispose() {
-    controller?.dispose();
+    controller.dispose();
     super.dispose();
   }
 
@@ -809,15 +808,17 @@ class _QRScannerPageState extends State<QRScannerPage> {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(20),
-                  child: QRView(
-                    key: qrKey,
-                    onQRViewCreated: _onQRViewCreated,
-                    overlay: QrScannerOverlayShape(
-                      borderColor: AppColors.blue,
-                      borderRadius: 12,
-                      borderLength: 40,
-                      borderWidth: 6,
-                      cutOutSize: MediaQuery.of(context).size.width * 0.7,
+                  child: MobileScanner(
+                    controller: controller,
+                    onDetect: _onDetect,
+                    overlayBuilder: (context, constraints) => Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: AppColors.blue,
+                          width: 6,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ),
@@ -902,17 +903,18 @@ class _QRScannerPageState extends State<QRScannerPage> {
     );
   }
 
-  void _onQRViewCreated(QRViewController controller) {
-    this.controller = controller;
-    controller.scannedDataStream.listen((scanData) {
-      if (scanData.code != null && !_hasScanned && mounted) {
-        final code = scanData.code!;
+  void _onDetect(BarcodeCapture capture) {
+    final List<Barcode> barcodes = capture.barcodes;
+
+    for (final barcode in barcodes) {
+      if (barcode.rawValue != null && !_hasScanned && mounted) {
+        final code = barcode.rawValue!;
 
         // 标记已扫描，防止重复
         _hasScanned = true;
 
-        // 立即暂停摄像头
-        controller.pauseCamera();
+        // 立即停止扫描
+        controller.stop();
 
         // 验证是否是有效的URL
         if (code.startsWith('http://') || code.startsWith('https://')) {
@@ -926,20 +928,19 @@ class _QRScannerPageState extends State<QRScannerPage> {
               setState(() {
                 _hasScanned = false;
               });
-              controller.resumeCamera();
+              controller.start();
             }
           });
         }
+        break;
       }
-    });
+    }
   }
 
   Future<void> _toggleFlash() async {
-    if (controller != null) {
-      await controller!.toggleFlash();
-      setState(() {
-        _isFlashOn = !_isFlashOn;
-      });
-    }
+    await controller.toggleTorch();
+    setState(() {
+      _isFlashOn = !_isFlashOn;
+    });
   }
 }
