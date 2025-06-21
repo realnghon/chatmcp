@@ -82,8 +82,9 @@ jobs:
             echo "⚠️  未找到签名配置，将使用 debug 签名"
           fi
       
-      - name: Activate flutter_distributor
-        run: dart pub global activate flutter_distributor
+      - name: Activate FastForge
+        if: matrix.os == 'ubuntu-latest'
+        run: dart pub global activate fastforge
 
       - name: Build ${{ matrix.build_target }}
         shell: bash
@@ -98,7 +99,7 @@ jobs:
       - name: Build deb package
         if: matrix.os == 'ubuntu-latest'
         run: |
-          flutter_distributor release --name=dev --jobs=linux-deb
+          fastforge release --name=dev --jobs=linux-deb
         
       - name: Package Linux App
         if: matrix.os == 'ubuntu-latest'
