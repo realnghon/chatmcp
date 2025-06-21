@@ -87,16 +87,19 @@ jobs:
         run: dart pub global activate fastforge
 
       - name: Build ${{ matrix.build_target }}
-        if: matrix.os == 'windows-latest' || matrix.os == 'macos-latest'
         shell: bash
         run: |
+          echo "apk_build: ${{ matrix.apk_build }}"
+          if [ "${{ matrix.apk_build }}" == "true" ]; then
+            flutter build apk --release
+            flutter build appbundle --release
+          fi
           flutter build ${{ matrix.build_target }} --release
 
       - name: Build deb package
         if: matrix.os == 'ubuntu-latest'
         run: |
-          fastforge release --name=linux
-          fastforge release --name=android
+          fastforge release --name=dev --jobs=linux-deb
         
       - name: Package Linux App
         if: matrix.os == 'ubuntu-latest'
