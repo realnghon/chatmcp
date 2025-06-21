@@ -79,28 +79,60 @@ jobs:
       - name: Activate FastForge
         run: dart pub global activate fastforge
 
+      - name: Add pub cache to PATH (Windows)
+        if: matrix.os == 'windows-latest'
+        run: echo "$env:LOCALAPPDATA\Pub\Cache\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        shell: pwsh
+
+      - name: Add pub cache to PATH (Unix)
+        if: matrix.os != 'windows-latest'
+        run: echo "$HOME/.pub-cache/bin" >> $GITHUB_PATH
+        shell: bash
+
       - name: Build with FastForge
         shell: bash
         run: |
           echo "Building for ${{ matrix.build_target }}"
+          
+          # 确保 fastforge 在 PATH 中
+          if ! command -v fastforge &> /dev/null; then
+            echo "fastforge not found in PATH, trying to locate it..."
+            if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+              export PATH="$LOCALAPPDATA/Pub/Cache/bin:$PATH"
+            else
+              export PATH="$HOME/.pub-cache/bin:$PATH"
+            fi
+          fi
+          
+          # 验证 fastforge 是否可用
+          if ! command -v fastforge &> /dev/null; then
+            echo "Error: fastforge command not found after PATH setup"
+            echo "Current PATH: $PATH"
+            echo "Trying dart pub global run fastforge instead..."
+            FASTFORGE_CMD="dart pub global run fastforge"
+          else
+            echo "fastforge found: $(which fastforge)"
+            FASTFORGE_CMD="fastforge"
+          fi
+          
           case "${{ matrix.build_target }}" in
             "linux")
               # 使用 fastforge 构建 Linux 平台
-              fastforge release --name=linux
+              $FASTFORGE_CMD release --name=linux
               ;;
             "windows")
               # 使用 fastforge 构建 Windows 平台
-              fastforge release --name=windows
+              $FASTFORGE_CMD release --name=windows
               ;;
             "macos")
               # 使用 fastforge 构建 macOS 平台
-              fastforge release --name=macos
+              $FASTFORGE_CMD release --name=macos
               ;;
           esac
           
           # 如果需要构建 Android
           if [ "${{ matrix.apk_build }}" == "true" ]; then
-            fastforge release --name=android
+            $FASTFORGE_CMD release --name=android
           fi
         
       - name: List FastForge Output
