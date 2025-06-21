@@ -85,22 +85,22 @@ jobs:
           echo "Building for ${{ matrix.build_target }}"
           case "${{ matrix.build_target }}" in
             "linux")
-              # 使用 fastforge 构建 Linux 平台的多种格式
-              fastforge release --name=dev
+              # 使用 fastforge 构建 Linux 平台
+              fastforge release --name=linux
               ;;
             "windows")
               # 使用 fastforge 构建 Windows 平台
-              fastforge release --name=all --jobs=windows-exe,windows-zip
+              fastforge release --name=windows
               ;;
             "macos")
               # 使用 fastforge 构建 macOS 平台
-              fastforge release --name=all --jobs=macos-dmg,macos-pkg
+              fastforge release --name=macos
               ;;
           esac
           
           # 如果需要构建 Android
           if [ "${{ matrix.apk_build }}" == "true" ]; then
-            fastforge release --name=all --jobs=android-apk,android-aab
+            fastforge release --name=android
           fi
         
       - name: List FastForge Output
@@ -171,7 +171,7 @@ jobs:
 
       - name: Build Web with FastForge
         run: |
-          fastforge release --name=all --jobs=web-tar-gz
+          fastforge release --name=web
 
       - name: Upload Web Artifact
         uses: actions/upload-artifact@v4

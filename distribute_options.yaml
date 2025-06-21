@@ -1,55 +1,88 @@
 # Fastforge 配置文件
-# 使用命令: fastforge release --name=dev 或 fastforge release --name=all
+# 参考官方示例: https://github.com/fastforgedev/fastforge
+# 使用命令: fastforge release --name=dev
+
 output: dist/
 releases:
-  - name: all
+  - name: linux 
     jobs:
-      # Linux 构建
-      - name: linux-deb
+      # Linux DEB 包构建 (Debian/Ubuntu)
+      - name: release-linux-deb
         package:
           platform: linux
           target: deb
-      - name: linux-rpm
+          build_args:
+            dart-define:
+              APP_ENV: production
+      
+      # Linux RPM 包构建 (Red Hat/CentOS/Fedora)
+      - name: release-linux-rpm
         package:
           platform: linux
           target: rpm
-      - name: linux-appimage
+          build_args:
+            dart-define:
+              APP_ENV: production
+      
+      # Linux AppImage 包构建 (便携式)
+      - name: release-linux-appimage
         package:
           platform: linux
           target: appimage
-      # Windows 构建
-      - name: windows-exe
+          build_args:
+            dart-define:
+              APP_ENV: production
+      
+      # Linux Pacman 包构建 (Arch Linux)
+      - name: release-linux-pacman
         package:
-          platform: windows
-          target: exe
-      - name: windows-zip
-        package:
-          platform: windows
-          target: zip
-      # macOS 构建
-      - name: macos-dmg
-        package:
-          platform: macos
-          target: dmg
-      - name: macos-pkg
-        package:
-          platform: macos
-          target: pkg
-      # Android 构建
-      - name: android-apk
+          platform: linux
+          target: pacman
+          build_args:
+            dart-define:
+              APP_ENV: production
+              
+  - name: android
+    jobs:
+      # Android APK 构建
+      - name: release-android-apk
         package:
           platform: android
           target: apk
           build_args:
             target-platform: android-arm,android-arm64
-      - name: android-aab
+            dart-define:
+              APP_ENV: production
+              
+  - name: windows
+    jobs:
+      # Windows ZIP 包构建
+      - name: release-windows-zip
         package:
-          platform: android
-          target: aab
+          platform: windows
+          target: zip
           build_args:
-            target-platform: android-arm,android-arm64
+            dart-define:
+              APP_ENV: production
+              
+  - name: macos
+    jobs:
+      # macOS DMG 构建
+      - name: release-macos-dmg
+        package:
+          platform: macos
+          target: dmg
+          build_args:
+            dart-define:
+              APP_ENV: production
+  
+  - name: web
+    jobs:
       # Web 构建
-      - name: web-tar-gz
+      - name: release-web-tarball
         package:
           platform: web
           target: tar.gz
+          build_args:
+            dart-define:
+              APP_ENV: production
