@@ -276,6 +276,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmDeleteSelected => 'Are you sure you want to delete the selected conversations?';
 
   @override
+  String get confirmThisChat => 'Are you sure you want to delete the this conversations';
+
+  @override
   String get ok => 'OK';
 
   @override

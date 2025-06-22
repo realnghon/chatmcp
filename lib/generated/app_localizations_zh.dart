@@ -269,6 +269,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get confirmDeleteSelected => '确定要删除选中的对话吗？';
 
   @override
+  String get confirmThisChat => '您确定要删除这些对话吗？';
+
+  @override
   String get ok => '确定';
 
   @override
