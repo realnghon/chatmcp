@@ -64,6 +64,10 @@ releases:
           build_args:
             dart-define:
               APP_ENV: production
+          # 添加额外文件配置
+          extra_files:
+            - source: "windows/sqlite3.dll"
+              destination: "sqlite3.dll"
               
   - name: macos
     jobs:

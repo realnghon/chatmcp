@@ -1,0 +1,26 @@
+display_name: ChatMCP
+
+icon: assets/logo.png
+
+keywords:
+  - ChatMCP
+  - AI
+  - Chat
+  - MCP
+
+generic_name: AI Chat Application
+
+categories:
+  - Office
+  - Utility
+
+startup_notify: true
+
+# 您可以指定要与您的应用捆绑的共享库
+#
+# fastforge 会自动检测您的应用所依赖的共享库，但您也可以在此处手动指定它们。
+#
+# 对于 SQLite 相关的库，可能需要包含以下库文件：
+include:
+  - libsqlite3.so.0
+  - libsqlite3.so
