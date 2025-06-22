@@ -82,6 +82,7 @@
     "last30Days": "Last 30 Days",
     "earlier": "Earlier",
     "confirmDeleteSelected": "Are you sure you want to delete the selected conversations?",
+    "confirmThisChat": "Are you sure you want to delete the this conversations",
     "ok": "OK",
     "askMeAnything": "Ask me anything...",
     "uploadFiles": "Upload Files",

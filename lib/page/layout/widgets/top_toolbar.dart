@@ -145,12 +145,31 @@ class TopToolbar extends StatelessWidget {
           // delete chat
           if (ProviderManager.chatProvider.activeChat != null)
             InkWell(
-              onTap: () {
-                final chat = ProviderManager.chatProvider.activeChat;
-                if (chat != null) {
-                  ProviderManager.chatProvider.deleteChat(chat.id!);
+              onTap: () async {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: Text(l10n.confirmDelete),
+                    content: Text(l10n.confirmThisChat + '?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.of(context).pop(true),
+                        child: Text(MaterialLocalizations.of(context).okButtonLabel),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirm == true) {
+                  final chat = ProviderManager.chatProvider.activeChat;
+                  if (chat != null) {
+                    ProviderManager.chatProvider.deleteChat(chat.id!);
+                  }
+                  Navigator.of(context).pop(); // Close the popup after deleting
                 }
-                Navigator.of(context).pop(); // Close the popup after deleting
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

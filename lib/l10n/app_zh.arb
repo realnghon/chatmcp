@@ -82,6 +82,7 @@
     "last30Days": "前 30 天",
     "earlier": "更早",
     "confirmDeleteSelected": "确定要删除选中的对话吗？",
+    "confirmThisChat": "您确定要删除这些对话吗？",
     "ok": "确定",
     "askMeAnything": "问我任何问题...",
     "uploadFiles": "上传文件",

@@ -275,6 +275,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get confirmDeleteSelected => 'Seçili sohbetleri silmek istediğinize emin misiniz?';
 
   @override
+  String get confirmThisChat => 'Bu sohbetleri silmek istediğinize emin misiniz?';
+
+  @override
   String get ok => 'Tamam';
 
   @override

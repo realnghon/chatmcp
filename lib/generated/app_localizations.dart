@@ -585,6 +585,12 @@ abstract class AppLocalizations {
   /// **'Are you sure you want to delete the selected conversations?'**
   String get confirmDeleteSelected;
 
+  /// No description provided for @confirmThisChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete the this conversations'**
+  String get confirmThisChat;
+
   /// No description provided for @ok.
   ///
   /// In en, this message translates to:
