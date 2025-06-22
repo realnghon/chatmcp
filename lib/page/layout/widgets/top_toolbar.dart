@@ -150,6 +150,7 @@ class TopToolbar extends StatelessWidget {
                 if (chat != null) {
                   ProviderManager.chatProvider.deleteChat(chat.id!);
                 }
+                Navigator.of(context).pop(); // Close the popup after deleting
               },
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
