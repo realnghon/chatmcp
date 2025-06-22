@@ -33,15 +33,6 @@ releases:
             dart-define:
               APP_ENV: production
       
-      # Linux Pacman 包构建 (Arch Linux)
-      - name: release-linux-pacman
-        package:
-          platform: linux
-          target: pacman
-          build_args:
-            dart-define:
-              APP_ENV: production
-              
   - name: android
     jobs:
       # Android APK 构建
