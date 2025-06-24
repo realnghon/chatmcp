@@ -404,7 +404,7 @@ class McpServerProvider extends ChangeNotifier {
     return clients;
   }
 
-  String mcpServerMarket = "https://raw.githubusercontent.com/daodao97/chatmcp/refs/heads/main/assets/mcp_server_market.json";
+  String mcpServerMarket = "https://raw.githubusercontent.com/chatmcpclient/mcp_server_market/refs/heads/main/mcp_server_market.json";
 
   Future<Map<String, dynamic>> loadMarketServers() async {
     try {
