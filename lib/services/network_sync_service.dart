@@ -62,7 +62,7 @@ class NetworkSyncService {
         }));
       });
 
-      final handler = Pipeline().addMiddleware(corsHeaders()).addMiddleware(logRequests()).addHandler(router);
+      final handler = Pipeline().addMiddleware(corsHeaders()).addMiddleware(logRequests()).addHandler(router.call);
 
       _server = await io.serve(handler, InternetAddress.anyIPv4, _port);
       _isServerRunning = true;
@@ -71,7 +71,7 @@ class NetworkSyncService {
       onServerStateChanged?.call(true, _ipAddress, _port);
     } catch (e) {
       Logger.root.severe('Failed to start server: $e');
-      throw e;
+      rethrow;
     }
   }
 
@@ -185,7 +185,7 @@ class NetworkSyncService {
     } catch (e) {
       Logger.root.severe('Failed to sync from remote server: $e');
       onSyncStateChanged?.call('syncFailed: $e', error: e.toString());
-      throw e;
+      rethrow;
     }
   }
 
@@ -216,7 +216,7 @@ class NetworkSyncService {
     } catch (e) {
       Logger.root.severe('Failed to push data to remote server: $e');
       onSyncStateChanged?.call('pushFailed: $e', error: e.toString());
-      throw e;
+      rethrow;
     }
   }
 
@@ -437,7 +437,7 @@ class NetworkSyncService {
       }
     } catch (e) {
       Logger.root.severe('Failed to import data: $e');
-      throw e;
+      rethrow;
     }
   }
 }

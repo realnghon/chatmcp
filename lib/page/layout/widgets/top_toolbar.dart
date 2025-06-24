@@ -150,7 +150,7 @@ class TopToolbar extends StatelessWidget {
                   context: context,
                   builder: (context) => AlertDialog(
                     title: Text(l10n.confirmDelete),
-                    content: Text(l10n.confirmThisChat + '?'),
+                    content: Text('${l10n.confirmThisChat}?'),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(false),
