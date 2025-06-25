@@ -176,7 +176,7 @@ Oluşturma tamamlandıktan sonra, dosyalar `build/web` dizininde olacak ve herha
 
 ## Uygulamanın Temel Özellikleri
 * MCP Sunucusu ile Sohbet
-* MCP Sunucusu Pazaryeri
+* MCP Server Market
 * MCP Sunucusunu Otomatik Kurulum
 * SSE MCP Aktarım Desteği
 * Otomatik MCP Sunucusu Seçimi
@@ -191,8 +191,31 @@ Oluşturma tamamlandıktan sonra, dosyalar `build/web` dizininde olacak ve herha
 
 Her türlü özellik önerisine açığız. Fikirlerinizi veya bulduğunuz hataları [Issues](https://github.com/daodao97/chatmcp/issues) sayfasından bize iletebilirsiniz.
 
-* MCP Sunucusu Pazaryeri
-MCP Sunucusu Pazaryeri'nden dilediğiniz MCP sunucusunu kurabilirsiniz. MCP Sunucusu Pazaryeri, farklı veri türleriyle sohbet etmek için kullanabileceğiniz MCP sunucularının bir koleksiyonudur.
+## MCP Server Market
+MCP Server Market'ten dilediğiniz MCP sunucusunu kurabilirsiniz. MCP Server Market, farklı veri türleriyle sohbet etmek için kullanabileceğiniz MCP sunucularının bir koleksiyonudur.
+
+* Ayrıca yeni MCP Server ekleyebilirsiniz : [MCP Server Market](https://github.com/chatmcpclient/mcp_server_market/blob/main/mcp_server_market.json)
+
+[mcp_server_market](https://github.com/chatmcpclient/mcp_server_market) deposunu forklayın ve `mcp_server_market.json` dosyasının sonuna yeni MCP Server ekleyin.
+
+```json
+{
+    "mcpServers": {
+        "existing-mcp-servers": {},
+        "your-mcp-server": {
+            "command": "uvx",
+            "args": [
+                "--from",
+                "git+https://github.com/username/your-mcp-server",
+                "your-mcp-server"
+            ]
+        }
+    }
+}
+```
+Değişikliklerinizi bir Pull Request göndererek paylaşabilirsiniz. PR onaylandıktan sonra MCP Server Market'te görünecektir ve diğer kullanıcılar da aynı anda kullanmaya başlayacaktır.
+
+
 Geri bildirimleriniz, chatmcp'yi geliştirmemize ve diğer kullanıcıların bilinçli kararlar almasına yardımcı olur.
 
 * Teşekkürler
