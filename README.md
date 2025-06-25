@@ -241,7 +241,7 @@ After building, files will be in the `build/web` directory and can be deployed t
 ## Features
 
 - [x] Chat with MCP Server
-- [ ] MCP Server Market
+- [X] MCP Server Market
 - [ ] Auto install MCP Server
 - [x] SSE MCP Transport Support
 - [x] Auto Choose MCP Server
@@ -259,6 +259,27 @@ All features are welcome to submit, you can submit your ideas or bugs in [Issues
 ## MCP Server Market
 
 You can install MCP Server from MCP Server Market, MCP Server Market is a collection of MCP Server, you can use it to chat with different data.
+
+* Also you can add new MCP Server to the Market : [MCP Server Market](https://github.com/chatmcpclient/mcp_server_market/blob/main/mcp_server_market.json)
+
+Create a fork of [mcp_server_market](https://github.com/chatmcpclient/mcp_server_market) and add your MCP Server to the `mcp_server_market.json` end of the file.
+
+```json
+{
+    "mcpServers": {
+        "existing-mcp-servers": {},
+        "your-mcp-server": {
+              "command": "uvx",
+              "args": [
+                  "--from",
+                  "git+https://github.com/username/your-mcp-server",
+                  "your-mcp-server"
+            ]
+        }
+    }
+}
+```
+You can send a Pull Request to the [mcp_server_market](https://github.com/chatmcpclient/mcp_server_market) repository to add your MCP Server to the Market. After your PR is merged, your MCP Server will be available in the Market and other users can use it immediately.
 
 Your feedback helps us improve chatmcp and helps other users make informed decisions.
 

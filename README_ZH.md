@@ -193,7 +193,30 @@ flutter build appbundle --release
 
 您可以从 MCP 服务器市场安装 MCP 服务器。MCP 服务器市场是 MCP 服务器的集合，您可以用它来与不同的数据进行对话。
 
+
+您也可以在 [MCP 服务器市场](https://github.com/chatmcpclient/mcp_server_market/blob/main/mcp_server_market.json) 中添加新的 MCP 服务器。
+
+创建 [mcp_server_market](https://github.com/chatmcpclient/mcp_server_market) 的 fork 并添加您的 MCP 服务器到 `mcp_server_market.json` 文件的末尾。
+
+```json
+{
+    "mcpServers": {
+        "existing-mcp-servers": {},
+        "your-mcp-server": {
+              "command": "uvx",
+              "args": [
+                  "--from",
+                  "git+https://github.com/username/your-mcp-server",
+                  "your-mcp-server"
+            ]
+        }
+    }
+}
+```
+您可以向 [mcp_server_market](https://github.com/chatmcpclient/mcp_server_market) 仓库发送 Pull Request 以将您的 MCP 服务器添加到市场。在您的 PR 被合并后，您的 MCP 服务器将可在市场使用，其他用户可以立即使用它。 
+
 您的反馈有助于我们改进 chatmcp，也能帮助其他用户做出明智的决定。
+
 
 ## 致谢
 
