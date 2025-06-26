@@ -844,4 +844,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get unknownPlatform => '未知平台';
+
+  @override
+  String get inmemory => '内置';
 }

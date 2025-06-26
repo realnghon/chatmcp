@@ -851,4 +851,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unknownPlatform => 'Unknown Platform';
+
+  @override
+  String get inmemory => 'In Memory';
 }

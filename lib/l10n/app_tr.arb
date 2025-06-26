@@ -269,5 +269,6 @@
     "clearAllHistory": "Tümünü Temizle",
     "clearAllConnectionHistory": "Tüm bağlantı geçmişi temizlendi",
     "unknownDevice": "Bilinmeyen Cihaz",
-    "unknownPlatform": "Bilinmeyen Platform"
+    "unknownPlatform": "Bilinmeyen Platform",
+    "inmemory": "En Memoria"
 }

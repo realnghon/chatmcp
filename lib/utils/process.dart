@@ -153,8 +153,7 @@ env
       'USER': user,
       'SHELL': shell,
       'TERM': 'xterm-256color',
-      'PATH':
-          '/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin',
+      'PATH': '/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin',
     });
 
     // Clean up temporary files
@@ -232,6 +231,15 @@ Future<Process> startProcess(
 ) async {
   final Map<String, String> env = await getDefaultEnv();
   env.addAll(environment); // Add user-provided environment variables
+
+  // Validate command exists before starting process
+  if (!await isCommandAvailable(command)) {
+    throw ProcessException(
+      command,
+      args,
+      'Command not found: $command. Please check if the command exists and is in PATH.',
+    );
+  }
 
   return Process.start(
     command,

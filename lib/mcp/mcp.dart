@@ -8,8 +8,7 @@ import './streamable/streamable_client.dart';
 import 'inmemory/client.dart';
 import 'inmemory_server/factory.dart';
 
-Future<McpClient?> initializeMcpServer(
-    Map<String, dynamic> mcpServerConfig) async {
+Future<McpClient?> initializeMcpServer(Map<String, dynamic> mcpServerConfig) async {
   // Get server configuration
   final serverConfig = ServerConfig.fromJson(mcpServerConfig);
 
@@ -26,11 +25,16 @@ Future<McpClient?> initializeMcpServer(
         mcpClient = StreamableClient(serverConfig: serverConfig);
         break;
       case 'stdio':
-        mcpClient = StdioClient(serverConfig: serverConfig);
+        try {
+          mcpClient = StdioClient(serverConfig: serverConfig);
+        } catch (e) {
+          Logger.root.severe('Failed to create StdioClient: $e');
+          ToastUtils.error('StdioClient creation failed: ${e.toString()}');
+          return null;
+        }
         break;
       case 'inmemory':
-        final memoryServer =
-            MemoryServerFactory.createMemoryServer(serverConfig.command);
+        final memoryServer = MemoryServerFactory.createMemoryServer(serverConfig.command);
         if (memoryServer == null) {
           Logger.root.severe('Failed to create memory server');
 
@@ -45,7 +49,13 @@ Future<McpClient?> initializeMcpServer(
         if (serverConfig.command.startsWith('http')) {
           mcpClient = SSEClient(serverConfig: serverConfig);
         } else {
-          mcpClient = StdioClient(serverConfig: serverConfig);
+          try {
+            mcpClient = StdioClient(serverConfig: serverConfig);
+          } catch (e) {
+            Logger.root.severe('Failed to create StdioClient in fallback: $e');
+            ToastUtils.error('StdioClient creation failed: ${e.toString()}');
+            return null;
+          }
         }
     }
   } else {
@@ -53,7 +63,13 @@ Future<McpClient?> initializeMcpServer(
     if (serverConfig.command.startsWith('http')) {
       mcpClient = SSEClient(serverConfig: serverConfig);
     } else {
-      mcpClient = StdioClient(serverConfig: serverConfig);
+      try {
+        mcpClient = StdioClient(serverConfig: serverConfig);
+      } catch (e) {
+        Logger.root.severe('Failed to create StdioClient in legacy fallback: $e');
+        ToastUtils.error('StdioClient creation failed: ${e.toString()}');
+        return null;
+      }
     }
   }
 
@@ -90,14 +106,26 @@ Future<bool> verifyMcpServer(Map<String, dynamic> mcpServerConfig) async {
         mcpClient = StreamableClient(serverConfig: serverConfig);
         break;
       case 'stdio':
-        mcpClient = StdioClient(serverConfig: serverConfig);
+        try {
+          mcpClient = StdioClient(serverConfig: serverConfig);
+        } catch (e) {
+          Logger.root.severe('Failed to create StdioClient for verification: $e');
+          ToastUtils.error('StdioClient creation failed: ${e.toString()}');
+          return false;
+        }
         break;
       default:
         // 降级为基于命令的逻辑
         if (serverConfig.command.startsWith('http')) {
           mcpClient = SSEClient(serverConfig: serverConfig);
         } else {
-          mcpClient = StdioClient(serverConfig: serverConfig);
+          try {
+            mcpClient = StdioClient(serverConfig: serverConfig);
+          } catch (e) {
+            Logger.root.severe('Failed to create StdioClient in verify fallback: $e');
+            ToastUtils.error('StdioClient creation failed: ${e.toString()}');
+            return false;
+          }
         }
     }
   } else {
@@ -105,7 +133,13 @@ Future<bool> verifyMcpServer(Map<String, dynamic> mcpServerConfig) async {
     if (serverConfig.command.startsWith('http')) {
       mcpClient = SSEClient(serverConfig: serverConfig);
     } else {
-      mcpClient = StdioClient(serverConfig: serverConfig);
+      try {
+        mcpClient = StdioClient(serverConfig: serverConfig);
+      } catch (e) {
+        Logger.root.severe('Failed to create StdioClient in verify legacy fallback: $e');
+        ToastUtils.error('StdioClient creation failed: ${e.toString()}');
+        return false;
+      }
     }
   }
 

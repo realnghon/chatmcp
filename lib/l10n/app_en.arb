@@ -269,5 +269,6 @@
     "clearAllHistory": "Clear All",
     "clearAllConnectionHistory": "All connection history cleared",
     "unknownDevice": "Unknown Device",
-    "unknownPlatform": "Unknown Platform"
+    "unknownPlatform": "Unknown Platform",
+    "inmemory": "In Memory"
 }

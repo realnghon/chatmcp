@@ -1694,6 +1694,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unknown Platform'**
   String get unknownPlatform;
+
+  /// No description provided for @inmemory.
+  ///
+  /// In en, this message translates to:
+  /// **'In Memory'**
+  String get inmemory;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

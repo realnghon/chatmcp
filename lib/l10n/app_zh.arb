@@ -269,5 +269,6 @@
     "clearAllHistory": "清空所有",
     "clearAllConnectionHistory": "已清空所有连接历史",
     "unknownDevice": "未知设备",
-    "unknownPlatform": "未知平台"
+    "unknownPlatform": "未知平台",
+    "inmemory": "内置"
 }

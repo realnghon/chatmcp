@@ -850,4 +850,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get unknownPlatform => 'Bilinmeyen Platform';
+
+  @override
+  String get inmemory => 'En Memoria';
 }
