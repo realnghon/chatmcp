@@ -258,7 +258,7 @@ class TopToolbar extends StatelessWidget {
                   constraints: const BoxConstraints(minWidth: 50),
                   child: Row(
                     children: [
-                      if (kIsAndroid) ...[
+                      if (kIsAndroid || (kIsBrowser && MediaQuery.of(context).size.width < 768)) ...[
                         Gap(size: 12),
                         InkIcon(
                           icon: CupertinoIcons.sidebar_left,
