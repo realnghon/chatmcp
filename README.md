@@ -132,6 +132,7 @@ rd /s /q "%APPDATA%\ChatMcp"
 **Linux:**
 ```bash
 rm -rf ~/.local/share/ChatMcp
+rm -rf ~/.local/share/run.daodao.chatmcp
 ```
 
 ### Data Migration
