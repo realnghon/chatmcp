@@ -77,7 +77,7 @@ class _LayoutPageState extends State<LayoutPage> {
   Widget _buildLayout() {
     return Scaffold(
       backgroundColor: AppColors.getLayoutBackgroundColor(context),
-      drawer: kIsMobile
+      drawer: (kIsMobile || (kIsBrowser && MediaQuery.of(context).size.width < 768))
           ? Builder(
               builder: (BuildContext context) => Theme(
                 data: Theme.of(context),
