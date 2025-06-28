@@ -3,6 +3,7 @@ import 'package:chatmcp/widgets/ink_icon.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:chatmcp/page/setting/mcp_info.dart';
 import 'package:chatmcp/provider/mcp_server_provider.dart';
 import 'package:chatmcp/provider/serve_state_provider.dart';
 import 'package:flutter_switch/flutter_switch.dart';
@@ -235,6 +236,26 @@ class _McpToolsState extends State<McpTools> {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        if (isRunning)
+                          IconButton(
+                            icon: const Icon(Icons.info_outline, size: 18, color: Colors.blue),
+                            tooltip: 'Show server tools info',
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) => Dialog(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: SizedBox(
+                                    width: 400,
+                                    height: 500,
+                                    child: McpInfo(serverName: serverName),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
                         Container(
                           margin: const EdgeInsets.only(right: 8),
                           padding: const EdgeInsets.symmetric(
