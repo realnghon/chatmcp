@@ -201,9 +201,36 @@ dart test_migration.dart
 
 ## Development
 
+### Install Flutter
+
+To develop or run ChatMCP, you need to have [Flutter](https://flutter.dev/) installed.  
+Follow the official [Flutter installation guide](https://docs.flutter.dev/get-started/install) for your platform.
+
+- [Download Flutter](https://docs.flutter.dev/get-started/install)
+
+After installing, verify with:
 ```bash
+flutter --version
+```
+
+### Clone and Run Locally
+
+```bash
+# Clone the repository
+git clone https://github.com/daodao97/chatmcp.git
+cd chatmcp
+
+# Install dependencies
 flutter pub get
+
+# Run on macOS
 flutter run -d macos
+
+# Run on Linux (requires Flutter desktop support enabled)
+flutter run -d linux
+
+# Build release for Linux
+flutter build linux
 ```
 
 ### Web Version
@@ -217,6 +244,8 @@ flutter pub get
 flutter run -d chrome
 # Or specify port
 flutter run -d chrome --web-port 8080
+# Or run as web-serer for other browsers.
+flutter run -d web-server
 ```
 
 #### Build Web Version
