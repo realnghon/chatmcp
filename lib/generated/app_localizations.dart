@@ -1700,6 +1700,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'In Memory'**
   String get inmemory;
+
+  /// No description provided for @toggleSidebar.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle Sidebar'**
+  String get toggleSidebar;
+
+  /// No description provided for @deleteChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Chat'**
+  String get deleteChat;
+
+  /// No description provided for @selectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select All'**
+  String get selectAll;
+
+  /// No description provided for @newChat.
+  ///
+  /// In en, this message translates to:
+  /// **'New Chat'**
+  String get newChat;
+
+  /// No description provided for @send.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get send;
+
+  /// No description provided for @more.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get more;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

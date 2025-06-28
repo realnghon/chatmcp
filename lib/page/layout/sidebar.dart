@@ -68,12 +68,14 @@ class _SidebarPanelState extends State<SidebarPanel> {
                   InkIcon(
                     icon: CupertinoIcons.search,
                     onTap: toggleSearchVisibility,
+                    tooltip: AppLocalizations.of(context)!.search,
                   ),
                   if (kIsDesktop) ...[
                     const Gap(size: 8),
                     InkIcon(
                       icon: CupertinoIcons.sidebar_left,
                       onTap: widget.onToggle,
+                      tooltip: AppLocalizations.of(context)!.toggleSidebar,
                     ),
                   ],
                 ],
@@ -431,10 +433,10 @@ class SidebarToolbar extends StatelessWidget {
         children: [
           _buildSettingsButton(context),
           const Gap(size: 4),
-          _buildSelectModeButton(),
+          _buildSelectModeButton(context),
           if (chatProvider.isSelectMode) ...[
             const Gap(size: 4),
-            _buildSelectAllButton(),
+            _buildSelectAllButton(context),
             const Gap(size: 4),
             _buildDeleteButton(context),
           ],
@@ -450,10 +452,11 @@ class SidebarToolbar extends StatelessWidget {
     return InkIcon(
       icon: CupertinoIcons.settings,
       onTap: () => _showSettingsDialog(context),
+      tooltip: AppLocalizations.of(context)!.settings,
     );
   }
 
-  Widget _buildSelectModeButton() {
+  Widget _buildSelectModeButton(BuildContext context) {
     return InkIcon(
       icon: chatProvider.isSelectMode ? CupertinoIcons.clear : CupertinoIcons.trash,
       onTap: () {
@@ -463,26 +466,23 @@ class SidebarToolbar extends StatelessWidget {
           chatProvider.enterSelectMode();
         }
       },
+      tooltip: AppLocalizations.of(context)!.deleteChat,
     );
   }
 
-  Widget _buildSelectAllButton() {
+  Widget _buildSelectAllButton(BuildContext context) {
     return InkIcon(
       icon: CupertinoIcons.checkmark_square,
       onTap: () => chatProvider.toggleSelectAll(),
+      tooltip: AppLocalizations.of(context)!.selectAll,
     );
   }
 
   Widget _buildDeleteButton(BuildContext context) {
-    var t = AppLocalizations.of(context)!;
-    return InkWell(
+    return InkIcon(
+      icon: CupertinoIcons.delete,
       onTap: chatProvider.selectedChats.isNotEmpty ? () => _showDeleteConfirmDialog(context) : null,
-      child: CText(
-        text: t.delete,
-        size: 12,
-        color: chatProvider.selectedChats.isNotEmpty ? Colors.red : null,
-        fontWeight: FontWeight.w500,
-      ),
+      tooltip: AppLocalizations.of(context)!.delete,
     );
   }
 

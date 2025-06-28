@@ -229,7 +229,7 @@
     "mobileStep1": "1. \"QR Kod Tarayarak Bağlan\" düğmesine tıklayın",
     "mobileStep2": "2. Masaüstünde gösterilen QR kodu tarayın",
     "mobileStep3": "3. Senkronizasyon yönünü seçin (yükleme/indirme)",
-    "dataSync": "Veri Senkronizasyonu:",
+    "dataSync": "Veri Senkronizasyonu",
     "uploadDescription": "• Yükleme: Yerel cihaz verilerini sunucuya gönder",
     "downloadDescription": "• İndirme: Sunucudan yerel cihaza veri al",
     "syncContent": "• Senkronizasyon İçeriği: Sohbet geçmişi, ayarlar, MCP yapılandırmaları",
@@ -270,5 +270,11 @@
     "clearAllConnectionHistory": "Tüm bağlantı geçmişi temizlendi",
     "unknownDevice": "Bilinmeyen Cihaz",
     "unknownPlatform": "Bilinmeyen Platform",
-    "inmemory": "En Memoria"
+    "inmemory": "En Memoria",
+    "toggleSidebar": "Kenar Çubuğunu Değiştir",
+    "deleteChat": "Sohbeti Sil",
+    "selectAll": "Tümünü Seç",
+    "newChat": "Yeni Sohbet",
+    "send": "Gönder",
+    "more": "Daha Fazla"
 }

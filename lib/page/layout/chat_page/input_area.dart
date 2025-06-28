@@ -102,11 +102,8 @@ class _InputAreaState extends State<InputArea> {
     const int maxLength = 20;
     if (fileName.length <= maxLength) return fileName;
 
-    final extension =
-        fileName.contains('.') ? '.${fileName.split('.').last}' : '';
-    final nameWithoutExt = fileName.contains('.')
-        ? fileName.substring(0, fileName.lastIndexOf('.'))
-        : fileName;
+    final extension = fileName.contains('.') ? '.${fileName.split('.').last}' : '';
+    final nameWithoutExt = fileName.contains('.') ? fileName.substring(0, fileName.lastIndexOf('.')) : fileName;
 
     if (nameWithoutExt.length <= maxLength - extension.length - 3) {
       return fileName;
@@ -127,11 +124,9 @@ class _InputAreaState extends State<InputArea> {
         // color: Theme.of(context).cardColor,
         color: AppColors.getInputAreaBackgroundColor(context),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-            color: AppColors.getInputAreaBorderColor(context), width: 1),
+        border: Border.all(color: AppColors.getInputAreaBorderColor(context), width: 1),
       ),
-      margin:
-          const EdgeInsets.only(left: 12.0, right: 12.0, top: 2.0, bottom: 8.0),
+      margin: const EdgeInsets.only(left: 12.0, right: 12.0, top: 2.0, bottom: 8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -158,8 +153,7 @@ class _InputAreaState extends State<InputArea> {
                       padding: const EdgeInsets.only(right: 8.0),
                       child: Container(
                         decoration: BoxDecoration(
-                          color: AppColors.getInputAreaFileItemBackgroundColor(
-                              context),
+                          color: AppColors.getInputAreaFileItemBackgroundColor(context),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: AppColors.getInputAreaBorderColor(context),
@@ -169,27 +163,20 @@ class _InputAreaState extends State<InputArea> {
                         child: Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8.0, vertical: 6.0),
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
                               child: Row(
                                 children: [
                                   Icon(
-                                    isImage
-                                        ? Icons.image
-                                        : Icons.insert_drive_file,
+                                    isImage ? Icons.image : Icons.insert_drive_file,
                                     size: 16,
-                                    color: AppColors.getInputAreaFileIconColor(
-                                        context),
+                                    color: AppColors.getInputAreaFileIconColor(context),
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
                                     _truncateFileName(file.name),
                                     style: TextStyle(
                                       fontSize: 12,
-                                      color: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium
-                                          ?.color,
+                                      color: Theme.of(context).textTheme.bodyMedium?.color,
                                     ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -205,13 +192,11 @@ class _InputAreaState extends State<InputArea> {
                                   bottomRight: Radius.circular(8),
                                 ),
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 6.0, vertical: 6.0),
+                                  padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 6.0),
                                   child: Icon(
                                     Icons.close,
                                     size: 14,
-                                    color: AppColors.getInputAreaIconColor(
-                                        context),
+                                    color: AppColors.getInputAreaIconColor(context),
                                   ),
                                 ),
                               ),
@@ -225,16 +210,14 @@ class _InputAreaState extends State<InputArea> {
               ),
             ),
           Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
             child: Container(
               decoration: BoxDecoration(
                 color: AppColors.getInputAreaBackgroundColor(context),
               ),
               child: Focus(
                 onKeyEvent: (node, event) {
-                  if (event is KeyDownEvent &&
-                      event.logicalKey == LogicalKeyboardKey.enter) {
+                  if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.enter) {
                     if (HardwareKeyboard.instance.isShiftPressed) {
                       return KeyEventResult.ignored;
                     }
@@ -243,10 +226,8 @@ class _InputAreaState extends State<InputArea> {
                       return KeyEventResult.ignored;
                     }
 
-                    if (widget.isComposing &&
-                        textController.text.trim().isNotEmpty) {
-                      widget.onSubmitted(
-                          SubmitData(textController.text, _selectedFiles));
+                    if (widget.isComposing && textController.text.trim().isNotEmpty) {
+                      widget.onSubmitted(SubmitData(textController.text, _selectedFiles));
                       _afterSubmitted();
                     }
                     return KeyEventResult.handled;
@@ -262,12 +243,10 @@ class _InputAreaState extends State<InputArea> {
                   onAppPrivateCommand: (value, map) {
                     debugPrint('onAppPrivateCommand: $value');
                   },
-                  buildCounter: (context,
-                      {required currentLength, required isFocused, maxLength}) {
+                  buildCounter: (context, {required currentLength, required isFocused, maxLength}) {
                     return null;
                   },
-                  textInputAction:
-                      kIsMobile ? TextInputAction.newline : TextInputAction.done,
+                  textInputAction: kIsMobile ? TextInputAction.newline : TextInputAction.done,
                   onSubmitted: null,
                   inputFormatters: [
                     TextInputFormatter.withFunction((oldValue, newValue) {
@@ -304,8 +283,7 @@ class _InputAreaState extends State<InputArea> {
             ),
           ),
           Padding(
-            padding:
-                const EdgeInsets.only(left: 12.0, right: 12.0, bottom: 6.0),
+            padding: const EdgeInsets.only(left: 12.0, right: 12.0, bottom: 6.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -313,8 +291,7 @@ class _InputAreaState extends State<InputArea> {
                   Row(
                     children: [
                       FutureBuilder<int>(
-                        future: ProviderManager
-                            .mcpServerProvider.installedServersCount,
+                        future: ProviderManager.mcpServerProvider.installedServersCount,
                         builder: (context, snapshot) {
                           return const McpTools();
                         },
@@ -347,15 +324,13 @@ class _InputAreaState extends State<InputArea> {
                   InkIcon(
                     icon: CupertinoIcons.arrow_up_circle,
                     onTap: () {
-                      if (widget.disabled ||
-                          textController.text.trim().isEmpty) {
+                      if (widget.disabled || textController.text.trim().isEmpty) {
                         return;
                       }
-                      widget.onSubmitted(
-                          SubmitData(textController.text, _selectedFiles));
+                      widget.onSubmitted(SubmitData(textController.text, _selectedFiles));
                       _afterSubmitted();
                     },
-                    tooltip: "send",
+                    tooltip: AppLocalizations.of(context)!.send,
                   )
                 ] else ...[
                   const Spacer(),
@@ -366,7 +341,7 @@ class _InputAreaState extends State<InputArea> {
                             widget.onCancel!();
                           }
                         : null,
-                    tooltip: "cancel",
+                    tooltip: AppLocalizations.of(context)!.cancel,
                   ),
                 ]
               ],

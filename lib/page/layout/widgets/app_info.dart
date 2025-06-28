@@ -98,8 +98,7 @@ class AppInfo extends StatelessWidget {
                       l10n.visitWebsite,
                       appWebsite!,
                     ),
-                  if (appWebsite != null && githubUrl != null)
-                    const SizedBox(width: 12),
+                  if (appWebsite != null && githubUrl != null) const SizedBox(width: 12),
                   if (githubUrl != null)
                     _buildLinkButton(
                       context,
@@ -122,10 +121,7 @@ class AppInfo extends StatelessWidget {
                 Text(
                   licenseInfo!,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.getThemeTextColor(context).withAlpha(128)
-                  ),
+                  style: TextStyle(fontSize: 12, color: AppColors.getThemeTextColor(context).withAlpha(128)),
                 ),
               ],
             ],
@@ -135,8 +131,7 @@ class AppInfo extends StatelessWidget {
     );
   }
 
-  Widget _buildLinkButton(
-      BuildContext context, LlmIcon icon, String label, String url) {
+  Widget _buildLinkButton(BuildContext context, LlmIcon icon, String label, String url) {
     return InkWell(
       onTap: () {
         launchUrl(Uri.parse(url));
@@ -169,7 +164,7 @@ class AppInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () => _showAboutDialog(context),
-      child: LlmIcon(icon: "github"),
+      child: LlmIcon(icon: "github", tooltip: AppLocalizations.of(context)!.aboutApp),
     );
   }
 }

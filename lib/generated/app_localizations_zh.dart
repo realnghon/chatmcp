@@ -621,7 +621,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get saved => '已保存';
 
   @override
-  String get dataSync => '数据同步：';
+  String get dataSync => '数据同步';
 
   @override
   String get syncServerRunning => '同步服务器运行中';
@@ -847,4 +847,22 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get inmemory => '内置';
+
+  @override
+  String get toggleSidebar => '切换侧边栏';
+
+  @override
+  String get deleteChat => '删除聊天';
+
+  @override
+  String get selectAll => '全选';
+
+  @override
+  String get newChat => '新聊天';
+
+  @override
+  String get send => '发送';
+
+  @override
+  String get more => '更多';
 }

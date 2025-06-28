@@ -627,7 +627,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get saved => 'Kaydedildi';
 
   @override
-  String get dataSync => 'Veri Senkronizasyonu:';
+  String get dataSync => 'Veri Senkronizasyonu';
 
   @override
   String get syncServerRunning => 'Senkronizasyon sunucusu çalışıyor';
@@ -853,4 +853,22 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get inmemory => 'En Memoria';
+
+  @override
+  String get toggleSidebar => 'Kenar Çubuğunu Değiştir';
+
+  @override
+  String get deleteChat => 'Sohbeti Sil';
+
+  @override
+  String get selectAll => 'Tümünü Seç';
+
+  @override
+  String get newChat => 'Yeni Sohbet';
+
+  @override
+  String get send => 'Gönder';
+
+  @override
+  String get more => 'Daha Fazla';
 }

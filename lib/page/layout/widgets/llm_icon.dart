@@ -10,12 +10,14 @@ class LlmIcon extends StatelessWidget {
   final String icon;
   final Color? color;
   final double size;
+  final String? tooltip;
 
   const LlmIcon({
     super.key,
     required this.icon,
     this.color,
     this.size = 16, // 基础默认值保持为常量16
+    this.tooltip,
   });
 
   @override
@@ -32,18 +34,28 @@ class LlmIcon extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final defaultColor = isDark ? Colors.white : Colors.black;
 
+    final Widget iconWidget;
     if (icon.isNotEmpty) {
-      return ColorAwareSvg(
+      iconWidget = ColorAwareSvg(
         assetName: 'assets/logo/$icon.svg',
+        size: effectiveSize,
+        color: color ?? defaultColor,
+      );
+    } else {
+      iconWidget = ColorAwareSvg(
+        assetName: 'assets/logo/ai-chip.svg',
         size: effectiveSize,
         color: color ?? defaultColor,
       );
     }
 
-    return ColorAwareSvg(
-      assetName: 'assets/logo/ai-chip.svg',
-      size: effectiveSize,
-      color: color ?? defaultColor,
+    if (tooltip == null) {
+      return iconWidget;
+    }
+
+    return Tooltip(
+      message: tooltip!,
+      child: iconWidget,
     );
   }
 }
@@ -134,8 +146,7 @@ class ColorAwareSvg extends StatelessWidget {
             size: size,
           ),
           // 如果SVG有自己的颜色，则不应用colorFilter
-          colorFilter:
-              hasOwnColors ? null : ColorFilter.mode(color, BlendMode.srcIn),
+          colorFilter: hasOwnColors ? null : ColorFilter.mode(color, BlendMode.srcIn),
         );
       },
     );

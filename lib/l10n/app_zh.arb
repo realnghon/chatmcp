@@ -229,7 +229,7 @@
     "mobileStep1": "1. 点击\"扫描二维码连接\"",
     "mobileStep2": "2. 扫描桌面端显示的二维码",
     "mobileStep3": "3. 选择同步方向（上传/下载）",
-    "dataSync": "数据同步：",
+    "dataSync": "数据同步",
     "uploadDescription": "• 上传：将本设备数据推送到服务器",
     "downloadDescription": "• 下载：从服务器获取数据到本设备",
     "syncContent": "• 同步内容：聊天记录、设置、MCP配置",
@@ -270,5 +270,11 @@
     "clearAllConnectionHistory": "已清空所有连接历史",
     "unknownDevice": "未知设备",
     "unknownPlatform": "未知平台",
-    "inmemory": "内置"
+    "inmemory": "内置",
+    "toggleSidebar": "切换侧边栏",
+    "deleteChat": "删除聊天",
+    "selectAll": "全选",
+    "newChat": "新聊天",
+    "send": "发送",
+    "more": "更多"
 }

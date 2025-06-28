@@ -270,5 +270,11 @@
     "clearAllConnectionHistory": "All connection history cleared",
     "unknownDevice": "Unknown Device",
     "unknownPlatform": "Unknown Platform",
-    "inmemory": "In Memory"
+    "inmemory": "In Memory",
+    "toggleSidebar": "Toggle Sidebar",
+    "deleteChat": "Delete Chat",
+    "selectAll": "Select All",
+    "newChat": "New Chat",
+    "send": "Send",
+    "more": "More"
 }

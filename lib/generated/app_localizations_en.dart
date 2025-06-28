@@ -854,4 +854,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get inmemory => 'In Memory';
+
+  @override
+  String get toggleSidebar => 'Toggle Sidebar';
+
+  @override
+  String get deleteChat => 'Delete Chat';
+
+  @override
+  String get selectAll => 'Select All';
+
+  @override
+  String get newChat => 'New Chat';
+
+  @override
+  String get send => 'Send';
+
+  @override
+  String get more => 'More';
 }

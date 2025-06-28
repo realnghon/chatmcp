@@ -187,7 +187,11 @@ class TopToolbar extends StatelessWidget {
       maxWidth: 200,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: const Icon(CupertinoIcons.ellipsis_vertical, size: 18),
+        child: InkIcon(
+          icon: CupertinoIcons.ellipsis_vertical,
+          size: 18,
+          tooltip: AppLocalizations.of(context)!.more,
+        ),
       ),
     );
   }
@@ -297,6 +301,7 @@ class TopToolbar extends StatelessWidget {
             onTap: () {
               ProviderManager.chatProvider.clearActiveChat();
             },
+            tooltip: AppLocalizations.of(context)!.newChat,
           ),
         ],
         if (kIsWindows || kIsLinux) ...[

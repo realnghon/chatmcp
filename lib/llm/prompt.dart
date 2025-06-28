@@ -1,19 +1,26 @@
 import 'dart:convert';
 
+import 'package:chatmcp/provider/provider_manager.dart';
+
 class SystemPromptGenerator {
-  /// Default prompt template
-  final String template = '''
+  /// Base prompt template without tool instructions
+  final String baseTemplate = '''
 <system_prompt>
 You will select appropriate tools and call them to solve user queries
 
 **CRITICAL CONSTRAINT: You MUST call only ONE tool per response. Never call multiple tools simultaneously.**
-</system_prompt>
+</system_prompt>''';
+
+  /// Tool-related template parts
+  final String toolDefinitionsTemplate = '''
 
 **Tool Definitions:**
 Here are the functions available, described in JSONSchema format:
 <tool_definitions>
 {{ TOOL DEFINITIONS IN JSON SCHEMA }}
-</tool_definitions>
+</tool_definitions>''';
+
+  final String toolUsageTemplate = '''
 
 <tool_usage_instructions>
 TOOL USE
@@ -40,12 +47,10 @@ For example:
 </function>
 
 Always adhere to this format for the tool use to ensure proper parsing and execution.
-</tool_usage_instructions>
-''';
+</tool_usage_instructions>''';
 
   /// Default user system prompt
-  final String defaultUserSystemPrompt =
-      'You are an intelligent assistant capable of using tools to solve user queries effectively.';
+  final String defaultUserSystemPrompt = 'You are an intelligent assistant capable of using tools to solve user queries effectively.';
 
   /// Default tool configuration
   final String defaultToolConfig = 'No additional configuration is required.';
@@ -58,16 +63,28 @@ Always adhere to this format for the tool use to ensure proper parsing and execu
   String generatePrompt({
     required List<Map<String, dynamic>> tools,
   }) {
-    // Use provided values or defaults
-    final finalUserPrompt = defaultUserSystemPrompt;
+    // Start with base template
 
-    // Convert tools JSON to formatted string
-    final toolsJsonSchema = const JsonEncoder.withIndent('  ').convert(tools);
+    var userPrompt = ProviderManager.settingsProvider.generalSetting.systemPrompt;
 
-    // Replace placeholders in template
-    var prompt = template
-        .replaceAll('{{ TOOL DEFINITIONS IN JSON SCHEMA }}', toolsJsonSchema)
-        .replaceAll('{{ USER SYSTEM PROMPT }}', finalUserPrompt);
+    var language = ProviderManager.settingsProvider.generalSetting.locale;
+
+    var prompt = "$userPrompt\n$baseTemplate";
+    if (language.isNotEmpty) {
+      prompt += "\n\nLanguage: $language";
+    }
+
+    // Only add tool-related sections if tools are available
+    if (tools.isNotEmpty) {
+      // Convert tools JSON to formatted string
+      final toolsJsonSchema = const JsonEncoder.withIndent('  ').convert(tools);
+
+      // Add tool definitions section
+      prompt += toolDefinitionsTemplate.replaceAll('{{ TOOL DEFINITIONS IN JSON SCHEMA }}', toolsJsonSchema);
+
+      // Add tool usage instructions
+      prompt += toolUsageTemplate;
+    }
 
     return prompt;
   }

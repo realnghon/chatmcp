@@ -121,6 +121,8 @@ class OllamaClient extends BaseLLMClient {
       body['tool_choice'] = 'auto';
     }
 
+    Logger.root.fine('Ollama request: ${jsonEncode(body)}');
+
     try {
       final request = http.Request('POST', Uri.parse("$baseUrl/v1/chat/completions"));
       request.headers.addAll(_headers);
