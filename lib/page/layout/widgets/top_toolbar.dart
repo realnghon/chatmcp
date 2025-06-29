@@ -230,7 +230,12 @@ class TopToolbar extends StatelessWidget {
                       ),
                     ),
                   ),
-                  padding: kIsDesktop ? EdgeInsets.only(left: hideSidebar ? 70 : 0, top: 2) : null,
+                  padding: kIsDesktop
+                      ? EdgeInsets.only(
+                          left: hideSidebar ? (kIsMacOS ? 70 : 8) : 0,
+                          top: 2,
+                        )
+                      : null,
                   child: kIsDesktop
                       ? wm.DragToMoveArea(
                           child: _buildToolbarContent(context),
@@ -253,11 +258,30 @@ class TopToolbar extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (hideSidebar && kIsDesktop)
+              if (hideSidebar && kIsDesktop) ...[
+                // Show app logo and name when sidebar is hidden
+                if (!kIsMacOS) ...[
+                  Image.asset(
+                    'assets/logo.png',
+                    width: 24,
+                    height: 24,
+                  ),
+                  const Gap(size: 8),
+                  CText(
+                    text: 'ChatMCP',
+                    size: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  const Gap(size: 24),
+                ],
+
                 InkIcon(
                   icon: CupertinoIcons.sidebar_right,
                   onTap: onToggleSidebar,
+                  tooltip: AppLocalizations.of(context)!.toggleSidebar,
                 ),
+                const Gap(size: 8),
+              ],
               Flexible(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(minWidth: 50),
