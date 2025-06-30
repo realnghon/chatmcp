@@ -171,9 +171,15 @@ abstract class BaseLLMClient {
     try {
       final prompt = ChatMessage(
         role: MessageRole.user,
-        content: """Generate a concise title (max 20 characters) for this conversation. Return only the title:
+        content: """Generate a concise title based on the following conversation content.
 
-$finalText""",
+Conversation content:
+$finalText
+
+Please return the result in the following XML format:
+<title>Your generated title (max 20 characters)</title>
+
+Note: Only return the XML format result, the title should be concise and clear.""",
       );
 
       final response = await chatCompletion(CompletionRequest(
@@ -181,12 +187,40 @@ $finalText""",
         messages: [prompt],
       ));
 
-      final title = response.content?.trim() ?? "";
-      return title.isNotEmpty ? title : "";
+      Logger.root.info('genTitle response: ${response.content}');
+
+      final content = response.content?.trim() ?? "";
+
+      // 从 XML 标签中提取标题
+      final title = _extractTitleFromXml(content);
+      return title.isNotEmpty ? title : "New Chat";
     } catch (e, trace) {
-      Logger.root.severe('OpenAI gen title error: $e, trace: $trace');
+      Logger.root.severe('生成标题出错: $e, trace: $trace');
       return "New Chat";
     }
+  }
+
+  /// 从 XML 格式的响应中提取标题
+  String _extractTitleFromXml(String xmlContent) {
+    if (xmlContent.isEmpty) return "";
+
+    // 尝试匹配 <title>...</title> 标签
+    final titleRegex = RegExp(r'<title>(.*?)</title>', caseSensitive: false, dotAll: true);
+    final match = titleRegex.firstMatch(xmlContent);
+
+    if (match != null && match.group(1) != null) {
+      return match.group(1)!.trim();
+    }
+
+    // 如果没有找到 XML 标签，尝试查找是否有其他可能的格式
+    final lines = xmlContent.split('\n').where((line) => line.trim().isNotEmpty).toList();
+
+    // 如果只有一行且不包含 XML 标签，可能是纯文本标题
+    if (lines.length == 1 && !lines.first.contains('<')) {
+      return lines.first.trim();
+    }
+
+    return "";
   }
 
   Future<List<String>> models();
