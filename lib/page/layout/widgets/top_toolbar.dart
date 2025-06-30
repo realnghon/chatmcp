@@ -2,7 +2,6 @@ import 'package:chatmcp/components/widgets/base.dart';
 import 'package:chatmcp/widgets/ink_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:chatmcp/provider/provider_manager.dart';
-import 'package:logging/logging.dart';
 import './model_selector.dart';
 import 'package:window_manager/window_manager.dart' as wm;
 import 'package:chatmcp/utils/platform.dart';
