@@ -16,7 +16,7 @@ Cross-platform `Macos | Windows | Linux | iOS | Android | Web` AI Chat Client
 
 ¹ **Linux Notes:** 
 - Install required dependencies: `sudo apt install libsqlite3-0 libsqlite3-dev` on Debian/Ubuntu and derivatives
-- **Improved Linux Experience**: Latest versions include better dark theme support, unified data storage following [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html), and optimized UI layout for Linux desktop environments is planned
+- Improved Experience: Latest versions include better dark theme support, unified data storage following [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html), and optimized UI layout for Linux desktop environments is planned
 - Tested on major distributions: Ubuntu, Fedora, Arch Linux, openSUSE
 
 ² Note: Web version runs entirely in your browser with local storage for chat history and settings.
