@@ -15,8 +15,8 @@ Cross-platform `Macos | Windows | Linux | iOS | Android | Web` AI Chat Client
 | [Release](https://github.com/daodao97/chatmcp/releases) | [Release](https://github.com/daodao97/chatmcp/releases) | [Release](https://github.com/daodao97/chatmcp/releases) ¹ | [TestFlight](https://testflight.apple.com/join/dCXksFJV) | [Release](https://github.com/daodao97/chatmcp/releases) | [GitHub Pages](https://daodao97.github.io/chatmcp) ² |
 
 ¹ **Linux Notes:** 
-- Install required dependencies: `sudo apt-get install libsqlite3-0 libsqlite3-dev`
-- **Improved Linux Experience**: Version 1.x+ includes optimized UI layout for Linux desktop environments, better dark theme support, and unified data storage following XDG specifications
+- Install required dependencies: `sudo apt install libsqlite3-0 libsqlite3-dev` on Debian/Ubuntu and derivatives
+- Improved Experience: Latest versions include better dark theme support, unified data storage following [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html), and optimized UI layout for Linux desktop environments is planned
 - Tested on major distributions: Ubuntu, Fedora, Arch Linux, openSUSE
 
 ² Note: Web version runs entirely in your browser with local storage for chat history and settings.
@@ -100,9 +100,10 @@ ChatMCP follows platform-specific best practices for data storage:
 %APPDATA%\ChatMcp\
 ```
 
-**Linux:** (Follows [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html))
+**Linux:**
 ```bash
-~/.local/share/ChatMcp/
+~/.local/share/ChatMcp/           # Honors $XDG_DATA_HOME if set
+~/.local/share/run.daodao.chatmcp # Flutter dependency
 ```
 
 **Mobile:**
@@ -111,9 +112,10 @@ ChatMCP follows platform-specific best practices for data storage:
 ### File Structure
 
 All platforms store data in a unified directory structure:
+- `logs` folder - Application logs
 - `chatmcp.db` - Main database file containing chat history and messages
-- `config.json` - Application settings and preferences
-- Other MCP server configurations and logs
+- `shared_preferences.json` - Application settings and preferences
+- `mcp_server.json` - MCP server configurations
 
 ### Reset Application Data
 
@@ -133,70 +135,6 @@ rd /s /q "%APPDATA%\ChatMcp"
 ```bash
 rm -rf ~/.local/share/ChatMcp
 rm -rf ~/.local/share/run.daodao.chatmcp
-```
-
-### Data Migration
-
-ChatMCP automatically migrates your existing data when you upgrade to a newer version with unified storage locations.
-
-#### What Gets Migrated
-
-The application will automatically transfer:
-- ✅ **Chat Database** (`chatmcp.db`) - All your chat history and messages
-- ✅ **Application Settings** - Your preferences and configurations  
-- ✅ **MCP Server Configurations** (`mcp_server.json`) - Your custom MCP server setups
-- ✅ **Log Files** - Application logs from the `logs/` directory
-- ✅ **Other Configuration Files** - Any other settings files
-
-#### Platform-Specific Migration
-
-**Linux:**
-From scattered directories to unified XDG-compliant location:
-```bash
-# FROM (old locations):
-~/.local/share/run.daodao.chatmcp/  # Old config directory
-~/.local/share/ChatMcp/             # Old data directory
-
-# TO (new unified location):
-~/.local/share/ChatMcp/
-```
-
-**Windows & macOS:**
-Migrates from any previously used application data directories to the current standardized locations.
-
-#### Migration Process
-
-1. **Automatic Detection**: On first launch after upgrade, ChatMCP scans for existing data
-2. **Safe Copy**: Data is copied (not moved) to the new location to prevent data loss
-3. **Verification**: The application confirms successful migration before using new data
-4. **User Notification**: You'll see confirmation messages about migrated files
-
-#### Post-Migration Cleanup
-
-After confirming your application works correctly with migrated data, you can manually clean up old directories:
-
-**Linux:**
-```bash
-# Clean up old directories (only after confirming migration worked):
-rm -rf ~/.local/share/run.daodao.chatmcp  # Old config directory
-# Note: Check if old ChatMcp directory differs from new location before removing
-```
-
-**Windows & macOS:**
-Old directories will be clearly identified in the migration messages for manual cleanup.
-
-#### Troubleshooting Migration
-
-If you encounter migration issues:
-
-1. **Check Migration Status**: Use the debug information in the application
-2. **Manual Migration**: You can manually copy files if automatic migration fails
-3. **Reset and Reconfigure**: As a last resort, you can reset application data and reconfigure
-
-For advanced users, you can check migration status by running:
-```bash
-# Create and run a migration test script
-dart test_migration.dart
 ```
 
 ## Development
