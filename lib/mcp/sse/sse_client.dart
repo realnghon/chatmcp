@@ -33,7 +33,6 @@ class SSEClient implements McpClient {
 
   bool _isConnecting = false;
   bool _disposed = false;
-  int _reconnectAttempts = 0;
   static const int _maxReconnectAttempts = 5;
   static const Duration _initialReconnectDelay = Duration(seconds: 1);
   static const Duration _endpointTimeout = Duration(seconds: 10);
@@ -63,7 +62,6 @@ class SSEClient implements McpClient {
 
   @override
   Future<void> initialize() async {
-    _reconnectAttempts = 0;
     await _connect();
   }
 
@@ -115,7 +113,7 @@ class SSEClient implements McpClient {
           response?.stream?.listen(
             (event) {
               Logger.root.fine(
-                  '收到SSE事件: ${event.event}, ID: ${event.id}, 数据长度: ${event.data.length ?? 0}字节');
+                  '收到SSE事件: ${event.event}, ID: ${event.id}, 数据长度: ${event.data.length}字节');
               _handleSSEEvent(event);
             },
           );
@@ -139,7 +137,6 @@ class SSEClient implements McpClient {
         await _endpointConfirmedCompleter.future.timeout(_endpointTimeout);
         Logger.root.info('SSE连接已确认并获取到有效endpoint');
         _connectionState = ConnectionState.connected;
-        _reconnectAttempts = 0;
       } catch (e) {
         Logger.root.severe('等待endpoint确认超时: $e');
         throw Exception('Failed to confirm endpoint: $e');

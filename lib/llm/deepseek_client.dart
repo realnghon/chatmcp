@@ -105,7 +105,6 @@ class DeepSeekClient extends BaseLLMClient {
       final stream = response.stream.transform(utf8.decoder).transform(const LineSplitter());
 
       Logger.root.info('deepseek start stream response');
-      String buffer = '';
       bool reasoningContentStart = false;
       bool reasoningContentEnd = false;
       bool reasoningStyle = false;
