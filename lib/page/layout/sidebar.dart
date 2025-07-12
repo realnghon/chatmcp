@@ -9,6 +9,8 @@ import 'package:chatmcp/generated/app_localizations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:chatmcp/components/widgets/base.dart';
 import 'package:chatmcp/page/layout/widgets/app_info.dart';
+import 'package:chatmcp/config/pagination_config.dart';
+import 'dart:async';
 
 class SidebarPanel extends StatefulWidget {
   final VoidCallback? onToggle;
@@ -20,12 +22,13 @@ class SidebarPanel extends StatefulWidget {
 
 class _SidebarPanelState extends State<SidebarPanel> {
   bool _isSearchVisible = false;
-  String _searchText = '';
   final TextEditingController _searchController = TextEditingController();
+  Timer? _debounceTimer;
 
   @override
   void dispose() {
     _searchController.dispose();
+    _debounceTimer?.cancel();
     super.dispose();
   }
 
@@ -33,9 +36,24 @@ class _SidebarPanelState extends State<SidebarPanel> {
     setState(() {
       _isSearchVisible = !_isSearchVisible;
       if (!_isSearchVisible) {
-        _searchText = '';
         _searchController.clear();
+        _performSearch(''); // Reset search when hiding
       }
+    });
+  }
+
+  void _performSearch(String keyword) {
+    final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+    chatProvider.searchChats(keyword);
+  }
+
+  void _onSearchChanged(String value) {
+    // Cancel previous timer
+    _debounceTimer?.cancel();
+    
+    // Start new timer
+    _debounceTimer = Timer(const Duration(milliseconds: 300), () {
+      _performSearch(value);
     });
   }
 
@@ -105,9 +123,7 @@ class _SidebarPanelState extends State<SidebarPanel> {
                         icon: const Icon(CupertinoIcons.clear, size: 14),
                         onPressed: () {
                           _searchController.clear();
-                          setState(() {
-                            _searchText = '';
-                          });
+                          _onSearchChanged('');
                         },
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
@@ -120,11 +136,7 @@ class _SidebarPanelState extends State<SidebarPanel> {
                     ),
                     textAlignVertical: TextAlignVertical.center,
                     style: const TextStyle(fontSize: 12),
-                    onChanged: (value) {
-                      setState(() {
-                        _searchText = value;
-                      });
-                    },
+                    onChanged: _onSearchChanged,
                   ),
                 ),
               ),
@@ -133,7 +145,6 @@ class _SidebarPanelState extends State<SidebarPanel> {
             Expanded(
               child: ChatHistoryList(
                 chatProvider: chatProvider,
-                searchText: _searchText,
               ),
             ),
 
@@ -146,24 +157,79 @@ class _SidebarPanelState extends State<SidebarPanel> {
   }
 }
 
-class ChatHistoryList extends StatelessWidget {
+class ChatHistoryList extends StatefulWidget {
   final ChatProvider chatProvider;
-  final String searchText;
 
   const ChatHistoryList({
     super.key,
     required this.chatProvider,
-    this.searchText = '',
   });
 
-  Map<String, List<dynamic>> _groupChats(BuildContext context, List<dynamic> chats) {
-    // 过滤聊天记录
-    final filteredChats = searchText.isEmpty
-        ? chats
-        : chats.where((chat) {
-            return chat.title.toLowerCase().contains(searchText.toLowerCase());
-          }).toList();
+  @override
+  State<ChatHistoryList> createState() => _ChatHistoryListState();
+}
 
+class _ChatHistoryListState extends State<ChatHistoryList> {
+  final ScrollController _scrollController = ScrollController();
+  bool _isLoadingMore = false; // 防止重复触发加载
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_scrollListener);
+    
+    // Load initial data if empty
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.chatProvider.chats.isEmpty) {
+        widget.chatProvider.loadChats();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_scrollListener);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollListener() {
+    // 如果已经在加载，不重复触发
+    if (_isLoadingMore) return;
+    
+    // 检查是否滚动到接近底部
+    final scrollPosition = _scrollController.position;
+    final isNearBottom = scrollPosition.pixels >= 
+        scrollPosition.maxScrollExtent - PaginationConfig.loadMoreTriggerDistance;
+    
+    // 只有在接近底部且有更多数据时才加载
+    if (isNearBottom && 
+        widget.chatProvider.hasMoreChats && 
+        !widget.chatProvider.isLoadingChats && 
+        widget.chatProvider.chats.isNotEmpty) {
+      _triggerLoadMore();
+    }
+  }
+
+  void _triggerLoadMore() async {
+    if (_isLoadingMore) return;
+    
+    setState(() {
+      _isLoadingMore = true;
+    });
+    
+    try {
+      await widget.chatProvider.loadMoreChats();
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingMore = false;
+        });
+      }
+    }
+  }
+
+  Map<String, List<dynamic>> _groupChats(BuildContext context, List<dynamic> chats) {
     final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -172,23 +238,23 @@ class ChatHistoryList extends StatelessWidget {
     final previous30Days = today.subtract(const Duration(days: 30));
 
     return {
-      l10n.today: filteredChats.where((chat) {
+      l10n.today: chats.where((chat) {
         final chatDate = DateTime(chat.updatedAt.year, chat.updatedAt.month, chat.updatedAt.day);
         return chatDate.isAtSameMomentAs(today);
       }).toList(),
-      l10n.yesterday: filteredChats.where((chat) {
+      l10n.yesterday: chats.where((chat) {
         final chatDate = DateTime(chat.updatedAt.year, chat.updatedAt.month, chat.updatedAt.day);
         return chatDate.isAtSameMomentAs(yesterday);
       }).toList(),
-      l10n.last7Days: filteredChats.where((chat) {
+      l10n.last7Days: chats.where((chat) {
         final chatDate = DateTime(chat.updatedAt.year, chat.updatedAt.month, chat.updatedAt.day);
         return chatDate.isBefore(yesterday) && chatDate.isAfter(previous7Days);
       }).toList(),
-      l10n.last30Days: filteredChats.where((chat) {
+      l10n.last30Days: chats.where((chat) {
         final chatDate = DateTime(chat.updatedAt.year, chat.updatedAt.month, chat.updatedAt.day);
         return chatDate.isBefore(previous7Days) && chatDate.isAfter(previous30Days);
       }).toList(),
-      l10n.earlier: filteredChats.where((chat) {
+      l10n.earlier: chats.where((chat) {
         final chatDate = DateTime(chat.updatedAt.year, chat.updatedAt.month, chat.updatedAt.day);
         return chatDate.isBefore(previous30Days);
       }).toList(),
@@ -197,41 +263,147 @@ class ChatHistoryList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final groupedChats = _groupChats(context, chatProvider.chats);
+    final groupedChats = _groupChats(context, widget.chatProvider.chats);
+    final hasEmptyGroups = groupedChats.values.every((group) => group.isEmpty);
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      child: ListView.builder(
-        itemCount: groupedChats.entries.length,
-        itemBuilder: (context, index) {
-          final entry = groupedChats.entries.elementAt(index);
-          if (entry.value.isEmpty) {
-            return const SizedBox.shrink();
-          }
+    if (hasEmptyGroups && !widget.chatProvider.isLoadingChats) {
+      final l10n = AppLocalizations.of(context)!;
+      return Center(
+        child: Text(
+          l10n.welcomeMessage,
+          style: TextStyle(
+            color: Theme.of(context).textTheme.bodyMedium?.color?.withAlpha((0.6 * 255).round()),
+            fontSize: 14,
+          ),
+        ),
+      );
+    }
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                child: CText(
-                  text: entry.key,
-                  size: 10,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              ...entry.value.map(
-                (chat) => ChatHistoryItem(
-                  chat: chat,
-                  chatProvider: chatProvider,
-                ),
-              ),
-              const Gap(size: 12),
-            ],
-          );
-        },
+    return Column(
+      children: [
+        Expanded(
+          child: ListView.builder(
+            controller: _scrollController,
+            itemCount: _calculateItemCount(groupedChats) + 1, // +1 for footer
+            itemBuilder: (context, index) {
+              final normalItemCount = _calculateItemCount(groupedChats);
+              if (index == normalItemCount) {
+                // This is the footer item
+                return _buildFooter();
+              }
+              return _buildItem(context, groupedChats, index);
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  int _calculateItemCount(Map<String, List<dynamic>> groupedChats) {
+    int count = 0;
+    for (final entry in groupedChats.entries) {
+      if (entry.value.isNotEmpty) {
+        count += 1 + entry.value.length; // Header + items
+      }
+    }
+    return count;
+  }
+
+  Widget _buildItem(BuildContext context, Map<String, List<dynamic>> groupedChats, int index) {
+    int currentIndex = 0;
+    
+    for (final entry in groupedChats.entries) {
+      if (entry.value.isEmpty) continue;
+      
+      // Check if this is the header
+      if (currentIndex == index) {
+        return _buildGroupHeader(entry.key);
+      }
+      currentIndex++;
+      
+      // Check if this is within the group items
+      if (index < currentIndex + entry.value.length) {
+        final itemIndex = index - currentIndex;
+        return _buildChatItem(entry.value[itemIndex]);
+      }
+      currentIndex += entry.value.length;
+    }
+    
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildGroupHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: Theme.of(context).textTheme.bodyMedium?.color?.withAlpha((0.7 * 255).round()),
+        ),
       ),
     );
+  }
+
+  Widget _buildChatItem(dynamic chat) {
+    return ChatHistoryItem(
+      chat: chat,
+      chatProvider: widget.chatProvider,
+    );
+  }
+
+  Widget _buildFooter() {
+    // Don't show footer if there are no chats at all
+    if (widget.chatProvider.chats.isEmpty && !widget.chatProvider.isLoadingChats) {
+      return const SizedBox.shrink();
+    }
+
+    if (widget.chatProvider.isLoadingChats) {
+      // Show loading indicator when loading more
+      return Container(
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  Theme.of(context).primaryColor,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              AppLocalizations.of(context)!.downloadingData,
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(context).textTheme.bodyMedium?.color?.withAlpha((0.7 * 255).round()),
+              ),
+            ),
+          ],
+        ),
+      );
+    } else if (!widget.chatProvider.hasMoreChats && widget.chatProvider.chats.isNotEmpty) {
+      // Show "no more" message only when there are chats and no more to load
+      return Container(
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+        child: Text(
+          '—— ${AppLocalizations.of(context)!.noMoreData} ——',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 12,
+            color: Theme.of(context).textTheme.bodyMedium?.color?.withAlpha((0.5 * 255).round()),
+          ),
+        ),
+      );
+    } else {
+      // Has more but not loading, show minimal space for scroll detection
+      return const SizedBox(height: 50);
+    }
   }
 }
 

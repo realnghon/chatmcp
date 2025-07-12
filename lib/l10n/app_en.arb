@@ -276,5 +276,6 @@
     "selectAll": "Select All",
     "newChat": "New Chat",
     "send": "Send",
-    "more": "More"
+    "more": "More",
+    "noMoreData": "No more data"
 }

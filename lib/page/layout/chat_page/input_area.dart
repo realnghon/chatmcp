@@ -30,6 +30,7 @@ class InputArea extends StatefulWidget {
   final ValueChanged<SubmitData> onSubmitted;
   final VoidCallback? onCancel;
   final ValueChanged<List<PlatformFile>>? onFilesSelected;
+  final bool autoFocus;
 
   const InputArea({
     super.key,
@@ -39,16 +40,56 @@ class InputArea extends StatefulWidget {
     required this.onSubmitted,
     this.onFilesSelected,
     this.onCancel,
+    this.autoFocus = false,
   });
 
   @override
-  State<InputArea> createState() => _InputAreaState();
+  State<InputArea> createState() => InputAreaState();
 }
 
-class _InputAreaState extends State<InputArea> {
+class InputAreaState extends State<InputArea> {
   List<PlatformFile> _selectedFiles = [];
   final TextEditingController textController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
   bool _isImeComposing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Auto focus on desktop when autoFocus is true
+    if (!kIsMobile && widget.autoFocus) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _focusNode.requestFocus();
+        }
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(InputArea oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Auto focus on desktop when autoFocus changes to true
+    if (!kIsMobile && widget.autoFocus && !oldWidget.autoFocus) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _focusNode.requestFocus();
+        }
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void requestFocus() {
+    if (!kIsMobile && mounted) {
+      _focusNode.requestFocus();
+    }
+  }
 
   Future<void> _pickFiles() async {
     try {
@@ -237,6 +278,7 @@ class _InputAreaState extends State<InputArea> {
                 child: TextField(
                   enabled: !widget.disabled,
                   controller: textController,
+                  focusNode: _focusNode,
                   onChanged: widget.onTextChanged,
                   maxLines: 5,
                   minLines: 1,

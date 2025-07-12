@@ -59,4 +59,13 @@ class ChatMessageDao extends BaseDao<DbChatMessage> {
   Map<String, dynamic> toJson(DbChatMessage entity) {
     return entity.toJson();
   }
+
+  Future<int> deleteMessages(int chatId) async {
+    final db = await database;
+    return db.delete(
+      tableName,
+      where: 'chatId = ?',
+      whereArgs: [chatId],
+    );
+  }
 }

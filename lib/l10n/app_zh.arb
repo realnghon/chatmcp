@@ -276,5 +276,6 @@
     "selectAll": "全选",
     "newChat": "新聊天",
     "send": "发送",
-    "more": "更多"
+    "more": "更多",
+    "noMoreData": "没有更多了"
 }

@@ -157,6 +157,15 @@ class ChatMessage {
     return jsonEncode(toJson());
   }
 
+  DbChatMessage toDb(int chatId) {
+    return DbChatMessage(
+      chatId: chatId,
+      messageId: messageId,
+      parentMessageId: parentMessageId,
+      body: toString(),
+    );
+  }
+
   ChatMessage copyWith(
       {String? messageId,
       String? parentMessageId,

@@ -40,6 +40,9 @@ class _ChatPageState extends State<ChatPage> {
   String _parentMessageId = ''; // Parent message ID
   bool _isCancelled = false; // Indicates if the current operation has been cancelled by the user
   bool _isWaiting = false; // Indicates if the system is waiting for a response from the LLM
+  
+  // GlobalKey for InputArea to access focus methods
+  final GlobalKey<InputAreaState> _inputAreaKey = GlobalKey<InputAreaState>();
 
   // Stores image bytes of the widget for sharing functionality
   Uint8List? bytes;
@@ -327,6 +330,12 @@ class _ChatPageState extends State<ChatPage> {
         _parentMessageId = '';
       });
       _resetState();
+      // Auto focus input on desktop when creating new chat
+      if (!kIsMobile) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _inputAreaKey.currentState?.requestFocus();
+        });
+      }
       return;
     }
     if (_chat?.id != activeChat?.id) {
@@ -351,6 +360,12 @@ class _ChatPageState extends State<ChatPage> {
         _parentMessageId = parentId;
       });
       _resetState();
+      // Auto focus input on desktop when switching to a different chat
+      if (!kIsMobile) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _inputAreaKey.currentState?.requestFocus();
+        });
+      }
     }
   }
 
@@ -699,6 +714,12 @@ class _ChatPageState extends State<ChatPage> {
     setState(() {
       _isLoading = false;
     });
+    // Auto focus input on desktop when response completes
+    if (!kIsMobile) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _inputAreaKey.currentState?.requestFocus();
+      });
+    }
   }
 
   void _addUserMessage(String text, List<File> files) {
@@ -1104,6 +1125,12 @@ class _ChatPageState extends State<ChatPage> {
       _isWaiting = false;
       _currentLoop = 0;
     });
+    // Auto focus input on desktop when state resets
+    if (!kIsMobile) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _inputAreaKey.currentState?.requestFocus();
+      });
+    }
   }
 
   void _handleCancel() {
@@ -1211,6 +1238,7 @@ class _ChatPageState extends State<ChatPage> {
           _buildMessageList(),
           _buildFunctionRunning(),
           InputArea(
+            key: _inputAreaKey,
             disabled: _isLoading,
             isComposing: _isComposing,
             onTextChanged: _handleTextChanged,
@@ -1230,6 +1258,7 @@ class _ChatPageState extends State<ChatPage> {
               _buildMessageList(),
               _buildFunctionRunning(),
               InputArea(
+                key: _inputAreaKey,
                 disabled: _isLoading,
                 isComposing: _isComposing,
                 onTextChanged: _handleTextChanged,

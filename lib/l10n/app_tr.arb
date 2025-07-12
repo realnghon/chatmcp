@@ -276,5 +276,6 @@
     "selectAll": "Tümünü Seç",
     "newChat": "Yeni Sohbet",
     "send": "Gönder",
-    "more": "Daha Fazla"
+    "more": "Daha Fazla",
+    "noMoreData": "Daha fazla veri yok"
 }

@@ -871,4 +871,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get more => 'Daha Fazla';
+
+  @override
+  String get noMoreData => 'Daha fazla veri yok';
 }

@@ -1,9 +1,10 @@
 import 'package:chatmcp/utils/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:chatmcp/dao/chat.dart';
-import 'package:chatmcp/dao/chat_message.dart';
 import 'package:logging/logging.dart';
 import 'package:chatmcp/llm/model.dart' as llm_model;
+import 'package:chatmcp/repository/chat_repository_provider.dart';
+import 'package:chatmcp/config/pagination_config.dart';
 
 class ChatProvider extends ChangeNotifier {
   static final ChatProvider _instance = ChatProvider._internal();
@@ -15,8 +16,16 @@ class ChatProvider extends ChangeNotifier {
   bool isSelectMode = false;
   Set<int?> selectedChats = {};
 
+  // Pagination state
+  int _currentPage = 1; // 从 1 开始更符合常规分页概念
+  bool _hasMoreChats = true;
+  bool _isLoadingChats = false;
+  String? _currentSearchKeyword;
+
   Chat? get activeChat => _activeChat;
   List<Chat> get chats => _chats;
+  bool get hasMoreChats => _hasMoreChats;
+  bool get isLoadingChats => _isLoadingChats;
 
   bool _showCodePreview = false;
   bool get showCodePreview => _showCodePreview;
@@ -56,12 +65,59 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> loadChats() async {
-    final chatDao = ChatDao();
-    _chats = await chatDao.query(
-      orderBy: 'updatedAt DESC',
-    );
+  Future<void> loadChats({String? searchKeyword, bool refresh = false}) async {
+    if (_isLoadingChats) return;
+
+    if (refresh || searchKeyword != _currentSearchKeyword) {
+      // Reset pagination state for new search or refresh
+      _currentPage = 1; // 重置为第一页
+      _hasMoreChats = true;
+      _chats.clear();
+      _currentSearchKeyword = searchKeyword;
+    }
+
+    if (!_hasMoreChats) return;
+
+    _isLoadingChats = true;
     notifyListeners();
+
+    try {
+      Logger.root.info('loadChats: currentPage: $_currentPage, pageSize: ${PaginationConfig.defaultPageSize}');
+      final result = await ChatRepositoryProvider.instance.getChats(
+        page: _currentPage,
+        pageSize: PaginationConfig.defaultPageSize,
+        searchKeyword: searchKeyword,
+      );
+
+      if (_currentPage == 1) {
+        // 第一页，替换现有数据
+        _chats = result.chats;
+      } else {
+        // 后续页面，追加数据
+        _chats.addAll(result.chats);
+      }
+
+      _hasMoreChats = result.hasMore;
+      _currentPage++;
+    } catch (e) {
+      Logger.root.severe('Failed to load chats: $e');
+    } finally {
+      _isLoadingChats = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadMoreChats() async {
+    if (!_hasMoreChats || _isLoadingChats) return;
+    await loadChats(searchKeyword: _currentSearchKeyword);
+  }
+
+  Future<void> searchChats(String keyword) async {
+    await loadChats(searchKeyword: keyword.isEmpty ? null : keyword, refresh: true);
+  }
+
+  Future<void> refreshChats() async {
+    await loadChats(searchKeyword: _currentSearchKeyword, refresh: true);
   }
 
   Future<void> setActiveChat(Chat chat) async {
@@ -73,38 +129,32 @@ class ChatProvider extends ChangeNotifier {
     if (_activeChat == null) {
       return;
     }
-    final chatDao = ChatDao();
-    await chatDao.update(Chat(title: title), _activeChat!.id!.toString());
+    final updatedChat = Chat(id: _activeChat!.id, title: title, createdAt: _activeChat!.createdAt, updatedAt: DateTime.now());
+    await ChatRepositoryProvider.instance.updateChat(updatedChat);
     await loadChats();
     if (_activeChat?.id == _activeChat!.id) {
-      setActiveChat(_activeChat!);
+      setActiveChat(updatedChat);
     }
   }
 
-  Future<void> createChat(
-      Chat chat, List<llm_model.ChatMessage> messages) async {
-    final chatDao = ChatDao();
-    final id = await chatDao.insert(chat);
-    await loadChats();
-    final newChat = await chatDao.queryById(id.toString());
-    await addChatMessage(newChat!.id!, messages);
+  Future<void> createChat(Chat chat, List<llm_model.ChatMessage> messages) async {
+    final newChat = await ChatRepositoryProvider.instance.createChat(chat, messages);
+    await refreshChats(); // Refresh to get updated list
     setActiveChat(newChat);
   }
 
   Future<void> updateChat(Chat chat) async {
-    final chatDao = ChatDao();
     Logger.root.info('updateChat: ${chat.toJson()}');
-    await chatDao.update(chat, chat.id!.toString());
-    await loadChats();
+    await ChatRepositoryProvider.instance.updateChat(chat);
+    await refreshChats();
     if (_activeChat?.id == chat.id) {
       setActiveChat(chat);
     }
   }
 
   Future<void> deleteChat(int chatId) async {
-    final chatDao = ChatDao();
-    await chatDao.delete(chatId.toString());
-    await loadChats();
+    await ChatRepositoryProvider.instance.deleteChat(chatId);
+    await refreshChats();
     if (_activeChat?.id == chatId) {
       _activeChat = null;
     }
@@ -116,25 +166,8 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addChatMessage(
-      int chatId, List<llm_model.ChatMessage> messages) async {
-    final chatMessageDao = ChatMessageDao();
-    for (var message in messages) {
-      if (message.role == llm_model.MessageRole.error) {
-        continue;
-      }
-      final chatMessages = await chatMessageDao
-          .query(where: 'messageId = ?', whereArgs: [message.messageId]);
-      if (chatMessages.isNotEmpty) {
-        continue;
-      }
-      await chatMessageDao.insert(DbChatMessage(
-        chatId: chatId,
-        messageId: message.messageId,
-        parentMessageId: message.parentMessageId,
-        body: message.toString(),
-      ));
-    }
+  Future<void> addChatMessage(int chatId, List<llm_model.ChatMessage> messages) async {
+    await ChatRepositoryProvider.instance.addChatMessage(chatId, messages);
     notifyListeners();
   }
 
@@ -179,17 +212,15 @@ class ChatProvider extends ChangeNotifier {
   }
 
   Future<void> deleteSelectedChats() async {
-    final chatDao = ChatDao();
-
-    // Delete selected chats from database
+    // Delete selected chats from repository
     for (var chatId in selectedChats) {
       if (chatId != null) {
-        await chatDao.delete(chatId.toString());
+        await ChatRepositoryProvider.instance.deleteChat(chatId);
       }
     }
 
     // Reload chat list
-    await loadChats();
+    await refreshChats();
 
     // Update activeChat if current active chat was deleted
     if (selectedChats.contains(activeChat?.id)) {
