@@ -1,5 +1,4 @@
 import 'package:chatmcp/provider/settings_provider.dart';
-import 'package:chatmcp/utils/platform.dart';
 import 'package:flutter/material.dart';
 import 'package:chatmcp/llm/model.dart';
 import 'dart:convert';
@@ -258,13 +257,12 @@ class ChatUIMessage extends StatelessWidget {
                     isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                 children: [
                   _buildMessageGroup(context, messages, isUser),
-                  if (kIsDesktop &&
-                      messages.last.role != MessageRole.loading &&
-                      !isUser)
+                  if (messages.last.role != MessageRole.loading)
                     MessageActions(
                       messages: messages,
                       onRetry: onRetry,
                       onSwitch: onSwitch,
+                      isUser: isUser,
                     ),
                 ],
               ),
@@ -368,20 +366,18 @@ class ChatMessageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return kIsDesktop
-        ? _buildMessage(context)
-        : GestureDetector(
-            onLongPress: () {
-              showModalBottomSheet(
-                context: context,
-                builder: (context) => MessageLongPressMenu(
-                  message: message,
-                  onRetry: onRetry,
-                ),
-              );
-            },
-            child: _buildMessage(context),
-          );
+    return GestureDetector(
+      onLongPress: () {
+        showModalBottomSheet(
+          context: context,
+          builder: (context) => MessageLongPressMenu(
+            message: message,
+            onRetry: onRetry,
+          ),
+        );
+      },
+      child: _buildMessage(context),
+    );
   }
 }
 
