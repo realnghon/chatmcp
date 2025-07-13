@@ -8,12 +8,14 @@ class MessageActions extends StatelessWidget {
   final List<ChatMessage> messages;
   final Function(ChatMessage) onRetry;
   final Function(String messageId) onSwitch;
+  final bool isUser;
 
   const MessageActions({
     super.key,
     required this.messages,
     required this.onRetry,
     required this.onSwitch,
+    this.isUser = false,
   });
 
   @override
@@ -24,6 +26,7 @@ class MessageActions extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Copy button - available for both user and assistant messages
           IconButton(
             iconSize: 14,
             padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -44,19 +47,24 @@ class MessageActions extends StatelessWidget {
               );
             },
           ),
-          IconButton(
-            iconSize: 14,
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            constraints: const BoxConstraints(
-              minWidth: 20,
-              minHeight: 20,
+          // Retry button - only for assistant messages
+          if (!isUser)
+            IconButton(
+              iconSize: 14,
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              constraints: const BoxConstraints(
+                minWidth: 20,
+                minHeight: 20,
+              ),
+              icon: const Icon(Icons.refresh),
+              onPressed: () {
+                onRetry(messages.last);
+              },
+              tooltip: t.retry,
             ),
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              onRetry(messages.last);
-            },
-          ),
-          if (messages.first.brotherMessageIds != null &&
+          // Branch switch - only for assistant messages
+          if (!isUser &&
+              messages.first.brotherMessageIds != null &&
               messages.first.brotherMessageIds!.isNotEmpty)
             _buildBranchSwitchWidget(messages),
         ],
