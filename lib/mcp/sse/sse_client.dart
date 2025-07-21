@@ -58,6 +58,16 @@ class SSEClient implements McpClient {
       final completer = _pendingRequests.remove(message.id);
       completer?.complete(message);
     }
+    if (message.method == 'ping') {
+      Logger.root.info('Received ping message, sending pong response');
+      final pongMessage = JSONRPCMessage.fromJson({
+        'id': message.id,
+        'jsonrpc': message.jsonrpc,
+        'result': {},
+      });
+      Logger.root.info('Sending pong response: $pongMessage');
+      _sendHttpPost(pongMessage.toJson());
+    }
   }
 
   @override
@@ -158,7 +168,7 @@ class SSEClient implements McpClient {
 
     if (eventType == 'endpoint') {
       _handleEndpointEvent(data);
-    } else if (eventType == 'message') {
+    } else {
       try {
         final jsonData = jsonDecode(data);
         final message = JSONRPCMessage.fromJson(jsonData);
@@ -166,18 +176,15 @@ class SSEClient implements McpClient {
       } catch (e, stack) {
         Logger.root.severe('handle message failed: $e\n$stack');
       }
-    } else {
-      Logger.root.info('unhandled event: $eventType');
     }
   }
 
   void _handleEndpointEvent(String data) {
     try {
       final uri = Uri.parse(serverConfig.command);
-      final baseUrl = uri.origin;
 
       data = data.trim();
-      String rawEndpoint = data.startsWith("http") ? data : baseUrl + data;
+      String rawEndpoint = data.startsWith("http") ? data : uri.resolve(data).toString();
 
       final parsedUri = Uri.parse(rawEndpoint);
       if (!parsedUri.hasScheme || !parsedUri.hasAuthority) {
@@ -192,6 +199,8 @@ class SSEClient implements McpClient {
       uri.queryParameters.forEach((key, value) {
         queryParams[key] = value;
       });
+
+      Logger.root.info('parsedUri host: ${parsedUri.host}, path: ${parsedUri.path}, query: ${parsedUri.query}');
 
       final normalizedUri = Uri(
         scheme: parsedUri.scheme,
