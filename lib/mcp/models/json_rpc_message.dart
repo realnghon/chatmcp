@@ -3,7 +3,7 @@ import 'dart:convert';
 class JSONRPCMessage {
   final String? id;
   final String jsonrpc;
-  final String method;
+  final String? method; // Method is not required for all messages
   final Map<String, dynamic>? params;
   final dynamic result;
   final dynamic error;
@@ -11,7 +11,7 @@ class JSONRPCMessage {
   JSONRPCMessage({
     this.id,
     this.jsonrpc = '2.0',
-    required this.method,
+    this.method,
     this.params,
     this.result,
     this.error,
@@ -21,7 +21,7 @@ class JSONRPCMessage {
     return JSONRPCMessage(
       id: json['id']?.toString(),
       jsonrpc: json['jsonrpc']?.toString() ?? '2.0',
-      method: json['method'] as String? ?? '',
+      method: json['method']?.toString(),
       params: json['params'] as Map<String, dynamic>?,
       result: json['result'],
       error: json['error'],
@@ -30,10 +30,10 @@ class JSONRPCMessage {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> json = {
-      'jsonrpc': jsonrpc,
-      'method': method,
+      'jsonrpc': jsonrpc
     };
 
+    if (method != null) json['method'] = method;
     if (id != null) json['id'] = id;
     if (params != null) json['params'] = params;
     if (result != null) json['result'] = result;
