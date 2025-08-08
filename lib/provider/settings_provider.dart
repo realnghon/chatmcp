@@ -222,6 +222,26 @@ final List<LLMProviderSetting> defaultApiSettings = [
   ),
   LLMProviderSetting(
     apiKey: '',
+    apiEndpoint: '', // Not used by CLI mode
+    apiStyle: 'claude-code',
+    providerId: 'claude-code',
+    providerName: 'Claude Code',
+    icon: 'claude',
+    custom: false,
+    link: 'https://docs.anthropic.com/en/docs/claude-code/sdk',
+    models: [
+      'claude-3-7-sonnet',
+      'claude-3-opus',
+      'claude-3-5-sonnet',
+      'claude-3-5-haiku',
+    ],
+    enabledModels: [
+      'claude-3-7-sonnet',
+      'claude-3-5-sonnet',
+    ],
+  ),
+  LLMProviderSetting(
+    apiKey: '',
     apiEndpoint: 'https://api.deepseek.com',
     apiStyle: 'deepseek',
     providerId: 'deepseek',
