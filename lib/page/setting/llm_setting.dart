@@ -1,3 +1,4 @@
+import 'dart:convert';
 
 import 'package:chatmcp/components/widgets/base.dart';
 import 'package:chatmcp/llm/llm_factory.dart';
@@ -6,6 +7,7 @@ import 'package:chatmcp/utils/platform.dart';
 import 'package:chatmcp/utils/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:uuid/uuid.dart';
@@ -947,6 +949,8 @@ class _KeysSettingsState extends State<KeysSettings> {
           ),
           const SizedBox(height: 12),
 
+          if (config.providerId == 'copilot') _copilotOAuthButtonList(),
+
           // API Version
           if (config.providerId == 'foundry') ...[
             Text(
@@ -1386,6 +1390,84 @@ class _KeysSettingsState extends State<KeysSettings> {
     );
   }
 
+  Widget _copilotOAuthButtonList() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ElevatedButton(
+          onPressed: () async {
+            githubCopilotOAuth.getCopilotDeviceCode().then((success) {
+              if (success) {
+                setState(() {
+                  _hasChanges = true;
+                });
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: const Text('Device Authorization'),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SelectableText(
+                          'User Code: ${githubCopilotOAuth.userCode ?? ""}',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 12),
+                          Text('Please enter this code at:'),
+                          InkWell(
+                          child: Text(
+                            githubCopilotOAuth.verificationUri ?? 'https://github.com/login/device',
+                            style: const TextStyle(
+                            color: Colors.blue,
+                            decoration: TextDecoration.underline,
+                            ),
+                          ),
+                          onTap: () async {
+                            final url = githubCopilotOAuth.verificationUri ?? 'https://github.com/login/device';
+                            await launchUrl(Uri.parse(url));
+                          },
+                          ),
+                        ],
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+                ToastUtils.success('Device code fetched successfully');
+              } else {
+                ToastUtils.error('Failed to fetch device code');
+              }
+            }).catchError((error) {
+              ToastUtils.error('Error fetching device code: $error');
+            });
+          },
+          child: const Text('Get Device Code'),
+        ),
+        const SizedBox(width: 12),
+        ElevatedButton(
+          onPressed: githubCopilotOAuth.userCode == null ? null : () {
+            githubCopilotOAuth.getCopilotAccessToken().then((token) {
+              setState(() {
+                _controllers[_selectedProvider].keyController.text = token;
+                _hasChanges = true;
+              });
+              ToastUtils.success('Token fetched successfully');
+            }).catchError((error) {
+              ToastUtils.error('Failed to fetch token: $error');
+            });
+          }, // Disabled
+          child: const Text('Get Token'),
+        ),
+      ],
+    );
+  }
+
   Future<void> _saveSettings() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
@@ -1430,6 +1512,104 @@ class _KeysSettingsState extends State<KeysSettings> {
           setState(() => _isLoading = false);
         }
       }
+    }
+  }
+
+  final githubCopilotOAuth = GithubCopilotOAuth(clientId: "YOUR_CLIENT_ID_HERE");
+}
+
+class GithubCopilotOAuth{
+  final String clientId; // Replace with your actual client_id
+  final String scope = 'read:user';
+  final String grantType = 'urn:ietf:params:oauth:grant-type:device_code';
+  final Map<String, String> headers = {
+    'Accept': 'application/json',
+  };
+  final Map<String, dynamic> apiUrls = {
+    'GITHUB_USER': 'https://api.github.com/user',
+    'GITHUB_DEVICE_CODE': 'https://github.com/login/device/code',
+    'GITHUB_ACCESS_TOKEN': 'https://github.com/login/oauth/access_token',
+    'COPILOT_TOKEN': 'https://api.github.com/copilot_internal/v2/token'
+  };
+  String? deviceCode;
+  String? userCode;
+  String? verificationUri;
+
+  GithubCopilotOAuth({
+    required this.clientId,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'clientId': clientId,
+      'scope': scope,
+      'headers': headers,
+      'apiUrls': apiUrls,
+      'deviceCode': deviceCode,
+      'userCode': userCode,
+      'verificationUri': verificationUri,
+    };
+  }
+
+  Future<bool> getCopilotDeviceCode() async {
+    // Füge die Parameter korrekt zur URI hinzu
+    final baseUri = Uri.parse(apiUrls['GITHUB_DEVICE_CODE']);
+    final requestBody = {
+      'client_id': clientId,
+      'scope': scope,
+    };
+    final uri = Uri(
+      scheme: baseUri.scheme,
+      host: baseUri.host,
+      path: baseUri.path,
+      queryParameters: requestBody,
+    );
+    final response = await post(
+      uri,
+      headers: headers
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      deviceCode = data['device_code'];
+      userCode = data['user_code'];
+      verificationUri = data['verification_uri'];
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  Future<String> getCopilotAccessToken() async {
+    if (deviceCode == null) {
+      throw Exception('Device code is not set. Call getCopilotDeviceCode first.');
+    }
+
+    final baseUri = Uri.parse(apiUrls['GITHUB_ACCESS_TOKEN']);
+    final requestBody = {
+      'client_id': clientId,
+      'device_code': deviceCode,
+      'grant_type': grantType,
+    };
+    final uri = Uri(
+      scheme: baseUri.scheme,
+      host: baseUri.host,
+      path: baseUri.path,
+      queryParameters: requestBody,
+    );
+
+    final response = await post(
+      uri,
+      headers: headers,
+    );
+
+    if (response.statusCode == 200) {
+      // Handle success, parse response.body
+      final data = jsonDecode(response.body);
+      return data['access_token'];
+    } else {
+      // Handle error
+      throw Exception('Failed to get access token: ${response.statusCode} ${response.body}');
     }
   }
 }

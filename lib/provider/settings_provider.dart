@@ -192,6 +192,15 @@ class ChatSetting {
 }
 
 final List<LLMProviderSetting> defaultApiSettings = [
+    LLMProviderSetting(
+    apiKey: '',
+    apiEndpoint: 'https://api.githubcopilot.com',
+    apiStyle: 'openai',
+    providerId: 'copilot',
+    providerName: 'GitHub Copilot',
+    icon: 'copilot',
+    custom: false,
+  ),
   LLMProviderSetting(
     apiKey: '',
     apiEndpoint: 'https://YOUR_RESOURCE_NAME.openai.azure.com',
