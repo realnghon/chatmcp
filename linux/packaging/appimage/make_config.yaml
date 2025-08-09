@@ -16,11 +16,11 @@ categories:
 
 startup_notify: true
 
-# 您可以指定要与您的应用捆绑的共享库
+# You can specify the shared libraries to bundle with your app
 #
-# fastforge 会自动检测您的应用所依赖的共享库，但您也可以在此处手动指定它们。
+# fastforge will automatically detect the shared libraries your app depends on, but you can also specify them here.
 #
-# 对于 SQLite 相关的库，可能需要包含以下库文件：
+# For SQLite-related libraries, you may need to include the following library files:
 include:
   - libsqlite3.so.0
   - libsqlite3.so
