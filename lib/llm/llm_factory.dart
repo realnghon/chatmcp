@@ -6,12 +6,13 @@ import 'ollama_client.dart';
 import 'gemini_client.dart';
 import 'foundry_client.dart';
 import 'copilot_client.dart';
+import 'claude_code_client.dart';
 import 'package:chatmcp/provider/provider_manager.dart';
 import 'package:chatmcp/provider/settings_provider.dart';
 import 'package:logging/logging.dart';
 import 'model.dart' as llm_model;
 
-enum LLMProvider { openai, claude, ollama, deepseek, gemini, foundry, copilot }
+enum LLMProvider { openai, claude, ollama, deepseek, gemini, foundry, claudeCode, copilot }
 
 class LLMFactory {
   static BaseLLMClient create(LLMProvider provider, {required String apiKey, required String baseUrl, String? apiVersion}) {
@@ -20,6 +21,8 @@ class LLMFactory {
         return OpenAIClient(apiKey: apiKey, baseUrl: baseUrl);
       case LLMProvider.claude:
         return ClaudeClient(apiKey: apiKey, baseUrl: baseUrl);
+      case LLMProvider.claudeCode:
+        return ClaudeCodeClient();
       case LLMProvider.deepseek:
         return DeepSeekClient(apiKey: apiKey, baseUrl: baseUrl);
       case LLMProvider.ollama:
@@ -44,6 +47,7 @@ class LLMFactoryHelper {
   static final Map<String, LLMProvider> providerMap = {
     "openai": LLMProvider.openai,
     "claude": LLMProvider.claude,
+    "claude-code": LLMProvider.claudeCode,
     "deepseek": LLMProvider.deepseek,
     "ollama": LLMProvider.ollama,
     "gemini": LLMProvider.gemini,
@@ -66,7 +70,7 @@ class LLMFactoryHelper {
     try {
       final setting = ProviderManager.settingsProvider.apiSettings.firstWhere((element) => element.providerId == currentModel.providerId);
 
-      // 检查提供商是否启用（null 表示启用，只有 false 为禁用）
+      // Check if the provider is enabled (null means enabled, only false means disabled)
       final isEnabled = setting.enable ?? true;
       if (!isEnabled) {
         throw Exception('Provider ${currentModel.providerId} is disabled');
